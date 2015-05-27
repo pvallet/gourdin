@@ -18,18 +18,12 @@ Map::Map(Camera* camera) :
     hmap[4] = new Heightmap(sf::Vector2i(-2, 0), rand());
     hmap[5] = new Heightmap(sf::Vector2i(-2,-1), rand());
 
-    hmap[0]->generate(std::vector<Constraint>());
+    hmap[0]->generate();
     hmap[0]->saveToImage();
     map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
 
     for (int i = 1 ; i < 6 ; i++) {
-        std::vector<Constraint> c;
-
-        for (int j = 0 ; j < i ; j++) {
-            c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
-        }
-
-        hmap[i]->generate(c);
+        hmap[i]->generate();
         hmap[i]->saveToImage();
         map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
     }

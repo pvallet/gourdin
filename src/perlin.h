@@ -4,7 +4,7 @@
 
 class Perlin {
 public:
-    Perlin(int seed, int _size, std::vector<Constraint> constraints);
+    Perlin(int seed, int _size);
     ~Perlin();
     double getValue(double x, double y) const;
 

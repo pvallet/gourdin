@@ -16,7 +16,7 @@ double noise(int x, int y) {
     return (rand_noise(tmp + y) + 1.) / 2;
 }*/
 
-Perlin::Perlin(int seed, int _size, std::vector<Constraint> constraints) : 
+Perlin::Perlin(int seed, int _size) : 
     size(_size),
     octaves(5), 
     frequency(0.01), 
