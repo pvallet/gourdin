@@ -27,7 +27,7 @@ igElement::~igElement() {
 void igElement::update(sf::Time elapsed, float theta) {
 	graphics.update(elapsed, orientation);
 	
-	setOrientation(orientation + camOrientation - theta); // Orientation moves opposite to camera
+	setOrientation(orientation + camOrientation - theta); // Orientation moves opposite to the camera
 
 	camOrientation = theta;
 }

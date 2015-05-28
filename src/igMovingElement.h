@@ -4,17 +4,20 @@
 #include <string>
 #include "igElement.h"
 
+enum MovingType {BOID, HUNTER};
+
 class igMovingElement : public igElement {
 public:
 	igMovingElement(sf::Vector2f position, std::string filename);
-	inline virtual GraphicType getType() {return igME;}
+	inline virtual abstractType getAbstractType() const {return igME;}
+	virtual MovingType getMovingType() const = 0;
 
 	virtual void update(sf::Time elapsed, float theta);
+	virtual void stop();
 
-	void setTarget(sf::Vector2f t);
 protected:
 	const float speed; // Distance per second
 	bool moving;
-	sf::Vector2f target;
+
 	sf::Vector2f direction; // Normalized vector towards the target
 };

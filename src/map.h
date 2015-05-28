@@ -7,10 +7,13 @@
 #include <set>
 
 #include "heightmap.h"
-#include "igElement.h"
-#include "igMovingElement.h"
 #include "skybox.h"
 #include "camera.h"
+
+#include "igElement.h"
+#include "hunter.h"
+#include "boid.h"
+
 
 struct compChunkPos {
     bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const

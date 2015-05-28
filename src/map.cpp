@@ -28,7 +28,7 @@ Map::Map(Camera* camera) :
         map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
     }
 
-    e.push_back(new igMovingElement(sf::Vector2f(0.,0.), "res/caveman.png"));
+    e.push_back(new Hunter(sf::Vector2f(0.,0.), "res/caveman.png"));
 
     skybox = new Skybox("res/skybox", cam);
 }
@@ -222,8 +222,8 @@ void Map::moveSelection(sf::Vector2i screenTarget) {
 
     if (z != 1.) { // If the click was on the map
         for(auto it = sel.begin(); it != sel.end(); ++it) {
-            if ((*it)->getType() == igME) {
-                igMovingElement* tmp = (igMovingElement*) *it;
+            if ((*it)->getAbstractType() == CTRL) {
+                Controllable* tmp = (Controllable*) *it;
                 tmp->setTarget(sf::Vector2f(x,z));
             }
         }

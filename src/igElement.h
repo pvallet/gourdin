@@ -6,13 +6,13 @@
 
 // ig = ingame
 
-enum GraphicType {igE, igME};
+enum abstractType {igE, igME, CTRL};
 
 class igElement {
 public:
 	igElement(sf::Vector2f position, std::string filename);
 	virtual ~igElement();
-	inline virtual GraphicType getType() {return igE;}
+	inline virtual abstractType getAbstractType() const {return igE;}
 
 	virtual void update(sf::Time elapsed, float theta);
 	void set3DCorners(sf::Vector3f nCorners[4]);
