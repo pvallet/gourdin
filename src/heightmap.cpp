@@ -7,6 +7,8 @@
 #define DEFAULT_MAP_SIZE 257 // +1 to join with other chunks
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
+#define SMOOTH_RANGE 20. // Percentage
+
 
 Heightmap::Heightmap(sf::Vector2i chunkPosition, int _seed) :
 	size(DEFAULT_MAP_SIZE),
@@ -21,7 +23,7 @@ Heightmap::Heightmap(sf::Vector2i chunkPosition, int _seed) :
 	indices = new GLuint[2*size*(size-1)];
 }
 
-void Heightmap::generate() {
+void Heightmap::generate(std::vector<Constraint> constraints) {
     Perlin perlin(seed, size);
 
 	for (int i = 0 ; i < size ; i++) {
@@ -29,6 +31,55 @@ void Heightmap::generate() {
 			heights[i][j] = perlin.getValue(i, j) * HEIGHT_FACTOR;
 		}
 	}
+
+    float range = size * SMOOTH_RANGE / 100;
+
+    for (unsigned int k = 0 ; k < constraints.size() ; k++) {
+        switch(constraints[k].type) {          
+            case XN:
+                for (int i = 0 ; i < size ; i++) {
+                    float dif = constraints[k].vertices[i].y - heights[0][i];
+
+                    for (int j = 0 ; j < (int) range ; j++) {
+                        heights[j][i] += dif * (1 - (float) j / range);
+                    }
+                }
+                break;
+            
+            case XP:
+                for (int i = 0 ; i < size ; i++) {
+                    float dif = constraints[k].vertices[i].y - heights[size-1][i];
+                    
+                    for (int j = 0 ; j < (int) range ; j++) {
+                        heights[size-1-j][i] += dif * (1 - (float) j / range);
+                    }
+                }
+                break;
+
+            case YN:
+                for (int i = 0 ; i < size ; i++) {
+                    float dif = constraints[k].vertices[i].y - heights[i][0];
+
+                    for (int j = 0 ; j < (int) range ; j++) {
+                        heights[i][j] += dif * (1 - (float) j / range);
+                    }
+                }
+                break;
+
+            case YP:
+                for (int i = 0 ; i < size ; i++) {
+                    float dif = constraints[k].vertices[i].y - heights[i][size-1];
+
+                    for (int j = 0 ; j < (int) range ; j++) {
+                        heights[i][size-1-j] += dif * (1 - (float) j / range);
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
 	
 	float c2[3] = {0.1, 0.1, 0.1};
     float c[3] = {1.0, 1.0, 1.0};
@@ -117,6 +168,44 @@ void Heightmap::saveToImage() const {
 
 bool Heightmap::calculateFrustum(const Camera* camera) {
     return true;
+}
+
+Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {
+    Constraint c;
+    c.vertices = std::vector<sf::Vector3f>(size);
+
+    if(fromChunkPos == sf::Vector2i(chunkPos.x+1, chunkPos.y)) {
+        for (int i = 0 ; i < size ; i++)
+            c.vertices[i] = sf::Vector3f((size-1) * CHUNK_SIZE / (size-1), heights[size-1][i], i * CHUNK_SIZE / (size-1));
+            
+        c.type = XN;
+    }
+
+    else if(fromChunkPos == sf::Vector2i(chunkPos.x-1, chunkPos.y)) {
+        for (int i = 0 ; i < size ; i++)
+            c.vertices[i] = sf::Vector3f(0.f, heights[0][i], i * CHUNK_SIZE / (size-1));
+
+        c.type = XP;
+    }
+
+    else if(fromChunkPos == sf::Vector2i(chunkPos.x, chunkPos.y+1)) {
+        for (int i = 0 ; i < size ; i++)
+            c.vertices[i] = sf::Vector3f(i * CHUNK_SIZE / (size-1), heights[i][size-1], (size-1) * CHUNK_SIZE / (size-1));
+
+        c.type = YN;
+    }
+
+    else if(fromChunkPos == sf::Vector2i(chunkPos.x, chunkPos.y-1)) {
+        for (int i = 0 ; i < size ; i++)
+            c.vertices[i] = sf::Vector3f( i * CHUNK_SIZE / (size-1), heights[i][0], 0.f);
+            
+        c.type = YP;
+    }
+
+    else
+        c.type = NONE;
+
+    return c;
 }
 
 float Heightmap::getHeight(float x, float y) const {

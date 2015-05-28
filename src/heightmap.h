@@ -14,12 +14,13 @@ public:
 	Heightmap(sf::Vector2i chunkPosition, int _seed);
 	~Heightmap() {}
 
-	void generate();
+	void generate(std::vector<Constraint> constraints);
 	void draw() const;
 	void saveToImage() const;
 
 	virtual bool calculateFrustum(const Camera* camera);
 
+	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const;
 	float getHeight(float x, float y) const; // linear interpolation
 	inline int getSize() const {return size;}
 

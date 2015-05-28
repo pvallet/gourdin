@@ -6,6 +6,14 @@
 
 #define CHUNK_SIZE 256.
 
+enum ConstraintType {XN, XP, YN, YP, NONE};
+
+typedef struct Constraint Constraint;
+struct Constraint {
+	ConstraintType type;
+	std::vector<sf::Vector3f> vertices;
+};
+
 class Chunk {
 public:
 	Chunk(sf::Vector2i chunkPosition);
@@ -14,7 +22,8 @@ public:
 	virtual bool calculateFrustum(const Camera* camera) = 0; // Returns true if the chunk is to be displayed
 	virtual void draw() const = 0;
 	virtual float getHeight(float x, float y) const = 0;
-	//static void merge(std::vector<Chunk>)
+	
+	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const = 0;
 
 	inline GLuint getVBOIndex() const {return vbo;}
 	inline GLuint getIBOIndex() const {return ibo;}
