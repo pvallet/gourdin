@@ -22,30 +22,13 @@ igElement::igElement(sf::Vector2f position, AnimationManager _graphics) :
 	for (int i = 0 ; i < 12 ; i++)
 		vertices[i] = 0.f;
 
-	vertices[0] = 0.;
-	vertices[1] = 1.;
-	vertices[2] = 0.;
-	vertices[3] = 1.;
-	vertices[4] = 1.;
-	vertices[5] = 0.;
-	vertices[6] = 0.;
-	vertices[7] = 0.;
-	vertices[8] = 1.;
-	vertices[9] = 1.;
-	vertices[10] = 0.;
-	vertices[11] = 1.;
-
 	for (int i = 0 ; i < 8 ; i++)
 		coord2D[i] = 0;
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferData(	GL_ARRAY_BUFFER, (24*sizeof *vertices), NULL, GL_DYNAMIC_DRAW);
-
-    glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *vertices), vertices);
-    //glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
-    glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (12*sizeof *vertices), vertices);
+    glBufferData(	GL_ARRAY_BUFFER, (20*sizeof *vertices), NULL, GL_STREAM_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -74,51 +57,24 @@ void igElement::draw() const {
 	const sf::Texture* texture = getTexture();
 
     sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
-    sf::IntRect rect = getCurrentSprite();
-    glBegin( GL_QUADS );
-        glTexCoord2d(rect.left, rect.top);
-    	//glColor3f( vertices[0], vertices[1], vertices[2]);
-        glVertex3f( vertices[0], vertices[1], vertices[2]);
-        
-        glTexCoord2d(rect.left + rect.width,rect.top); 
-        //glColor3f( vertices[3], vertices[4], vertices[5]);
-        glVertex3f( vertices[3], vertices[4], vertices[5]);
-        
-        glTexCoord2d(rect.left + rect.width,rect.top + rect.height);
-        //glColor3f( vertices[6], vertices[7], vertices[8]);
-        glVertex3f( vertices[6], vertices[7], vertices[8]);
-        
-        glTexCoord2d(rect.left, rect.top + rect.height);
-        //glColor3f( vertices[9], vertices[10], vertices[11]);
-        glVertex3f( vertices[9], vertices[10], vertices[11]);
-    glEnd();
 
-    /*for (int i = 0 ; i < 4 ; i++) {
-		std::cout << vertices[3*i] << " "
-				  << vertices[3*i+1] << " " 
-				  << vertices[3*i+2] << std::endl;
-	}*/
-
-	/*glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-    //glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
-    glColorPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(12*sizeof *vertices));// + 8*sizeof *coord2D));
+    glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glDrawElements(GL_TRIANGLES, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);*/
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -151,6 +107,13 @@ void igElement::set3DCorners(sf::Vector3f nCorners[4]) {
 	coord2D[5] = rect.top + rect.height;
 	coord2D[6] = rect.left;
 	coord2D[7] = rect.top + rect.height;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *vertices), vertices);
+    glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::launchAnimation(ANM_TYPE type) {
