@@ -26,7 +26,7 @@ public:
 	void update(sf::Time elapsed, float nOrientation);
 
 	inline const sf::Texture* getTexture() const {return tex[currentAnim];}
-	sf::IntRect getCurrentSprite();
+	sf::IntRect getCurrentSprite() const;
 	inline float getMaxHeightFactor() {return (float) maxHeight / (float) animInfo[currentAnim].sprite.height;}
 	inline void die() {dead = true;}
 

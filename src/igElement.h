@@ -1,6 +1,7 @@
 #pragma once
-
+#include <GL/glew.h>
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 #include <string>
 #include "animationManager.h"
 
@@ -17,9 +18,12 @@ public:
 	virtual void update(sf::Time elapsed, float theta);
 	void set3DCorners(sf::Vector3f nCorners[4]);
 	void set2DCorners(sf::IntRect nCorners) {corners2 = nCorners;}
+	void setDepth(float nDepth) {depth = nDepth;}
 
 	inline virtual float getMaxHeightFactor() {return graphics.getMaxHeightFactor();}
 	virtual void launchAnimation (ANM_TYPE type);
+
+	void draw() const;
 
 	// Getters
 
@@ -27,9 +31,9 @@ public:
 	inline float getOrientation() const {return orientation;}
 	inline float getH() const {return height;}
 	inline const sf::Texture* getTexture() const {return graphics.getTexture();}
-	inline sf::IntRect getCurrentSprite() {return graphics.getCurrentSprite();}
-	inline sf::Vector3f* get3DCorners() const {return corners3;}
+	inline sf::IntRect getCurrentSprite() const {return graphics.getCurrentSprite();}
 	inline sf::IntRect get2DCorners() const {return corners2;}
+	inline float getDepth() const {return depth;}
 
 protected:
 	sf::Vector2f pos;
@@ -42,6 +46,15 @@ protected:
 	float camOrientation; // Angle between the camera and the vector (0,1)
 
 	void setOrientation(float nOrientation);
+
+	float depth; // Distance to camera
+
+	GLuint vbo;
+	GLuint ibo;
+
+	float* vertices;
+	int* coord2D;
+	GLuint* indices;
 
 private:
 	float orientation; // Angle between the front of the sprite and the camera

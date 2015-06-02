@@ -39,6 +39,8 @@ public:
 	inline std::vector<igElement*> getElements() const {return e;}
 
 private:
+	void fusion(const int begin1, const int end1,const int end2);
+	void sortAux(const int start, const int end);
 	void sortE(); // sorts E according to depth buffer
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 

@@ -161,12 +161,12 @@ void Map::update(sf::Time elapsed) {
 
         // Calculate their projections
 
-        GLdouble left, top, right, bot;
+        GLdouble left, top, right, bot, depth;
         GLdouble trash;
 
         gluProject(corners3[0].x,corners3[0].y,corners3[0].z,modelview,projection,viewport,&left,  &top,   &trash);
         gluProject(corners3[1].x,corners3[1].y,corners3[1].z,modelview,projection,viewport,&right, &trash, &trash);
-        gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &trash);
+        gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &depth);
 
         top = viewport[3]-top;
         bot = viewport[3]-bot;
@@ -174,6 +174,7 @@ void Map::update(sf::Time elapsed) {
         sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
         e[i]->set2DCorners(cornersRect);
+        e[i]->setDepth(depth);
 
     }
 
@@ -182,7 +183,7 @@ void Map::update(sf::Time elapsed) {
 
 void Map::render() const {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    
     // Skybox
 
     glEnable(GL_TEXTURE_CUBE_MAP_ARB);
@@ -214,37 +215,56 @@ void Map::render() const {
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (unsigned int i = 0 ; i < e.size() ; i++) {
-        const sf::Texture* texture = e[i]->getTexture();
-        sf::IntRect rect = e[i]->getCurrentSprite();
-
-        sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
-
-        glBegin( GL_QUADS );
-            glTexCoord2d(rect.left, rect.top);
-            glVertex3f( e[i]->get3DCorners()[0].x, e[i]->get3DCorners()[0].y, e[i]->get3DCorners()[0].z);
-            
-            glTexCoord2d(rect.left + rect.width,rect.top); 
-            glVertex3f( e[i]->get3DCorners()[1].x, e[i]->get3DCorners()[1].y, e[i]->get3DCorners()[1].z);
-            
-            glTexCoord2d(rect.left + rect.width,rect.top + rect.height);
-            glVertex3f( e[i]->get3DCorners()[2].x, e[i]->get3DCorners()[2].y, e[i]->get3DCorners()[2].z);
-            
-            glTexCoord2d(rect.left, rect.top + rect.height);
-            glVertex3f( e[i]->get3DCorners()[3].x, e[i]->get3DCorners()[3].y, e[i]->get3DCorners()[3].z);
-        glEnd();
-
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        e[i]->draw();
+        glPopMatrix();
     }
-
-    glMatrixMode(GL_TEXTURE); // sf::Texture::bind modifies the texture matrix, we need to set it back to identity
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
 
     glDisable(GL_BLEND | GL_TEXTURE_2D);
 }
 
+void Map::fusion(const int begin1, const int end1,const int end2) {
+   int begin2 = end1+1;
+   int count1 = begin1;
+   int count2 = begin2;
+
+   std::vector<igElement*> aux(end1 - begin1 + 1);
+
+   for(int i = begin1; i <= end1; i++)
+      aux[i-begin1] = e[i];
+
+   for(int i = begin1; i <= end2; i++) {
+      if(count1 == begin2)
+         break;
+
+      else if(count2 == (end2 + 1)) {
+         e[i] = aux[count1-begin1];
+         count1++;
+      }
+      else if(aux[count1-begin1]->getDepth() > e[count2]->getDepth()) {
+         e[i] = aux[count1-begin1];
+         count1++;
+      }
+      else {
+         e[i] = e[count2];
+         count2++;
+      }
+   }
+}
+
+void Map::sortAux(const int start, const int end) {
+   if(start!=end) {
+      int mid = (start+end)/2;
+      sortAux(start, mid);
+      sortAux(mid+1, end);
+      fusion(start, mid, end);
+   }
+}
+
 void Map::sortE() {
-    
+    if (e.size() > 0)
+        sortAux(0, e.size()-1);
 }
 
 void Map::select(sf::IntRect rect, bool add) {    
