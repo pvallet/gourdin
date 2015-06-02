@@ -6,7 +6,7 @@
 
 class Controllable : public igMovingElement {
 public:
-	Controllable(sf::Vector2f position, std::string filename);
+	Controllable(sf::Vector2f position, AnimationManager _graphics);
 
 	inline virtual abstractType getAbstractType() const {return CTRL;}
 

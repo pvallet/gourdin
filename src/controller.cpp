@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include "igElement.h"
+#include "lion.h"
 
 #define ROTATION_ANGLE_PS 60. // PS = per second
 #define TRANSLATION_VALUE_PS 60.
@@ -40,16 +41,26 @@ void Controller::render() {
         // Life bars
 
         sf::RectangleShape lifeBar(sf::Vector2f(20., 2.));
-        lifeBar.setFillColor(sf::Color::Green);
+        lifeBar.setFillColor(sf::Color::Yellow);
         lifeBar.setOutlineThickness(0);
 
         std::set<igElement*> sel = map.getSelection();
         sf::IntRect corners;
+        float maxHeightFactor;
 
         for(auto it = sel.begin(); it != sel.end(); ++it) {
             corners = (*it)->get2DCorners();
-            lifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - 5);
+            maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+            Controllable* ctrl = (Controllable*) (*it);
+            
+            if (ctrl->getMovingType() == HUNTER) {
+                Lion* lion = (Lion*) ctrl;
+                lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
+            }
+
+            lifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - corners.height*maxHeightFactor + corners.height - 5);
             window->draw(lifeBar);
+            lifeBar.setSize(sf::Vector2f(20., 2.));
         }
 
         // FPS
@@ -96,8 +107,12 @@ void Controller::run() {
                 }
 
                 // Move selection
-                if (event.mouseButton.button == sf::Mouse::Right)
-                    map.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                if (event.mouseButton.button == sf::Mouse::Right) {
+                    if (map.getSelection().empty())
+                        map.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                    else
+                        map.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                }
             }
 
             else if (event.type == sf::Event::MouseButtonReleased) {
@@ -121,6 +136,35 @@ void Controller::run() {
                     case sf::Keyboard::Escape:
                         running = false;
                         break;
+                    case sf::Keyboard::LShift: {
+                        std::set<igElement*> sel = map.getSelection();
+
+                        for (auto it = sel.begin() ; it != sel.end() ; ++it) {
+                            Controllable* ctrl = (Controllable*) (*it);
+
+                            if (ctrl->getMovingType() == HUNTER) {
+                                Lion* lion = (Lion*) ctrl;
+                                if (lion->isRunning())
+                                    lion->beginWalking();
+                                else
+                                    lion->beginRunning();
+                            }
+                        }}
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            else if (event.type == sf::Event::KeyReleased) {
+                switch(event.key.code) {
+                    case sf::Keyboard::Delete: {
+                        std::set<igElement*> sel = map.getSelection();
+                        Controllable* ctrl = (Controllable*) (*sel.begin());
+                        ctrl->die();
+                    }
+                    break;
+
                     default:
                         break;
                 }
@@ -137,10 +181,12 @@ void Controller::run() {
             camera.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.);
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            camera.rotate(0., - ROTATION_ANGLE_PS * elapsed.asSeconds());
+            camera.translate(0., - TRANSLATION_VALUE_PS * elapsed.asSeconds());
+            //camera.rotate(0., - ROTATION_ANGLE_PS * elapsed.asSeconds()); // for the mouse wheel
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            camera.rotate(0., ROTATION_ANGLE_PS * elapsed.asSeconds());
+            camera.translate(0., TRANSLATION_VALUE_PS * elapsed.asSeconds());
+            //camera.rotate(0., ROTATION_ANGLE_PS * elapsed.asSeconds());
 
         if (sf::Mouse::getPosition().x == 0)
             camera.translate(TRANSLATION_VALUE_PS * elapsed.asSeconds(), 0.);

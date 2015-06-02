@@ -3,13 +3,15 @@
 #include <SFML/OpenGL.hpp>
 #include <cmath>
 #include <iostream>
+#include <ctime>
 
-igElement::igElement(sf::Vector2f position, std::string filename) :
+igElement::igElement(sf::Vector2f position, AnimationManager _graphics) :
 	pos(position),
 	height(3.),
-	graphics(filename),
-	orientation(90.),
+	graphics(_graphics),
 	camOrientation(0.) {
+
+	orientation = (float) rand() / (float) RAND_MAX * 360.f;
 
 	corners3 = new sf::Vector3f[4];
 	
@@ -36,6 +38,12 @@ void igElement::set3DCorners(sf::Vector3f nCorners[4]) {
 	for (int i = 0 ; i < 4 ; i++) {
 		corners3[i] = nCorners[i];
 	}
+}
+
+void igElement::launchAnimation(ANM_TYPE type) {
+	height /= graphics.getCurrentSprite().height;
+	graphics.launchAnimation(type);
+	height *= graphics.getCurrentSprite().height;
 }
 
 void igElement::setOrientation(float nOrientation) {

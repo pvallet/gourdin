@@ -7,7 +7,7 @@ Camera::Camera() : 	fovAngle(45.0),
     				nearPlane(0.1),
     				farPlane(10000.0),
     				x(0.0), y(0.0),
-    				r(100.0),
+    				r(150.0),
     				theta(0.0),
     				phi(60.0) {}
 

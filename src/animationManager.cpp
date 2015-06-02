@@ -1,98 +1,116 @@
 #include "animationManager.h"
+#include <tinyxml.h>
 #include <iostream>
 
-AnimationManager::AnimationManager(std::string filename) :
-	moving(false),
-	currentAnim(0),
-    currentSprite(4),
-    alreadyElapsed(sf::Time::Zero) {
-	sf::Image img;
-	if (!img.loadFromFile(filename)) {
-    	std::cout << "Unable to open file" << std::endl;
+AnimationManager::AnimationManager(std::vector<sf::Texture*> _tex, std::string xml) :
+	currentAnim(WAIT),
+    currentSprite(0),
+    alreadyElapsed(sf::Time::Zero),
+    dead(false) {
+
+    TiXmlDocument doc(xml);
+    if(!doc.LoadFile()) {
+        std::cerr << "Error while loading file: " << xml << std::endl;
+        std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
     }
 
-    img.createMaskFromColor(sf::Color(173, 214, 214));
-    tex.loadFromImage(img);
-    tex.setSmooth(true);
+    TiXmlHandle hdl(&doc);
+    TiXmlElement *elem = hdl.FirstChildElement().FirstChildElement().Element();
 
-    AnimInfo tmp;
-    tmp.sprite = sf::IntRect(0, 0, 35, 64);
-    tmp.steps = 12;
-    tmp.duration = sf::seconds(1./12.);
-    tmp.orientation = 90.;
-    tmp.type = ANM_WALK;
-    animInfo.push_back(tmp);
+    maxHeight = 0;
 
-    tmp.orientation = 270.;
-    animInfo.push_back(tmp);
-    
-    tmp.sprite = sf::IntRect(0, 0, 36, 64);
-    tmp.steps = 4;
-    tmp.orientation = 0.;
-    tmp.type = ANM_TURN;
-    animInfo.push_back(tmp);
+    for (unsigned int i = 0 ; i < _tex.size() ; i++) {
+        if(!elem)
+            std::cerr << "Lack of info in xml file" << std::endl;
+
+        AnimInfo anm;
+        elem->QueryIntAttribute("steps", &anm.steps);
+        elem->QueryIntAttribute("nbOri", &anm.orientations);
+
+        int durationms, pausems, type;
+        elem->QueryIntAttribute("duration", &durationms);
+        elem->QueryIntAttribute("pause", &pausems);
+        elem->QueryIntAttribute("type", &type);
+
+        anm.duration = sf::milliseconds(durationms);
+
+        if (pausems == -1) {
+            anm.loop = false;
+            anm.pause = sf::milliseconds(1);
+        }
+
+        else {
+            anm.loop = true;
+            anm.pause = sf::milliseconds(pausems);
+        }
+
+        tex.push_back(_tex[i]);
+
+        anm.sprite = sf::IntRect(0, 0, tex[i]->getSize().x / anm.steps, tex[i]->getSize().y / anm.orientations);
+
+        if (anm.sprite.height > maxHeight)
+            maxHeight = anm.sprite.height;
+        
+        animInfo.insert(std::pair<ANM_TYPE, AnimInfo>((ANM_TYPE) type, anm));
+        elem = elem->NextSiblingElement();
+    }
 }
 
-void AnimationManager::launchAnimation(ANM_TYPE type, float nOrientation) {
-	moving = true;
+void AnimationManager::launchAnimation(ANM_TYPE type) {
+    if (!dead) {
+        if (currentAnim != type) {
+            currentAnim = type;
 
-    if (animInfo[currentAnim].type != type) {
-        currentAnim = getClosestAnim(type, nOrientation);
-        currentSprite = 0;
+            currentSprite = 0;
+        }
     }
 }
 
 void AnimationManager::update(sf::Time elapsed, float nOrientation) {
-    if (moving) {
-        alreadyElapsed += elapsed;
-        int add = alreadyElapsed.asMilliseconds() / animInfo[currentAnim].duration.asMilliseconds();
+    alreadyElapsed += elapsed;
 
-        if (add > 0) {
-            currentSprite += add;
-            currentSprite %= animInfo[currentAnim].steps;
-            alreadyElapsed = sf::milliseconds(alreadyElapsed.asMilliseconds() % animInfo[currentAnim].duration.asMilliseconds());
-        }
-    }
-
-    currentAnim = getClosestAnim(animInfo[currentAnim].type, nOrientation);
-}
-
-void AnimationManager::stop() {
-    moving = false;
-    currentSprite = 0;
-    alreadyElapsed = sf::Time::Zero;
-}
-
-sf::IntRect AnimationManager::getCurrentSprite() const {
-	sf::IntRect sprite = animInfo[currentAnim].sprite;
-
-    sprite.left += currentSprite * sprite.width;
-    sprite.top += currentAnim * sprite.height;
-
-    return sprite;
-}
-
-
-int AnimationManager::getClosestAnim(ANM_TYPE type, float orientation) {
-    float diff = 180.;
-    int index = 0;
-
-    for (unsigned int i = 0 ; i < animInfo.size(); i++) {
-        if (animInfo[i].type == type) {
-            float tmp = animInfo[i].orientation - orientation;
-
-            if (tmp < 0.)
-                tmp += 360.;
-
-            if (tmp > 180.)
-                tmp = 360. - tmp;
-
-            if (tmp < diff) {
-                diff = tmp;
-                index = i;
+    if (currentSprite == animInfo[currentAnim].steps - 1 && animInfo[currentAnim].pause != sf::Time::Zero) {
+        if (animInfo[currentAnim].loop) {
+            if (alreadyElapsed.asMilliseconds() / animInfo[currentAnim].pause.asMilliseconds() != 0) {
+                currentSprite = 0;
+                alreadyElapsed = sf::milliseconds(alreadyElapsed.asMilliseconds() - animInfo[currentAnim].pause.asMilliseconds());
             }
         }
     }
 
-    return index;
+    else {
+        if (alreadyElapsed.asMilliseconds() / animInfo[currentAnim].duration.asMilliseconds() != 0) {
+            currentSprite++;
+            currentSprite %= animInfo[currentAnim].steps;
+            alreadyElapsed = sf::milliseconds(alreadyElapsed.asMilliseconds() - animInfo[currentAnim].duration.asMilliseconds());
+        }
+    }
+
+    currentOrient = getClosestOrient(nOrientation);
 }
+
+sf::IntRect AnimationManager::getCurrentSprite() {
+	sf::IntRect sprite = animInfo[currentAnim].sprite;
+
+    sprite.left += currentSprite * sprite.width;
+    sprite.top += currentOrient * sprite.height;
+
+    return sprite;
+}
+
+sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) {
+    return sf::milliseconds((animInfo[type].steps-1) * animInfo[type].duration.asMilliseconds());
+}
+
+int AnimationManager::getClosestOrient(float orientation) {
+    /*if (tmp < 0.)
+        tmp += 360.;
+
+    if (tmp > 180.)
+        tmp = 360. - tmp;*/
+
+    float oriStep = 360. / (float) animInfo[currentAnim].orientations;
+
+    return (animInfo[currentAnim].orientations - (int) round(orientation / oriStep)) % 8;
+}
+

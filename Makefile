@@ -1,6 +1,6 @@
 CIBLE = out
 SRCS =  $(wildcard src/*.cpp)
-LIBS =  -lsfml-graphics -lsfml-window -lsfml-system -lGLU -lGL -lX11 -lGLEW
+LIBS =  -lsfml-graphics -lsfml-window -lsfml-system -lGLU -lGL -lX11 -lGLEW -ltinyxml
 
 CFLAGS = -Wall -std=c++11 -g
 

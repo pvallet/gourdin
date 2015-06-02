@@ -4,6 +4,9 @@
 #include <cstdlib>
 #include <ctime>
 
+#define MIN_ANTILOPE_PROX 2.f
+#define HERD_RADIUS 5.f // for 10 antilopes
+
 Map::Map(Camera* camera) :
     cam(camera) {
 	
@@ -19,7 +22,6 @@ Map::Map(Camera* camera) :
     hmap[5] = new Heightmap(sf::Vector2i(-2,-1), rand());
 
     hmap[0]->generate(std::vector<Constraint>());
-    hmap[0]->saveToImage();
     map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
 
     for (int i = 1 ; i < 6 ; i++) {
@@ -29,13 +31,61 @@ Map::Map(Camera* camera) :
             c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
 
         hmap[i]->generate(c);
-        hmap[i]->saveToImage();
         map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
     }
 
-    e.push_back(new Hunter(sf::Vector2f(0.,0.), "res/caveman.png"));
+    skybox = new Skybox("res/skybox/skybox", cam);
 
-    skybox = new Skybox("res/skybox", cam);
+    sf::Color mask(0, 151, 135);
+
+    std::vector<std::string> lionSheets;
+    lionSheets.push_back("res/lion/wait.png");
+    lionSheets.push_back("res/lion/walk.png");
+    lionSheets.push_back("res/lion/die.png");
+    lionSheets.push_back("res/lion/run.png");
+    lionSheets.push_back("res/lion/attack.png");
+
+    for (unsigned int i = 0 ; i < lionSheets.size() ; i++) {
+        sf::Image img;
+
+        if (!img.loadFromFile(lionSheets[i])) {
+            std::cout << "Unable to open file" << std::endl;
+        }
+
+        sf::Texture* curTex = new sf::Texture();
+
+        img.createMaskFromColor(mask);
+
+        curTex->loadFromImage(img);
+        curTex->setSmooth(true);
+
+        lionTex.push_back(curTex);
+    }
+
+    std::vector<std::string> antilopeSheets;
+    antilopeSheets.push_back("res/antilope/wait.png");
+    antilopeSheets.push_back("res/antilope/walk.png");
+    antilopeSheets.push_back("res/antilope/die.png");
+    antilopeSheets.push_back("res/antilope/run.png");
+
+    for (unsigned int i = 0 ; i < antilopeSheets.size() ; i++) {
+        sf::Image img;
+
+        if (!img.loadFromFile(antilopeSheets[i])) {
+            std::cerr << "Unable to open file" << std::endl;
+        }
+
+        sf::Texture* curTex = new sf::Texture();
+
+        img.createMaskFromColor(mask);
+
+        curTex->loadFromImage(img);
+        curTex->setSmooth(true);
+
+        antilopeTex.push_back(curTex);
+    }
+
+    generateHerd(sf::Vector2f(0.f,0.f), 20);
 }
 
 Map::~Map() {
@@ -50,6 +100,21 @@ Map::~Map() {
 }
 
 void Map::update(sf::Time elapsed) {
+    for (unsigned int i = 0 ; i < e.size() ; i++) {
+        if (e[i]->getAbstractType() != igE) {
+            igMovingElement* igM = (igMovingElement*) e[i];
+            if (igM->getMovingType() == PREY) {
+                Antilope* atlp = (Antilope*) igM;
+                atlp->updateState(e);
+            }
+
+            else if (igM->getMovingType() == HUNTER) {
+                Lion* lion = (Lion*) igM;
+                lion->kill(e);
+            }
+        }
+    }
+
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT,viewport);
     GLdouble projection[16];
@@ -111,6 +176,8 @@ void Map::update(sf::Time elapsed) {
         e[i]->set2DCorners(cornersRect);
 
     }
+
+    sortE();
 }
 
 void Map::render() const {
@@ -176,6 +243,9 @@ void Map::render() const {
     glDisable(GL_BLEND | GL_TEXTURE_2D);
 }
 
+void Map::sortE() {
+    
+}
 
 void Map::select(sf::IntRect rect, bool add) {    
     if (!add)
@@ -191,21 +261,72 @@ void Map::select(sf::IntRect rect, bool add) {
             centerY = c.top + c.height / 2;
 
             if (rect.contains(centerX, centerY)) {
-                sel.insert(e[i]);
+                if (e[i]->getAbstractType() == CTRL)
+                    sel.insert(e[i]);
             }
 
             else if (   c.contains(rect.left, rect.top) ||
                         c.contains(rect.left + rect.width, rect.top) ||
                         c.contains(rect.left + rect.width, rect.top + rect.height) ||
                         c.contains(rect.left, rect.top + rect.height)  ) {
-                sel.insert(e[i]);   
+                if (e[i]->getAbstractType() == CTRL)
+                    sel.insert(e[i]);   
             }
         }
     }
 }
 
 void Map::moveSelection(sf::Vector2i screenTarget) {
+    sf::Vector2f target = get2DCoord(screenTarget);
 
+    for(auto it = sel.begin(); it != sel.end(); ++it) {
+        if ((*it)->getAbstractType() == CTRL) {
+            Controllable* tmp = (Controllable*) *it;
+            tmp->setTarget(target);
+        }
+    }
+}
+
+void Map::addLion(sf::Vector2i screenTarget) {
+    e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(lionTex, "res/lion/animInfo.xml")));
+}
+
+void Map::generateHerd(sf::Vector2f pos, int count) {
+    srand(time(NULL));
+    float r, theta;
+    sf::Vector2f p, diff;
+    bool add;
+
+    std::vector<Antilope*> tmp;
+
+    for (int i = 0 ; i < count ; i++) {
+        add = true;
+        r = sqrt((float) rand() / (float) RAND_MAX) * HERD_RADIUS * sqrt(count);
+        theta = (float) rand() / (float) RAND_MAX * 2*M_PI;
+
+        p.x = pos.x + r*cos(theta);
+        p.y = pos.y + r*sin(theta);
+
+        for (int j = 0 ; j < i ; j++) {
+            diff = tmp[j]->getPos() - p;
+            
+            if (diff.x * diff.x + diff.y * diff.y < MIN_ANTILOPE_PROX) {
+                i--;
+                add = false;
+            }
+        }
+
+        if (add) {
+            tmp.push_back(new Antilope(p, AnimationManager(antilopeTex, "res/antilope/animInfo.xml")));
+        }
+    }
+
+    for (int i = 0 ; i < count ; i++) {
+        e.push_back(tmp[i]);
+    }
+}
+
+sf::Vector2f Map::get2DCoord(sf::Vector2i screenTarget) const {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT,viewport);
     GLdouble projection[16];
@@ -225,16 +346,7 @@ void Map::moveSelection(sf::Vector2i screenTarget) {
     double x,y,z;
     gluUnProject(winX,winY,d,modelview,projection,viewport,&x,&y,&z);
 
-    if (z != 1.) { // If the click was on the map
-        for(auto it = sel.begin(); it != sel.end(); ++it) {
-            if ((*it)->getAbstractType() == CTRL) {
-                Controllable* tmp = (Controllable*) *it;
-                tmp->setTarget(sf::Vector2f(x,z));
-            }
-        }
-    }
+    return sf::Vector2f(x,z);
 }
-
-
 
 

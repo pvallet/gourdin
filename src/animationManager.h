@@ -3,40 +3,49 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include <map>
 
 
-enum ANM_TYPE {ANM_WALK, ANM_TURN};
+enum ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
 
 typedef struct AnimInfo AnimInfo;
 struct AnimInfo {
 	sf::IntRect sprite;
 	int steps;
-	sf::Time duration;
-	float orientation;
-	ANM_TYPE type;
+	int orientations;
+	sf::Time duration; 	// of each frame
+	sf::Time pause; 	// Before starting the anim over
+	bool loop; 			// If false, pause is infinite
 };
 
 class AnimationManager {
 public:
-	AnimationManager(std::string filename);
+	AnimationManager(std::vector<sf::Texture*> _tex, std::string xml);
 
-	void launchAnimation(ANM_TYPE type, float nOrientation);
+	void launchAnimation(ANM_TYPE type);
 	void update(sf::Time elapsed, float nOrientation);
-	void stop();
 
-	inline const sf::Texture* getTexture() const {return &tex;}
-	sf::IntRect getCurrentSprite() const;
+	inline const sf::Texture* getTexture() const {return tex[currentAnim];}
+	sf::IntRect getCurrentSprite();
+	inline float getMaxHeightFactor() {return (float) maxHeight / (float) animInfo[currentAnim].sprite.height;}
+	inline void die() {dead = true;}
+
+	sf::Time getAnimationTime(ANM_TYPE type);
+
 private:
-	int getClosestAnim(ANM_TYPE type, float orientation); // Finds the best animation for the current orientation
+	int getClosestOrient(float orientation);
 
-	sf::Texture tex;
+	std::vector<sf::Texture*> tex;
 
-	bool moving;
-	int currentAnim;
+	int maxHeight;
+
+	ANM_TYPE currentAnim;
+	int currentOrient;
 	int currentSprite;
 	float nOrientation;
+	bool dead;
 
 	sf::Time alreadyElapsed;
-	std::vector<AnimInfo> animInfo;
+	std::map<ANM_TYPE, AnimInfo> animInfo;
 };
 

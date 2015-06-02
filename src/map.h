@@ -11,9 +11,10 @@
 #include "camera.h"
 
 #include "igElement.h"
-#include "hunter.h"
-#include "boid.h"
+#include "lion.h"
+#include "antilope.h"
 
+#include "animationManager.h"
 
 struct compChunkPos {
     bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const
@@ -31,14 +32,22 @@ public:
 	void render() const; 
 	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
+	void addLion(sf::Vector2i screenTarget);
+	void generateHerd(sf::Vector2f pos, int count);
 
 	inline std::set<igElement*> getSelection() const {return sel;}
 	inline std::vector<igElement*> getElements() const {return e;}
 
 private:
+	void sortE(); // sorts E according to depth buffer
+	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
+
 	std::set<igElement*> sel; // Selection
 	std::vector<igElement*> e; // Elements
 	Camera* cam;
+
+	std::vector<sf::Texture*> lionTex;
+	std::vector<sf::Texture*> antilopeTex;
 
 	std::map<sf::Vector2i, Chunk*, compChunkPos> map;
 	Skybox* skybox;
