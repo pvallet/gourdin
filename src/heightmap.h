@@ -11,7 +11,7 @@
 class Heightmap : public Chunk {
 
 public:
-	Heightmap(sf::Vector2i chunkPosition, int _seed);
+	Heightmap(sf::Vector2i chunkPosition, int _seed, sf::Texture* _tex);
 	~Heightmap() {}
 
 	void generate(std::vector<Constraint> constraints);
@@ -25,9 +25,11 @@ public:
 	inline int getSize() const {return size;}
 
 private:
+	int compareToCorners(sf::Vector3f cam, sf::Vector3f vec) const; // 1 if they are all outside, -1 inside, else 0
 	int size;
 	int seed;
 
 	std::vector<std::vector<float> > heights;
+	sf::Texture* tex;
 };
 

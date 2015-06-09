@@ -21,6 +21,8 @@ public:
     inline sf::Vector3f getPos() const {return pos;}
     inline float getTheta() const {return theta;}
     inline float getPhi() const {return phi;}
+    inline float getFov() const {return fovAngle;}
+    inline float getRatio() const {return aspectRatio;}
 
 private:
 	unsigned int W, H;

@@ -186,7 +186,10 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 		break;
 
 		case RECOVERING: {
-			if (beginPhase.getElapsedTime() > timePhase) {
+			if (nbFlee != 0)
+				beginFleeing();
+
+			else if (beginPhase.getElapsedTime() > timePhase) {
 				beginIdle();
 				beginPhase.restart();
 			}

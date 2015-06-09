@@ -9,22 +9,32 @@
 
 Map::Map(Camera* camera) :
     cam(camera) {
+
+    sf::Image img;
+
+    if (!img.loadFromFile("res/terrain/sand.png")) {
+        std::cout << "Unable to open file" << std::endl;
+    }
+
+    sf::Texture* heightmapTex = new sf::Texture();
+
+    heightmapTex->loadFromImage(img);
+    heightmapTex->setSmooth(true);
 	
-    Heightmap* hmap[6];
+    Heightmap* hmap[4];
     
     srand(time(NULL));
 
-    hmap[0] = new Heightmap(sf::Vector2i( 0, 0), rand());
-    hmap[1] = new Heightmap(sf::Vector2i( 0,-1), rand());
-    hmap[2] = new Heightmap(sf::Vector2i(-1, 0), rand());
-    hmap[3] = new Heightmap(sf::Vector2i(-1,-1), rand());
-    hmap[4] = new Heightmap(sf::Vector2i(-2, 0), rand());
-    hmap[5] = new Heightmap(sf::Vector2i(-2,-1), rand());
+    hmap[0] = new Heightmap(sf::Vector2i( 0, 0), rand(), heightmapTex);
+    hmap[1] = new Heightmap(sf::Vector2i( 0,-1), rand(), heightmapTex);
+    hmap[2] = new Heightmap(sf::Vector2i(-1, 0), rand(), heightmapTex);
+    hmap[3] = new Heightmap(sf::Vector2i(-1,-1), rand(), heightmapTex);
 
     hmap[0]->generate(std::vector<Constraint>());
     map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
+    mapBorder.insert(hmap[0]->getChunkPos());
 
-    for (int i = 1 ; i < 6 ; i++) {
+    for (int i = 1 ; i < 4 ; i++) {
         std::vector<Constraint> c;
 
         for (int j = 0 ; j < i ; j++)
@@ -32,6 +42,7 @@ Map::Map(Camera* camera) :
 
         hmap[i]->generate(c);
         map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
+        mapBorder.insert(hmap[i]->getChunkPos());
     }
 
     skybox = new Skybox("res/skybox/skybox", cam);
@@ -99,7 +110,59 @@ Map::~Map() {
     }
 }
 
+void Map::generateNeighbourChunks(sf::Vector2i pos) {
+    if (mapBorder.find(pos) != mapBorder.end()) {
+        sf::Vector2i tmp1;
+        for (int i = 0; i < 4; i++) {
+            tmp1 = neighbour(pos,i);
+
+            if (map.find(tmp1) == map.end()) { // We only add the neighbour if it's not already generated
+                sf::Vector2i tmp2;
+                std::vector<Constraint> c;
+
+                for (int j = 0 ; j < 4 ; j++) { // Get constraints
+                    tmp2 = neighbour(tmp1,j);
+                    std::map<sf::Vector2i, Chunk*>::iterator it = map.find(tmp2);
+
+                    if (it != map.end()) {
+                        c.push_back(it->second->getConstraint(tmp1));
+                    }
+                }
+
+                Heightmap* hmap = new Heightmap(sf::Vector2i(tmp1), rand(), heightmapTex);
+                hmap->generate(c);
+                map.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
+                mapBorder.insert(hmap->getChunkPos());
+            }
+        }
+
+        mapBorder.erase(pos);
+    }
+}
+
+sf::Vector2i Map::neighbour(sf::Vector2i pos, int index) const {
+    switch(index) {
+        case 0:
+            return sf::Vector2i(pos.x-1,pos.y);
+            break;
+        case 1:
+            return sf::Vector2i(pos.x+1,pos.y);
+            break;
+        case 2:
+            return sf::Vector2i(pos.x,pos.y-1);
+            break;
+        case 3:
+            return sf::Vector2i(pos.x,pos.y+1);
+            break;
+    }
+}
+
 void Map::update(sf::Time elapsed) {
+    for (auto it = mapBorder.begin() ; it != mapBorder.end() ; ++it) {
+        if (map[(*it)]->alreadyDisplayed())
+            generateNeighbourChunks(*it);
+    }
+
     for (unsigned int i = 0 ; i < e.size() ; i++) {
         if (e[i]->getAbstractType() != igE) {
             igMovingElement* igM = (igMovingElement*) e[i];
@@ -127,6 +190,8 @@ void Map::update(sf::Time elapsed) {
 
         int chunkPosX = e[i]->getPos().x < 0 ? e[i]->getPos().x / CHUNK_SIZE - 1 : e[i]->getPos().x / CHUNK_SIZE;
         int chunkPosY = e[i]->getPos().y < 0 ? e[i]->getPos().y / CHUNK_SIZE - 1 : e[i]->getPos().y / CHUNK_SIZE;
+
+        std::cout << e[i]->getPos().x - CHUNK_SIZE * chunkPosX << " " << e[i]->getPos().y - CHUNK_SIZE * chunkPosY << std::endl;
 
         // No test yet to see if the element can move to its new pos (no collision)
         float newHeight =   map[sf::Vector2i(chunkPosX, chunkPosY)]
@@ -206,6 +271,10 @@ void Map::render() const {
         
             glPopMatrix();
         }
+        else {
+            //std::cout << "Hidden: " << it->second->getChunkPos().x << " " << it->second->getChunkPos().y << std::endl;
+        }
+
     }
 
     // igElements

@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "vecUtils.h"
 
 #include <SFML/OpenGL.hpp>
 
@@ -24,10 +25,11 @@ void Camera::resize(unsigned int _W, unsigned int _H) {
 }
 
 void Camera::apply() {
-	float rad = M_PI / 180.;
-
+    sf::Vector3f tmp = sf::Vector3f(x,y,0.) + vu::carthesian(r, theta, phi);
     // y and z are inverted
-    pos = sf::Vector3f(x + r*sin(phi*rad)*cos(theta*rad), r*cos(phi*rad), y + r*sin(phi*rad)*sin(theta*rad));
+    pos.x = tmp.x;
+    pos.y = tmp.z;
+    pos.z = tmp.y;
 
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity();

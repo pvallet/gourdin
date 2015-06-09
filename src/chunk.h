@@ -29,14 +29,19 @@ public:
 	inline GLuint getIBOIndex() const {return ibo;}
 	inline sf::Vector2i getChunkPos() const {return chunkPos;}
 
+	inline bool alreadyDisplayed() const {return displayed;}
+
 protected:
 	GLuint vbo;
 	GLuint ibo;
 
 	float* vertices;
 	float* colors;
+	float* coord;
 	GLuint* indices;
 
 	sf::Vector2i chunkPos;
+
+	bool displayed;
 };
 

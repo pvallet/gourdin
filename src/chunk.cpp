@@ -1,7 +1,8 @@
 #include "chunk.h"
 
 Chunk::Chunk(sf::Vector2i chunkPosition) :
-	chunkPos(chunkPosition) {
+	chunkPos(chunkPosition),
+	displayed(false) {
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &ibo);
 }

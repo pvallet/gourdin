@@ -22,6 +22,8 @@ Perlin::Perlin(int seed, int _size) :
     frequency(0.01), 
     persistence(0.5) {
 
+    frequency *= (float) 256 / (float) (_size - 1);
+
     srand(seed);
 
     size = size * frequency * pow(2, octaves) + 3; // Add an extra border for interpolation

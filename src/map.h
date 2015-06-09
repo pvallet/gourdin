@@ -28,6 +28,7 @@ public:
 	Map(Camera* camera);
 	~Map();
 
+	void generateNeighbourChunks(sf::Vector2i pos);
 	void update(sf::Time elapsed);
 	void render() const; 
 	void select(sf::IntRect rect, bool add);
@@ -39,6 +40,7 @@ public:
 	inline std::vector<igElement*> getElements() const {return e;}
 
 private:
+	sf::Vector2i neighbour(sf::Vector2i pos, int index) const;
 	void fusion(const int begin1, const int end1,const int end2);
 	void sortAux(const int start, const int end);
 	void sortE(); // sorts E according to depth buffer
@@ -50,8 +52,10 @@ private:
 
 	std::vector<sf::Texture*> lionTex;
 	std::vector<sf::Texture*> antilopeTex;
+	sf::Texture* heightmapTex;
 
 	std::map<sf::Vector2i, Chunk*, compChunkPos> map;
+	std::set<sf::Vector2i, compChunkPos> mapBorder;
 	Skybox* skybox;
 };
 
