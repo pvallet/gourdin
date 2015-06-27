@@ -15,6 +15,8 @@ public:
   	inline void rotate (float dtheta, float dphi) {theta += dtheta; phi += dphi;}
   	inline void zoom (float dr) {r += dr;}
   	void apply ();
+    inline void setPointedPos(sf::Vector2f newPos) {x = newPos.x; y = newPos.y;}
+    inline void setHeight(float nHeight) {height = nHeight;}
 
   	inline unsigned int getW() const {return W;}
   	inline unsigned int getH() const {return H;}
@@ -23,6 +25,7 @@ public:
     inline float getPhi() const {return phi;}
     inline float getFov() const {return fovAngle;}
     inline float getRatio() const {return aspectRatio;}
+    inline sf::Vector2<double> getPointedPos() const {return sf::Vector2<double>(x, y);}
 
 private:
 	unsigned int W, H;
@@ -32,7 +35,7 @@ private:
     float nearPlane;
     float farPlane;
 
-    float x, y;
+    double x, y, height;
     float r, phi, theta; // The camera points towards the center of the sphere
     sf::Vector3f pos;
 };

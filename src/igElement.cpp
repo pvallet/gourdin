@@ -5,38 +5,40 @@
 #include <iostream>
 #include <ctime>
 
+#include "utils.h"
+
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-igElement::igElement(sf::Vector2f position, AnimationManager _graphics) :
+igElement::igElement(sf::Vector2<double> position) :
 	pos(position),
 	height(3.),
-	graphics(_graphics),
-	camOrientation(0.) {
+	camOrientation(0.),
+	visible(false) {
 
-	orientation = (float) rand() / (float) RAND_MAX * 360.f;
+	orientation = randomF() * 360.f;
 
 	vertices = new float[12];
-	coord2D = new int[8];
-	indices = new GLuint[4];
+    coord2D = new int[8];
+    indices = new GLuint[4];
 
-	for (int i = 0 ; i < 12 ; i++)
-		vertices[i] = 0.f;
+    for (int i = 0 ; i < 12 ; i++)
+        vertices[i] = 0.f;
 
-	for (int i = 0 ; i < 8 ; i++)
-		coord2D[i] = 0;
+    for (int i = 0 ; i < 8 ; i++)
+        coord2D[i] = 0;
 
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferData(	GL_ARRAY_BUFFER, (20*sizeof *vertices), NULL, GL_STREAM_DRAW);
+    glBufferData(   GL_ARRAY_BUFFER, (12*sizeof *vertices) + (8*sizeof *coord2D), NULL, GL_STREAM_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	for (int i = 0 ; i < 4 ; i++) {
-		indices[i] = i;
-	}
+    for (int i = 0 ; i < 4 ; i++) {
+        indices[i] = i;
+    }
 
-	glGenBuffers(1, &ibo);
+    glGenBuffers(1, &ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof *indices, NULL, GL_STATIC_DRAW);    
@@ -53,39 +55,7 @@ igElement::~igElement() {
 	delete[] indices;
 }
 
-void igElement::draw() const {
-	const sf::Texture* texture = getTexture();
-
-    sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-    glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glMatrixMode(GL_TEXTURE); // sf::Texture::bind modifies the texture matrix, we need to set it back to identity
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
-}
-
-void igElement::update(sf::Time elapsed, float theta) {
-	graphics.update(elapsed, orientation);
-	
+void igElement::update(sf::Time elapsed, float theta) {	
 	setOrientation(orientation + camOrientation - theta); // Orientation moves opposite to the camera
 
 	camOrientation = theta;
@@ -98,28 +68,11 @@ void igElement::set3DCorners(sf::Vector3f nCorners[4]) {
 		vertices[3*i+2] = nCorners[i].z;
 	}
 
-	sf::IntRect rect = getCurrentSprite();
-	coord2D[0] = rect.left;
-	coord2D[1] = rect.top;
-	coord2D[2] = rect.left + rect.width;
-	coord2D[3] = rect.top;
-	coord2D[4] = rect.left + rect.width;
-	coord2D[5] = rect.top + rect.height;
-	coord2D[6] = rect.left;
-	coord2D[7] = rect.top + rect.height;
-
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *vertices), vertices);
-    glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void igElement::launchAnimation(ANM_TYPE type) {
-	height /= graphics.getCurrentSprite().height;
-	graphics.launchAnimation(type);
-	height *= graphics.getCurrentSprite().height;
 }
 
 void igElement::setOrientation(float nOrientation) {

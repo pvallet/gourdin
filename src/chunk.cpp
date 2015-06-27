@@ -2,7 +2,7 @@
 
 Chunk::Chunk(sf::Vector2i chunkPosition) :
 	chunkPos(chunkPosition),
-	displayed(false) {
+	visible(false) {
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &ibo);
 }

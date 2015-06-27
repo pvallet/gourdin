@@ -1,61 +1,108 @@
 #pragma once
-#include <GL/glew.h>
+
 #include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
+#include <flann/flann.hpp>
 #include <map>
 #include <vector>
-#include <set>
-
-#include "heightmap.h"
-#include "skybox.h"
+#include <string>
+#include <iostream>
 #include "camera.h"
+#include "utils.h"
 
-#include "igElement.h"
-#include "lion.h"
-#include "antilope.h"
+struct Center;
+struct Edge;
+struct Corner;
 
-#include "animationManager.h"
+typedef struct Center Center;
+struct Center {
+	int id;
+	double x;
+	double y;
+	bool water;
+	bool ocean;
+	bool coast;
+	bool border;
+	Biome biome;
+	double elevation;
+	double moisture;
 
-struct compChunkPos {
-    bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const
-    {
-        return a.x != b.x ? a.x < b.x : a.y < b.y;
-    }
+	std::vector<int> centerIDs; // Only for initialisation
+	std::vector<int> edgeIDs;
+	std::vector<int> cornerIDs;
+
+	std::vector<Center*> centers;
+	std::vector<Edge*> edges;
+	std::vector<Corner*> corners;
+};
+
+typedef struct Edge Edge;
+struct Edge {
+	int id;
+	bool mapEdge;
+	double x; // Midpoint coordinates
+	double y;
+	int river;
+	int center0ID; // Only for initialisation
+	int center1ID;
+	int corner0ID;
+	int corner1ID;
+	Center* center0;
+	Center* center1;
+	Corner* corner0;
+	Corner* corner1;
+};
+
+typedef struct Corner Corner;
+struct Corner {
+	int id;
+	double x;
+	double y;
+	bool water;
+	bool ocean;
+	bool coast;
+	bool border;
+	double elevation;
+	double moisture;
+	int river;
+	int downslope; // Index of the lowest adjacent corner
+	
+	std::vector<int> centerIDs; // Only for initialisation
+	std::vector<int> edgeIDs;
+	std::vector<int> cornerIDs;
+
+	std::vector<Center*> centers;
+	std::vector<Edge*> edges;
+	std::vector<Corner*> corners;
 };
 
 class Map {
 public:
-	Map(Camera* camera);
+	Map(std::string path);
 	~Map();
 
-	void generateNeighbourChunks(sf::Vector2i pos);
-	void update(sf::Time elapsed);
-	void render() const; 
-	void select(sf::IntRect rect, bool add);
-	void moveSelection(sf::Vector2i screenTarget);
-	void addLion(sf::Vector2i screenTarget);
-	void generateHerd(sf::Vector2f pos, int count);
+	inline sf::Texture* getMinimap() const {return minimap;}
+	inline std::vector<Center*> getCenters() const {return centers;}
+	inline std::vector<Edge*> 	getEdges()   const {return edges;}
+	inline std::vector<Corner*> getCorners() const {return corners;}
+	inline int getNbChunks() const {return nbChunks;}
+	inline double getMaxCoord() const {return maxCoord;}
 
-	inline std::set<igElement*> getSelection() const {return sel;}
-	inline std::vector<igElement*> getElements() const {return e;}
+	Center* getClosestCenter(sf::Vector2<double> pos) const;
 
 private:
-	sf::Vector2i neighbour(sf::Vector2i pos, int index) const;
-	void fusion(const int begin1, const int end1,const int end2);
-	void sortAux(const int start, const int end);
-	void sortE(); // sorts E according to depth buffer
-	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
+	bool boolAttrib(std::string str) const;
+	Biome biomeAttrib(std::string str) const;
 
-	std::set<igElement*> sel; // Selection
-	std::vector<igElement*> e; // Elements
-	Camera* cam;
+	sf::Texture* minimap;
+	std::vector<Center*> centers;
+	std::vector<Edge*>   edges;
+	std::vector<Corner*> corners;
 
-	std::vector<sf::Texture*> lionTex;
-	std::vector<sf::Texture*> antilopeTex;
-	sf::Texture* heightmapTex;
+	int nbChunks; // Number of chunks on a row
+	double maxCoord;
 
-	std::map<sf::Vector2i, Chunk*, compChunkPos> map;
-	std::set<sf::Vector2i, compChunkPos> mapBorder;
-	Skybox* skybox;
+	double* data;
+	flann::Matrix<double> dataset; // For knn searches
+	flann::Index<flann::L2<double> >* kdIndex;
 };
 

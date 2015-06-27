@@ -25,6 +25,8 @@ int main()
     window.setActive(true);
 
     glEnable(GL_DEPTH_TEST);
+    //glCullFace (GL_BACK);
+    //glEnable (GL_CULL_FACE);
 
     Controller controller(&window);
 

@@ -1,441 +1,367 @@
 #include "map.h"
-#include <SFML/OpenGL.hpp>
+#include "utils.h"
+#include "vecUtils.h"
+#include <omp.h>
+#include <tinyxml.h>
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
+#include <sstream>
 
-#define MIN_ANTILOPE_PROX 2.f
-#define HERD_RADIUS 5.f // for 10 antilopes
+#define MAP_MAX_COORD 600.
 
-Map::Map(Camera* camera) :
-    cam(camera) {
-
-    sf::Image img;
-
-    if (!img.loadFromFile("res/terrain/sand.png")) {
-        std::cout << "Unable to open file" << std::endl;
-    }
-
-    sf::Texture* heightmapTex = new sf::Texture();
-
-    heightmapTex->loadFromImage(img);
-    heightmapTex->setSmooth(true);
+Map::Map(std::string path) :
+	nbChunks(50),
+	maxCoord(nbChunks * CHUNK_SIZE)	{
+	minimap = new sf::Texture();
 	
-    Heightmap* hmap[4];
-    
-    srand(time(NULL));
+	std::ostringstream texPath;
+    texPath << path << "map.png"; 
 
-    hmap[0] = new Heightmap(sf::Vector2i( 0, 0), rand(), heightmapTex);
-    hmap[1] = new Heightmap(sf::Vector2i( 0,-1), rand(), heightmapTex);
-    hmap[2] = new Heightmap(sf::Vector2i(-1, 0), rand(), heightmapTex);
-    hmap[3] = new Heightmap(sf::Vector2i(-1,-1), rand(), heightmapTex);
+    sf::Image mapImg;
 
-    hmap[0]->generate(std::vector<Constraint>());
-    map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
-    mapBorder.insert(hmap[0]->getChunkPos());
-
-    for (int i = 1 ; i < 4 ; i++) {
-        std::vector<Constraint> c;
-
-        for (int j = 0 ; j < i ; j++)
-            c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
-
-        hmap[i]->generate(c);
-        map.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
-        mapBorder.insert(hmap[i]->getChunkPos());
+    if (!mapImg.loadFromFile(texPath.str())) {
+        std::cout << "Unable to open file: " << path << std::endl;
     }
 
-    skybox = new Skybox("res/skybox/skybox", cam);
+    minimap->loadFromImage(mapImg);
+    minimap->setSmooth(true);
 
-    sf::Color mask(0, 151, 135);
 
-    std::vector<std::string> lionSheets;
-    lionSheets.push_back("res/lion/wait.png");
-    lionSheets.push_back("res/lion/walk.png");
-    lionSheets.push_back("res/lion/die.png");
-    lionSheets.push_back("res/lion/run.png");
-    lionSheets.push_back("res/lion/attack.png");
+    // Parse the XML file
 
-    for (unsigned int i = 0 ; i < lionSheets.size() ; i++) {
-        sf::Image img;
+    std::ostringstream xmlPath;
+    xmlPath << path << "map.xml"; 
 
-        if (!img.loadFromFile(lionSheets[i])) {
-            std::cout << "Unable to open file" << std::endl;
-        }
-
-        sf::Texture* curTex = new sf::Texture();
-
-        img.createMaskFromColor(mask);
-
-        curTex->loadFromImage(img);
-        curTex->setSmooth(true);
-
-        lionTex.push_back(curTex);
+    TiXmlDocument doc(xmlPath.str());
+    if(!doc.LoadFile()) {
+        std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
+        std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
     }
 
-    std::vector<std::string> antilopeSheets;
-    antilopeSheets.push_back("res/antilope/wait.png");
-    antilopeSheets.push_back("res/antilope/walk.png");
-    antilopeSheets.push_back("res/antilope/die.png");
-    antilopeSheets.push_back("res/antilope/run.png");
+    TiXmlHandle hDoc(&doc);
+	TiXmlElement *elem, *elem2;
+	TiXmlHandle hRoot(0);
+	TiXmlHandle hSub(0);
 
-    for (unsigned int i = 0 ; i < antilopeSheets.size() ; i++) {
-        sf::Image img;
+	elem = hDoc.FirstChildElement().Element();
+	if (!elem) return;
+	
+	int size;
+	elem->QueryIntAttribute("size", &size);
+	centers.resize(size);
 
-        if (!img.loadFromFile(antilopeSheets[i])) {
-            std::cerr << "Unable to open file" << std::endl;
-        }
+	hRoot = TiXmlHandle(elem);
 
-        sf::Texture* curTex = new sf::Texture();
+	// Centers
+	Center center;
+	std::string str;
+	int id;
+	elem = hRoot.FirstChild("centers").FirstChild().Element();
+	for ( elem; elem; elem = elem->NextSiblingElement()) {
+		elem->QueryIntAttribute("id", &center.id);
+		elem->QueryDoubleAttribute("x", &center.x);
+		elem->QueryDoubleAttribute("y", &center.y);
 
-        img.createMaskFromColor(mask);
+		elem->QueryStringAttribute("water", &str);
+		center.water = boolAttrib(str);
+		elem->QueryStringAttribute("ocean", &str);
+		center.ocean = boolAttrib(str);
+		elem->QueryStringAttribute("coast", &str);
+		center.coast = boolAttrib(str);
+		elem->QueryStringAttribute("border", &str);
+		center.border = boolAttrib(str);
 
-        curTex->loadFromImage(img);
-        curTex->setSmooth(true);
+		elem->QueryStringAttribute("biome", &str);
+		center.biome = biomeAttrib(str);
 
-        antilopeTex.push_back(curTex);
-    }
+		elem->QueryDoubleAttribute("elevation", &center.elevation);
+		elem->QueryDoubleAttribute("moisture", &center.moisture);
 
-    generateHerd(sf::Vector2f(0.f,0.f), 20);
+
+		hSub = TiXmlHandle(elem);
+		elem2 = hSub.FirstChildElement().Element();
+
+		center.centerIDs.clear();
+		center.edgeIDs.clear();
+		center.cornerIDs.clear();
+
+		for ( elem2; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			center.centerIDs.push_back(id);			
+		}
+
+		for ( elem2; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			center.edgeIDs.push_back(id);	
+		}
+
+		for ( elem2; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			center.cornerIDs.push_back(id);			
+		}
+
+		center.centers.resize(center.centerIDs.size());
+		center.edges.  resize(center.edgeIDs.size());
+		center.corners.resize(center.cornerIDs.size());
+
+		centers[center.id] = new Center(center);
+	}
+
+	// Edges
+	Edge edge;
+	elem = hRoot.FirstChild("edges").FirstChild().Element();
+	for( elem; elem; elem = elem->NextSiblingElement()) {
+		elem->QueryIntAttribute("id", &edge.id);
+		elem->QueryIntAttribute("river", &edge.river);
+		elem->QueryIntAttribute("center0", &edge.center0ID);
+		elem->QueryIntAttribute("center1", &edge.center1ID);
+
+		// If the edge touches the edge of the map, there are no ends
+		if (elem->QueryDoubleAttribute("x", &edge.x) == TIXML_NO_ATTRIBUTE) {
+			edge.mapEdge = true;
+			edge.x = 0.;
+			edge.y = 0.;
+			edge.corner0 = 0;
+			edge.corner1 = 0;
+		}
+
+		else {
+			edge.mapEdge = false;
+			elem->QueryDoubleAttribute("y", &edge.y);
+			elem->QueryIntAttribute("corner0", &edge.corner0ID);
+			elem->QueryIntAttribute("corner1", &edge.corner1ID);
+		}
+
+		if (edge.id >= edges.size())
+			edges.resize(edge.id + 1);
+		edges[edge.id] = new Edge(edge);
+	}
+
+	// Corners
+	Corner corner;
+	elem = hRoot.FirstChild("corners").FirstChild().Element();
+	for( elem; elem; elem = elem->NextSiblingElement()) {
+		elem->QueryIntAttribute("id", &corner.id);
+		elem->QueryDoubleAttribute("x", &corner.x);
+		elem->QueryDoubleAttribute("y", &corner.y);
+		
+		elem->QueryStringAttribute("water", &str);
+		corner.water = boolAttrib(str);
+		elem->QueryStringAttribute("ocean", &str);
+		corner.ocean = boolAttrib(str);
+		elem->QueryStringAttribute("coast", &str);
+		corner.coast = boolAttrib(str);
+		elem->QueryStringAttribute("border", &str);
+		corner.border = boolAttrib(str);
+
+		elem->QueryDoubleAttribute("elevation", &corner.elevation);
+		elem->QueryDoubleAttribute("moisture", &corner.moisture);
+
+		elem->QueryIntAttribute("river", &corner.river);
+		elem->QueryIntAttribute("downslope", &corner.downslope);
+
+		hSub = TiXmlHandle(elem);
+		elem2 = hSub.FirstChildElement().Element();
+
+		corner.centerIDs.clear();
+		corner.edgeIDs.clear();
+		corner.cornerIDs.clear();
+
+		for ( elem2 ; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			corner.centerIDs.push_back(id);			
+		}
+
+		for ( elem2 ; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			corner.edgeIDs.push_back(id);			
+		}
+
+		for ( elem2 ; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
+			elem2->QueryIntAttribute("id", &id);
+			corner.cornerIDs.push_back(id);			
+		}
+
+		corner.centers.resize(corner.centerIDs.size());
+		corner.edges.  resize(corner.edgeIDs.size());
+		corner.corners.resize(corner.cornerIDs.size());
+
+		if (corner.id >= corners.size())
+			corners.resize(corner.id + 1);
+		corners[corner.id] = new Corner(corner);
+	}
+
+	// Convert to game coordinates
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {		
+		centers[i]->x *= maxCoord / MAP_MAX_COORD;
+		centers[i]->y *= maxCoord / MAP_MAX_COORD;
+	}
+
+	for (unsigned int i = 0 ; i < edges.size() ; i++) {
+		if (!edges[i]->mapEdge) {			
+			edges[i]->x *= maxCoord / MAP_MAX_COORD;
+			edges[i]->y *= maxCoord / MAP_MAX_COORD;
+		}
+	}
+
+	for (unsigned int i = 0 ; i < corners.size() ; i++) {
+		corners[i]->x *= maxCoord / MAP_MAX_COORD;
+		corners[i]->y *= maxCoord / MAP_MAX_COORD;
+	}
+
+	// Set the pointers thanks to the indices
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {
+		for (unsigned int j = 0 ; j < centers[i]->centerIDs.size() ; j++) {
+			centers[i]->centers[j] = centers[centers[i]->centerIDs[j]];
+		}
+
+		for (unsigned int j = 0 ; j < centers[i]->edgeIDs.size() ; j++) {
+			centers[i]->edges[j] = edges[centers[i]->edgeIDs[j]];
+		}
+
+		for (unsigned int j = 0 ; j < centers[i]->cornerIDs.size() ; j++) {
+			centers[i]->corners[j] = corners[centers[i]->cornerIDs[j]];
+		}
+	}
+
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < edges.size() ; i++) {
+		if (!edges[i]->mapEdge) {
+			edges[i]->center0 = centers[edges[i]->center0ID];
+			edges[i]->center1 = centers[edges[i]->center1ID];
+			edges[i]->corner0 = corners[edges[i]->corner0ID];
+			edges[i]->corner1 = corners[edges[i]->corner1ID];
+		}
+	}
+
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < corners.size() ; i++) {
+		for (unsigned int j = 0 ; j < corners[i]->centerIDs.size() ; j++) {
+			corners[i]->centers[j] = centers[corners[i]->centerIDs[j]];
+		}
+
+		for (unsigned int j = 0 ; j < corners[i]->edgeIDs.size() ; j++) {
+			corners[i]->edges[j] = edges[corners[i]->edgeIDs[j]];
+		}
+
+		for (unsigned int j = 0 ; j < corners[i]->cornerIDs.size() ; j++) {
+			corners[i]->corners[j] = corners[corners[i]->cornerIDs[j]];
+		}
+	}
+
+
+	data = new double[centers.size()*2];
+
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {
+		data[2*i]   = centers[i]->x;
+		data[2*i+1] = centers[i]->y;
+	}
+
+	dataset = flann::Matrix<double>(data, centers.size(), 2);
+
+	kdIndex = new flann::Index<flann::L2<double> >(dataset, flann::KDTreeIndexParams(4));
+
+    kdIndex->buildIndex();
+}
+
+bool Map::boolAttrib(std::string str) const {
+	if (str == std::string("true"))
+		return true;
+	else
+		return false;
+}
+
+Biome Map::biomeAttrib(std::string str) const {
+	if (str == std::string("OCEAN"))
+		return OCEAN;
+	else if (str == std::string("WATER"))
+		return WATER;
+	else if (str == std::string("LAKE"))
+		return LAKE;
+	else if (str == std::string("ICE"))
+		return ICE;
+	else if (str == std::string("MARSH"))
+		return MARSH;
+	else if (str == std::string("BEACH"))
+		return BEACH;
+	else if (str == std::string("RIVER"))
+		return RIVER;
+	else if (str == std::string("SNOW"))
+		return SNOW;
+	else if (str == std::string("TUNDRA"))
+		return TUNDRA;
+	else if (str == std::string("BARE"))
+		return BARE;
+	else if (str == std::string("SCORCHED"))
+		return SCORCHED;
+	else if (str == std::string("TAIGA"))
+		return TAIGA;
+	else if (str == std::string("SHRUBLAND"))
+		return SHRUBLAND;
+	else if (str == std::string("TEMPERATE_DESERT"))
+		return TEMPERATE_DESERT;
+	else if (str == std::string("TEMPERATE_RAIN_FOREST"))
+		return TEMPERATE_RAIN_FOREST;
+	else if (str == std::string("TEMPERATE_DECIDUOUS_FOREST"))
+		return TEMPERATE_DECIDUOUS_FOREST;
+	else if (str == std::string("GRASSLAND"))
+		return GRASSLAND;
+	else if (str == std::string("TROPICAL_RAIN_FOREST"))
+		return TROPICAL_RAIN_FOREST;
+	else if (str == std::string("TROPICAL_SEASONAL_FOREST"))
+		return TROPICAL_SEASONAL_FOREST;
+	else if (str == std::string("SUBTROPICAL_DESERT"))
+		return SUBTROPICAL_DESERT;
+	else
+		return GRASSLAND;
 }
 
 Map::~Map() {
-	for(auto it = map.begin() ; it != map.end() ; ++it) {
-        //delete it->second;
-    }
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {
+		delete centers[i];
+	}
 
-    delete skybox;
-    for (unsigned int i = 0 ; i < e.size() ; i++) {
-        delete e[i];
-    }
+	for (unsigned int i = 0 ; i < edges.size() ; i++) {
+		delete edges[i];
+	}
+
+	for (unsigned int i = 0 ; i < corners.size() ; i++) {
+		delete corners[i];
+	}
+
+	delete[] data;
+	delete[] dataset.ptr();
+	delete[] kdIndex;
 }
 
-void Map::generateNeighbourChunks(sf::Vector2i pos) {
-    if (mapBorder.find(pos) != mapBorder.end()) {
-        sf::Vector2i tmp1;
-        for (int i = 0; i < 4; i++) {
-            tmp1 = neighbour(pos,i);
+Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
+	/*double minDist = CHUNK_SIZE * nbChunks;
+	double dist;
+	Center* minCenter;
 
-            if (map.find(tmp1) == map.end()) { // We only add the neighbour if it's not already generated
-                sf::Vector2i tmp2;
-                std::vector<Constraint> c;
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {
+		dist = vu::norm(sf::Vector2<double>(centers[i]->x, centers[i]->y) - pos);
 
-                for (int j = 0 ; j < 4 ; j++) { // Get constraints
-                    tmp2 = neighbour(tmp1,j);
-                    std::map<sf::Vector2i, Chunk*>::iterator it = map.find(tmp2);
+		if (dist <= minDist) {
+			minDist = dist;
+			minCenter = centers[i];
+		}
+	}
 
-                    if (it != map.end()) {
-                        c.push_back(it->second->getConstraint(tmp1));
-                    }
-                }
+	return minCenter;*/
 
-                Heightmap* hmap = new Heightmap(sf::Vector2i(tmp1), rand(), heightmapTex);
-                hmap->generate(c);
-                map.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
-                mapBorder.insert(hmap->getChunkPos());
-            }
-        }
+	double queryData[2];
+	queryData[0] = pos.x;
+	queryData[1] = pos.y;
 
-        mapBorder.erase(pos);
-    }
+	flann::Matrix<double> query(queryData, 1, 2);
+
+    std::vector<std::vector<int> > indices;
+    std::vector<std::vector<double> > dists;
+
+    kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(centers.size()));
+
+	return centers[indices[0][0]];
 }
-
-sf::Vector2i Map::neighbour(sf::Vector2i pos, int index) const {
-    switch(index) {
-        case 0:
-            return sf::Vector2i(pos.x-1,pos.y);
-            break;
-        case 1:
-            return sf::Vector2i(pos.x+1,pos.y);
-            break;
-        case 2:
-            return sf::Vector2i(pos.x,pos.y-1);
-            break;
-        case 3:
-            return sf::Vector2i(pos.x,pos.y+1);
-            break;
-    }
-}
-
-void Map::update(sf::Time elapsed) {
-    for (auto it = mapBorder.begin() ; it != mapBorder.end() ; ++it) {
-        if (map[(*it)]->alreadyDisplayed())
-            generateNeighbourChunks(*it);
-    }
-
-    for (unsigned int i = 0 ; i < e.size() ; i++) {
-        if (e[i]->getAbstractType() != igE) {
-            igMovingElement* igM = (igMovingElement*) e[i];
-            if (igM->getMovingType() == PREY) {
-                Antilope* atlp = (Antilope*) igM;
-                atlp->updateState(e);
-            }
-
-            else if (igM->getMovingType() == HUNTER) {
-                Lion* lion = (Lion*) igM;
-                lion->kill(e);
-            }
-        }
-    }
-
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    GLdouble projection[16];
-    glGetDoublev(GL_PROJECTION_MATRIX,projection);
-    GLdouble modelview[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
-
-    for (unsigned int i = 0 ; i < e.size() ; i++) {
-        e[i]->update(elapsed, cam->getTheta()); // Choose the right sprite and update pos
-
-        int chunkPosX = e[i]->getPos().x < 0 ? e[i]->getPos().x / CHUNK_SIZE - 1 : e[i]->getPos().x / CHUNK_SIZE;
-        int chunkPosY = e[i]->getPos().y < 0 ? e[i]->getPos().y / CHUNK_SIZE - 1 : e[i]->getPos().y / CHUNK_SIZE;
-
-        std::cout << e[i]->getPos().x - CHUNK_SIZE * chunkPosX << " " << e[i]->getPos().y - CHUNK_SIZE * chunkPosY << std::endl;
-
-        // No test yet to see if the element can move to its new pos (no collision)
-        float newHeight =   map[sf::Vector2i(chunkPosX, chunkPosY)]
-                            ->getHeight(e[i]->getPos().x - CHUNK_SIZE * chunkPosX,
-                                        e[i]->getPos().y - CHUNK_SIZE * chunkPosY);
-
-        // Calculate new corners
-        sf::Vector3f corners3[4];
-
-        float width = e[i]->getH() * e[i]->getCurrentSprite().width / e[i]->getCurrentSprite().height;
-
-        corners3[0] = sf::Vector3f( e[i]->getPos().x + sin(cam->getTheta()*M_PI/180.)*width/2,
-                                    newHeight + e[i]->getH(),
-                                    e[i]->getPos().y - cos(cam->getTheta()*M_PI/180.)*width/2);
-            
-
-        corners3[1] = sf::Vector3f( e[i]->getPos().x - sin(cam->getTheta()*M_PI/180.)*width/2,
-                                    newHeight + e[i]->getH(),
-                                    e[i]->getPos().y + cos(cam->getTheta()*M_PI/180.)*width/2);
-            
-
-        corners3[2] = sf::Vector3f( e[i]->getPos().x - sin(cam->getTheta()*M_PI/180.)*width/2,
-                                    newHeight,
-                                    e[i]->getPos().y + cos(cam->getTheta()*M_PI/180.)*width/2);
-            
-
-        corners3[3] = sf::Vector3f( e[i]->getPos().x + sin(cam->getTheta()*M_PI/180.)*width/2,
-                                    newHeight,
-                                    e[i]->getPos().y - cos(cam->getTheta()*M_PI/180.)*width/2);
-
-        e[i]->set3DCorners(corners3);
-
-        // Calculate their projections
-
-        GLdouble left, top, right, bot, depth;
-        GLdouble trash;
-
-        gluProject(corners3[0].x,corners3[0].y,corners3[0].z,modelview,projection,viewport,&left,  &top,   &trash);
-        gluProject(corners3[1].x,corners3[1].y,corners3[1].z,modelview,projection,viewport,&right, &trash, &trash);
-        gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &depth);
-
-        top = viewport[3]-top;
-        bot = viewport[3]-bot;
-
-        sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
-
-        e[i]->set2DCorners(cornersRect);
-        e[i]->setDepth(depth);
-
-    }
-
-    sortE();
-}
-
-void Map::render() const {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // Skybox
-
-    glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-    glDepthMask(GL_FALSE);
-    skybox->draw();
-    glDepthMask(GL_TRUE);
-    glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-    
-    // Heightmap
-
-    for(auto it = map.begin() ; it != map.end() ; ++it) {
-        if (it->second->calculateFrustum(cam)) {
-            glMatrixMode(GL_MODELVIEW);
-            glPushMatrix();
-
-            glTranslatef(CHUNK_SIZE * it->first.x, 0.0f, CHUNK_SIZE * it->first.y);
-        
-            it->second->draw();
-            
-        
-            glPopMatrix();
-        }
-        else {
-            //std::cout << "Hidden: " << it->second->getChunkPos().x << " " << it->second->getChunkPos().y << std::endl;
-        }
-
-    }
-
-    // igElements
-
-    glEnable (GL_TEXTURE_2D);
-    glEnable (GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    for (unsigned int i = 0 ; i < e.size() ; i++) {
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        e[i]->draw();
-        glPopMatrix();
-    }
-
-    glDisable(GL_BLEND | GL_TEXTURE_2D);
-}
-
-void Map::fusion(const int begin1, const int end1,const int end2) {
-   int begin2 = end1+1;
-   int count1 = begin1;
-   int count2 = begin2;
-
-   std::vector<igElement*> aux(end1 - begin1 + 1);
-
-   for(int i = begin1; i <= end1; i++)
-      aux[i-begin1] = e[i];
-
-   for(int i = begin1; i <= end2; i++) {
-      if(count1 == begin2)
-         break;
-
-      else if(count2 == (end2 + 1)) {
-         e[i] = aux[count1-begin1];
-         count1++;
-      }
-      else if(aux[count1-begin1]->getDepth() > e[count2]->getDepth()) {
-         e[i] = aux[count1-begin1];
-         count1++;
-      }
-      else {
-         e[i] = e[count2];
-         count2++;
-      }
-   }
-}
-
-void Map::sortAux(const int start, const int end) {
-   if(start!=end) {
-      int mid = (start+end)/2;
-      sortAux(start, mid);
-      sortAux(mid+1, end);
-      fusion(start, mid, end);
-   }
-}
-
-void Map::sortE() {
-    if (e.size() > 0)
-        sortAux(0, e.size()-1);
-}
-
-void Map::select(sf::IntRect rect, bool add) {    
-    if (!add)
-        sel.clear();
-
-    for (unsigned int i = 0 ; i < e.size() ; i++) {
-        if (sel.find(e[i]) == sel.end()) { // e[i] is not selected yet, we can bother to calculate
-            sf::IntRect c = e[i]->get2DCorners();
-
-            int centerX, centerY;
-
-            centerX = c.left + c.width / 2;
-            centerY = c.top + c.height / 2;
-
-            if (rect.contains(centerX, centerY)) {
-                if (e[i]->getAbstractType() == CTRL)
-                    sel.insert(e[i]);
-            }
-
-            else if (   c.contains(rect.left, rect.top) ||
-                        c.contains(rect.left + rect.width, rect.top) ||
-                        c.contains(rect.left + rect.width, rect.top + rect.height) ||
-                        c.contains(rect.left, rect.top + rect.height)  ) {
-                if (e[i]->getAbstractType() == CTRL)
-                    sel.insert(e[i]);   
-            }
-        }
-    }
-}
-
-void Map::moveSelection(sf::Vector2i screenTarget) {
-    sf::Vector2f target = get2DCoord(screenTarget);
-
-    for(auto it = sel.begin(); it != sel.end(); ++it) {
-        if ((*it)->getAbstractType() == CTRL) {
-            Controllable* tmp = (Controllable*) *it;
-            tmp->setTarget(target);
-        }
-    }
-}
-
-void Map::addLion(sf::Vector2i screenTarget) {
-    e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(lionTex, "res/lion/animInfo.xml")));
-}
-
-void Map::generateHerd(sf::Vector2f pos, int count) {
-    srand(time(NULL));
-    float r, theta;
-    sf::Vector2f p, diff;
-    bool add;
-
-    std::vector<Antilope*> tmp;
-
-    for (int i = 0 ; i < count ; i++) {
-        add = true;
-        r = sqrt((float) rand() / (float) RAND_MAX) * HERD_RADIUS * sqrt(count);
-        theta = (float) rand() / (float) RAND_MAX * 2*M_PI;
-
-        p.x = pos.x + r*cos(theta);
-        p.y = pos.y + r*sin(theta);
-
-        for (int j = 0 ; j < i ; j++) {
-            diff = tmp[j]->getPos() - p;
-            
-            if (diff.x * diff.x + diff.y * diff.y < MIN_ANTILOPE_PROX) {
-                i--;
-                add = false;
-            }
-        }
-
-        if (add) {
-            tmp.push_back(new Antilope(p, AnimationManager(antilopeTex, "res/antilope/animInfo.xml")));
-        }
-    }
-
-    for (int i = 0 ; i < count ; i++) {
-        e.push_back(tmp[i]);
-    }
-}
-
-sf::Vector2f Map::get2DCoord(sf::Vector2i screenTarget) const {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    GLdouble projection[16];
-    glGetDoublev(GL_PROJECTION_MATRIX,projection);
-    GLdouble modelview[16];
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
-    GLdouble winX,winY;
-    
-    screenTarget.y=viewport[3]-screenTarget.y; // Inverted coordinates
-    
-    winX=(double)screenTarget.x;
-    winY=(double)screenTarget.y;
-
-    GLfloat d;
-    glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
-
-    double x,y,z;
-    gluUnProject(winX,winY,d,modelview,projection,viewport,&x,&y,&z);
-
-    return sf::Vector2f(x,z);
-}
-
 

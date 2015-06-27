@@ -5,6 +5,7 @@
 #include <SFML/OpenGL.hpp>
 
 #include "camera.h"
+#include "game.h"
 #include "map.h"
 
 
@@ -23,6 +24,8 @@ private:
 	sf::RectangleShape rectSelect;
 	sf::Font font;
 	sf::Text fpsCounter;
+	sf::Sprite minimap;
+	Map map;
 
 	bool running;
 	sf::Clock frameClock;
@@ -30,6 +33,6 @@ private:
 	sf::RenderWindow* window;
 
 	Camera camera;
-	Map map;
+	Game game;
 };
 

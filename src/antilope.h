@@ -7,9 +7,10 @@ enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
 
 class Antilope : public igMovingElement {
 public:
-	Antilope(sf::Vector2f position, AnimationManager _graphics);
+	Antilope(sf::Vector2<double> position, AnimationManager _graphics);
 	virtual MovingType getMovingType() const {return PREY;}
 
+	// React to the environment
 	void updateState(std::vector<igElement*> neighbors);
 
 	void beginIdle();

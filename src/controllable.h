@@ -6,13 +6,14 @@
 
 class Controllable : public igMovingElement {
 public:
-	Controllable(sf::Vector2f position, AnimationManager _graphics);
+	Controllable(sf::Vector2<double> position, AnimationManager _graphics);
 
 	inline virtual abstractType getAbstractType() const {return CTRL;}
 
 	virtual void update(sf::Time elapsed, float theta);
-	virtual void setTarget(sf::Vector2f t);
+	virtual void setTarget(sf::Vector2<double> t);
 
-	sf::Vector2f target;
+protected:
+	sf::Vector2<double> target;
 
 };

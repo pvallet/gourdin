@@ -9,12 +9,30 @@ static float norm(const sf::Vector2f& v) {
 	return sqrt(v.x*v.x + v.y*v.y);
 }
 
+static double norm(const sf::Vector2<double>& v) {
+  return sqrt(v.x*v.x + v.y*v.y);
+}
+
+static float norm(const sf::Vector3f& v) {
+  return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+}
+
 static float dot(const sf::Vector2f& u, const sf::Vector2f& v) {
 	return u.x*v.x + u.y*v.y;
 }
 
+static double dot(const sf::Vector2<double>& u, const sf::Vector2<double>& v) {
+  return u.x*v.x + u.y*v.y;
+}
+
 static float dot(const sf::Vector3f& u, const sf::Vector3f& v) {
     return u.x*v.x + u.y*v.y + u.z*v.z;
+}
+
+static sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v) {
+  return sf::Vector3f(u.y * v.z - u.z * v.y,
+                      u.z * v.x - u.x * v.z,
+                      u.x * v.y - u.y * v.x);
 }
 
 static sf::Vector3f carthesian(float r, float theta, float phi) {
@@ -38,6 +56,21 @@ static float angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1
 
     else {
     	float nDot = dot(u,v) / lengths;
+
+        return sign * acos(nDot) * 180. / M_PI;
+    }
+}
+
+static double angle(const sf::Vector2<double>& u, const sf::Vector2<double>& v) { // returns -1 if one is the vector (0,0), else value in degrees
+  int sign = u.x * v.y - u.y * v.x >= 0. ? 1 : -1; // Cross >= 0
+    double lengths = norm(u)*norm(v);
+
+    if (lengths == 0.) {
+        return -1.f;
+    }
+
+    else {
+      double nDot = dot(u,v) / lengths;
 
         return sign * acos(nDot) * 180. / M_PI;
     }

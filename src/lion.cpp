@@ -2,17 +2,17 @@
 #include "vecUtils.h"
 #include <iostream>
 
-Lion::Lion(sf::Vector2f position, AnimationManager _graphics) :
+Lion::Lion(sf::Vector2<double> position, AnimationManager _graphics) :
 	Controllable(position, _graphics),
 	stamina(100),
 	catchBreathSpeed(25.),
-	loseBreathSpeed(15.),
+	loseBreathSpeed(10.),
 	speedWalking(7.),
 	speedRunning(15.),
 	range(5.),
 	status(WAITING) {
 
-	height = 3.f;
+	height = 5.f;
 	speed = speedWalking;
 	animAttack = graphics.getAnimationTime(ATTACK);
 }
@@ -79,7 +79,7 @@ void Lion::beginAttacking() {
 	}
 }
 
-void Lion::setTarget(sf::Vector2f t) {
+void Lion::setTarget(sf::Vector2<double> t) {
 	Controllable::setTarget(t);
 	if (status == WAITING) {
 		beginWalking();

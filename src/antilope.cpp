@@ -1,17 +1,20 @@
 #include "antilope.h"
 #include "vecUtils.h"
+#include "utils.h"
 #include <cmath>
 #include <iostream>
 
-Antilope::Antilope(sf::Vector2f position, AnimationManager _graphics) :
+Antilope::Antilope(sf::Vector2<double> position, AnimationManager _graphics) :
 	igMovingElement(position, _graphics),
 	lineOfSight(50.),
-	repulsionRadius(3.),
-	orientationRadius(7.),
-	attractionRadius(40.),
+	repulsionRadius(6.),
+	orientationRadius(10.),
+	attractionRadius(50.),
 	speedWalking(5.),
-	speedRunning(10.),
+	speedRunning(11.),
 	status(IDLE) {
+
+	height = 5.;
 
 	averageRecovering = sf::seconds(3.f);
 	averageEating = sf::seconds(7.f);
@@ -45,20 +48,20 @@ void Antilope::beginRecovering() {
 
 sf::Time Antilope::generateTimePhase(sf::Time average) const {
 	return 	average + 
-			sf::seconds((float) rand() / (float) RAND_MAX * average.asSeconds() * 0.8f)
+			sf::seconds(randomF() * average.asSeconds() * 0.8f)
 			- sf::seconds(average.asSeconds() * 0.4f);
 }
 
 void Antilope::updateState(std::vector<igElement*> neighbors) {
 	// Get info
 
-	sf::Vector2f closestRep;
-	sf::Vector2f baryAttract, baryFlee, meanDir;
+	sf::Vector2<double> closestRep;
+	sf::Vector2<double> baryAttract, baryFlee, meanDir;
 	int nbDir = 0;
 	int nbAttract = 0;
 	int nbFlee = 0;
-	float distance;
-	float minRepDst = repulsionRadius + 0.1f;
+	double distance;
+	double minRepDst = repulsionRadius + 0.1f;
 	igMovingElement* igM;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
@@ -105,7 +108,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 				beginFleeing();
 
 			if (nbAttract != 0 && nbAttract <= 2) {
-				direction = baryAttract / (float) nbAttract - pos;
+				direction = baryAttract / (double) nbAttract - pos;
 				direction /= vu::norm(direction);
 			}
 
@@ -125,7 +128,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 					}
 
 					else {
-						float theta = (float) rand() / (float) RAND_MAX * 2. * M_PI;
+						float theta = randomD() * 2. * M_PI;
 						direction.x = cos(theta);
 						direction.y = sin(theta);
 					}
@@ -148,9 +151,9 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 			}
 
 			else if (nbDir != 0) {
-				sf::Vector2f zbla = meanDir / (float) nbDir;
+				sf::Vector2<double> zbla = meanDir / (double) nbDir;
 				if (zbla.x != 0 && zbla.y != 0) {
-					direction = meanDir / (float) nbDir;
+					direction = meanDir / (double) nbDir;
 					direction /= vu::norm(direction);
 				}
 
@@ -161,18 +164,18 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 			}
 
 			else if (nbAttract != 0) {
-				direction = baryAttract / (float) nbAttract - pos;
+				direction = baryAttract / (double) nbAttract - pos;
 				direction /= vu::norm(direction);
 			}
 
 			else if (nbFlee != 0) {
-				direction = pos - baryFlee / (float) nbFlee;
+				direction = pos - baryFlee / (double) nbFlee;
 				direction /= vu::norm(direction);
 			}
 
 			// Take into account the hunter for half as much
 			if (nbFlee != 0) {
-				direction = pos - baryFlee / (float) nbFlee;
+				direction = pos - baryFlee / (double) nbFlee;
 				direction /= vu::norm(direction);
 			}
 
@@ -200,9 +203,9 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 			}
 
 			else if (nbDir != 0) {
-				sf::Vector2f zbla = meanDir / (float) nbDir;
+				sf::Vector2<double> zbla = meanDir / (double) nbDir;
 				if (zbla.x != 0 && zbla.y != 0) {
-					direction = meanDir / (float) nbDir;
+					direction = meanDir / (double) nbDir;
 					direction /= vu::norm(direction);
 				}
 
@@ -213,7 +216,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 			}
 
 			else if (nbAttract != 0) {
-				direction = baryAttract / (float) nbAttract - pos;
+				direction = baryAttract / (double) nbAttract - pos;
 				direction /= vu::norm(direction);
 			}
 		}

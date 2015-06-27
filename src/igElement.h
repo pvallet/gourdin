@@ -11,34 +11,31 @@ enum abstractType {igE, igME, CTRL};
 
 class igElement {
 public:
-	igElement(sf::Vector2f position, AnimationManager _graphics);
+	igElement(sf::Vector2<double> position);
 	virtual ~igElement();
 	inline virtual abstractType getAbstractType() const {return igE;}
 
 	virtual void update(sf::Time elapsed, float theta);
 	void set3DCorners(sf::Vector3f nCorners[4]);
 	void set2DCorners(sf::IntRect nCorners) {corners2 = nCorners;}
-	void setDepth(float nDepth) {depth = nDepth;}
+	inline void setDepth(float nDepth) {depth = nDepth;}
+	inline bool setVisible(bool nVisible) {visible = nVisible;}
 
-	inline virtual float getMaxHeightFactor() {return graphics.getMaxHeightFactor();}
-	virtual void launchAnimation (ANM_TYPE type);
-
-	void draw() const;
+	virtual void draw() const = 0;
 
 	// Getters
 
-	inline sf::Vector2f getPos() const {return pos;}
+	inline sf::Vector2<double> getPos() const {return pos;}
 	inline float getOrientation() const {return orientation;}
 	inline float getH() const {return height;}
-	inline const sf::Texture* getTexture() const {return graphics.getTexture();}
-	inline sf::IntRect getCurrentSprite() const {return graphics.getCurrentSprite();}
+	inline float getW() const {return height * (float) (coord2D[2]-coord2D[0]) / (float) (coord2D[5]-coord2D[1]);}
 	inline sf::IntRect get2DCorners() const {return corners2;}
 	inline float getDepth() const {return depth;}
+	inline bool getVisible() const {return visible;}
 
 protected:
-	sf::Vector2f pos;
+	sf::Vector2<double> pos;
 	float height;
-	AnimationManager graphics;
 
 	sf::Vector3f* corners3; // Starting with top left, then clockwise
 	sf::IntRect corners2;
@@ -48,6 +45,7 @@ protected:
 	void setOrientation(float nOrientation);
 
 	float depth; // Distance to camera
+	bool visible;
 
 	GLuint vbo;
 	GLuint ibo;
