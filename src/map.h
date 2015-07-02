@@ -88,6 +88,7 @@ public:
 	inline double getMaxCoord() const {return maxCoord;}
 
 	Center* getClosestCenter(sf::Vector2<double> pos) const;
+	std::vector<Center*> getCentersInChunk(sf::Vector2i chunkPos) const;
 
 private:
 	bool boolAttrib(std::string str) const;

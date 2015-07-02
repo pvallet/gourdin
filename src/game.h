@@ -51,7 +51,7 @@ private:
 	sf::Vector2i neighbour(sf::Vector2i pos, int index) const;
 	void generateHeightmap(sf::Vector2i pos);
 	sf::Vector2<double> get2DCoord(sf::Vector2i screenTarget) const;
-	void generateForests();
+	void generateForests(sf::Vector2i pos);
 
 	std::set<igElement*> sel; // Selection
 	std::set<igElement*, compDepth> vis; // Visible

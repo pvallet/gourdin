@@ -41,6 +41,7 @@ Game::Game(Camera* camera, Map* _map) :
         hmap[i]->generate(c);
         terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
         terrainBorder.insert(hmap[i]->getChunkPos());
+        generateForests(hmap[i]->getChunkPos());
     }
 
     skybox = new Skybox("res/skybox/skybox", cam);
@@ -94,15 +95,7 @@ Game::Game(Camera* camera, Map* _map) :
         antilopeTex.push_back(curTex);
     }
 
-    generateForests();
-
     generateHerd(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
-
-    //for (int i = 0 ; i < map->getCenters().size() ; i++)
-    //    e.push_back(new Lion(sf::Vector2f(map->getCenters()[i]->x, map->getCenters()[i]->y), AnimationManager(lionTex, "res/animals/lion/animInfo.xml")));
-
-    //for (int i = 0 ; i < map->getCorners().size() ; i++)
-    //    e.push_back(new Lion(sf::Vector2f(map->getCorners()[i]->x, map->getCorners()[i]->y), AnimationManager(lionTex, "res/animals/lion/animInfo.xml")));
 }
 
 Game::~Game() {
@@ -159,6 +152,7 @@ void Game::generateNeighbourChunks(sf::Vector2i pos) {
 
                 else {
                     generateHeightmap(tmp);
+                    generateForests(tmp);
                 }
             }
         }
@@ -409,7 +403,7 @@ void Game::generateHerd(sf::Vector2f pos, int count) {
         p.x = pos.x + r*cos(theta);
         p.y = pos.y + r*sin(theta);
 
-        for (int j = 0 ; j < i ; j++) {
+        for (int j = 0 ; j < tmp.size() ; j++) {
             diff = tmp[j]->getPos() - p;
             
             if (diff.x * diff.x + diff.y * diff.y < MIN_ANTILOPE_PROX) {
@@ -428,43 +422,45 @@ void Game::generateHerd(sf::Vector2f pos, int count) {
     }
 }
 
-void Game::generateForests() {
+void Game::generateForests(sf::Vector2i pos) {
     srand(time(NULL));
     double r, theta;
-    sf::Vector2<double> p, diff, center;
+    sf::Vector2<double> p, diff;
     bool add;
     int count, nbTrees;
 
     std::vector<Tree*> tmp;
 
-    for (unsigned int i = 0 ; i < map->getCenters().size() ; i++) {
-        if (map->getCenters()[i]->biome >= 11) { // No forests in other biomes
+    std::vector<Center*> centers = map->getCentersInChunk(pos);
+
+    for (unsigned int i = 0 ; i < centers.size() ; i++) {
+        if (centers[i]->biome >= 11) { // No forests in other biomes
             count = 0;
             tmp.clear();
-            nbTrees = treeTexManager.getExtension(map->getCenters()[i]->biome);
+            nbTrees = treeTexManager.getExtension(centers[i]->biome);
             nbTrees *= 1.5;
 
             for (int j = 0 ; j < nbTrees ; j++) {
                 add = true;
-                r = sqrt(randomD()) * treeTexManager.getExtension(map->getCenters()[i]->biome) * sqrt(nbTrees);
+                r = sqrt(randomD()) * treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
                 theta = randomD() * 2*M_PI;
 
-                p.x = map->getCenters()[i]->x + r*cos(theta);
-                p.y = map->getCenters()[i]->y + r*sin(theta);
+                p.x = centers[i]->x + r*cos(theta);
+                p.y = centers[i]->y + r*sin(theta);
 
-                for (int k = 0 ; k < j ; k++) {
+                for (int k = 0 ; k < tmp.size() ; k++) {
                     diff = tmp[k]->getPos() - p;
                     
-                    if (diff.x * diff.x + diff.y * diff.y < treeTexManager.getDensity(map->getCenters()[i]->biome) ||
-                        map->getClosestCenter(p)->biome != map->getCenters()[i]->biome) {
+                    if (diff.x * diff.x + diff.y * diff.y < treeTexManager.getDensity(centers[i]->biome) ||
+                        map->getClosestCenter(p)->biome != centers[i]->biome) {
                         add = false;
                     }
                 }
 
                 if (add) {
                     count++;
-                    tmp.push_back(new Tree(p, &treeTexManager, map->getCenters()[i]->biome,
-                        (int) ((randomD() - 0.01f) * treeTexManager.getNBTrees(map->getCenters()[i]->biome))));
+                    tmp.push_back(new Tree(p, &treeTexManager, centers[i]->biome,
+                        (int) ((randomD() - 0.01f) * treeTexManager.getNBTrees(centers[i]->biome))));
                 }
             }
 

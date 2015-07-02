@@ -336,21 +336,6 @@ Map::~Map() {
 }
 
 Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
-	/*double minDist = CHUNK_SIZE * nbChunks;
-	double dist;
-	Center* minCenter;
-
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {
-		dist = vu::norm(sf::Vector2<double>(centers[i]->x, centers[i]->y) - pos);
-
-		if (dist <= minDist) {
-			minDist = dist;
-			minCenter = centers[i];
-		}
-	}
-
-	return minCenter;*/
-
 	double queryData[2];
 	queryData[0] = pos.x;
 	queryData[1] = pos.y;
@@ -363,5 +348,33 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
     kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(centers.size()));
 
 	return centers[indices[0][0]];
+}
+
+std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
+	double queryData[2];
+	queryData[0] = chunkPos.x * CHUNK_SIZE + CHUNK_SIZE / 2;
+	queryData[1] = chunkPos.y * CHUNK_SIZE + CHUNK_SIZE / 2;
+
+	flann::Matrix<double> query(queryData, 1, 2);
+
+    std::vector<std::vector<int> > indices;
+    std::vector<std::vector<double> > dists;
+
+    // Flann weirdly expects the square of the radius
+    kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(centers.size()));
+
+    std::vector<Center*> res;
+    for (unsigned int i = 0 ; i < indices[0].size() ; i++) {
+
+    	if (centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
+    		centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
+    		centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
+    		centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
+
+    		res.push_back(centers[indices[0][i]]);
+    	}
+    }
+
+	return res;
 }
 
