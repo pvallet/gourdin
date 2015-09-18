@@ -4,6 +4,7 @@
 #include "igMovingElement.h"
 
 enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
+enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 class Antilope : public igMovingElement {
 public:
@@ -22,6 +23,7 @@ private:
 	sf::Time generateTimePhase(sf::Time average) const;
 
 	float lineOfSight;
+	float lineOfSightStandard; // * 1 for normal line of sight, * 1.1 for hysteresis
 
 	float repulsionRadius; // r < o < a
 	float orientationRadius;
@@ -30,7 +32,8 @@ private:
 	float speedWalking;
 	float speedRunning;
 
-	AntilopeStatus status;
+	AntilopeStatus aStatus;
+	BoidStatus bStatus; // To control hysteresis
 
 	sf::Time averageRecovering;
 	sf::Time averageEating;

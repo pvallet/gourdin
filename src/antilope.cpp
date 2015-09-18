@@ -6,15 +6,17 @@
 
 Antilope::Antilope(sf::Vector2<double> position, AnimationManager _graphics) :
 	igMovingElement(position, _graphics),
-	lineOfSight(50.),
-	repulsionRadius(6.),
-	orientationRadius(10.),
+	lineOfSightStandard(50.),
+	repulsionRadius(8.),
+	orientationRadius(15.),
 	attractionRadius(50.),
 	speedWalking(5.),
 	speedRunning(11.),
-	status(IDLE) {
+	aStatus(IDLE),
+	bStatus(ORIENTATION) {
 
 	height = 5.;
+	lineOfSight = lineOfSightStandard;
 
 	averageRecovering = sf::seconds(3.f);
 	averageEating = sf::seconds(7.f);
@@ -26,21 +28,24 @@ Antilope::Antilope(sf::Vector2<double> position, AnimationManager _graphics) :
 
 
 void Antilope::beginIdle() {
-	status = IDLE;
+	lineOfSight = lineOfSightStandard;
+	aStatus = IDLE;
 	speed = 0.f;
 	moving = false;
 	launchAnimation(WAIT);
 }
 
 void Antilope::beginFleeing() {
-	status = FLEEING;
+	lineOfSight = lineOfSightStandard * 1.2;
+	aStatus = FLEEING;
 	speed = speedRunning;
 	moving = true;
 	launchAnimation(RUN);
 }
 
 void Antilope::beginRecovering() {
-	status = RECOVERING;
+	lineOfSight = lineOfSightStandard * 1.1;
+	aStatus = RECOVERING;
 	speed = speedWalking;
 	moving = true;
 	launchAnimation(WALK);
@@ -61,7 +66,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 	int nbAttract = 0;
 	int nbFlee = 0;
 	double distance;
-	double minRepDst = repulsionRadius + 0.1f;
+	double minRepDst = repulsionRadius;
 	igMovingElement* igM;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
@@ -102,7 +107,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 
 	// Interpret the info
 
-	switch (status) {
+	switch (aStatus) {
 		case IDLE:
 			if (nbFlee != 0)
 				beginFleeing();
@@ -122,7 +127,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 				}
 
 				else {
-					if (minRepDst != repulsionRadius + 0.1f) {
+					if (minRepDst != repulsionRadius) { // There is someone inside the repulsion radius
 						direction = pos - closestRep;
 						direction /= vu::norm(direction);
 					}
@@ -145,7 +150,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 
 		case FLEEING: {
 			// Take into account the closest elements
-			if (minRepDst != repulsionRadius + 0.1f) {
+			if (minRepDst != repulsionRadius) {
 				direction = pos - closestRep;
 				direction /= vu::norm(direction);
 			}
@@ -197,12 +202,14 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 				beginPhase.restart();
 			}
 
-			else if (minRepDst != repulsionRadius + 0.1f) {
+			else if (minRepDst != repulsionRadius &&
+					(bStatus == REPULSION || vu::norm(pos-closestRep) < repulsionRadius * 0.8) ) {
 				direction = pos - closestRep;
 				direction /= vu::norm(direction);
+				bStatus = REPULSION;
 			}
 
-			else if (nbDir != 0) {
+			else if (nbDir != 0) { // TODO : Hysteresis
 				sf::Vector2<double> zbla = meanDir / (double) nbDir;
 				if (zbla.x != 0 && zbla.y != 0) {
 					direction = meanDir / (double) nbDir;
@@ -213,11 +220,15 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 					direction.x = 1.;
 					direction.y = 0.;
 				}
+
+				bStatus = ORIENTATION;
 			}
 
-			else if (nbAttract != 0) {
+			else if (nbAttract != 0 && 
+					(bStatus == ATTRACTION || vu::norm(baryAttract / (double) nbAttract - pos) < attractionRadius * 0.8) ) {
 				direction = baryAttract / (double) nbAttract - pos;
 				direction /= vu::norm(direction);
+				bStatus = ATTRACTION;
 			}
 		}
 		break;

@@ -6,10 +6,17 @@ varying vec3 N; // fragment-wise normal
 
 uniform vec3 camPos;
 
-uniform sampler2D tex;
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
+uniform sampler2D tex4;
+uniform sampler2D tex5;
+uniform sampler2D tex6;
+uniform sampler2D tex7;
 
 void main (void) {
-    gl_FragColor = texture2D(tex, gl_TexCoord[0].st);
+    gl_FragColor = texture2D(tex0, gl_TexCoord[0].st);
     
     vec3 p = vec3 (gl_ModelViewMatrix * P);
     vec3 n = normalize (gl_NormalMatrix * N);
