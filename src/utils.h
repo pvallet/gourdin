@@ -12,18 +12,13 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			TROPICAL_RAIN_FOREST, TROPICAL_SEASONAL_FOREST, SUBTROPICAL_DESERT};
 
 
-static double randomD() {
-	return (double) rand() / (double) RAND_MAX;
-}
+double randomD();
 
-static float randomF() {
-	return (float) rand() / (float) RAND_MAX;
-}
+float randomF();
 
 struct compChunkPos {
-    bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const
-    {
-        return a.x != b.x ? a.x < b.x : a.y < b.y;
-    }
+  bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const
+  {
+    return a.x != b.x ? a.x < b.x : a.y < b.y;
+  }
 };
-

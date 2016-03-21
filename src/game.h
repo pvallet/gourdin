@@ -24,10 +24,10 @@
 #include "utils.h"
 
 struct compDepth {
-    bool operator()(const igElement* a, const igElement* b) const
-    {
-        return a->getDepth() >= b->getDepth();
-    }
+  bool operator()(const igElement* a, const igElement* b) const
+  {
+    return a->getDepth() >= b->getDepth();
+  }
 };
 
 class Game {
@@ -69,4 +69,3 @@ private:
 	std::set<sf::Vector2i, compChunkPos> terrainBorder;
 	Skybox* skybox;
 };
-

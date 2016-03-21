@@ -18,33 +18,33 @@ igElement::igElement(sf::Vector2<double> position) :
 	orientation = randomF() * 360.f;
 
 	vertices = new float[12];
-    coord2D = new int[8];
-    indices = new GLuint[4];
+  coord2D = new int[8];
+  indices = new GLuint[4];
 
-    for (int i = 0 ; i < 12 ; i++)
-        vertices[i] = 0.f;
+  for (int i = 0 ; i < 12 ; i++)
+    vertices[i] = 0.f;
 
-    for (int i = 0 ; i < 8 ; i++)
-        coord2D[i] = 0;
+  for (int i = 0 ; i < 8 ; i++)
+    coord2D[i] = 0;
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferData(   GL_ARRAY_BUFFER, (12*sizeof *vertices) + (8*sizeof *coord2D), NULL, GL_STREAM_DRAW);
+  glBufferData(   GL_ARRAY_BUFFER, (12*sizeof *vertices) + (8*sizeof *coord2D), NULL, GL_STREAM_DRAW);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    for (int i = 0 ; i < 4 ; i++) {
-        indices[i] = i;
-    }
+  for (int i = 0 ; i < 4 ; i++) {
+    indices[i] = i;
+  }
 
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glGenBuffers(1, &ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof *indices, NULL, GL_STATIC_DRAW);    
-    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, 4 * sizeof *indices, indices);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof *indices, NULL, GL_STATIC_DRAW);
+  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, 4 * sizeof *indices, indices);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 igElement::~igElement() {
@@ -55,7 +55,7 @@ igElement::~igElement() {
 	delete[] indices;
 }
 
-void igElement::update(sf::Time elapsed, float theta) {	
+void igElement::update(sf::Time elapsed, float theta) {
 	setOrientation(orientation + camOrientation - theta); // Orientation moves opposite to the camera
 
 	camOrientation = theta;
@@ -70,9 +70,9 @@ void igElement::set3DCorners(sf::Vector3f nCorners[4]) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *vertices), vertices);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *vertices), vertices);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setOrientation(float nOrientation) {

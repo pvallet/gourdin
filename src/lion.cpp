@@ -38,7 +38,7 @@ void Lion::update(sf::Time elapsed, float theta) {
 				stop();
 			}
 			break;
-		
+
 		default:
 			stamina += elapsed.asSeconds() * catchBreathSpeed;
 			if (stamina >= 100.f)
@@ -89,7 +89,7 @@ void Lion::setTarget(sf::Vector2<double> t) {
 void Lion::kill(std::vector<igElement*> neighbors) {
 	float distance;
 	igMovingElement* igM;
-	igMovingElement* closest;
+	igMovingElement* closest = NULL;
 	float nearestDist = range;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {

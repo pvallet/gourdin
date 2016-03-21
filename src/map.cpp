@@ -12,39 +12,39 @@ Map::Map(std::string path) :
 	nbChunks(50),
 	maxCoord(nbChunks * CHUNK_SIZE)	{
 	minimap = new sf::Texture();
-	
+
 	std::ostringstream texPath;
-    texPath << path << "map.png"; 
+  texPath << path << "map.png";
 
-    sf::Image mapImg;
+  sf::Image mapImg;
 
-    if (!mapImg.loadFromFile(texPath.str())) {
-        std::cout << "Unable to open file: " << path << std::endl;
-    }
+  if (!mapImg.loadFromFile(texPath.str())) {
+    std::cerr << "Unable to open file: " << path << std::endl;
+  }
 
-    minimap->loadFromImage(mapImg);
-    minimap->setSmooth(true);
+  minimap->loadFromImage(mapImg);
+  minimap->setSmooth(true);
 
 
-    // Parse the XML file
+  // Parse the XML file
 
-    std::ostringstream xmlPath;
-    xmlPath << path << "map.xml"; 
+  std::ostringstream xmlPath;
+  xmlPath << path << "map.xml";
 
-    TiXmlDocument doc(xmlPath.str());
-    if(!doc.LoadFile()) {
-        std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
-        std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
-    }
+  TiXmlDocument doc(xmlPath.str());
+  if(!doc.LoadFile()) {
+    std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
+    std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
+  }
 
-    TiXmlHandle hDoc(&doc);
+  TiXmlHandle hDoc(&doc);
 	TiXmlElement *elem, *elem2;
 	TiXmlHandle hRoot(0);
 	TiXmlHandle hSub(0);
 
 	elem = hDoc.FirstChildElement().Element();
 	if (!elem) return;
-	
+
 	int size;
 	elem->QueryIntAttribute("size", &size);
 	centers.resize(size);
@@ -56,7 +56,7 @@ Map::Map(std::string path) :
 	std::string str;
 	int id;
 	elem = hRoot.FirstChild("centers").FirstChild().Element();
-	for ( elem; elem; elem = elem->NextSiblingElement()) {
+	for (; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &center.id);
 		elem->QueryDoubleAttribute("x", &center.x);
 		elem->QueryDoubleAttribute("y", &center.y);
@@ -84,19 +84,19 @@ Map::Map(std::string path) :
 		center.edgeIDs.clear();
 		center.cornerIDs.clear();
 
-		for ( elem2; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
+		for (; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			center.centerIDs.push_back(id);			
+			center.centerIDs.push_back(id);
 		}
 
-		for ( elem2; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
+		for (; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			center.edgeIDs.push_back(id);	
+			center.edgeIDs.push_back(id);
 		}
 
-		for ( elem2; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
+		for (; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			center.cornerIDs.push_back(id);			
+			center.cornerIDs.push_back(id);
 		}
 
 		center.centers.resize(center.centerIDs.size());
@@ -109,7 +109,7 @@ Map::Map(std::string path) :
 	// Edges
 	Edge edge;
 	elem = hRoot.FirstChild("edges").FirstChild().Element();
-	for( elem; elem; elem = elem->NextSiblingElement()) {
+	for(; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &edge.id);
 		elem->QueryIntAttribute("river", &edge.river);
 		elem->QueryIntAttribute("center0", &edge.center0ID);
@@ -131,7 +131,7 @@ Map::Map(std::string path) :
 			elem->QueryIntAttribute("corner1", &edge.corner1ID);
 		}
 
-		if (edge.id >= edges.size())
+		if (edge.id >= (int) edges.size())
 			edges.resize(edge.id + 1);
 		edges[edge.id] = new Edge(edge);
 	}
@@ -139,11 +139,11 @@ Map::Map(std::string path) :
 	// Corners
 	Corner corner;
 	elem = hRoot.FirstChild("corners").FirstChild().Element();
-	for( elem; elem; elem = elem->NextSiblingElement()) {
+	for(; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &corner.id);
 		elem->QueryDoubleAttribute("x", &corner.x);
 		elem->QueryDoubleAttribute("y", &corner.y);
-		
+
 		elem->QueryStringAttribute("water", &str);
 		corner.water = boolAttrib(str);
 		elem->QueryStringAttribute("ocean", &str);
@@ -166,39 +166,39 @@ Map::Map(std::string path) :
 		corner.edgeIDs.clear();
 		corner.cornerIDs.clear();
 
-		for ( elem2 ; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
+		for ( ; elem2 && elem2->Value() == std::string("center"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			corner.centerIDs.push_back(id);			
+			corner.centerIDs.push_back(id);
 		}
 
-		for ( elem2 ; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
+		for ( ; elem2 && elem2->Value() == std::string("edge"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			corner.edgeIDs.push_back(id);			
+			corner.edgeIDs.push_back(id);
 		}
 
-		for ( elem2 ; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
+		for ( ; elem2 && elem2->Value() == std::string("corner"); elem2 = elem2->NextSiblingElement()) {
 			elem2->QueryIntAttribute("id", &id);
-			corner.cornerIDs.push_back(id);			
+			corner.cornerIDs.push_back(id);
 		}
 
 		corner.centers.resize(corner.centerIDs.size());
 		corner.edges.  resize(corner.edgeIDs.size());
 		corner.corners.resize(corner.cornerIDs.size());
 
-		if (corner.id >= corners.size())
+		if (corner.id >= (int) corners.size())
 			corners.resize(corner.id + 1);
 		corners[corner.id] = new Corner(corner);
 	}
 
 	// Convert to game coordinates
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {		
+	for (unsigned int i = 0 ; i < centers.size() ; i++) {
 		centers[i]->x *= maxCoord / MAP_MAX_COORD;
 		centers[i]->y *= maxCoord / MAP_MAX_COORD;
 	}
 
 	for (unsigned int i = 0 ; i < edges.size() ; i++) {
-		if (!edges[i]->mapEdge) {			
+		if (!edges[i]->mapEdge) {
 			edges[i]->x *= maxCoord / MAP_MAX_COORD;
 			edges[i]->y *= maxCoord / MAP_MAX_COORD;
 		}
@@ -342,10 +342,10 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
 
 	flann::Matrix<double> query(queryData, 1, 2);
 
-    std::vector<std::vector<int> > indices;
-    std::vector<std::vector<double> > dists;
+  std::vector<std::vector<int> > indices;
+  std::vector<std::vector<double> > dists;
 
-    kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(centers.size()));
+  kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(centers.size()));
 
 	return centers[indices[0][0]];
 }
@@ -357,24 +357,23 @@ std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
 
 	flann::Matrix<double> query(queryData, 1, 2);
 
-    std::vector<std::vector<int> > indices;
-    std::vector<std::vector<double> > dists;
+  std::vector<std::vector<int> > indices;
+  std::vector<std::vector<double> > dists;
 
-    // Flann weirdly expects the square of the radius
-    kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(centers.size()));
+  // Flann weirdly expects the square of the radius
+  kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(centers.size()));
 
-    std::vector<Center*> res;
-    for (unsigned int i = 0 ; i < indices[0].size() ; i++) {
+  std::vector<Center*> res;
+  for (unsigned int i = 0 ; i < indices[0].size() ; i++) {
 
-    	if (centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
-    		centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
-    		centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
-    		centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
+  	if (centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
+  		centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
+  		centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
+  		centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
 
-    		res.push_back(centers[indices[0][i]]);
-    	}
-    }
+  		res.push_back(centers[indices[0][i]]);
+  	}
+  }
 
 	return res;
 }
-

@@ -5,41 +5,41 @@
 #include <iostream>
 
 igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager _graphics) :
-	speed(0.), 
-	moving(false), 
-	dead(false),
 	igElement(position),
+	speed(0.),
+	moving(false),
+	dead(false),
 	graphics(_graphics) {
 }
 
 void igMovingElement::draw() const {
 	const sf::Texture* texture = graphics.getTexture();
 
-    sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
+  sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-    glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
+  glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
+  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+  glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
-    glMatrixMode(GL_TEXTURE); // sf::Texture::bind modifies the texture matrix, we need to set it back to identity
-    glLoadIdentity();
-    glMatrixMode(GL_MODELVIEW);
+  glMatrixMode(GL_TEXTURE); // sf::Texture::bind modifies the texture matrix, we need to set it back to identity
+  glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
@@ -62,7 +62,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 		if (direction.x != 0. || direction.y != 0.) {
 			float ori = vu::angle(sf::Vector2<double>(1.0f,0.0f), direction);
 			setOrientation(ori - camOrientation);
-			
+
 			pos.x += direction.x * speed * elapsed.asSeconds();
 			pos.y += direction.y * speed * elapsed.asSeconds();
 		}
@@ -82,7 +82,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 
 	glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igMovingElement::die() {
@@ -92,5 +92,3 @@ void igMovingElement::die() {
 	dead = true;
 	graphics.die();
 }
-
-

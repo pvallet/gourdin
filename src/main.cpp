@@ -13,26 +13,26 @@
 
 int main()
 {
-    //XInitThreads();
+  //XInitThreads();
 
-    sf::ContextSettings context(32, 8, 4, 3, 0);
+  sf::ContextSettings context(32, 8, 4, 3, 0);
 
-    sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+  sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
 
-    glewInit();
+  glewInit();
 
-    window.setVerticalSyncEnabled(true);
-    window.setActive(true);
+  window.setVerticalSyncEnabled(true);
+  window.setActive(true);
 
-    glEnable(GL_DEPTH_TEST);
-    //glCullFace (GL_BACK);
-    //glEnable (GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glCullFace (GL_BACK);
+  glEnable (GL_CULL_FACE);
 
-    Controller controller(&window);
+  Controller controller(&window);
 
-    controller.init();
+  controller.init();
 
-    controller.run();
+  controller.run();
 
-    return 0;
+  return 0;
 }

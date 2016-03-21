@@ -19,7 +19,7 @@ public:
 	void set3DCorners(sf::Vector3f nCorners[4]);
 	void set2DCorners(sf::IntRect nCorners) {corners2 = nCorners;}
 	inline void setDepth(float nDepth) {depth = nDepth;}
-	inline bool setVisible(bool nVisible) {visible = nVisible;}
+	inline void setVisible(bool nVisible) {visible = nVisible;}
 
 	virtual void draw() const = 0;
 
@@ -57,4 +57,3 @@ protected:
 private:
 	float orientation; // Angle between the front of the sprite and the camera
 };
-

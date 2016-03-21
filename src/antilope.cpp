@@ -52,9 +52,9 @@ void Antilope::beginRecovering() {
 }
 
 sf::Time Antilope::generateTimePhase(sf::Time average) const {
-	return 	average + 
-			sf::seconds(randomF() * average.asSeconds() * 0.8f)
-			- sf::seconds(average.asSeconds() * 0.4f);
+	return 	average +
+					sf::seconds(randomF() * average.asSeconds() * 0.8f)
+					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
 void Antilope::updateState(std::vector<igElement*> neighbors) {
@@ -224,7 +224,7 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 				bStatus = ORIENTATION;
 			}
 
-			else if (nbAttract != 0 && 
+			else if (nbAttract != 0 &&
 					(bStatus == ATTRACTION || vu::norm(baryAttract / (double) nbAttract - pos) < attractionRadius * 0.8) ) {
 				direction = baryAttract / (double) nbAttract - pos;
 				direction /= vu::norm(direction);
@@ -233,5 +233,5 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 		}
 		break;
 	}
-	
+
 }

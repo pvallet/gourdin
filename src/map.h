@@ -65,7 +65,7 @@ struct Corner {
 	double moisture;
 	int river;
 	int downslope; // Index of the lowest adjacent corner
-	
+
 	std::vector<int> centerIDs; // Only for initialisation
 	std::vector<int> edgeIDs;
 	std::vector<int> cornerIDs;
@@ -106,4 +106,3 @@ private:
 	flann::Matrix<double> dataset; // For knn searches
 	flann::Index<flann::L2<double> >* kdIndex;
 };
-

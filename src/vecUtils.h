@@ -5,94 +5,43 @@
 
 namespace vu {
 
-static float norm(const sf::Vector2f& v) {
-	return sqrt(v.x*v.x + v.y*v.y);
-}
+float norm(const sf::Vector2f& v);
 
-static double norm(const sf::Vector2<double>& v) {
-  return sqrt(v.x*v.x + v.y*v.y);
-}
+double norm(const sf::Vector2<double>& v);
 
-static float norm(const sf::Vector3f& v) {
-  return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-}
+float norm(const sf::Vector3f& v);
 
-static float dot(const sf::Vector2f& u, const sf::Vector2f& v) {
-	return u.x*v.x + u.y*v.y;
-}
+float dot(const sf::Vector2f& u, const sf::Vector2f& v);
 
-static double dot(const sf::Vector2<double>& u, const sf::Vector2<double>& v) {
-  return u.x*v.x + u.y*v.y;
-}
+double dot(const sf::Vector2<double>& u, const sf::Vector2<double>& v);
 
-static float dot(const sf::Vector3f& u, const sf::Vector3f& v) {
-    return u.x*v.x + u.y*v.y + u.z*v.z;
-}
+float dot(const sf::Vector3f& u, const sf::Vector3f& v);
 
-static sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v) {
-  return sf::Vector3f(u.y * v.z - u.z * v.y,
-                      u.z * v.x - u.x * v.z,
-                      u.x * v.y - u.y * v.x);
-}
+sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v);
 
-static sf::Vector3f carthesian(float r, float theta, float phi) {
-    sf::Vector3f u;
-    float rad = M_PI / 180.;
+sf::Vector3f carthesian(float r, float theta, float phi);
 
-    u.x = r*sin(phi*rad)*cos(theta*rad);
-    u.y = r*sin(phi*rad)*sin(theta*rad);
-    u.z = r*cos(phi*rad);
+float angle(const sf::Vector2f& u, const sf::Vector2f& v);
 
-    return u;
-}
-
-static float angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if one is the vector (0,0), else value in degrees
-	int sign = u.x * v.y - u.y * v.x >= 0. ? 1 : -1; // Cross >= 0
-    float lengths = norm(u)*norm(v);
-
-    if (lengths == 0.) {
-        return -1.f;
-    }
-
-    else {
-    	float nDot = dot(u,v) / lengths;
-
-        return sign * acos(nDot) * 180. / M_PI;
-    }
-}
-
-static double angle(const sf::Vector2<double>& u, const sf::Vector2<double>& v) { // returns -1 if one is the vector (0,0), else value in degrees
-  int sign = u.x * v.y - u.y * v.x >= 0. ? 1 : -1; // Cross >= 0
-    double lengths = norm(u)*norm(v);
-
-    if (lengths == 0.) {
-        return -1.f;
-    }
-
-    else {
-      double nDot = dot(u,v) / lengths;
-
-        return sign * acos(nDot) * 180. / M_PI;
-    }
-}
+double angle(const sf::Vector2<double>& u, const sf::Vector2<double>& v);
 
 class Mat3f {
 
 public:
   inline Mat3f (void)   { m[0] = m[1] = m[2] = m[3] = m[4] = m[5] = m[6] = m[7] = m[8] = 0.0; }
-  
+
   ~Mat3f() {}
 
-  inline Mat3f (float* mm) { 
+  inline Mat3f (float* mm) {
     m[0] = mm[0];
     m[1] = mm[1];
     m[2] = mm[2];
-    m[3] = mm[3]; 
-    m[4] = mm[4]; 
-    m[5] = mm[5]; 
-    m[6] = mm[6]; 
-    m[7] = mm[7]; 
-    m[8] = mm[8]; 
+    m[3] = mm[3];
+    m[4] = mm[4];
+    m[5] = mm[5];
+    m[6] = mm[6];
+    m[7] = mm[7];
+    m[8] = mm[8];
   };
 
   inline sf::Vector3f multiply(const sf::Vector3f& v) const
@@ -102,7 +51,7 @@ public:
                         m[2]*v.x + m[5]*v.y + m[8]*v.z);
   }
 
-  void rotation(sf::Vector3f n, float angle) {
+  inline void rotation(sf::Vector3f n, float angle) {
     angle *= M_PI / 180.;
     m[0]=1+(1-cos(angle))*(n.x*n.x-1);            m[3]=-n.z*sin(angle)+(1-cos(angle))*n.x*n.y; m[6]=n.y*sin(angle)+(1-cos(angle))*n.x*n.z;
     m[1]=n.z*sin(angle)+(1-cos(angle))*n.x*n.y;   m[4]=1+(1-cos(angle))*(n.y*n.y-1);           m[7]=-n.x*sin(angle)+(1-cos(angle))*n.y*n.z;
