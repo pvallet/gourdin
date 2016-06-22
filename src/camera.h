@@ -1,6 +1,15 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+
+// From SFML/OpenGL.hpp, adapted for glu.h
+#if defined(SFML_SYSTEM_WINDOWS)
+    #ifdef _MSC_VER
+        #include <windows.h>
+    #endif
+#endif
+
+#include <GL/glu.h>
 #include <cmath>
 
 #define RAD M_PI / 180.
