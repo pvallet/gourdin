@@ -34,5 +34,8 @@
 *.odp
 *.pdf
 
+gamedesign/
+scientific_stuff
+
 out
 .tags
