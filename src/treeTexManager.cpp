@@ -1,4 +1,5 @@
 #include "treeTexManager.h"
+#include <iostream>
 #include <tinyxml.h>
 
 TreeTexManager::TreeTexManager(std::string path) :

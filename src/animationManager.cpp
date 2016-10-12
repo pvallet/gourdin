@@ -111,5 +111,5 @@ int AnimationManager::getClosestOrient(float orientation) {
 
   float oriStep = 360. / (float) _animInfo[_currentAnim].orientations;
 
-  return (_animInfo[_currentAnim].orientations - (int) round(orientation / oriStep)) % 8;
+  return (_animInfo[_currentAnim].orientations - (int) std::round(orientation / oriStep)) % 8;
 }
