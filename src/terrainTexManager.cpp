@@ -6,7 +6,7 @@
 TerrainTexManager::TerrainTexManager(std::string folder) {
   texIndices = new GLuint[NB_BIOMES];
 
-  glEnable(GL_TEXTURE_2D);
+  // glEnable(GL_TEXTURE_2D);
 
   for (int i = 0 ; i < NB_BIOMES ; i++) {
 
@@ -40,5 +40,5 @@ TerrainTexManager::TerrainTexManager(std::string folder) {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glDisable(GL_TEXTURE_2D);
+  // glDisable(GL_TEXTURE_2D);
 }

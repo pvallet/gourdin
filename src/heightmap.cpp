@@ -61,14 +61,18 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
       heights[i][j] = 0.;
 
-      /*int chosenTriangle = 500;
+      int chosenTriangle = 1000;
       std::ostringstream tamere;
-      tamere << tmpRegions[i][j]->id << " " << tmpRegions[i][j]->biome << " " << tmpRegions[i][j]->x << " " << tmpRegions[i][j]->y <<
-              " - " << x << " " << y << " " << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(x1, y1)) << std::endl;
+      tamere << "chosen cell " << tmpRegions[i][j]->id << " Center " << tmpRegions[i][j]->x << " " << tmpRegions[i][j]->y <<
+              " - Point Coords - " << x << " " << y << " " << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(x1, y1)) << std::endl;
+
+			tamere << "Other cells dists ";
 
       for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers.size() ; k++){
           tamere << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(tmpRegions[i][j]->centers[k]->x, tmpRegions[i][j]->centers[k]->y)) << " ";
-      }*/
+      }
+
+			tamere << std::endl;
 
       // Linear interpolation to get the height
       double s, t;
@@ -78,8 +82,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
       int minK = 0;
       for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
         if (!tmpRegions[i][j]->edges[k]->mapEdge) {
-          //chosenTriangle = 1000;
-          x2 = tmpRegions[i][j]->edges[k]->corner0->x;
+
+					x2 = tmpRegions[i][j]->edges[k]->corner0->x;
           y2 = tmpRegions[i][j]->edges[k]->corner0->y;
           x3 = tmpRegions[i][j]->edges[k]->corner1->x;
           y3 = tmpRegions[i][j]->edges[k]->corner1->y;
@@ -87,8 +91,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
           s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
           t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
 
-          /*tamere << tmpRegions[i][j]->edges[k]->x << " " << tmpRegions[i][j]->edges[k]->y << " - " <<
-                  x2 << " " << y2 << " - " << x3 << " " << y3 << std::endl << s << " " << t << std::endl;*/
+          tamere << "Triangle coords " << tmpRegions[i][j]->edges[k]->x << " " << tmpRegions[i][j]->edges[k]->y << " - " <<
+                  x2 << " " << y2 << " - " << x3 << " " << y3 << std::endl << "Barycentric coordinates " << s << " " << t << std::endl;
 
           if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
             heights[i][j] = s       * tmpRegions[i][j]->elevation +
@@ -96,10 +100,14 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
                             (1-s-t) * tmpRegions[i][j]->edges[k]->corner1->elevation;
             if (heights[i][j] < 0)
               	heights[i][j] = 0;
-            heights[i][j] *=  sqrt(heights[i][j]);
+            // heights[i][j] *=  sqrt(heights[i][j]);
             heights[i][j] *=  HEIGHT_FACTOR;
-            //chosenTriangle = k;
-            testPassed = true;
+
+            chosenTriangle = k;
+
+						tamere << "kestufoula" << std::endl;
+
+						testPassed = true;
           }
 
           else if (s < minS) {
@@ -108,20 +116,52 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
             minK = k;
           }
         }
-      }
+			}
 
-      if (!testPassed) {
-        heights[i][j] = minS * tmpRegions[i][j]->elevation +
-                        minT * tmpRegions[i][j]->edges[minK]->corner0->elevation +
-                        (1-minS-minT) * tmpRegions[i][j]->edges[minK]->corner1->elevation;
-        if (heights[i][j] < 0)
-            heights[i][j] = 0;
-        heights[i][j] *=  sqrt(heights[i][j]);
-        heights[i][j] *=  HEIGHT_FACTOR;
-      }
+			// tamere << std::endl;
+			//
+			// x1 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->x;
+      // y1 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->y;
+			//
+			// tamere << "RECHOSEN CELL" << tmpRegions[i][j]->id << " Center " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->x << " " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->y <<
+      //         " - Point Coords - " << x << " " << y << " " << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(x1, y1)) << std::endl;
+			//
+			// tamere << "Other cells dists ";
+			//
+      // for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers.size() ; k++){
+      //     tamere << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->centers[k]->x, tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->centers[k]->y)) << " ";
+      // }
+			//
+			// tamere << std::endl;
+			//
+			// for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges.size() ; k++) {
+      //   if (!tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->mapEdge) {
+			//
+			// 		x2 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner0->x;
+      //     y2 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner0->y;
+      //     x3 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner1->x;
+      //     y3 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner1->y;
+			//
+      //     s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+      //     t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+			//
+      //     tamere << "Triangle coords 2 " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->x << " " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->y << " - " <<
+      //             x2 << " " << y2 << " - " << x3 << " " << y3 << std::endl << "Barycentric coordinates " << s << " " << t << std::endl;
+      //   }
+      // }
 
-      /*if (chosenTriangle == 1000 && tmpRegions[i][j]->biome != OCEAN)
-          std::cout << tamere.str() << std::endl << std::endl;*/
+      // if (!testPassed) {
+      //   heights[i][j] = minS * tmpRegions[i][j]->elevation +
+      //                   minT * tmpRegions[i][j]->edges[minK]->corner0->elevation +
+      //                   (1-minS-minT) * tmpRegions[i][j]->edges[minK]->corner1->elevation;
+      //   if (heights[i][j] < 0)
+      //       heights[i][j] = 0;
+      //   heights[i][j] *=  sqrt(heights[i][j]);
+      //   heights[i][j] *=  HEIGHT_FACTOR;
+      // }
+
+      // if (chosenTriangle == 1000 && tmpRegions[i][j]->biome != OCEAN && tmpRegions[i][j]->id == 1050)
+      //     std::cout << tamere.str() << std::endl << std::endl;
 
       if (i != size1 && j != size1) // We must not put the last indices in the ibo
         regions[tmpRegions[i][j]->id].count++;

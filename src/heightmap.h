@@ -46,11 +46,9 @@ private:
 	sf::Vector3f highests[4];
 
 
-	std::map<int, Region> regions; 
+	std::map<int, Region> regions;
 
 	std::vector<std::vector<float> > heights;
 	TerrainTexManager* texManager;
 	Map* map;
 };
-
-

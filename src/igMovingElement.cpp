@@ -4,25 +4,25 @@
 #include <cmath>
 #include <iostream>
 
-igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager _graphics) :
+igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager graphics) :
 	igElement(position),
-	speed(0.),
-	moving(false),
-	dead(false),
-	graphics(_graphics) {
+	_speed(0.),
+	_moving(false),
+	_dead(false),
+	_graphics(graphics) {
 }
 
 void igMovingElement::draw() const {
-	const sf::Texture* texture = graphics.getTexture();
+	const sf::Texture* texture = _graphics.getTexture();
 
   sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
+  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *_vertices));
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -43,52 +43,52 @@ void igMovingElement::draw() const {
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
-	height /= graphics.getCurrentSprite().height;
-	graphics.launchAnimation(type);
-	height *= graphics.getCurrentSprite().height;
+	_height /= _graphics.getCurrentSprite().height;
+	_graphics.launchAnimation(type);
+	_height *= _graphics.getCurrentSprite().height;
 }
 
 void igMovingElement::stop() {
 	launchAnimation(WAIT);
-	moving = false;
-	speed = 0.f;
+	_moving = false;
+	_speed = 0.f;
 }
 
 void igMovingElement::update(sf::Time elapsed, float theta) {
-	graphics.update(elapsed, getOrientation());
+	_graphics.update(elapsed, getOrientation());
 	igElement::update(elapsed, theta);
 
-	if (!dead) {
-		if (direction.x != 0. || direction.y != 0.) {
-			float ori = vu::angle(sf::Vector2<double>(1.0f,0.0f), direction);
-			setOrientation(ori - camOrientation);
+	if (!_dead) {
+		if (_direction.x != 0. || _direction.y != 0.) {
+			float ori = vu::angle(sf::Vector2<double>(1.0f,0.0f), _direction);
+			setOrientation(ori - _camOrientation);
 
-			pos.x += direction.x * speed * elapsed.asSeconds();
-			pos.y += direction.y * speed * elapsed.asSeconds();
+			_pos.x += _direction.x * _speed * elapsed.asSeconds();
+			_pos.y += _direction.y * _speed * elapsed.asSeconds();
 		}
 	}
 
-	sf::IntRect rect = graphics.getCurrentSprite();
-	coord2D[0] = rect.left;
-	coord2D[1] = rect.top;
-	coord2D[2] = rect.left + rect.width;
-	coord2D[3] = rect.top;
-	coord2D[4] = rect.left + rect.width;
-	coord2D[5] = rect.top + rect.height;
-	coord2D[6] = rect.left;
-	coord2D[7] = rect.top + rect.height;
+	sf::IntRect rect = _graphics.getCurrentSprite();
+	_coord2D[0] = rect.left;
+	_coord2D[1] = rect.top;
+	_coord2D[2] = rect.left + rect.width;
+	_coord2D[3] = rect.top;
+	_coord2D[4] = rect.left + rect.width;
+	_coord2D[5] = rect.top + rect.height;
+	_coord2D[6] = rect.left;
+	_coord2D[7] = rect.top + rect.height;
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-	glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
+	glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord2D), _coord2D);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igMovingElement::die() {
 	launchAnimation(DIE);
-	speed = 0.;
-	moving = false;
-	dead = true;
-	graphics.die();
+	_speed = 0.;
+	_moving = false;
+	_dead = true;
+	_graphics.die();
 }

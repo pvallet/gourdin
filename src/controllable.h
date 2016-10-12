@@ -14,6 +14,6 @@ public:
 	virtual void setTarget(sf::Vector2<double> t);
 
 protected:
-	sf::Vector2<double> target;
+	sf::Vector2<double> _target;
 
 };

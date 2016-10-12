@@ -325,7 +325,7 @@ void Game::render() const {
 
   // igElements
 
-  glEnable (GL_TEXTURE_2D);
+  // glEnable (GL_TEXTURE_2D);
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -338,7 +338,8 @@ void Game::render() const {
     glPopMatrix();
   }
 
-  glDisable(GL_BLEND | GL_TEXTURE_2D);
+  // glDisable(GL_BLEND | GL_TEXTURE_2D);
+  glDisable(GL_BLEND);
 }
 
 void Game::select(sf::IntRect rect, bool add) {

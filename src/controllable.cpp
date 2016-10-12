@@ -2,30 +2,29 @@
 #include "vecUtils.h"
 #include <iostream>
 
-Controllable::Controllable(sf::Vector2<double> position, AnimationManager _graphics) :
- 	igMovingElement(position, _graphics) {
-	
+Controllable::Controllable(sf::Vector2<double> position, AnimationManager graphics) :
+ 	igMovingElement(position, graphics) {
+
 }
 
 void Controllable::update(sf::Time elapsed, float theta) {
 	igMovingElement::update(elapsed, theta);
-	
-	if (!dead) {
+
+	if (!_dead) {
 		// The element has gone too far
-		if (vu::dot((target - pos), direction) < 0) {
-			pos = target;
+		if (vu::dot((_target - _pos), _direction) < 0) {
+			_pos = _target;
 			stop();
 		}
 	}
 }
 
 void Controllable::setTarget(sf::Vector2<double> t) {
-	if (!dead) {
-		moving = true;
-		target = t;
+	if (!_dead) {
+		_moving = true;
+		_target = t;
 
-		direction = (t-pos);
-		direction /= vu::norm(direction);
+		_direction = (t-_pos);
+		_direction /= vu::norm(_direction);
 	}
 }
-

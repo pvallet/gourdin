@@ -2,6 +2,7 @@
 #include "vecUtils.h"
 
 #include <SFML/OpenGL.hpp>
+#include <GL/glut.h>
 
 Camera::Camera() :
   fovAngle(45.f),

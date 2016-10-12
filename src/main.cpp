@@ -3,7 +3,6 @@
 #include <SFML/OpenGL.hpp>
 #include <iostream>
 #include <thread>
-//#include <X11/Xlib.h>
 
 #include "controller.h"
 
@@ -11,11 +10,8 @@
 #define DEFAULT_SCREENHEIGHT 600
 
 
-int main()
-{
-  //XInitThreads();
-
-  sf::ContextSettings context(32, 8, 4, 3, 0);
+int main() {
+  sf::ContextSettings context(24, 8, 4, 3, 0);
 
   sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
 

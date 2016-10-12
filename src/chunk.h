@@ -23,7 +23,7 @@ public:
 	virtual void calculateFrustum(const Camera* camera) = 0; // Returns true if the chunk is to be displayed
 	virtual void draw() const = 0;
 	virtual float getHeight(float x, float y) const = 0;
-	
+
 	// To join the chunk with neighbours ones. Used with the perlin version.
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const {Constraint c; c.type = NONE; return c;}
 
@@ -41,4 +41,3 @@ protected:
 
 	bool visible;
 };
-

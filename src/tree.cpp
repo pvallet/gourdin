@@ -1,39 +1,39 @@
 #include "tree.h"
 #include "animationManager.h"
 
-Tree::Tree(sf::Vector2<double> position, TreeTexManager* _manager, Biome _biome, int _index) :
+Tree::Tree(sf::Vector2<double> position, TreeTexManager* manager, Biome biome, int index) :
 	igElement(position),
-	manager(_manager),
-	biome(_biome),
-	index(_index) {
+	_manager(manager),
+	_biome(biome),
+	_index(index) {
 
-  height = manager->getHeight(biome, index);
+  _height = _manager->getHeight(_biome, _index);
 
-  coord2D[0] = 0;
-  coord2D[1] = 0;
-  coord2D[2] = manager->getSize(biome, index).x-1;
-  coord2D[3] = 0;
-  coord2D[4] = manager->getSize(biome, index).x-1;
-  coord2D[5] = manager->getSize(biome, index).y-1;
-  coord2D[6] = 0;
-  coord2D[7] = manager->getSize(biome, index).y-1;
+  _coord2D[0] = 0;
+  _coord2D[1] = 0;
+  _coord2D[2] = _manager->getSize(_biome, _index).x-1;
+  _coord2D[3] = 0;
+  _coord2D[4] = _manager->getSize(_biome, _index).x-1;
+  _coord2D[5] = _manager->getSize(_biome, _index).y-1;
+  _coord2D[6] = 0;
+  _coord2D[7] = _manager->getSize(_biome, _index).y-1;
 
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *vertices), (8*sizeof *coord2D), coord2D);
+  glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord2D), _coord2D);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Tree::draw() const {
-	manager->bind(biome, index);
+	_manager->bind(_biome, _index);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *vertices));
+  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *_vertices));
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);

@@ -8,7 +8,7 @@ enum MovingType {PREY, HUNTER};
 
 class igMovingElement : public igElement {
 public:
-	igMovingElement(sf::Vector2<double> position, AnimationManager _graphics);
+	igMovingElement(sf::Vector2<double> position, AnimationManager graphics);
 	inline virtual abstractType getAbstractType() const {return igME;}
 	virtual MovingType getMovingType() const = 0;
 
@@ -19,17 +19,17 @@ public:
 	virtual void stop();
 	virtual void die();
 
-	inline virtual float getMaxHeightFactor() {return graphics.getMaxHeightFactor();}
-	inline sf::Vector2<double> getDirection() const {return direction;}
-	inline float getSpeed() const {return speed;}
-	inline bool isDead() const {return dead;}
+	inline virtual float getMaxHeightFactor() {return _graphics.getMaxHeightFactor();}
+	inline sf::Vector2<double> getDirection() const {return _direction;}
+	inline float getSpeed() const {return _speed;}
+	inline bool isDead() const {return _dead;}
 
 protected:
-	float speed; // Distance per second
-	bool moving;
-	bool dead;
+	float _speed; // Distance per second
+	bool _moving;
+	bool _dead;
 
-	AnimationManager graphics;
+	AnimationManager _graphics;
 
-	sf::Vector2<double> direction; // Normalized vector towards the target
+	sf::Vector2<double> _direction; // Normalized vector towards the target
 };

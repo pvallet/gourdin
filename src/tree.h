@@ -10,9 +10,8 @@ public:
 	void draw() const;
 
 protected:
-	TreeTexManager* manager;
+	TreeTexManager* _manager;
 
-	Biome biome;
-	int index;
+	Biome _biome;
+	int _index;
 };
-

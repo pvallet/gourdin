@@ -8,7 +8,7 @@ enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 class Antilope : public igMovingElement {
 public:
-	Antilope(sf::Vector2<double> position, AnimationManager _graphics);
+	Antilope(sf::Vector2<double> position, AnimationManager graphics);
 	virtual MovingType getMovingType() const {return PREY;}
 
 	// React to the environment
@@ -18,27 +18,26 @@ public:
 	void beginFleeing();
 	void beginRecovering();
 
-	inline float getLineOfSight() const {return lineOfSight;}
+	inline float getLineOfSight() const {return _lineOfSight;}
 private:
 	sf::Time generateTimePhase(sf::Time average) const;
 
-	float lineOfSight;
-	float lineOfSightStandard; // * 1 for normal line of sight, * 1.1 for hysteresis
+	float _lineOfSight;
+	float _lineOfSightStandard; // * 1 for normal line of sight, * 1.1 for hysteresis
 
-	float repulsionRadius; // r < o < a
-	float orientationRadius;
-	float attractionRadius;
+	float _repulsionRadius; // r < o < a
+	float _orientationRadius;
+	float _attractionRadius;
 
-	float speedWalking;
-	float speedRunning;
+	float _speedWalking;
+	float _speedRunning;
 
-	AntilopeStatus aStatus;
-	BoidStatus bStatus; // To control hysteresis
+	AntilopeStatus _aStatus;
+	BoidStatus _bStatus; // To control hysteresis
 
-	sf::Time averageRecovering;
-	sf::Time averageEating;
-	sf::Time averageFindingFood;
-	sf::Time timePhase;
-	sf::Clock beginPhase;
+	sf::Time _averageRecovering;
+	sf::Time _averageEating;
+	sf::Time _averageFindingFood;
+	sf::Time _timePhase;
+	sf::Clock _beginPhase;
 };
-

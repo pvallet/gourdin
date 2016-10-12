@@ -12,7 +12,7 @@
 class Controller {
 public:
 	Controller(sf::RenderWindow* _window);
-	
+
 	void init();
 	void run();
 
@@ -35,4 +35,3 @@ private:
 	Camera camera;
 	Game game;
 };
-

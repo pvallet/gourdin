@@ -11,23 +11,23 @@ class Shader {
 public:
 
   Shader();
-  Shader(Shader const &_shader);
-  Shader(std::string _vertexSource, std::string _fragmentSource);
+  Shader(Shader const &shader);
+  Shader(std::string vertexSource, std::string fragmentSource);
   ~Shader();
 
-  Shader& operator=(Shader const &_shader);
+  Shader& operator=(Shader const &shader);
 
   bool load();
-  bool compileShader(GLuint &shader, GLenum type, std::string const &fichierSource);
-  inline GLuint getProgramID() const {return programID;}
+  bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
+  inline GLuint getProgramID() const {return _programID;}
 
 
 private:
 
-  GLuint vertexID;
-  GLuint fragmentID;
-  GLuint programID;
+  GLuint _vertexID;
+  GLuint _fragmentID;
+  GLuint _programID;
 
-  std::string vertexSource;
-  std::string fragmentSource;
+  std::string _vertexSource;
+  std::string _fragmentSource;
 };
