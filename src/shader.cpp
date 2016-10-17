@@ -1,4 +1,7 @@
 #include "shader.h"
+#include "camera.h"
+
+#include <cassert>
 
 Shader::Shader() :
 	_vertexID(0),
@@ -85,14 +88,17 @@ bool Shader::load() {
 
     std::cerr << error << std::endl;
 
-    delete[] error;
+    // delete[] error;
     glDeleteProgram(_programID);
 
     return false;
   }
 
-  else
+  else {
+		_matrixID = glGetUniformLocation(_programID, "MVP");
+		assert(_matrixID != -1 && "Your vertex shader must contain a matrix uniform \"MVP\" to perform the projection");
     return true;
+	}
 }
 
 
@@ -142,12 +148,17 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
     std::cerr << error << std::endl;
 
-    delete[] error;
+    // delete[] error;
     glDeleteShader(shader);
 
     return false;
   }
 
-  else
+	else
     return true;
+}
+
+void Shader::sendModelMatrix(Camera *cam, const glm::mat4& model) const {
+	glm::mat4 MVP = cam->getViewProjectionMatrix() * model;
+	glUniformMatrix4fv(_matrixID, 1, GL_FALSE, &MVP[0][0]);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <glm/glm.hpp>
 #include <cmath>
 
 namespace vu {
@@ -20,6 +21,8 @@ float dot(const sf::Vector3f& u, const sf::Vector3f& v);
 sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v);
 
 sf::Vector3f carthesian(float r, float theta, float phi);
+
+sf::Vector3f convertSFML(glm::vec3 u);
 
 float angle(const sf::Vector2f& u, const sf::Vector2f& v);
 

@@ -41,6 +41,16 @@ sf::Vector3f vu::carthesian(float r, float theta, float phi) {
     return u;
 }
 
+sf::Vector3f vu::convertSFML(glm::vec3 u) {
+	sf::Vector3f res;
+
+	res.x = u.x;
+	res.y = u.y;
+	res.z = u.z;
+
+	return res;
+}
+
 float vu::angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if one is the vector (0,0), else value in degrees
 	int sign = u.x * v.y - u.y * v.x >= 0. ? 1 : -1; // Cross >= 0
     float lengths = norm(u)*norm(v);

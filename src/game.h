@@ -32,7 +32,7 @@ struct compDepth {
 
 class Game {
 public:
-	Game(Camera* camera, Map* _map);
+	Game(Camera* camera, Map* map);
 	~Game();
 
 	void generateNeighbourChunks(sf::Vector2i pos);

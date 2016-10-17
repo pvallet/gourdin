@@ -1,8 +1,11 @@
 #include "game.h"
-#include <SFML/OpenGL.hpp>
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+
+#include <SFML/OpenGL.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
@@ -14,7 +17,7 @@ Game::Game(Camera* camera, Map* map) :
   _map(map),
   _terrainTexManager("res/terrain/"),
   _treeTexManager("res/trees/"),
-  _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag") {
+  _hmapShader("src/shaders/testShader.vert", "src/shaders/testShader.frag") {
   _hmapShader.load();
 
   _cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
@@ -100,12 +103,12 @@ Game::Game(Camera* camera, Map* map) :
 
 Game::~Game() {
 	for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-      //delete it->second;
+      //// delete it->second;
   }
 
-  delete _skybox;
+  // delete _skybox;
   for (unsigned int i = 0 ; i < _e.size() ; i++) {
-    delete _e[i];
+    // delete _e[i];
   }
 }
 
@@ -213,13 +216,6 @@ void Game::update(sf::Time elapsed) {
       it->second->calculateFrustum(_cam);
   }
 
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  GLdouble projection[16];
-  glGetDoublev(GL_PROJECTION_MATRIX,projection);
-  GLdouble modelview[16];
-  glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
-
   _vis.clear();
 
   for (unsigned int i = 0 ; i < _e.size() ; i++) {
@@ -242,42 +238,57 @@ void Game::update(sf::Time elapsed) {
                                        _e[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
 
       // Calculate new corners
-      sf::Vector3f corners3[4];
+      glm::vec3 corners3[4];
 
       float width = _e[i]->getW();
 
-      corners3[0] = sf::Vector3f( _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight + _e[i]->getH(),
-                                  _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
+      corners3[0] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight + _e[i]->getH(),
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
-      corners3[1] = sf::Vector3f( _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight + _e[i]->getH(),
-                                  _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
+      corners3[1] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight + _e[i]->getH(),
+                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
-      corners3[2] = sf::Vector3f( _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight,
-                                  _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
+      corners3[2] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight,
+                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
-      corners3[3] = sf::Vector3f( _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight,
-                                  _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
+      corners3[3] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight,
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
 
       _e[i]->set3DCorners(corners3);
 
       // Calculate their projections
 
-      GLdouble left, top, right, bot, depth;
-      GLdouble trash;
 
-      gluProject(corners3[0].x,corners3[0].y,corners3[0].z,modelview,projection,viewport,&left,  &top,   &trash);
-      gluProject(corners3[1].x,corners3[1].y,corners3[1].z,modelview,projection,viewport,&right, &trash, &trash);
-      gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &depth);
+      // gluProject(corners3[0].x,corners3[0].y,corners3[0].z,modelview,projection,viewport,&left,  &top,   &trash);
+      // gluProject(corners3[1].x,corners3[1].y,corners3[1].z,modelview,projection,viewport,&right, &trash, &trash);
+      // gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &depth);
 
-      top = viewport[3]-top;
-      bot = viewport[3]-bot;
+      // TODO optimize with only 2 matrix multiplications
+
+      glm::mat4 viewProjection = _cam->getViewProjectionMatrix();
+
+      glm::vec4 cornersProjNorm[4];
+      for (size_t i = 0; i < 4; i++) {
+        cornersProjNorm[i] = viewProjection * glm::vec4(corners3[i], 1.0);
+      }
+
+      double left, top, right, bot, depth;
+
+      left  = _cam->getW() * cornersProjNorm[0].x + 1./2;
+      top   = _cam->getH() * cornersProjNorm[0].y + 1./2;
+      right = _cam->getW() * cornersProjNorm[1].x + 1./2;
+      bot   = _cam->getH() * cornersProjNorm[3].y + 1./2;
+      depth = cornersProjNorm[3].z + 1./2;
+
+      top = _cam->getH()-top;
+      bot = _cam->getH()-bot;
 
       sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
@@ -305,19 +316,17 @@ void Game::render() const {
   glUseProgram(_hmapShader.getProgramID());
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(_hmapShader.getProgramID(), "tex"), 0);
-  glUniform3f(glGetUniformLocation(_hmapShader.getProgramID(), "camPos"), _cam->getPos().x, _cam->getPos().y, _cam->getPos().z);
 
   for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
     if (it->second->isVisible()) {
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
+      glm::mat4 modelview = glm::translate(glm::mat4(1.f),
+        glm::vec3(CHUNK_SIZE * it->first.x, 0.0f, CHUNK_SIZE * it->first.y)
+      );
 
-      glTranslatef(CHUNK_SIZE * it->first.x, 0.0f, CHUNK_SIZE * it->first.y);
+      _hmapShader.sendModelMatrix(_cam, modelview);
 
       it->second->draw();
 
-
-      glPopMatrix();
     }
   }
 
@@ -325,21 +334,15 @@ void Game::render() const {
 
   // igElements
 
-  // glEnable (GL_TEXTURE_2D);
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  //std::cout << _e.size() << " " << _vis.size() << std::endl;
+  // glEnable (GL_BLEND);
+  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   for (auto it = _vis.begin() ; it != _vis.end() ; ++it) {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    _hmapShader.sendModelMatrix(_cam, glm::mat4(1.f));
     (*it)->draw();
-    glPopMatrix();
   }
 
-  // glDisable(GL_BLEND | GL_TEXTURE_2D);
-  glDisable(GL_BLEND);
+  // glDisable(GL_BLEND);
 }
 
 void Game::select(sf::IntRect rect, bool add) {

@@ -319,20 +319,20 @@ Biome Map::biomeAttrib(std::string str) const {
 
 Map::~Map() {
 	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
-		delete _centers[i];
+		// delete _centers[i];
 	}
 
 	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
-		delete _edges[i];
+		// delete _edges[i];
 	}
 
 	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
-		delete _corners[i];
+		// delete _corners[i];
 	}
 
-	delete[] _data;
-	delete[] _dataset.ptr();
-	delete[] _kdIndex;
+	// delete[] _data;
+	// delete[] _dataset.ptr();
+	// delete[] _kdIndex;
 }
 
 Center* Map::getClosestCenter(sf::Vector2<double> pos) const {

@@ -1,8 +1,12 @@
 #pragma once
+
+#include <string>
+
 #include <GL/glew.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
-#include <string>
+#include <glm/glm.hpp>
+
 #include "animationManager.h"
 
 // ig = ingame
@@ -16,7 +20,7 @@ public:
 	inline virtual abstractType getAbstractType() const {return igE;}
 
 	virtual void update(sf::Time elapsed, float theta);
-	void set3DCorners(sf::Vector3f nCorners[4]);
+	void set3DCorners(glm::vec3 nCorners[4]);
 	void set2DCorners(sf::IntRect nCorners) {_corners2 = nCorners;}
 	inline void setDepth(float nDepth) {_depth = nDepth;}
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
@@ -37,7 +41,6 @@ protected:
 	sf::Vector2<double> _pos;
 	float _height;
 
-	sf::Vector3f* _corners3; // Starting with top left, then clockwise
 	sf::IntRect _corners2;
 
 	float _camOrientation; // Angle between the camera and the vector (0,1)

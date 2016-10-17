@@ -30,25 +30,21 @@ void Tree::draw() const {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glTexCoordPointer(2, GL_INT, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(2, 2, GL_INT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(2);
 
   glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glBindTexture(GL_TEXTURE_2D, 0);
-
-  glMatrixMode(GL_TEXTURE); // sf::Texture::bind modifies the texture matrix, we need to set it back to identity
-  glLoadIdentity();
-  glMatrixMode(GL_MODELVIEW);
 }

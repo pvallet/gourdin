@@ -2,14 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 
-// From SFML/OpenGL.hpp, adapted for glu.h
-#if defined(SFML_SYSTEM_WINDOWS)
-    #ifdef _MSC_VER
-        #include <windows.h>
-    #endif
-#endif
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
-#include <GL/glu.h>
 #include <cmath>
 
 #define RAD M_PI / 180.
@@ -35,6 +30,7 @@ public:
   inline float getFov() const {return _fovAngle;}
   inline float getRatio() const {return _aspectRatio;}
   inline sf::Vector2<double> getPointedPos() const {return sf::Vector2<double>(_x, _y);}
+  inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 
 private:
 	unsigned int _W, _H;
@@ -47,4 +43,8 @@ private:
   double _x, _y, _height;
   float _r, _phi, _theta; // The camera points towards the center of the sphere
   sf::Vector3f _pos;
+
+  glm::mat4 _projection;
+  glm::mat4 _view;
+  glm::mat4 _viewProjection;
 };

@@ -397,16 +397,15 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 void Heightmap::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(3*4*(_size-1)*(_size-1)*sizeof *_vertices));
-  glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(2*3*4*(_size-1)*(_size-1)*sizeof *_vertices));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(3*4*(_size-1)*(_size-1)*sizeof *_vertices));
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*3*4*(_size-1)*(_size-1)*sizeof *_vertices));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
   int cursor = 0;
   for (auto it = _regions.begin(); it != _regions.end() ; ++it ) {
@@ -418,10 +417,9 @@ void Heightmap::draw() const {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
-
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -45,10 +45,10 @@ Perlin::Perlin(int seed, int size) :
 
 Perlin::~Perlin() {
   for (int i = 0 ; i < _octaves ; i++) {
-    delete[] _randValues[i];
+    // delete[] _randValues[i];
   }
 
-  delete[] _randValues;
+  // delete[] _randValues;
 }
 
 double Perlin::cubic_interpolate(double before_p0, double p0, double p1, double after_p1, double t) {

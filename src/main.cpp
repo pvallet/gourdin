@@ -1,8 +1,8 @@
 #include <GL/glew.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
-#include <iostream>
-#include <thread>
+
+#include <cassert>
 
 #include "controller.h"
 
@@ -12,13 +12,13 @@
 
 int main() {
   sf::ContextSettings context(24, 8, 4, 3, 3);
-
   sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
-
-  glewInit();
-
   window.setVerticalSyncEnabled(true);
   window.setActive(true);
+
+  glewExperimental = true;
+  glewInit();
+  // assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
 
   glEnable(GL_DEPTH_TEST);
   glCullFace (GL_BACK);

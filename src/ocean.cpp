@@ -122,21 +122,21 @@ void Ocean::draw() const {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glNormalPointer(GL_FLOAT, 0, BUFFER_OFFSET(12*sizeof *_vertices));
-  glTexCoordPointer(2, GL_FLOAT, 0, BUFFER_OFFSET(24*sizeof *_vertices));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(24*sizeof *_vertices));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

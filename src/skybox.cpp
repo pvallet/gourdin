@@ -96,13 +96,13 @@ void Skybox::draw() const {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glVertexPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(0));
-  glTexCoordPointer(3, GL_FLOAT, 0, BUFFER_OFFSET(24*sizeof *_pos));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(24*sizeof *_pos));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(2);
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(4*sizeof *_iXN));
@@ -111,8 +111,8 @@ void Skybox::draw() const {
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(16*sizeof *_iXN));
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(20*sizeof *_iXN));
 
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

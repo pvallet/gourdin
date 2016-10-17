@@ -11,18 +11,19 @@ Camera::Camera() :
 	_x(0.f), _y(0.f), _height(0.f),
 	_r(150.0),
 	_phi(60.f),
-	_theta(0.f) {}
+	_theta(0.f),
+  _projection(1.f),
+  _view(1.f) {}
 
 void Camera::resize(unsigned int W, unsigned int H) {
 	_W = W;
 	_H = H;
 
 	glViewport (0, 0, (GLint)W, (GLint)H);
-  glMatrixMode (GL_PROJECTION);
-  glLoadIdentity ();
   _aspectRatio = static_cast<float>(W)/static_cast<float>(H);
-  gluPerspective (_fovAngle, _aspectRatio, _nearPlane, _farPlane);
-  glMatrixMode (GL_MODELVIEW);
+  _projection = glm::perspective(_fovAngle, _aspectRatio, _nearPlane, _farPlane);
+
+  _viewProjection = _projection * _view;
 }
 
 void Camera::apply() {
@@ -32,10 +33,12 @@ void Camera::apply() {
   _pos.y = tmp.z;
   _pos.z = tmp.y;
 
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(	_pos.x, _pos.y, _pos.z,
-      				_x, _height, _y,
-      				0., 1., 0.);
-      				//_r*sin((_phi-90.)*rad)*cos(_theta*rad), _r*sin((_phi-90))*rad*sin(_theta*rad), _r*cos((_phi-90.)*rad));
+  _view = glm::lookAt (
+	  glm::vec3(_pos.x, _pos.y, _pos.z),
+    glm::vec3(_x, _height, _y),
+    glm::vec3(0., 1., 0.)
+  );
+  //_r*sin((_phi-90.)*rad)*cos(_theta*rad), _r*sin((_phi-90))*rad*sin(_theta*rad), _r*cos((_phi-90.)*rad));
+
+  _viewProjection = _projection * _view;
 }

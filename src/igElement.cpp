@@ -50,9 +50,9 @@ igElement::igElement(sf::Vector2<double> position) :
 igElement::~igElement() {
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ibo);
-	delete[] _vertices;
-	delete[] _coord2D;
-	delete[] _indices;
+	// delete[] _vertices;
+	// delete[] _coord2D;
+	// delete[] _indices;
 }
 
 void igElement::update(sf::Time elapsed, float theta) {
@@ -61,7 +61,7 @@ void igElement::update(sf::Time elapsed, float theta) {
 	_camOrientation = theta;
 }
 
-void igElement::set3DCorners(sf::Vector3f nCorners[4]) {
+void igElement::set3DCorners(glm::vec3 nCorners[4]) {
 	for (int i = 0 ; i < 4 ; i++) {
 		_vertices[3*i]   = nCorners[i].x;
 		_vertices[3*i+1] = nCorners[i].y;
