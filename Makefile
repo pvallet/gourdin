@@ -1,8 +1,8 @@
 CIBLE = out
 SRCS =  $(wildcard src/*.cpp)
-LIBS =  -lsfml-graphics -lsfml-window -lsfml-system -lGL -lGLEW
+LIBS =  -lsfml-graphics -lsfml-window -lsfml-system -lGL -lGLEW -ltinyxml -fopenmp
 
-CFLAGS = -Wall -g
+CFLAGS = -Wall -std=c++11 -g
 
 OBJS = $(addprefix obj/,$(notdir $(SRCS:.cpp=.o)))
 
@@ -13,5 +13,5 @@ clean:
 
 obj/main.o: src/main.cpp
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
-obj/%.o: src/%.cpp src/%.hpp
+obj/%.o: src/%.cpp src/%.h
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)

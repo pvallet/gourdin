@@ -279,16 +279,19 @@ void Game::update(sf::Time elapsed) {
         cornersProjNorm[i] = viewProjection * glm::vec4(corners3[i], 1.0);
       }
 
+      double w = _cam->getW();
+      double h = _cam->getH();
+
       double left, top, right, bot, depth;
 
-      left  = _cam->getW() * cornersProjNorm[0].x + 1./2;
-      top   = _cam->getH() * cornersProjNorm[0].y + 1./2;
-      right = _cam->getW() * cornersProjNorm[1].x + 1./2;
-      bot   = _cam->getH() * cornersProjNorm[3].y + 1./2;
+      left  = w * cornersProjNorm[0].x + 1./2;
+      top   = h * cornersProjNorm[0].y + 1./2;
+      right = w * cornersProjNorm[1].x + 1./2;
+      bot   = h * cornersProjNorm[3].y + 1./2;
       depth = cornersProjNorm[3].z + 1./2;
 
-      top = _cam->getH()-top;
-      bot = _cam->getH()-bot;
+      top = h-top;
+      bot = h-bot;
 
       sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
@@ -479,24 +482,14 @@ void Game::generateForests(sf::Vector2i pos) {
 }
 
 sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT,viewport);
-  GLdouble projection[16];
-  glGetDoublev(GL_PROJECTION_MATRIX,projection);
-  GLdouble modelview[16];
-  glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
-  GLdouble winX,winY;
-
-  screenTarget.y=viewport[3]-screenTarget.y; // Inverted coordinates
-
-  winX=(double)screenTarget.x;
-  winY=(double)screenTarget.y;
+  screenTarget.y = _cam->getH() - screenTarget.y; // Inverted coordinates
 
   GLfloat d;
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
-  double x,y,z;
-  gluUnProject(winX,winY,d,modelview,projection,viewport,&x,&y,&z);
+  glm::vec4 screenCoord(screenTarget.x, screenTarget.y, d, 1.0);
 
-  return sf::Vector2<double>(x,z);
+  glm::vec4 modelCoord = glm::inverse(_cam->getViewProjectionMatrix()) * screenCoord;
+
+  return sf::Vector2<double>(modelCoord.x,modelCoord.z);
 }
