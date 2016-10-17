@@ -27,17 +27,17 @@ public:
 	// To join the chunk with neighbours ones. Used with the perlin version.
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const {Constraint c; c.type = NONE; return c;}
 
-	inline GLuint getVBOIndex() const {return vbo;}
-	inline GLuint getIBOIndex() const {return ibo;}
-	inline sf::Vector2i getChunkPos() const {return chunkPos;}
+	inline GLuint getVBOIndex() const {return _vbo;}
+	inline GLuint getIBOIndex() const {return _ibo;}
+	inline sf::Vector2i getChunkPos() const {return _chunkPos;}
 
-	inline bool isVisible() const {return visible;}
+	inline bool isVisible() const {return _visible;}
 
 protected:
-	GLuint vbo;
-	GLuint ibo;
+	GLuint _vbo;
+	GLuint _ibo;
 
-	sf::Vector2i chunkPos;
+	sf::Vector2i _chunkPos;
 
-	bool visible;
+	bool _visible;
 };

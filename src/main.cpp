@@ -11,7 +11,7 @@
 
 
 int main() {
-  sf::ContextSettings context(24, 8, 4, 3, 0);
+  sf::ContextSettings context(24, 8, 4, 3, 3);
 
   sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
 

@@ -19,19 +19,19 @@ public:
 	void render();
 
 private:
-	bool addSelect;
-	bool selecting;
-	sf::RectangleShape rectSelect;
-	sf::Font font;
-	sf::Text fpsCounter;
-	sf::Sprite minimap;
-	Map map;
+	bool _addSelect;
+	bool _selecting;
+	sf::RectangleShape _rectSelect;
+	sf::Font _font;
+	sf::Text _fpsCounter;
+	sf::Sprite _minimap;
+	Map _map;
 
-	bool running;
-	sf::Clock frameClock;
-	sf::Time elapsed;
-	sf::RenderWindow* window;
+	bool _running;
+	sf::Clock _frameClock;
+	sf::Time _elapsed;
+	sf::RenderWindow* _window;
 
-	Camera camera;
-	Game game;
+	Camera _camera;
+	Game _game;
 };

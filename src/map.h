@@ -80,12 +80,12 @@ public:
 	Map(std::string path);
 	~Map();
 
-	inline sf::Texture* getMinimap() const {return minimap;}
-	inline std::vector<Center*> getCenters() const {return centers;}
-	inline std::vector<Edge*> 	getEdges()   const {return edges;}
-	inline std::vector<Corner*> getCorners() const {return corners;}
-	inline int getNbChunks() const {return nbChunks;}
-	inline double getMaxCoord() const {return maxCoord;}
+	inline sf::Texture* getMinimap() const {return _minimap;}
+	inline std::vector<Center*> getCenters() const {return _centers;}
+	inline std::vector<Edge*> 	getEdges()   const {return _edges;}
+	inline std::vector<Corner*> getCorners() const {return _corners;}
+	inline int getNbChunks() const {return _nbChunks;}
+	inline double getMaxCoord() const {return _maxCoord;}
 
 	Center* getClosestCenter(sf::Vector2<double> pos) const;
 	std::vector<Center*> getCentersInChunk(sf::Vector2i chunkPos) const;
@@ -94,15 +94,15 @@ private:
 	bool boolAttrib(std::string str) const;
 	Biome biomeAttrib(std::string str) const;
 
-	sf::Texture* minimap;
-	std::vector<Center*> centers;
-	std::vector<Edge*>   edges;
-	std::vector<Corner*> corners;
+	sf::Texture* _minimap;
+	std::vector<Center*> _centers;
+	std::vector<Edge*>   _edges;
+	std::vector<Corner*> _corners;
 
-	int nbChunks; // Number of chunks on a row
-	double maxCoord;
+	int _nbChunks; // Number of chunks on a row
+	double _maxCoord;
 
-	double* data;
-	flann::Matrix<double> dataset; // For knn searches
-	flann::Index<flann::L2<double> >* kdIndex;
+	double* _data;
+	flann::Matrix<double> _dataset; // For knn searches
+	flann::Index<flann::L2<double> >* _kdIndex;
 };

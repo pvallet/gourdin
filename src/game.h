@@ -44,8 +44,8 @@ public:
 	void addLion(sf::Vector2i screenTarget);
 	void generateHerd(sf::Vector2f pos, int count);
 
-	inline std::set<igElement*> getSelection() const {return sel;}
-	inline std::vector<igElement*> getElements() const {return e;}
+	inline std::set<igElement*> getSelection() const {return _sel;}
+	inline std::vector<igElement*> getElements() const {return _e;}
 
 private:
 	sf::Vector2i neighbour(sf::Vector2i pos, int index) const;
@@ -53,19 +53,19 @@ private:
 	sf::Vector2<double> get2DCoord(sf::Vector2i screenTarget) const;
 	void generateForests(sf::Vector2i pos);
 
-	std::set<igElement*> sel; // Selection
-	std::set<igElement*, compDepth> vis; // Visible
-	std::vector<igElement*> e; // Elements
-	Camera* cam;
+	std::set<igElement*> _sel; // Selection
+	std::set<igElement*, compDepth> _vis; // Visible
+	std::vector<igElement*> _e; // Elements
+	Camera* _cam;
 
-	std::vector<sf::Texture*> lionTex;
-	std::vector<sf::Texture*> antilopeTex;
-	Map* map;
-	TerrainTexManager terrainTexManager;
-	TreeTexManager treeTexManager;
-	Shader hmapShader;
+	std::vector<sf::Texture*> _lionTex;
+	std::vector<sf::Texture*> _antilopeTex;
+	Map* _map;
+	TerrainTexManager _terrainTexManager;
+	TreeTexManager _treeTexManager;
+	Shader _hmapShader;
 
-	std::map<sf::Vector2i, Chunk*, compChunkPos> terrain;
-	std::set<sf::Vector2i, compChunkPos> terrainBorder;
-	Skybox* skybox;
+	std::map<sf::Vector2i, Chunk*, compChunkPos> _terrain;
+	std::set<sf::Vector2i, compChunkPos> _terrainBorder;
+	Skybox* _skybox;
 };

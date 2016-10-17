@@ -1,13 +1,18 @@
 cmake_minimum_required(VERSION 3.1)
 
-
 project(gourdin)
 
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-set (CMAKE_CXX_STANDARD 11)
+# set (CMAKE_CXX_STANDARD 11)
+
+set(extra_flags -std=c++11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${extra_flags}")
 
 add_definitions(-D_USE_MATH_DEFINES)
+add_definitions(-DTIXML_USE_STL )
+
+
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -24,7 +29,6 @@ find_package(GLEW REQUIRED)
 find_package(TinyXML REQUIRED)
 find_package(FLANN REQUIRED)
 
-# link_directories(${OPENGL_LIBRARY_DIRS} ${GLEW_LIBRARY_DIRS})
 include_directories(
   ${SFML_INCLUDE_DIR}
   ${OPENGL_INCLUDE_DIRS}

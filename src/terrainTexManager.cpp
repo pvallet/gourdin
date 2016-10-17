@@ -4,7 +4,7 @@
 #include <sstream>
 
 TerrainTexManager::TerrainTexManager(std::string folder) {
-  texIndices = new GLuint[NB_BIOMES];
+  _texIndices = new GLuint[NB_BIOMES];
 
   // glEnable(GL_TEXTURE_2D);
 
@@ -20,9 +20,9 @@ TerrainTexManager::TerrainTexManager(std::string folder) {
       std::cerr << "Unable to open file " << std::endl;
     }
 
-    glGenTextures(1, &texIndices[i]);
+    glGenTextures(1, &_texIndices[i]);
 
-    glBindTexture(GL_TEXTURE_2D, texIndices[i]);
+    glBindTexture(GL_TEXTURE_2D, _texIndices[i]);
 
     glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGBA,
                     img.getSize().x, img.getSize().y,

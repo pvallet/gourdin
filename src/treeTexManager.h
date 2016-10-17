@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
@@ -20,18 +20,16 @@ public:
 	TreeTexManager(std::string path);
 	~TreeTexManager();
 
-	inline float getHeight(Biome biome, int index) const {return flora[biome]->tex[index]->getSize().y * heightFactor;}
-	inline sf::Vector2u getSize(Biome biome, int index) const {return flora[biome]->tex[index]->getSize();}
-	inline void bind(Biome biome, int index) {sf::Texture::bind(flora[biome]->tex[index], sf::Texture::CoordinateType::Pixels);}
+	inline float getHeight(Biome biome, int index) const {return _flora[biome]->tex[index]->getSize().y * _heightFactor;}
+	inline sf::Vector2u getSize(Biome biome, int index) const {return _flora[biome]->tex[index]->getSize();}
+	inline void bind(Biome biome, int index) {sf::Texture::bind(_flora[biome]->tex[index], sf::Texture::CoordinateType::Pixels);}
 
-	inline float getDensity(Biome biome) const {return flora[biome]->density;}
-	inline float getExtension(Biome biome) const {return flora[biome]->extension;}
-	inline float getNBTrees(Biome biome) const {return flora[biome]->nbTrees;}
+	inline float getDensity(Biome biome) const {return _flora[biome]->density;}
+	inline float getExtension(Biome biome) const {return _flora[biome]->extension;}
+	inline float getNBTrees(Biome biome) const {return _flora[biome]->nbTrees;}
 
 private:
-	std::vector<Flora*> flora;
+	std::vector<Flora*> _flora;
 
-	float heightFactor;
+	float _heightFactor;
 };
-
-

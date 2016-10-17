@@ -9,28 +9,28 @@
 #define CHUNK_BEGIN_X 30
 #define CHUNK_BEGIN_Y 11
 
-Game::Game(Camera* camera, Map* _map) :
-  cam(camera),
-  map(_map),
-  terrainTexManager("res/terrain/"),
-  treeTexManager("res/trees/"),
-  hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag") {
-  hmapShader.load();
+Game::Game(Camera* camera, Map* map) :
+  _cam(camera),
+  _map(map),
+  _terrainTexManager("res/terrain/"),
+  _treeTexManager("res/trees/"),
+  _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag") {
+  _hmapShader.load();
 
-  cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
+  _cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
 
   Heightmap* hmap[4];
 
   srand(time(NULL));
 
-  hmap[0] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y), rand(), &terrainTexManager, map);
-  hmap[1] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y - 1), rand(), &terrainTexManager, map);
-  hmap[2] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y), rand(), &terrainTexManager, map);
-  hmap[3] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y - 1), rand(), &terrainTexManager, map);
+  hmap[0] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y), rand(), &_terrainTexManager, _map);
+  hmap[1] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y - 1), rand(), &_terrainTexManager, _map);
+  hmap[2] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y), rand(), &_terrainTexManager, _map);
+  hmap[3] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y - 1), rand(), &_terrainTexManager, _map);
 
   hmap[0]->generate(std::vector<Constraint>());
-  terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
-  terrainBorder.insert(hmap[0]->getChunkPos());
+  _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
+  _terrainBorder.insert(hmap[0]->getChunkPos());
 
   for (int i = 1 ; i < 4 ; i++) {
     std::vector<Constraint> c;
@@ -39,12 +39,12 @@ Game::Game(Camera* camera, Map* _map) :
       c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
 
     hmap[i]->generate(c);
-    terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
-    terrainBorder.insert(hmap[i]->getChunkPos());
+    _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
+    _terrainBorder.insert(hmap[i]->getChunkPos());
     generateForests(hmap[i]->getChunkPos());
   }
 
-  skybox = new Skybox("res/skybox/skybox", cam);
+  _skybox = new Skybox("res/skybox/skybox", _cam);
 
   sf::Color mask(0, 151, 135);
 
@@ -69,7 +69,7 @@ Game::Game(Camera* camera, Map* _map) :
     curTex->loadFromImage(img);
     curTex->setSmooth(true);
 
-    lionTex.push_back(curTex);
+    _lionTex.push_back(curTex);
   }
 
   std::vector<std::string> antilopeSheets;
@@ -92,20 +92,20 @@ Game::Game(Camera* camera, Map* _map) :
     curTex->loadFromImage(img);
     curTex->setSmooth(true);
 
-    antilopeTex.push_back(curTex);
+    _antilopeTex.push_back(curTex);
   }
 
   generateHerd(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
 }
 
 Game::~Game() {
-	for(auto it = terrain.begin() ; it != terrain.end() ; ++it) {
+	for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
       //delete it->second;
   }
 
-  delete skybox;
-  for (unsigned int i = 0 ; i < e.size() ; i++) {
-    delete e[i];
+  delete _skybox;
+  for (unsigned int i = 0 ; i < _e.size() ; i++) {
+    delete _e[i];
   }
 }
 
@@ -115,39 +115,39 @@ void Game::generateHeightmap(sf::Vector2i pos) {
 
   for (int j = 0 ; j < 4 ; j++) { // Get constraints
     tmp = neighbour(pos,j);
-    std::map<sf::Vector2i, Chunk*>::iterator it = terrain.find(tmp);
+    std::map<sf::Vector2i, Chunk*>::iterator it = _terrain.find(tmp);
 
-    if (it != terrain.end()) {
+    if (it != _terrain.end()) {
       c.push_back(it->second->getConstraint(pos));
     }
   }
 
-  Heightmap* hmap = new Heightmap(pos, rand(), &terrainTexManager, map);
+  Heightmap* hmap = new Heightmap(pos, rand(), &_terrainTexManager, _map);
   hmap->generate(c);
-  terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
-  terrainBorder.insert(hmap->getChunkPos());
+  _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
+  _terrainBorder.insert(hmap->getChunkPos());
 }
 
 void Game::generateNeighbourChunks(sf::Vector2i pos) {
-  if (terrainBorder.find(pos) != terrainBorder.end()) {
+  if (_terrainBorder.find(pos) != _terrainBorder.end()) {
     sf::Vector2i tmp;
     for (int i = 0; i < 4; i++) {
       tmp = neighbour(pos,i);
 
-      if (terrain.find(tmp) == terrain.end()) { // We only add the neighbour if it's not already generated
-        // If the chunk to be generated is not handled by the map, we generate an ocean
-        if (tmp.x < 0 || tmp.x >= map->getNbChunks() || tmp.y < 0 || tmp.y >= map->getNbChunks()) {
-          terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, terrainTexManager.getTexIndex(OCEAN))));
-          terrainBorder.insert(tmp);
+      if (_terrain.find(tmp) == _terrain.end()) { // We only add the neighbour if it's not already generated
+        // If the chunk to be generated is not handled by the _map, we generate an ocean
+        if (tmp.x < 0 || tmp.x >= _map->getNbChunks() || tmp.y < 0 || tmp.y >= _map->getNbChunks()) {
+          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexIndex(OCEAN))));
+          _terrainBorder.insert(tmp);
         }
 
-        else if (map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
-                 map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
+        else if (_map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
+                 _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
 
-          terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, terrainTexManager.getTexIndex(OCEAN))));
-          terrainBorder.insert(tmp);
+          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexIndex(OCEAN))));
+          _terrainBorder.insert(tmp);
         }
 
         else {
@@ -157,7 +157,7 @@ void Game::generateNeighbourChunks(sf::Vector2i pos) {
       }
     }
 
-    terrainBorder.erase(pos);
+    _terrainBorder.erase(pos);
   }
 }
 
@@ -183,34 +183,34 @@ sf::Vector2i Game::neighbour(sf::Vector2i pos, int index) const {
 }
 
 void Game::update(sf::Time elapsed) {
-  int camPosX = cam->getPointedPos().x < 0 ? cam->getPointedPos().x / CHUNK_SIZE - 1 : cam->getPointedPos().x / CHUNK_SIZE;
-  int camPosY = cam->getPointedPos().y < 0 ? cam->getPointedPos().y / CHUNK_SIZE - 1 : cam->getPointedPos().y / CHUNK_SIZE;
-  cam->setHeight( terrain[sf::Vector2i(camPosX, camPosY)]
-                          ->getHeight(cam->getPointedPos().x - CHUNK_SIZE * camPosX,
-                                      cam->getPointedPos().y - CHUNK_SIZE * camPosY));
+  int camPosX = _cam->getPointedPos().x < 0 ? _cam->getPointedPos().x / CHUNK_SIZE - 1 : _cam->getPointedPos().x / CHUNK_SIZE;
+  int camPosY = _cam->getPointedPos().y < 0 ? _cam->getPointedPos().y / CHUNK_SIZE - 1 : _cam->getPointedPos().y / CHUNK_SIZE;
+  _cam->setHeight( _terrain[sf::Vector2i(camPosX, camPosY)]
+                          ->getHeight(_cam->getPointedPos().x - CHUNK_SIZE * camPosX,
+                                      _cam->getPointedPos().y - CHUNK_SIZE * camPosY));
 
-  for (auto it = terrainBorder.begin() ; it != terrainBorder.end() ; ++it) {
-      if (terrain[(*it)]->isVisible())
+  for (auto it = _terrainBorder.begin() ; it != _terrainBorder.end() ; ++it) {
+      if (_terrain[(*it)]->isVisible())
           generateNeighbourChunks(*it);
   }
 
-  for (unsigned int i = 0 ; i < e.size() ; i++) {
-      if (e[i]->getAbstractType() != igE) {
-          igMovingElement* igM = (igMovingElement*) e[i];
+  for (unsigned int i = 0 ; i < _e.size() ; i++) {
+      if (_e[i]->getAbstractType() != igE) {
+          igMovingElement* igM = (igMovingElement*) _e[i];
           if (igM->getMovingType() == PREY) {
               Antilope* atlp = (Antilope*) igM;
-              atlp->updateState(e);
+              atlp->updateState(_e);
           }
 
           else if (igM->getMovingType() == HUNTER) {
               Lion* lion = (Lion*) igM;
-              lion->kill(e);
+              lion->kill(_e);
           }
       }
   }
 
-  for (auto it = terrain.begin() ; it != terrain.end() ; ++it) {
-      it->second->calculateFrustum(cam);
+  for (auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
+      it->second->calculateFrustum(_cam);
   }
 
   GLint viewport[4];
@@ -220,52 +220,52 @@ void Game::update(sf::Time elapsed) {
   GLdouble modelview[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
 
-  vis.clear();
+  _vis.clear();
 
-  for (unsigned int i = 0 ; i < e.size() ; i++) {
-    int chunkPosX = e[i]->getPos().x / CHUNK_SIZE;
-    int chunkPosY = e[i]->getPos().y / CHUNK_SIZE;
+  for (unsigned int i = 0 ; i < _e.size() ; i++) {
+    int chunkPosX = _e[i]->getPos().x / CHUNK_SIZE;
+    int chunkPosY = _e[i]->getPos().y / CHUNK_SIZE;
 
-    if (terrain.find(sf::Vector2i(chunkPosX, chunkPosY)) != terrain.end() &&
-        terrain.at(sf::Vector2i(chunkPosX, chunkPosY))->isVisible()) {
+    if (_terrain.find(sf::Vector2i(chunkPosX, chunkPosY)) != _terrain.end() &&
+        _terrain.at(sf::Vector2i(chunkPosX, chunkPosY))->isVisible()) {
 
       //std::cout << chunkPosX << " " << chunkPosY << std::endl;
 
-      e[i]->update(elapsed, cam->getTheta()); // Choose the right sprite and update pos
+      _e[i]->update(elapsed, _cam->getTheta()); // Choose the right sprite and update pos
 
-      chunkPosX = e[i]->getPos().x / CHUNK_SIZE;
-      chunkPosY = e[i]->getPos().y / CHUNK_SIZE;
+      chunkPosX = _e[i]->getPos().x / CHUNK_SIZE;
+      chunkPosY = _e[i]->getPos().y / CHUNK_SIZE;
 
       // No test yet to see if the element can move to its new pos (no collision)
-      double newHeight =   terrain[sf::Vector2i(chunkPosX, chunkPosY)]
-                           ->getHeight(e[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
-                                       e[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
+      double newHeight =   _terrain[sf::Vector2i(chunkPosX, chunkPosY)]
+                           ->getHeight(_e[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
+                                       _e[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
 
       // Calculate new corners
       sf::Vector3f corners3[4];
 
-      float width = e[i]->getW();
+      float width = _e[i]->getW();
 
-      corners3[0] = sf::Vector3f( e[i]->getPos().x + sin(cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight + e[i]->getH(),
-                                  e[i]->getPos().y - cos(cam->getTheta()*M_PI/180.)*width/2);
-
-
-      corners3[1] = sf::Vector3f( e[i]->getPos().x - sin(cam->getTheta()*M_PI/180.)*width/2,
-                                  newHeight + e[i]->getH(),
-                                  e[i]->getPos().y + cos(cam->getTheta()*M_PI/180.)*width/2);
+      corners3[0] = sf::Vector3f( _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                  newHeight + _e[i]->getH(),
+                                  _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
-      corners3[2] = sf::Vector3f( e[i]->getPos().x - sin(cam->getTheta()*M_PI/180.)*width/2,
+      corners3[1] = sf::Vector3f( _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                  newHeight + _e[i]->getH(),
+                                  _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
+
+
+      corners3[2] = sf::Vector3f( _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
                                   newHeight,
-                                  e[i]->getPos().y + cos(cam->getTheta()*M_PI/180.)*width/2);
+                                  _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
-      corners3[3] = sf::Vector3f( e[i]->getPos().x + sin(cam->getTheta()*M_PI/180.)*width/2,
+      corners3[3] = sf::Vector3f( _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
                                   newHeight,
-                                  e[i]->getPos().y - cos(cam->getTheta()*M_PI/180.)*width/2);
+                                  _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
 
-      e[i]->set3DCorners(corners3);
+      _e[i]->set3DCorners(corners3);
 
       // Calculate their projections
 
@@ -281,10 +281,10 @@ void Game::update(sf::Time elapsed) {
 
       sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
-      e[i]->set2DCorners(cornersRect);
-      e[i]->setDepth(depth);
+      _e[i]->set2DCorners(cornersRect);
+      _e[i]->setDepth(depth);
 
-      vis.insert(e[i]);
+      _vis.insert(_e[i]);
     }
   }
 }
@@ -296,18 +296,18 @@ void Game::render() const {
 
   /*glEnable(GL_TEXTURE_CUBE_MAP_ARB);
   glDepthMask(GL_FALSE);
-  skybox->draw();
+  _skybox->draw();
   glDepthMask(GL_TRUE);
   glDisable(GL_TEXTURE_CUBE_MAP_ARB);*/
 
   // Heightmap
 
-  glUseProgram(hmapShader.getProgramID());
+  glUseProgram(_hmapShader.getProgramID());
   glActiveTexture(GL_TEXTURE0);
-  glUniform1i(glGetUniformLocation(hmapShader.getProgramID(), "tex"), 0);
-  glUniform3f(glGetUniformLocation(hmapShader.getProgramID(), "camPos"), cam->getPos().x, cam->getPos().y, cam->getPos().z);
+  glUniform1i(glGetUniformLocation(_hmapShader.getProgramID(), "tex"), 0);
+  glUniform3f(glGetUniformLocation(_hmapShader.getProgramID(), "camPos"), _cam->getPos().x, _cam->getPos().y, _cam->getPos().z);
 
-  for(auto it = terrain.begin() ; it != terrain.end() ; ++it) {
+  for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
     if (it->second->isVisible()) {
       glMatrixMode(GL_MODELVIEW);
       glPushMatrix();
@@ -329,9 +329,9 @@ void Game::render() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  //std::cout << e.size() << " " << vis.size() << std::endl;
+  //std::cout << _e.size() << " " << _vis.size() << std::endl;
 
-  for (auto it = vis.begin() ; it != vis.end() ; ++it) {
+  for (auto it = _vis.begin() ; it != _vis.end() ; ++it) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     (*it)->draw();
@@ -344,11 +344,11 @@ void Game::render() const {
 
 void Game::select(sf::IntRect rect, bool add) {
   if (!add)
-    sel.clear();
+    _sel.clear();
 
-  for (unsigned int i = 0 ; i < e.size() ; i++) {
-    if (sel.find(e[i]) == sel.end()) { // e[i] is not selected yet, we can bother to calculate
-      sf::IntRect c = e[i]->get2DCorners();
+  for (unsigned int i = 0 ; i < _e.size() ; i++) {
+    if (_sel.find(_e[i]) == _sel.end()) { // _e[i] is not selected yet, we can bother to calculate
+      sf::IntRect c = _e[i]->get2DCorners();
 
       int centerX, centerY;
 
@@ -356,16 +356,16 @@ void Game::select(sf::IntRect rect, bool add) {
       centerY = c.top + c.height / 2;
 
       if (rect.contains(centerX, centerY)) {
-        if (e[i]->getAbstractType() == CTRL)
-          sel.insert(e[i]);
+        if (_e[i]->getAbstractType() == CTRL)
+          _sel.insert(_e[i]);
       }
 
       else if (   c.contains(rect.left, rect.top) ||
                   c.contains(rect.left + rect.width, rect.top) ||
                   c.contains(rect.left + rect.width, rect.top + rect.height) ||
                   c.contains(rect.left, rect.top + rect.height)  ) {
-        if (e[i]->getAbstractType() == CTRL)
-          sel.insert(e[i]);
+        if (_e[i]->getAbstractType() == CTRL)
+          _sel.insert(_e[i]);
       }
     }
   }
@@ -374,7 +374,7 @@ void Game::select(sf::IntRect rect, bool add) {
 void Game::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2<double> target = get2DCoord(screenTarget);
 
-  for(auto it = sel.begin(); it != sel.end(); ++it) {
+  for(auto it = _sel.begin(); it != _sel.end(); ++it) {
     if ((*it)->getAbstractType() == CTRL) {
       Controllable* tmp = (Controllable*) *it;
       tmp->setTarget(target);
@@ -384,11 +384,11 @@ void Game::moveSelection(sf::Vector2i screenTarget) {
 
 void Game::moveCamera(sf::Vector2f newAimedPos) {
   generateHeightmap(sf::Vector2i(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE));
-  cam->setPointedPos(newAimedPos);
+  _cam->setPointedPos(newAimedPos);
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {
-  e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(lionTex, "res/animals/lion/animInfo.xml")));
+  _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTex, "res/animals/lion/animInfo.xml")));
 }
 
 void Game::generateHerd(sf::Vector2f pos, int count) {
@@ -417,12 +417,12 @@ void Game::generateHerd(sf::Vector2f pos, int count) {
     }
 
     if (add) {
-      tmp.push_back(new Antilope(p, AnimationManager(antilopeTex, "res/animals/antilope/animInfo.xml")));
+      tmp.push_back(new Antilope(p, AnimationManager(_antilopeTex, "res/animals/antilope/animInfo.xml")));
     }
   }
 
   for (int i = 0 ; i < count ; i++) {
-    e.push_back(tmp[i]);
+    _e.push_back(tmp[i]);
   }
 }
 
@@ -435,18 +435,18 @@ void Game::generateForests(sf::Vector2i pos) {
 
   std::vector<Tree*> tmp;
 
-  std::vector<Center*> centers = map->getCentersInChunk(pos);
+  std::vector<Center*> centers = _map->getCentersInChunk(pos);
 
   for (unsigned int i = 0 ; i < centers.size() ; i++) {
     if (centers[i]->biome >= 11) { // No forests in other biomes
       count = 0;
       tmp.clear();
-      nbTrees = treeTexManager.getExtension(centers[i]->biome);
+      nbTrees = _treeTexManager.getExtension(centers[i]->biome);
       nbTrees *= 1.5;
 
       for (int j = 0 ; j < nbTrees ; j++) {
         add = true;
-        r = sqrt(randomD()) * treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
+        r = sqrt(randomD()) * _treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
         theta = randomD() * 2*M_PI;
 
         p.x = centers[i]->x + r*cos(theta);
@@ -455,21 +455,21 @@ void Game::generateForests(sf::Vector2i pos) {
         for (unsigned int k = 0 ; k < tmp.size() ; k++) {
           diff = tmp[k]->getPos() - p;
 
-          if (diff.x * diff.x + diff.y * diff.y < treeTexManager.getDensity(centers[i]->biome) ||
-            map->getClosestCenter(p)->biome != centers[i]->biome) {
+          if (diff.x * diff.x + diff.y * diff.y < _treeTexManager.getDensity(centers[i]->biome) ||
+            _map->getClosestCenter(p)->biome != centers[i]->biome) {
             add = false;
           }
         }
 
         if (add) {
           count++;
-          tmp.push_back(new Tree(p, &treeTexManager, centers[i]->biome,
-            (int) ((randomD() - 0.01f) * treeTexManager.getNBTrees(centers[i]->biome))));
+          tmp.push_back(new Tree(p, &_treeTexManager, centers[i]->biome,
+            (int) ((randomD() - 0.01f) * _treeTexManager.getNBTrees(centers[i]->biome))));
         }
       }
 
       for (int j = 0 ; j < count ; j++) {
-        e.push_back(tmp[j]);
+        _e.push_back(tmp[j]);
       }
     }
   }

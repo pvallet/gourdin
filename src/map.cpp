@@ -9,9 +9,9 @@
 #define MAP_MAX_COORD 600.
 
 Map::Map(std::string path) :
-	nbChunks(50),
-	maxCoord(nbChunks * CHUNK_SIZE)	{
-	minimap = new sf::Texture();
+	_nbChunks(50),
+	_maxCoord(_nbChunks * CHUNK_SIZE)	{
+	_minimap = new sf::Texture();
 
 	std::ostringstream texPath;
   texPath << path << "map.png";
@@ -22,8 +22,8 @@ Map::Map(std::string path) :
     std::cerr << "Unable to open file: " << path << std::endl;
   }
 
-  minimap->loadFromImage(mapImg);
-  minimap->setSmooth(true);
+  _minimap->loadFromImage(mapImg);
+  _minimap->setSmooth(true);
 
 
   // Parse the XML file
@@ -47,7 +47,7 @@ Map::Map(std::string path) :
 
 	int size;
 	elem->QueryIntAttribute("size", &size);
-	centers.resize(size);
+	_centers.resize(size);
 
 	hRoot = TiXmlHandle(elem);
 
@@ -103,7 +103,7 @@ Map::Map(std::string path) :
 		center.edges.  resize(center.edgeIDs.size());
 		center.corners.resize(center.cornerIDs.size());
 
-		centers[center.id] = new Center(center);
+		_centers[center.id] = new Center(center);
 	}
 
 	// Edges
@@ -131,9 +131,9 @@ Map::Map(std::string path) :
 			elem->QueryIntAttribute("corner1", &edge.corner1ID);
 		}
 
-		if (edge.id >= (int) edges.size())
-			edges.resize(edge.id + 1);
-		edges[edge.id] = new Edge(edge);
+		if (edge.id >= (int) _edges.size())
+			_edges.resize(edge.id + 1);
+		_edges[edge.id] = new Edge(edge);
 	}
 
 	// Corners
@@ -185,84 +185,84 @@ Map::Map(std::string path) :
 		corner.edges.  resize(corner.edgeIDs.size());
 		corner.corners.resize(corner.cornerIDs.size());
 
-		if (corner.id >= (int) corners.size())
-			corners.resize(corner.id + 1);
-		corners[corner.id] = new Corner(corner);
+		if (corner.id >= (int) _corners.size())
+			_corners.resize(corner.id + 1);
+		_corners[corner.id] = new Corner(corner);
 	}
 
 	// Convert to game coordinates
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {
-		centers[i]->x *= maxCoord / MAP_MAX_COORD;
-		centers[i]->y *= maxCoord / MAP_MAX_COORD;
+	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+		_centers[i]->x *= _maxCoord / MAP_MAX_COORD;
+		_centers[i]->y *= _maxCoord / MAP_MAX_COORD;
 	}
 
-	for (unsigned int i = 0 ; i < edges.size() ; i++) {
-		if (!edges[i]->mapEdge) {
-			edges[i]->x *= maxCoord / MAP_MAX_COORD;
-			edges[i]->y *= maxCoord / MAP_MAX_COORD;
+	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+		if (!_edges[i]->mapEdge) {
+			_edges[i]->x *= _maxCoord / MAP_MAX_COORD;
+			_edges[i]->y *= _maxCoord / MAP_MAX_COORD;
 		}
 	}
 
-	for (unsigned int i = 0 ; i < corners.size() ; i++) {
-		corners[i]->x *= maxCoord / MAP_MAX_COORD;
-		corners[i]->y *= maxCoord / MAP_MAX_COORD;
+	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
+		_corners[i]->x *= _maxCoord / MAP_MAX_COORD;
+		_corners[i]->y *= _maxCoord / MAP_MAX_COORD;
 	}
 
 	// Set the pointers thanks to the indices
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {
-		for (unsigned int j = 0 ; j < centers[i]->centerIDs.size() ; j++) {
-			centers[i]->centers[j] = centers[centers[i]->centerIDs[j]];
+	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+		for (unsigned int j = 0 ; j < _centers[i]->centerIDs.size() ; j++) {
+			_centers[i]->centers[j] = _centers[_centers[i]->centerIDs[j]];
 		}
 
-		for (unsigned int j = 0 ; j < centers[i]->edgeIDs.size() ; j++) {
-			centers[i]->edges[j] = edges[centers[i]->edgeIDs[j]];
+		for (unsigned int j = 0 ; j < _centers[i]->edgeIDs.size() ; j++) {
+			_centers[i]->edges[j] = _edges[_centers[i]->edgeIDs[j]];
 		}
 
-		for (unsigned int j = 0 ; j < centers[i]->cornerIDs.size() ; j++) {
-			centers[i]->corners[j] = corners[centers[i]->cornerIDs[j]];
-		}
-	}
-
-	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < edges.size() ; i++) {
-		if (!edges[i]->mapEdge) {
-			edges[i]->center0 = centers[edges[i]->center0ID];
-			edges[i]->center1 = centers[edges[i]->center1ID];
-			edges[i]->corner0 = corners[edges[i]->corner0ID];
-			edges[i]->corner1 = corners[edges[i]->corner1ID];
+		for (unsigned int j = 0 ; j < _centers[i]->cornerIDs.size() ; j++) {
+			_centers[i]->corners[j] = _corners[_centers[i]->cornerIDs[j]];
 		}
 	}
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < corners.size() ; i++) {
-		for (unsigned int j = 0 ; j < corners[i]->centerIDs.size() ; j++) {
-			corners[i]->centers[j] = centers[corners[i]->centerIDs[j]];
+	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+		if (!_edges[i]->mapEdge) {
+			_edges[i]->center0 = _centers[_edges[i]->center0ID];
+			_edges[i]->center1 = _centers[_edges[i]->center1ID];
+			_edges[i]->corner0 = _corners[_edges[i]->corner0ID];
+			_edges[i]->corner1 = _corners[_edges[i]->corner1ID];
+		}
+	}
+
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
+		for (unsigned int j = 0 ; j < _corners[i]->centerIDs.size() ; j++) {
+			_corners[i]->centers[j] = _centers[_corners[i]->centerIDs[j]];
 		}
 
-		for (unsigned int j = 0 ; j < corners[i]->edgeIDs.size() ; j++) {
-			corners[i]->edges[j] = edges[corners[i]->edgeIDs[j]];
+		for (unsigned int j = 0 ; j < _corners[i]->edgeIDs.size() ; j++) {
+			_corners[i]->edges[j] = _edges[_corners[i]->edgeIDs[j]];
 		}
 
-		for (unsigned int j = 0 ; j < corners[i]->cornerIDs.size() ; j++) {
-			corners[i]->corners[j] = corners[corners[i]->cornerIDs[j]];
+		for (unsigned int j = 0 ; j < _corners[i]->cornerIDs.size() ; j++) {
+			_corners[i]->corners[j] = _corners[_corners[i]->cornerIDs[j]];
 		}
 	}
 
 
-	data = new double[centers.size()*2];
+	_data = new double[_centers.size()*2];
 
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {
-		data[2*i]   = centers[i]->x;
-		data[2*i+1] = centers[i]->y;
+	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+		_data[2*i]   = _centers[i]->x;
+		_data[2*i+1] = _centers[i]->y;
 	}
 
-	dataset = flann::Matrix<double>(data, centers.size(), 2);
+	_dataset = flann::Matrix<double>(_data, _centers.size(), 2);
 
-	kdIndex = new flann::Index<flann::L2<double> >(dataset, flann::KDTreeIndexParams(4));
+	_kdIndex = new flann::Index<flann::L2<double> >(_dataset, flann::KDTreeIndexParams(4));
 
-    kdIndex->buildIndex();
+	_kdIndex->buildIndex();
 }
 
 bool Map::boolAttrib(std::string str) const {
@@ -318,21 +318,21 @@ Biome Map::biomeAttrib(std::string str) const {
 }
 
 Map::~Map() {
-	for (unsigned int i = 0 ; i < centers.size() ; i++) {
-		delete centers[i];
+	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+		delete _centers[i];
 	}
 
-	for (unsigned int i = 0 ; i < edges.size() ; i++) {
-		delete edges[i];
+	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+		delete _edges[i];
 	}
 
-	for (unsigned int i = 0 ; i < corners.size() ; i++) {
-		delete corners[i];
+	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
+		delete _corners[i];
 	}
 
-	delete[] data;
-	delete[] dataset.ptr();
-	delete[] kdIndex;
+	delete[] _data;
+	delete[] _dataset.ptr();
+	delete[] _kdIndex;
 }
 
 Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
@@ -345,9 +345,9 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
   std::vector<std::vector<int> > indices;
   std::vector<std::vector<double> > dists;
 
-  kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(centers.size()));
+  _kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(_centers.size()));
 
-	return centers[indices[0][0]];
+	return _centers[indices[0][0]];
 }
 
 std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
@@ -361,17 +361,17 @@ std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
   std::vector<std::vector<double> > dists;
 
   // Flann weirdly expects the square of the radius
-  kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(centers.size()));
+  _kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(_centers.size()));
 
   std::vector<Center*> res;
   for (unsigned int i = 0 ; i < indices[0].size() ; i++) {
 
-  	if (centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
-  		centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
-  		centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
-  		centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
+  	if (_centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
+  		_centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
+  		_centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
+  		_centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
 
-  		res.push_back(centers[indices[0][i]]);
+  		res.push_back(_centers[indices[0][i]]);
   	}
   }
 

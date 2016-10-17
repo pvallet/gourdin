@@ -9,40 +9,40 @@
 #define TRANSLATION_VALUE_PS 60.
 #define ZOOM_FACTOR 10.
 
-Controller::Controller(sf::RenderWindow* _window) :
- 	addSelect(false),
-  selecting(false),
-  rectSelect(sf::Vector2f(0., 0.)),
-  map("res/map/"),
-  running(true),
-	window(_window),
-  game(&camera, &map) {
+Controller::Controller(sf::RenderWindow* window) :
+ 	_addSelect(false),
+  _selecting(false),
+  _rectSelect(sf::Vector2f(0., 0.)),
+  _map("res/map/"),
+  _running(true),
+	_window(window),
+  _game(&_camera, &_map) {
 
-  font.loadFromFile("res/Arial.ttf");
-  fpsCounter.setFont(font);
-  fpsCounter.setCharacterSize(10);
-  fpsCounter.setColor(sf::Color::White);
+  _font.loadFromFile("res/Arial.ttf");
+  _fpsCounter.setFont(_font);
+  _fpsCounter.setCharacterSize(10);
+  _fpsCounter.setColor(sf::Color::White);
 
-  rectSelect.setFillColor(sf::Color::Transparent);
-  rectSelect.setOutlineThickness(1);
-  rectSelect.setOutlineColor(sf::Color(255, 255, 255));
+  _rectSelect.setFillColor(sf::Color::Transparent);
+  _rectSelect.setOutlineThickness(1);
+  _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
 
-  minimap.setTexture(*(map.getMinimap()));
-  minimap.setPosition(sf::Vector2f(0.f, window->getSize().y - minimap.getTextureRect().height));
+  _minimap.setTexture(*(_map.getMinimap()));
+  _minimap.setPosition(sf::Vector2f(0.f, _window->getSize().y - _minimap.getTextureRect().height));
 }
 
 void Controller::init() {
-	camera.resize(window->getSize().x, window->getSize().y );
+	_camera.resize(_window->getSize().x, _window->getSize().y );
 }
 
 void Controller::render() {
-  if (running) {
+  if (_running) {
 
     // Game
 
-    window->clear(sf::Color::Black);
-    game.render();
-    window->pushGLStates();
+    _window->clear(sf::Color::Black);
+    _game.render();
+    _window->pushGLStates();
 
     // Life bars
 
@@ -54,7 +54,7 @@ void Controller::render() {
     fullLifeBar.setOutlineColor(sf::Color::Black);
     fullLifeBar.setOutlineThickness(1);
 
-    std::set<igElement*> sel = game.getSelection();
+    std::set<igElement*> sel = _game.getSelection();
     sf::IntRect corners;
     float maxHeightFactor;
 
@@ -70,112 +70,112 @@ void Controller::render() {
 
       lifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - corners.height*maxHeightFactor + corners.height - 5);
       fullLifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - corners.height*maxHeightFactor + corners.height - 5);
-      window->draw(lifeBar);
-      window->draw(fullLifeBar);
+      _window->draw(lifeBar);
+      _window->draw(fullLifeBar);
       lifeBar.setSize(sf::Vector2f(20., 2.));
     }
 
     // RectSelect
 
-    window->draw(rectSelect);
+    _window->draw(_rectSelect);
 
     // Minimap
-    window->draw(minimap);
+    _window->draw(_minimap);
 
     sf::CircleShape miniCamPos(3);
     miniCamPos.setPointCount(8);
     miniCamPos.setFillColor(sf::Color::Black);
-    miniCamPos.setPosition( minimap.getPosition().x - miniCamPos.getRadius() / 2 +
-                            (float) minimap.getTextureRect().height * camera.getPointedPos().x / map.getMaxCoord(),
+    miniCamPos.setPosition( _minimap.getPosition().x - miniCamPos.getRadius() / 2 +
+                            (float) _minimap.getTextureRect().height * _camera.getPointedPos().x / _map.getMaxCoord(),
 
-                            minimap.getPosition().y - miniCamPos.getRadius() / 2 +
-                            (float) minimap.getTextureRect().width  * camera.getPointedPos().y / map.getMaxCoord());
+                            _minimap.getPosition().y - miniCamPos.getRadius() / 2 +
+                            (float) _minimap.getTextureRect().width  * _camera.getPointedPos().y / _map.getMaxCoord());
 
-    window->draw(miniCamPos);
+    _window->draw(miniCamPos);
 
     // FPS
 
-    int fps = 1. / elapsed.asSeconds();
+    int fps = 1. / _elapsed.asSeconds();
     std::ostringstream convert;
     convert << fps;
-    fpsCounter.setString("FPS: " + convert.str());
+    _fpsCounter.setString("FPS: " + convert.str());
 
-    window->draw(fpsCounter);
-    window->display();
-    window->popGLStates();
+    _window->draw(_fpsCounter);
+    _window->display();
+    _window->popGLStates();
   }
 }
 
 void Controller::run() {
-  while (running) {
+  while (_running) {
     sf::Event event;
-    elapsed = frameClock.restart();
+    _elapsed = _frameClock.restart();
 
-    while (window->pollEvent(event)) {
+    while (_window->pollEvent(event)) {
       if (event.type == sf::Event::Closed)
-        running = false;
+        _running = false;
 
       else if (event.type == sf::Event::Resized) {
         glViewport(0, 0, event.size.width, event.size.height);
-        camera.resize(event.size.width, event.size.height);
+        _camera.resize(event.size.width, event.size.height);
       }
 
       else if (event.type == sf::Event::MouseWheelMoved)
-        camera.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
+        _camera.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
 
       else if (event.type == sf::Event::MouseButtonPressed) {
-        if (minimap.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, window->getSize().y - event.mouseButton.y))) {
-          game.moveCamera(sf::Vector2f( (float) (event.mouseButton.x - minimap.getPosition().x) /
-                                        (float) minimap.getTextureRect().width * map.getMaxCoord(),
-                                        (float) (event.mouseButton.y - minimap.getPosition().y) /
-                                        (float) minimap.getTextureRect().height * map.getMaxCoord()));
+        if (_minimap.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
+          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.x - _minimap.getPosition().x) /
+                                        (float) _minimap.getTextureRect().width * _map.getMaxCoord(),
+                                        (float) (event.mouseButton.y - _minimap.getPosition().y) /
+                                        (float) _minimap.getTextureRect().height * _map.getMaxCoord()));
         }
 
         else {
           // Begin selection
           if (event.mouseButton.button == sf::Mouse::Left) {
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-                addSelect = true;
+                _addSelect = true;
             else
-                addSelect = false;
+                _addSelect = false;
 
-            selecting = true;
-            rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
+            _selecting = true;
+            _rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
           }
 
           // Move selection
           if (event.mouseButton.button == sf::Mouse::Right) {
-            if (game.getSelection().empty())
-              game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+            if (_game.getSelection().empty())
+              _game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
             else
-              game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+              _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
           }
         }
       }
 
       else if (event.type == sf::Event::MouseButtonReleased) {
         if (event.mouseButton.button == sf::Mouse::Left) {
-          game.select(sf::IntRect( rectSelect.getPosition().x, rectSelect.getPosition().y,
-                                  rectSelect.getSize().x, rectSelect.getSize().y), addSelect);
-          selecting = false;
-          rectSelect.setSize(sf::Vector2f(0,0));
+          _game.select(sf::IntRect( _rectSelect.getPosition().x, _rectSelect.getPosition().y,
+                                  _rectSelect.getSize().x, _rectSelect.getSize().y), _addSelect);
+          _selecting = false;
+          _rectSelect.setSize(sf::Vector2f(0,0));
         }
       }
 
       else if (event.type == sf::Event::MouseMoved) {
-        if (selecting) {
-          rectSelect.setSize(sf::Vector2f(event.mouseMove.x - rectSelect.getPosition().x,
-                                          event.mouseMove.y - rectSelect.getPosition().y));
+        if (_selecting) {
+          _rectSelect.setSize(sf::Vector2f(event.mouseMove.x - _rectSelect.getPosition().x,
+                                          event.mouseMove.y - _rectSelect.getPosition().y));
         }
       }
 
       else if (event.type == sf::Event::KeyPressed) {
         switch(event.key.code) {
           case sf::Keyboard::Escape:
-              running = false;
+              _running = false;
               break;
           case sf::Keyboard::LShift: {
-              std::set<igElement*> sel = game.getSelection();
+              std::set<igElement*> sel = _game.getSelection();
 
               for (auto it = sel.begin() ; it != sel.end() ; ++it) {
                   Controllable* ctrl = (Controllable*) (*it);
@@ -197,7 +197,7 @@ void Controller::run() {
       else if (event.type == sf::Event::KeyReleased) {
         switch(event.key.code) {
             case sf::Keyboard::Delete: {
-              std::set<igElement*> sel = game.getSelection();
+              std::set<igElement*> sel = _game.getSelection();
               Controllable* ctrl = (Controllable*) (*sel.begin());
               ctrl->die();
             }
@@ -210,36 +210,36 @@ void Controller::run() {
 
     }
 
-    // Move camera
+    // Move _camera
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-      camera.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.);
+      _camera.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-      camera.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.);
+      _camera.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      camera.translate(0., - TRANSLATION_VALUE_PS * elapsed.asSeconds());
-      //camera.rotate(0., - ROTATION_ANGLE_PS * elapsed.asSeconds()); // for the mouse wheel
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      //_camera.rotate(0., - ROTATION_ANGLE_PS * _elapsed.asSeconds()); // for the mouse wheel
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      camera.translate(0., TRANSLATION_VALUE_PS * elapsed.asSeconds());
-      //camera.rotate(0., ROTATION_ANGLE_PS * elapsed.asSeconds());
+      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      //_camera.rotate(0., ROTATION_ANGLE_PS * _elapsed.asSeconds());
 
     if (sf::Mouse::getPosition().x == 0)
-      camera.translate(TRANSLATION_VALUE_PS * elapsed.asSeconds(), 0.);
+      _camera.translate(TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Mouse::getPosition().y == 0)
-      camera.translate(0., - TRANSLATION_VALUE_PS * elapsed.asSeconds());
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
-    if ((int) sf::Mouse::getPosition().x == (int) camera.getW() - 1)
-      camera.translate(- TRANSLATION_VALUE_PS * elapsed.asSeconds(), 0.);
+    if ((int) sf::Mouse::getPosition().x == (int) _camera.getW() - 1)
+      _camera.translate(- TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
 
-    if ((int) sf::Mouse::getPosition().y == (int) camera.getH() - 1)
-      camera.translate(0., TRANSLATION_VALUE_PS * elapsed.asSeconds());
+    if ((int) sf::Mouse::getPosition().y == (int) _camera.getH() - 1)
+      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
-    camera.apply();
-    game.update(elapsed);
+    _camera.apply();
+    _game.update(_elapsed);
     render();
   }
 }

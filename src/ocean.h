@@ -6,7 +6,7 @@
 
 class Ocean : public Chunk {
 public:
-	Ocean(sf::Vector2i chunkPosition, GLuint _tex);
+	Ocean(sf::Vector2i chunkPosition, GLuint tex);
 	~Ocean() {}
 
 	virtual void calculateFrustum(const Camera* camera);
@@ -18,10 +18,10 @@ public:
 private:
 	int compareToCorners(sf::Vector3f cam, sf::Vector3f vec) const;
 
-	float vertices[12];
-	float normals[12];
-	float coord[8];
-	GLuint indices[4];
+	float _vertices[12];
+	float _normals[12];
+	float _coord[8];
+	GLuint _indices[4];
 
-	GLuint tex;
+	GLuint _tex;
 };

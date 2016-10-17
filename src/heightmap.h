@@ -19,7 +19,7 @@ struct Region {
 class Heightmap : public Chunk {
 
 public:
-	Heightmap(sf::Vector2i chunkPosition, int _seed, TerrainTexManager* _texManager, Map* _map);
+	Heightmap(sf::Vector2i chunkPosition, int seed, TerrainTexManager* texManager, Map* map);
 	~Heightmap() {}
 
 	void generate(std::vector<Constraint> constraints);
@@ -30,25 +30,25 @@ public:
 
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const;
 	float getHeight(float x, float y) const; // linear interpolation
-	inline int getSize() const {return size;}
+	inline int getSize() const {return _size;}
 
 private:
 	int compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const; // 1 if they are all outside, -1 inside, else 0
-	int size;
-	int seed;
+	int _size;
+	int _seed;
 
-	float* vertices;
-	float* normals;
-	float* coord;
+	float* _vertices;
+	float* _normals;
+	float* _coord;
 
-	sf::Vector3f corners[4]; // For frustum culling
-	sf::Vector3f lowests[4];
-	sf::Vector3f highests[4];
+	sf::Vector3f _corners[4]; // For frustum culling
+	sf::Vector3f _lowests[4];
+	sf::Vector3f _highests[4];
 
 
-	std::map<int, Region> regions;
+	std::map<int, Region> _regions;
 
-	std::vector<std::vector<float> > heights;
-	TerrainTexManager* texManager;
-	Map* map;
+	std::vector<std::vector<float> > _heights;
+	TerrainTexManager* _texManager;
+	Map* _map;
 };

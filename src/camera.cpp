@@ -2,41 +2,40 @@
 #include "vecUtils.h"
 
 #include <SFML/OpenGL.hpp>
-#include <GL/glut.h>
 
 Camera::Camera() :
-  fovAngle(45.f),
-	aspectRatio(1.f),
-	nearPlane(0.1f),
-	farPlane(100000.0),
-	x(0.f), y(0.f), height(0.f),
-	r(150.0),
-	phi(60.f),
-	theta(0.f) {}
+  _fovAngle(45.f),
+	_aspectRatio(1.f),
+	_nearPlane(0.1f),
+	_farPlane(100000.0),
+	_x(0.f), _y(0.f), _height(0.f),
+	_r(150.0),
+	_phi(60.f),
+	_theta(0.f) {}
 
-void Camera::resize(unsigned int _W, unsigned int _H) {
-	W = _W;
-	H = _H;
+void Camera::resize(unsigned int W, unsigned int H) {
+	_W = W;
+	_H = H;
 
 	glViewport (0, 0, (GLint)W, (GLint)H);
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity ();
-  aspectRatio = static_cast<float>(W)/static_cast<float>(H);
-  gluPerspective (fovAngle, aspectRatio, nearPlane, farPlane);
+  _aspectRatio = static_cast<float>(W)/static_cast<float>(H);
+  gluPerspective (_fovAngle, _aspectRatio, _nearPlane, _farPlane);
   glMatrixMode (GL_MODELVIEW);
 }
 
 void Camera::apply() {
-  sf::Vector3f tmp = sf::Vector3f(x,y,height) + vu::carthesian(r, theta, phi);
+  sf::Vector3f tmp = sf::Vector3f(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
   // y and z are inverted
-  pos.x = tmp.x;
-  pos.y = tmp.z;
-  pos.z = tmp.y;
+  _pos.x = tmp.x;
+  _pos.y = tmp.z;
+  _pos.z = tmp.y;
 
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(	pos.x, pos.y, pos.z,
-      				x, height, y,
+	gluLookAt(	_pos.x, _pos.y, _pos.z,
+      				_x, _height, _y,
       				0., 1., 0.);
-      				//r*sin((phi-90.)*rad)*cos(theta*rad), r*sin((phi-90))*rad*sin(theta*rad), r*cos((phi-90.)*rad));
+      				//_r*sin((_phi-90.)*rad)*cos(_theta*rad), _r*sin((_phi-90))*rad*sin(_theta*rad), _r*cos((_phi-90.)*rad));
 }

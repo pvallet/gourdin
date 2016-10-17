@@ -28,7 +28,7 @@ void Lion::update(sf::Time elapsed, float theta) {
 			break;
 
 		case ATTACKING:
-			target = _prey->getPos();
+			_target = _prey->getPos();
 			_direction = _prey->getPos() - _pos;
 			_direction /= vu::norm(_direction);
 			_speed = _prey->getSpeed() - 1.f;

@@ -1,14 +1,13 @@
 #include "chunk.h"
 
 Chunk::Chunk(sf::Vector2i chunkPosition) :
-	chunkPos(chunkPosition),
-	visible(false) {
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ibo);
+	_chunkPos(chunkPosition),
+	_visible(false) {
+	glGenBuffers(1, &_vbo);
+	glGenBuffers(1, &_ibo);
 }
 
 Chunk::~Chunk() {
-	glDeleteBuffers(1, &vbo);
-	glDeleteBuffers(1, &ibo);
+	glDeleteBuffers(1, &_vbo);
+	glDeleteBuffers(1, &_ibo);
 }
-

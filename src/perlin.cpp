@@ -16,39 +16,39 @@ double noise(int x, int y) {
   return (rand_noise(tmp + y) + 1.) / 2;
 }*/
 
-Perlin::Perlin(int seed, int _size) :
-  size(_size),
-  octaves(5),
-  frequency(0.01),
-  persistence(0.5) {
+Perlin::Perlin(int seed, int size) :
+  _size(size),
+  _octaves(5),
+  _frequency(0.01),
+  _persistence(0.5) {
 
-  frequency *= (float) 256 / (float) (_size - 1);
+  _frequency *= (float) 256 / (float) (_size - 1);
 
   srand(seed);
 
-  size = size * frequency * pow(2, octaves) + 3; // Add an extra border for interpolation
+  _size = _size * _frequency * pow(2, _octaves) + 3; // Add an extra border for interpolation
 
-  randValues = new double*[octaves]; // We create a different array of random values, thus a different space for each octave
+  _randValues = new double*[_octaves]; // We create a different array of random values, thus a different space for each octave
 
-  for (int i = 0 ; i < octaves ; i++) {
-    randValues[i] = new double[size*size];
+  for (int i = 0 ; i < _octaves ; i++) {
+    _randValues[i] = new double[_size*_size];
   }
 
-  for (int i = 0 ; i < size ; i++) {
-    for (int j = 0 ; j < size ; j++) {
-      for (int k = 0 ; k < octaves ; k++) {
-        randValues[k][size*i + j] = (double) rand() / (double) RAND_MAX;
+  for (int i = 0 ; i < _size ; i++) {
+    for (int j = 0 ; j < _size ; j++) {
+      for (int k = 0 ; k < _octaves ; k++) {
+        _randValues[k][_size*i + j] = (double) rand() / (double) RAND_MAX;
       }
     }
   }
 }
 
 Perlin::~Perlin() {
-  for (int i = 0 ; i < octaves ; i++) {
-    delete[] randValues[i];
+  for (int i = 0 ; i < _octaves ; i++) {
+    delete[] _randValues[i];
   }
 
-  delete[] randValues;
+  delete[] _randValues;
 }
 
 double Perlin::cubic_interpolate(double before_p0, double p0, double p1, double after_p1, double t) {
@@ -65,10 +65,10 @@ double Perlin::smooth_noise_firstdim(int integer_x, int integer_y, double fracti
   integer_x++; // Avoid requests for negative x & y
   integer_y++;
 
-  double v0 = randValues[octave][(integer_x - 1)*size + integer_y];
-  double v1 = randValues[octave][(integer_x    )*size + integer_y];
-  double v2 = randValues[octave][(integer_x + 1)*size + integer_y];
-  double v3 = randValues[octave][(integer_x + 2)*size + integer_y];
+  double v0 = _randValues[octave][(integer_x - 1)*_size + integer_y];
+  double v1 = _randValues[octave][(integer_x    )*_size + integer_y];
+  double v2 = _randValues[octave][(integer_x + 1)*_size + integer_y];
+  double v3 = _randValues[octave][(integer_x + 2)*_size + integer_y];
 
   return cubic_interpolate(v0, v1, v2, v3, fractional_x);
 }
@@ -91,16 +91,16 @@ double Perlin::smooth_noise(double x, double y, int octave) const {
 
 double Perlin::getValue(double x, double y) const {
   double r = 0.;
-  double f = frequency;
+  double f = _frequency;
   double amplitude = 1.;
 
-  for(int i = 0; i < octaves; i++) {
+  for(int i = 0; i < _octaves; i++) {
     r += smooth_noise(x * f, y * f, i) * amplitude;
-    amplitude *= persistence;
+    amplitude *= _persistence;
     f *= 2;
   }
 
-  double geo_lim = (1 - persistence) / (1 - amplitude); // To keep the result < 1.
+  double geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.
 
   return r * geo_lim;
 }
