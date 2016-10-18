@@ -3,6 +3,11 @@
 
 #include <cassert>
 
+#ifdef __linux__
+	#include <signal.h>
+	#include <unistd.h>
+#endif
+
 Shader::Shader() :
 	_vertexID(0),
 	_fragmentID(0),
@@ -150,6 +155,10 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
     // delete[] error;
     glDeleteShader(shader);
+
+#ifdef __linux__
+		kill(getpid(),SIGINT);
+#endif
 
     return false;
   }

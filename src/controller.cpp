@@ -40,7 +40,7 @@ void Controller::render() {
 
     // Game
 
-    _window->clear(sf::Color::Black);
+    // _window->clear(sf::Color::Black);
     _game.render();
     _window->pushGLStates();
 
@@ -115,10 +115,8 @@ void Controller::run() {
       if (event.type == sf::Event::Closed)
         _running = false;
 
-      else if (event.type == sf::Event::Resized) {
-        glViewport(0, 0, event.size.width, event.size.height);
+      else if (event.type == sf::Event::Resized)
         _camera.resize(event.size.width, event.size.height);
-      }
 
       else if (event.type == sf::Event::MouseWheelMoved)
         _camera.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);

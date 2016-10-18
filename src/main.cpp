@@ -12,13 +12,16 @@
 
 int main() {
   sf::ContextSettings context(24, 8, 4, 3, 3);
-  sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+  // sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+  sf::RenderWindow window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, context);
   window.setVerticalSyncEnabled(true);
   window.setActive(true);
 
   glewExperimental = true;
-  glewInit();
-  // assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
+  // glewInit();
+  assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
+
+  printf("GLSL VERSION: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
   glEnable(GL_DEPTH_TEST);
   glCullFace (GL_BACK);

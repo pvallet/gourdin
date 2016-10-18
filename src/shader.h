@@ -33,7 +33,7 @@ private:
   GLuint _fragmentID;
   GLuint _programID;
 
-  GLuint _matrixID; // for the modelview and projection matrix multiplication
+  GLint _matrixID; // for the modelview and projection matrix multiplication
 
   std::string _vertexSource;
   std::string _fragmentSource;
