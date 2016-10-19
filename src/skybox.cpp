@@ -20,7 +20,7 @@ Skybox::Skybox(std::string filename, Camera* camera) :
 
   // TEXTURES
 
-	for (int i = 0 ; i < 6 ; i++)
+	for (size_t i = 0 ; i < 6 ; i++)
 		_textures.push_back(sf::Image());
 
 	_cube_map_target.push_back(GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB);
@@ -77,7 +77,7 @@ void Skybox::draw() const {
 
   sf::Image im;
 
-  for (int i = 0; i < 6; i++) {
+  for (size_t i = 0; i < 6; i++) {
     im = _textures[i];
     glTexImage2D(_cube_map_target[i], 0, 3, im.getSize().x, im.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, im.getPixelsPtr());
   }

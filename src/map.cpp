@@ -24,8 +24,8 @@ void Map::load(std::string path) {
     std::cerr << "Unable to open file: " << path << std::endl;
   }
 
-  // _minimap->loadFromImage(mapImg);
-	// _minimap->setSmooth(true);
+  _minimap->loadFromImage(mapImg);
+	_minimap->setSmooth(true);
 
   // Parse the XML file
 

@@ -19,8 +19,9 @@ Game::Game(Camera* camera, Map* map) :
 
 void Game::init() {
   _hmapShader.load();
-  _terrainTexManager.load("res/terrain/"),
-  _treeTexManager.load("res/trees/"),
+
+  _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
+  _treeTexManager.load("res/trees/");
 
   _cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
 
@@ -37,10 +38,10 @@ void Game::init() {
   _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
   _terrainBorder.insert(hmap[0]->getChunkPos());
 
-  for (int i = 1 ; i < 4 ; i++) {
+  for (size_t i = 1 ; i < 4 ; i++) {
     std::vector<Constraint> c;
 
-    for (int j = 0 ; j < i ; j++)
+    for (size_t j = 0 ; j < i ; j++)
       c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
 
     hmap[i]->generate(c);
@@ -51,54 +52,8 @@ void Game::init() {
 
   _skybox = new Skybox("res/skybox/skybox", _cam);
 
-  sf::Color mask(0, 151, 135);
-
-  std::vector<std::string> lionSheets;
-  lionSheets.push_back("res/animals/lion/wait.png");
-  lionSheets.push_back("res/animals/lion/walk.png");
-  lionSheets.push_back("res/animals/lion/die.png");
-  lionSheets.push_back("res/animals/lion/run.png");
-  lionSheets.push_back("res/animals/lion/attack.png");
-
-  for (unsigned int i = 0 ; i < lionSheets.size() ; i++) {
-    sf::Image img;
-
-    if (!img.loadFromFile(lionSheets[i])) {
-      std::cerr << "Unable to open file" << std::endl;
-    }
-
-    sf::Texture* curTex = new sf::Texture();
-
-    img.createMaskFromColor(mask);
-
-    curTex->loadFromImage(img);
-    curTex->setSmooth(true);
-
-    _lionTex.push_back(curTex);
-  }
-
-  std::vector<std::string> antilopeSheets;
-  antilopeSheets.push_back("res/animals/antilope/wait.png");
-  antilopeSheets.push_back("res/animals/antilope/walk.png");
-  antilopeSheets.push_back("res/animals/antilope/die.png");
-  antilopeSheets.push_back("res/animals/antilope/run.png");
-
-  for (unsigned int i = 0 ; i < antilopeSheets.size() ; i++) {
-    sf::Image img;
-
-    if (!img.loadFromFile(antilopeSheets[i])) {
-      std::cerr << "Unable to open file" << std::endl;
-    }
-
-    sf::Texture* curTex = new sf::Texture();
-
-    img.createMaskFromColor(mask);
-
-    curTex->loadFromImage(img);
-    curTex->setSmooth(true);
-
-    _antilopeTex.push_back(curTex);
-  }
+  _antilopeTexManager.load("res/animals/antilope/");
+  _lionTexManager.load("res/animals/lion/");
 
   generateHerd(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
 }
@@ -118,7 +73,7 @@ void Game::generateHeightmap(sf::Vector2i pos) {
   sf::Vector2i tmp;
   std::vector<Constraint> c;
 
-  for (int j = 0 ; j < 4 ; j++) { // Get constraints
+  for (size_t j = 0 ; j < 4 ; j++) { // Get constraints
     tmp = neighbour(pos,j);
     std::map<sf::Vector2i, Chunk*>::iterator it = _terrain.find(tmp);
 
@@ -136,13 +91,13 @@ void Game::generateHeightmap(sf::Vector2i pos) {
 void Game::generateNeighbourChunks(sf::Vector2i pos) {
   if (_terrainBorder.find(pos) != _terrainBorder.end()) {
     sf::Vector2i tmp;
-    for (int i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 4; i++) {
       tmp = neighbour(pos,i);
 
       if (_terrain.find(tmp) == _terrain.end()) { // We only add the neighbour if it's not already generated
         // If the chunk to be generated is not handled by the _map, we generate an ocean
         if (tmp.x < 0 || tmp.x >= _map->getNbChunks() || tmp.y < 0 || tmp.y >= _map->getNbChunks()) {
-          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexIndex(OCEAN))));
+          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
           _terrainBorder.insert(tmp);
         }
 
@@ -151,7 +106,7 @@ void Game::generateNeighbourChunks(sf::Vector2i pos) {
                  _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
                  _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
 
-          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexIndex(OCEAN))));
+          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
           _terrainBorder.insert(tmp);
         }
 
@@ -396,7 +351,7 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {
-  _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTex, "res/animals/lion/animInfo.xml")));
+  _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
 }
 
 void Game::generateHerd(sf::Vector2f pos, int count) {
@@ -407,7 +362,7 @@ void Game::generateHerd(sf::Vector2f pos, int count) {
 
   std::vector<Antilope*> tmp;
 
-  for (int i = 0 ; i < count ; i++) {
+  for (size_t i = 0 ; i < count ; i++) {
     add = true;
     r = sqrt(randomD()) * HERD_RADIUS * sqrt(count);
     theta = randomD() * 2*M_PI;
@@ -425,11 +380,11 @@ void Game::generateHerd(sf::Vector2f pos, int count) {
     }
 
     if (add) {
-      tmp.push_back(new Antilope(p, AnimationManager(_antilopeTex, "res/animals/antilope/animInfo.xml")));
+      tmp.push_back(new Antilope(p, AnimationManager(_antilopeTexManager)));
     }
   }
 
-  for (int i = 0 ; i < count ; i++) {
+  for (size_t i = 0 ; i < count ; i++) {
     _e.push_back(tmp[i]);
   }
 }
@@ -452,7 +407,7 @@ void Game::generateForests(sf::Vector2i pos) {
       nbTrees = _treeTexManager.getExtension(centers[i]->biome);
       nbTrees *= 1.5;
 
-      for (int j = 0 ; j < nbTrees ; j++) {
+      for (size_t j = 0 ; j < nbTrees ; j++) {
         add = true;
         r = sqrt(randomD()) * _treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
         theta = randomD() * 2*M_PI;
@@ -476,7 +431,7 @@ void Game::generateForests(sf::Vector2i pos) {
         }
       }
 
-      for (int j = 0 ; j < count ; j++) {
+      for (size_t j = 0 ; j < count ; j++) {
         _e.push_back(tmp[j]);
       }
     }

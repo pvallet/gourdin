@@ -21,10 +21,10 @@ igElement::igElement(sf::Vector2<double> position) :
   _coord2D = new int[8];
   _indices = new GLuint[4];
 
-  for (int i = 0 ; i < 12 ; i++)
+  for (size_t i = 0 ; i < 12 ; i++)
     _vertices[i] = 0.f;
 
-  for (int i = 0 ; i < 8 ; i++)
+  for (size_t i = 0 ; i < 8 ; i++)
     _coord2D[i] = 0;
 
   glGenBuffers(1, &_vbo);
@@ -34,7 +34,7 @@ igElement::igElement(sf::Vector2<double> position) :
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  for (int i = 0 ; i < 4 ; i++) {
+  for (size_t i = 0 ; i < 4 ; i++) {
     _indices[i] = i;
   }
 
@@ -62,7 +62,7 @@ void igElement::update(sf::Time elapsed, float theta) {
 }
 
 void igElement::set3DCorners(glm::vec3 nCorners[4]) {
-	for (int i = 0 ; i < 4 ; i++) {
+	for (size_t i = 0 ; i < 4 ; i++) {
 		_vertices[3*i]   = nCorners[i].x;
 		_vertices[3*i+1] = nCorners[i].y;
 		_vertices[3*i+2] = nCorners[i].z;

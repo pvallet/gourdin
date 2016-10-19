@@ -12,7 +12,6 @@
 
 int main() {
   sf::ContextSettings context(24, 8, 4, 3, 0);
-  // sf::ContextSettings context(24, 8, 4, 3, 3, sf::ContextSettings::Core);
   // sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
   sf::RenderWindow window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, context);
   window.setVerticalSyncEnabled(true);

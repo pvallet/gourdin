@@ -17,8 +17,9 @@
 #include "tree.h"
 
 #include "animationManager.h"
+#include "AnimationManagerInitializer.h"
 #include "map.h"
-#include "terrainTexManager.h"
+#include "texManager.h"
 #include "treeTexManager.h"
 #include "shader.h"
 #include "utils.h"
@@ -60,10 +61,10 @@ private:
 	std::vector<igElement*> _e; // Elements
 	Camera* _cam;
 
-	std::vector<sf::Texture*> _lionTex;
-	std::vector<sf::Texture*> _antilopeTex;
 	Map* _map;
-	TerrainTexManager _terrainTexManager;
+  AnimationManagerInitializer _antilopeTexManager;
+  AnimationManagerInitializer _lionTexManager;
+	TexManager _terrainTexManager;
 	TreeTexManager _treeTexManager;
 	Shader _hmapShader;
 

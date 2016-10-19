@@ -30,13 +30,13 @@ Perlin::Perlin(int seed, int size) :
 
   _randValues = new double*[_octaves]; // We create a different array of random values, thus a different space for each octave
 
-  for (int i = 0 ; i < _octaves ; i++) {
+  for (size_t i = 0 ; i < _octaves ; i++) {
     _randValues[i] = new double[_size*_size];
   }
 
-  for (int i = 0 ; i < _size ; i++) {
-    for (int j = 0 ; j < _size ; j++) {
-      for (int k = 0 ; k < _octaves ; k++) {
+  for (size_t i = 0 ; i < _size ; i++) {
+    for (size_t j = 0 ; j < _size ; j++) {
+      for (size_t k = 0 ; k < _octaves ; k++) {
         _randValues[k][_size*i + j] = (double) rand() / (double) RAND_MAX;
       }
     }
@@ -44,7 +44,7 @@ Perlin::Perlin(int seed, int size) :
 }
 
 Perlin::~Perlin() {
-  for (int i = 0 ; i < _octaves ; i++) {
+  for (size_t i = 0 ; i < _octaves ; i++) {
     // delete[] _randValues[i];
   }
 

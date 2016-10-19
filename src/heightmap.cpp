@@ -13,11 +13,11 @@
 #define SMOOTH_RANGE 20. // Percentage
 
 
-Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, TerrainTexManager* texManager, Map* map) :
+Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTexManager, Map* map) :
 	Chunk(chunkPosition),
 	_size(DEFAULT_MAP_SIZE),
   _seed(seed),
-  _texManager(texManager),
+  _terrainTexManager(terrainTexManager),
   _map(map) {
 
   for (unsigned int i = 0 ; i < DEFAULT_MAP_SIZE ; i++) {
@@ -32,8 +32,8 @@ Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, TerrainTexManager* te
 void Heightmap::generate(std::vector<Constraint> constraints) {
   /*Perlin perlin(_seed, _size);
 
-	for (int i = 0 ; i < _size ; i++) {
-		for (int j = 0 ; j < _size ; j++) {
+	for (size_t i = 0 ; i < _size ; i++) {
+		for (size_t j = 0 ; j < _size ; j++) {
 			_heights[i][j] = perlin.getValue(i, j) * HEIGHT_FACTOR;
 		}
 	}*/
@@ -49,10 +49,10 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   double y, y1, y2, y3;
   x = _chunkPos.x * CHUNK_SIZE;
 
-  for (int i = 0 ; i < _size ; i++) {
+  for (size_t i = 0 ; i < _size ; i++) {
     y = _chunkPos.y * CHUNK_SIZE;
 
-    for (int j = 0 ; j < _size ; j++) {
+    for (size_t j = 0 ; j < _size ; j++) {
       tmpRegions[i][j] = _map->getClosestCenter(sf::Vector2<double>(x, y));
       _regions[tmpRegions[i][j]->id].cursor = 0;
 
@@ -177,8 +177,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   }
 
   Region* region;
-  for (int i = 0 ; i < size1 ; i++) {
-    for (int j = 0 ; j < size1 ; j++) {
+  for (size_t i = 0 ; i < size1 ; i++) {
+    for (size_t j = 0 ; j < size1 ; j++) {
       region = &_regions[tmpRegions[i][j]->id];
       region->indices[region->cursor]     =               + i*size1 + j;
       region->indices[region->cursor + 1] =   size1*size1 + i*size1 + j;
@@ -199,8 +199,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   sf::Vector3f normal;
   sf::Vector3f neighbourVec[4];
 
-  for (int i = 1 ; i < size1 ; i++) {
-    for (int j = 1 ; j < size1 ; j++) {
+  for (size_t i = 1 ; i < size1 ; i++) {
+    for (size_t j = 1 ; j < size1 ; j++) {
       neighbourVec[0] = sf::Vector3f(step,  _heights[i-1][j] - _heights[i][j], 0.f);
       neighbourVec[1] = sf::Vector3f(0.f,   _heights[i][j-1] - _heights[i][j], step);
       neighbourVec[2] = sf::Vector3f(-step, _heights[i+1][j] - _heights[i][j], 0.f);
@@ -217,7 +217,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     }
   }
 
-  for (int i = 1 ; i < size1 ; i++) {
+  for (size_t i = 1 ; i < size1 ; i++) {
     normalsTmp[0][i]     = normalsTmp[1][i];
     normalsTmp[size1][i] = normalsTmp[_size-2][i];
     normalsTmp[i][0]     = normalsTmp[i][1];
@@ -231,8 +231,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   // Top left corner
   #pragma omp parallel for
-	for (int i = 0 ; i < size1 ; i++) {
-	for (int j = 0 ; j < size1 ; j++) {
+	for (size_t i = 0 ; i < size1 ; i++) {
+	for (size_t j = 0 ; j < size1 ; j++) {
       _coord[2*i*size1 + 2*j]     = (float) i / (float) size1 * TEX_FACTOR;
       _coord[2*i*size1 + 2*j + 1] = (float) j / (float) size1 * TEX_FACTOR;
 
@@ -248,8 +248,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   // Top right corner
   #pragma omp parallel for
-  for (int i = 0 ; i < size1 ; i++) {
-    for (int j = 0 ; j < size1 ; j++) {
+  for (size_t i = 0 ; i < size1 ; i++) {
+    for (size_t j = 0 ; j < size1 ; j++) {
 
       _coord[2*size1*size1 + 2*i*size1 + 2*j]     = (float) i / (float) size1 * TEX_FACTOR;
       _coord[2*size1*size1 + 2*i*size1 + 2*j + 1] = (float) (j+1) / (float) size1 * TEX_FACTOR;
@@ -266,8 +266,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   // Bottom left corner
   #pragma omp parallel for
-  for (int i = 0 ; i < size1 ; i++) {
-    for (int j = 0 ; j < size1 ; j++) {
+  for (size_t i = 0 ; i < size1 ; i++) {
+    for (size_t j = 0 ; j < size1 ; j++) {
 
       _coord[4*size1*size1 + 2*i*size1 + 2*j]     = (float) (i+1) / (float) size1 * TEX_FACTOR;
       _coord[4*size1*size1 + 2*i*size1 + 2*j + 1] = (float) j / (float) size1 * TEX_FACTOR;
@@ -284,8 +284,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   // Bottom right corner
   #pragma omp parallel for
-  for (int i = 0 ; i < size1 ; i++) {
-    for (int j = 0 ; j < size1 ; j++) {
+  for (size_t i = 0 ; i < size1 ; i++) {
+    for (size_t j = 0 ; j < size1 ; j++) {
 
       _coord[6*size1*size1 + 2*i*size1 + 2*j]     = (float) (i+1) / (float) size1 * TEX_FACTOR;
       _coord[6*size1*size1 + 2*i*size1 + 2*j + 1] = (float) (j+1) / (float) size1 * TEX_FACTOR;
@@ -332,7 +332,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   int iMax = 0;
   float maxH = 0.;
 
-  for (int i = 0 ; i < _size ; i++) {
+  for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[0][i] < minH) {
       iMin = i;
       minH = _heights[0][i];
@@ -347,7 +347,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   _lowests[0]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][iMin], _chunkPos.y * CHUNK_SIZE + iMin * step);
   _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][iMax], _chunkPos.y * CHUNK_SIZE + iMax * step);
 
-  for (int i = 0 ; i < _size ; i++) {
+  for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[size1][i] < minH) {
       iMin = i;
       minH = _heights[size1][i];
@@ -362,7 +362,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   _lowests[1]  = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][iMin], _chunkPos.y * CHUNK_SIZE + iMin * step);
   _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][iMax], _chunkPos.y * CHUNK_SIZE + iMax * step);
 
-  for (int i = 0 ; i < _size ; i++) {
+  for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][0] < minH) {
       iMin = i;
       minH = _heights[i][0];
@@ -377,7 +377,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   _lowests[2]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _heights[iMin][0], _chunkPos.y * CHUNK_SIZE);
   _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _heights[iMax][0], _chunkPos.y * CHUNK_SIZE);
 
-  for (int i = 0 ; i < _size ; i++) {
+  for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][size1] < minH) {
       iMin = i;
       minH = _heights[i][size1];
@@ -409,7 +409,7 @@ void Heightmap::draw() const {
 
   int cursor = 0;
   for (auto it = _regions.begin(); it != _regions.end() ; ++it ) {
-    _texManager->bindTexture(_map->getCenters()[it->first]->biome);
+    _terrainTexManager->bindTexture(_map->getCenters()[it->first]->biome);
 
     glDrawElements(GL_TRIANGLES, 6*it->second.count, GL_UNSIGNED_INT, BUFFER_OFFSET(cursor));
     cursor += 6*it->second.count * sizeof(GLuint);
@@ -428,9 +428,9 @@ void Heightmap::draw() const {
 void Heightmap::saveToImage() const {
 	sf::Uint8* pixels = new sf::Uint8[_size * _size * 4];
 
-	for (int i = 0 ; i < _size ; i++) { // Convert _heights to array of pixels
-		for (int j = 0 ; j < _size ; j++) {
-			for (int k = 0 ; k < 3 ; k++) {
+	for (size_t i = 0 ; i < _size ; i++) { // Convert _heights to array of pixels
+		for (size_t j = 0 ; j < _size ; j++) {
+			for (size_t k = 0 ; k < 3 ; k++) {
 				pixels[i*4*_size + j*4 + k] = _heights[i][j]*255 / HEIGHT_FACTOR;
 			}
 			pixels[i*4*_size + j*4 + 3] = 255;
@@ -450,7 +450,7 @@ void Heightmap::saveToImage() const {
 int Heightmap::compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const {
     float dots[4];
 
-    for (int i = 0 ; i < 4 ; i++) {
+    for (size_t i = 0 ; i < 4 ; i++) {
         dots[i] = vu::dot(points[i]-cam, vec);
     }
 
@@ -531,28 +531,28 @@ Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {
   c.vertices = std::vector<sf::Vector3f>(_size);
 
   if(fromChunkPos == sf::Vector2i(_chunkPos.x+1, _chunkPos.y)) {
-    for (int i = 0 ; i < _size ; i++)
+    for (size_t i = 0 ; i < _size ; i++)
       c.vertices[i] = sf::Vector3f(CHUNK_SIZE, _heights[_size-1][i], i * CHUNK_SIZE / (_size-1));
 
     c.type = XN;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x-1, _chunkPos.y)) {
-    for (int i = 0 ; i < _size ; i++)
+    for (size_t i = 0 ; i < _size ; i++)
       c.vertices[i] = sf::Vector3f(0.f, _heights[0][i], i * CHUNK_SIZE / (_size-1));
 
     c.type = XP;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y+1)) {
-    for (int i = 0 ; i < _size ; i++)
+    for (size_t i = 0 ; i < _size ; i++)
       c.vertices[i] = sf::Vector3f(i * CHUNK_SIZE / (_size-1), _heights[i][_size-1], CHUNK_SIZE);
 
     c.type = YN;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y-1)) {
-    for (int i = 0 ; i < _size ; i++)
+    for (size_t i = 0 ; i < _size ; i++)
       c.vertices[i] = sf::Vector3f( i * CHUNK_SIZE / (_size-1), _heights[i][0], 0.f);
 
     c.type = YP;

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "chunk.h"
-#include "terrainTexManager.h"
+#include "texManager.h"
 #include "map.h"
 
 #define HEIGHT_FACTOR 1000.
@@ -19,7 +19,7 @@ struct Region {
 class Heightmap : public Chunk {
 
 public:
-	Heightmap(sf::Vector2i chunkPosition, int seed, TerrainTexManager* texManager, Map* map);
+	Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTexManager, Map* map);
 	~Heightmap() {}
 
 	void generate(std::vector<Constraint> constraints);
@@ -49,6 +49,6 @@ private:
 	std::map<int, Region> _regions;
 
 	std::vector<std::vector<float> > _heights;
-	TerrainTexManager* _texManager;
+	TexManager* _terrainTexManager;
 	Map* _map;
 };

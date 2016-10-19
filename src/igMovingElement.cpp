@@ -12,9 +12,7 @@ igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager 
 	_graphics(graphics) {}
 
 void igMovingElement::draw() const {
-	const sf::Texture* texture = _graphics.getTexture();
-
-  sf::Texture::bind(texture, sf::Texture::CoordinateType::Pixels);
+	_graphics.bindCurrentTexture();
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 

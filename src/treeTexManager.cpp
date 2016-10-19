@@ -7,7 +7,9 @@ TreeTexManager::TreeTexManager() :
   _heightFactor(0.15) {}
 
 void TreeTexManager::load(std::string path) {
-	_flora.resize(NB_BIOMES, NULL);
+  Flora defaultF;
+  defaultF.biome = NO_DEFINED_BIOME;
+  _flora.resize(NB_BIOMES, defaultF);
 
 	std::ostringstream xmlPath;
     xmlPath << path << "trees.xml";
@@ -32,15 +34,13 @@ void TreeTexManager::load(std::string path) {
     elem->QueryIntAttribute("density", &flr.density);
     elem->QueryIntAttribute("extension", &flr.extension);
 
-    _flora[flr.biome] = new Flora(flr);
+    _flora[flr.biome] = Flora(flr);
   }
-
-  sf::Color mask(255, 0, 255);
 
  	sf::Image img;
   for (unsigned int i = 0 ; i < NB_BIOMES ; i++) {
-    if (_flora[i] != NULL) {
-      for (int j = 0 ; j < _flora[i]->nbTrees ; j++) {
+    if (_flora[i].biome != NO_DEFINED_BIOME) {
+      for (size_t j = 0 ; j < _flora[i].nbTrees ; j++) {
        	std::ostringstream treePath;
 	      treePath << path << i << "_" << j << ".png";
 
@@ -48,12 +48,12 @@ void TreeTexManager::load(std::string path) {
           std::cerr << "Unable to open file: " << treePath.str() << std::endl;
         }
 
-        _flora[i]->tex.push_back(0);
-        _flora[i]->size.push_back(img.getSize());
+        _flora[i].tex.push_back(0);
+        _flora[i].size.push_back(img.getSize());
 
-        glGenTextures(1, &(_flora[i]->tex.back()));
+        glGenTextures(1, &(_flora[i].tex.back()));
 
-        glBindTexture(GL_TEXTURE_2D, _flora[i]->tex.back());
+        glBindTexture(GL_TEXTURE_2D, _flora[i].tex.back());
 
         glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGBA,
                         img.getSize().x, img.getSize().y,
@@ -72,10 +72,4 @@ void TreeTexManager::load(std::string path) {
   }
 
   glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-TreeTexManager::~TreeTexManager() {
-	for (unsigned int i = 0 ; i < NB_BIOMES ; i++) {
-  	// delete _flora[i];
-  }
 }
