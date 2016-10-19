@@ -22,8 +22,6 @@ int main() {
 
   assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
 
-  printf("GLSL VERSION: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
   glEnable(GL_DEPTH_TEST);
   glCullFace (GL_BACK);
   glEnable (GL_CULL_FACE);

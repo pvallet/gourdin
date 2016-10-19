@@ -1,5 +1,4 @@
 #version 130
-#extension ARB_explicit_attrib_location : require
 
 // Interpolated values from the vertex shaders
 in vec2 UV;

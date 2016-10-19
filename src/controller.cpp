@@ -20,7 +20,6 @@ Controller::Controller(sf::RenderWindow* window) :
 void Controller::init() {
   _map.load("res/map/");
   _game.init();
-  printf("GLSL VERSION2: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
   _font.loadFromFile("res/Arial.ttf");
   _fpsCounter.setFont(_font);
