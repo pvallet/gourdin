@@ -8,9 +8,11 @@
 
 #define MAP_MAX_COORD 600.
 
-Map::Map(std::string path) :
+Map::Map() :
 	_nbChunks(50),
-	_maxCoord(_nbChunks * CHUNK_SIZE)	{
+	_maxCoord(_nbChunks * CHUNK_SIZE) {}
+
+void Map::load(std::string path) {
 	_minimap = new sf::Texture();
 
 	std::ostringstream texPath;
@@ -22,9 +24,8 @@ Map::Map(std::string path) :
     std::cerr << "Unable to open file: " << path << std::endl;
   }
 
-  _minimap->loadFromImage(mapImg);
-  _minimap->setSmooth(true);
-
+  // _minimap->loadFromImage(mapImg);
+	// _minimap->setSmooth(true);
 
   // Parse the XML file
 

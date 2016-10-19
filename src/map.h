@@ -1,6 +1,8 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 #include <flann/flann.hpp>
 #include <map>
 #include <vector>
@@ -77,8 +79,10 @@ struct Corner {
 
 class Map {
 public:
-	Map(std::string path);
+	Map();
 	~Map();
+
+	void load(std::string path);
 
 	inline sf::Texture* getMinimap() const {return _minimap;}
 	inline std::vector<Center*> getCenters() const {return _centers;}

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-TerrainTexManager::TerrainTexManager(std::string folder) {
+void TerrainTexManager::load(std::string folder) {
   _texIndices = new GLuint[NB_BIOMES];
 
   for (int i = 0 ; i < NB_BIOMES ; i++) {

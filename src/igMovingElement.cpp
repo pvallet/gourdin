@@ -9,8 +9,7 @@ igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager 
 	_speed(0.),
 	_moving(false),
 	_dead(false),
-	_graphics(graphics) {
-}
+	_graphics(graphics) {}
 
 void igMovingElement::draw() const {
 	const sf::Texture* texture = _graphics.getTexture();

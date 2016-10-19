@@ -7,8 +7,6 @@
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
 
-#include "animationManager.h"
-
 // ig = ingame
 
 enum abstractType {igE, igME, CTRL};

@@ -20,8 +20,10 @@ struct Flora {
 
 class TreeTexManager {
 public:
-	TreeTexManager(std::string path);
+	TreeTexManager();
 	~TreeTexManager();
+
+	void load(std::string path);
 
 	inline float getHeight(Biome biome, int index) const {return _flora[biome]->size[index].y * _heightFactor;}
 	inline sf::Vector2u getSize(Biome biome, int index) const {return _flora[biome]->size[index];}

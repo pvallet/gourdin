@@ -3,8 +3,10 @@
 #include <iostream>
 #include <tinyxml.h>
 
-TreeTexManager::TreeTexManager(std::string path) :
-    _heightFactor(0.15) {
+TreeTexManager::TreeTexManager() :
+  _heightFactor(0.15) {}
+
+void TreeTexManager::load(std::string path) {
 	_flora.resize(NB_BIOMES, NULL);
 
 	std::ostringstream xmlPath;

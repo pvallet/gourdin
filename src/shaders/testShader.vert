@@ -1,4 +1,5 @@
-#version 330 core
+#version 130
+#extension ARB_explicit_attrib_location : require
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPos;

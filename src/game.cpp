@@ -15,10 +15,12 @@
 Game::Game(Camera* camera, Map* map) :
   _cam(camera),
   _map(map),
-  _terrainTexManager("res/terrain/"),
-  _treeTexManager("res/trees/"),
-  _hmapShader("src/shaders/testShader.vert", "src/shaders/testShader.frag") {
+  _hmapShader("src/shaders/testShader.vert", "src/shaders/testShader.frag") {}
+
+void Game::init() {
   _hmapShader.load();
+  _terrainTexManager.load("res/terrain/"),
+  _treeTexManager.load("res/trees/"),
 
   _cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
 

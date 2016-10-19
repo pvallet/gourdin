@@ -7,7 +7,9 @@
 
 class TerrainTexManager {
 public:
-	TerrainTexManager(std::string folder);
+	TerrainTexManager() {}
+
+	void load(std::string folder);
 
 	void bindTexture(Biome biome) const {glBindTexture(GL_TEXTURE_2D, _texIndices[biome]);}
 	inline GLuint getTexIndex(Biome biome) const {return _texIndices[biome];}

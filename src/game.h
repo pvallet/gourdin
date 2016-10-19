@@ -35,6 +35,8 @@ public:
 	Game(Camera* camera, Map* map);
 	~Game();
 
+  void init();
+
 	void generateNeighbourChunks(sf::Vector2i pos);
 	void update(sf::Time elapsed);
 	void render() const; // To be run on another thread

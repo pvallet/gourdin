@@ -11,7 +11,7 @@
 
 class Controller {
 public:
-	Controller(sf::RenderWindow* _window);
+	Controller(sf::RenderWindow* window);
 
 	void init();
 	void run();

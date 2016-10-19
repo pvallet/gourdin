@@ -2,7 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <string>
+
 #include "igElement.h"
+#include "animationManager.h"
 
 enum MovingType {PREY, HUNTER};
 

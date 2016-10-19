@@ -13,10 +13,14 @@ Controller::Controller(sf::RenderWindow* window) :
  	_addSelect(false),
   _selecting(false),
   _rectSelect(sf::Vector2f(0., 0.)),
-  _map("res/map/"),
   _running(true),
 	_window(window),
-  _game(&_camera, &_map) {
+  _game(&_camera, &_map) {}
+
+void Controller::init() {
+  _map.load("res/map/");
+  _game.init();
+  printf("GLSL VERSION2: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
   _font.loadFromFile("res/Arial.ttf");
   _fpsCounter.setFont(_font);
@@ -29,9 +33,7 @@ Controller::Controller(sf::RenderWindow* window) :
 
   _minimap.setTexture(*(_map.getMinimap()));
   _minimap.setPosition(sf::Vector2f(0.f, _window->getSize().y - _minimap.getTextureRect().height));
-}
 
-void Controller::init() {
 	_camera.resize(_window->getSize().x, _window->getSize().y );
 }
 
