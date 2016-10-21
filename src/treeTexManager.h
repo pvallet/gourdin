@@ -1,9 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
-#include <SFML/Graphics.hpp>
-
 #include <string>
 #include <vector>
 
@@ -17,7 +13,7 @@ struct Flora {
 	int density; // Proximity of trees
 	int extension; // Size of forests
 	std::vector<sf::Vector2u> size;
-	std::vector<GLuint> tex;
+	std::vector<size_t> texIndices;
 };
 
 class TreeTexManager : public TexManager {
@@ -28,7 +24,7 @@ public:
 
 	inline float getHeight(Biome biome, int index) const {return _flora[biome].size[index].y * _heightFactor;}
 	inline sf::Vector2u getSize(Biome biome, int index) const {return _flora[biome].size[index];}
-	inline void bind(Biome biome, int index) {glBindTexture(GL_TEXTURE_2D, _flora[biome].tex[index]);}
+	inline void bind(Biome biome, int index) {bindTexture(_flora[biome].texIndices[index]);}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
 	inline float getExtension(Biome biome) const {return _flora[biome].extension;}
