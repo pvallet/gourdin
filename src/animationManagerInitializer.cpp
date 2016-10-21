@@ -43,13 +43,15 @@ void AnimationManagerInitializer::load(std::string folderPath) {
       anm.pause = sf::milliseconds(pausems);
     }
 
-    std::ostringstream convert;
-    convert << folderPath << i << ".png";
-    loadTexture(convert.str());
     anm.sprite = sf::FloatRect(0, 0, 1. / anm.steps, 1. / anm.orientations);
 
-    if (anm.sprite.height > _maxHeight)
-      _maxHeight = anm.sprite.height;
+    std::ostringstream convert;
+    convert << folderPath << i << ".png";
+    sf::Vector2u texSize = loadTexture(convert.str());
+    anm.spriteSize = sf::Vector2f(texSize.x / anm.steps, texSize.y / anm.orientations);
+
+    if (anm.spriteSize.y > _maxHeight)
+      _maxHeight = anm.spriteSize.y;
 
     _animInfo.insert(std::pair<ANM_TYPE, AnimInfo>((ANM_TYPE) type, anm));
     _texIndexInTexManager.insert(std::pair<ANM_TYPE, size_t>((ANM_TYPE) type, i));

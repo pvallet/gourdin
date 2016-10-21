@@ -23,7 +23,7 @@ public:
 	inline void setDepth(float nDepth) {_depth = nDepth;}
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
-	virtual void draw() const = 0;
+	virtual void draw() const;
 
 	// Getters
 

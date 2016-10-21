@@ -10,41 +10,24 @@ igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager 
 	_moving(false),
 	_dead(false),
 	_graphics(graphics) {
-	_size.x = _graphics.getCurrentSprite().width;
-	_size.y = _graphics.getCurrentSprite().height;
+	_size = _graphics.getRawSize();
 	_size /= _size.y;
 }
 
 void igMovingElement::draw() const {
 	_graphics.bindCurrentTexture();
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(2);
-
-  glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	igElement::draw();
 
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
-	_size.x /= _graphics.getCurrentSprite().width;
-	_size.y /= _graphics.getCurrentSprite().height;
+	_size.x /= _graphics.getRawSize().x;
+	_size.y /= _graphics.getRawSize().y;
 	_graphics.launchAnimation(type);
-	_size.x *= _graphics.getCurrentSprite().width;
-	_size.y *= _graphics.getCurrentSprite().height;
+	_size.x *= _graphics.getRawSize().x;
+	_size.y *= _graphics.getRawSize().y;
 }
 
 void igMovingElement::stop() {

@@ -19,8 +19,10 @@ public:
 
 	sf::FloatRect getCurrentSprite() const;
 	inline float getMaxHeightFactor() const {
-		return (float) _texManager.getMaxHeight() / (float) _animInfo.at(_currentAnim).sprite.height;
+		return (float) _texManager.getMaxHeight() / (float) _animInfo.at(_currentAnim).spriteSize.y;
 	}
+
+	inline sf::Vector2f getRawSize() const {return _animInfo.at(_currentAnim).spriteSize;}
 
 	sf::Time getAnimationTime(ANM_TYPE type);
 
