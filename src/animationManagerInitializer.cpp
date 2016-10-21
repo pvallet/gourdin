@@ -45,8 +45,8 @@ void AnimationManagerInitializer::load(std::string folderPath) {
 
     std::ostringstream convert;
     convert << folderPath << i << ".png";
-    sf::Vector2u texSize = loadTexture(convert.str());
-    anm.sprite = sf::IntRect(0, 0, texSize.x / anm.steps, texSize.y / anm.orientations);
+    loadTexture(convert.str());
+    anm.sprite = sf::FloatRect(0, 0, 1. / anm.steps, 1. / anm.orientations);
 
     if (anm.sprite.height > _maxHeight)
       _maxHeight = anm.sprite.height;

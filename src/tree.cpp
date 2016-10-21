@@ -7,16 +7,16 @@ Tree::Tree(sf::Vector2<double> position, TreeTexManager* manager, Biome biome, i
 	_biome(biome),
 	_index(index) {
 
-  _height = _manager->getHeight(_biome, _index);
+  _size = _manager->getSize(_biome, _index);
 
   _coord2D[0] = 0;
   _coord2D[1] = 0;
-  _coord2D[2] = _manager->getSize(_biome, _index).x-1;
+  _coord2D[2] = 1;
   _coord2D[3] = 0;
-  _coord2D[4] = _manager->getSize(_biome, _index).x-1;
-  _coord2D[5] = _manager->getSize(_biome, _index).y-1;
+  _coord2D[4] = 1;
+  _coord2D[5] = 1;
   _coord2D[6] = 0;
-  _coord2D[7] = _manager->getSize(_biome, _index).y-1;
+  _coord2D[7] = 1;
 
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
@@ -31,7 +31,7 @@ void Tree::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(2, 2, GL_INT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 

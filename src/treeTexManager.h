@@ -12,7 +12,7 @@ struct Flora {
 	int nbTrees;
 	int density; // Proximity of trees
 	int extension; // Size of forests
-	std::vector<sf::Vector2u> size;
+	std::vector<sf::Vector2f> size;
 	std::vector<size_t> texIndices;
 };
 
@@ -22,8 +22,7 @@ public:
 
 	void load(std::string path);
 
-	inline float getHeight(Biome biome, int index) const {return _flora[biome].size[index].y * _heightFactor;}
-	inline sf::Vector2u getSize(Biome biome, int index) const {return _flora[biome].size[index];}
+	inline sf::Vector2f getSize(Biome biome, int index) const {return _flora[biome].size[index] * _heightFactor;}
 	inline void bind(Biome biome, int index) {bindTexture(_flora[biome].texIndices[index]);}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}

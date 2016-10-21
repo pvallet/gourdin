@@ -15,7 +15,7 @@ Antilope::Antilope(sf::Vector2<double> position, AnimationManager graphics) :
 	_aStatus(IDLE),
 	_bStatus(ORIENTATION) {
 
-	_height = 5.;
+	_size *= 5.f;
 	_lineOfSight = _lineOfSightStandard;
 
 	_averageRecovering = sf::seconds(3.f);

@@ -11,14 +11,13 @@
 
 igElement::igElement(sf::Vector2<double> position) :
 	_pos(position),
-	_height(3.),
 	_camOrientation(0.),
 	_visible(false) {
 
 	_orientation = randomF() * 360.f;
 
 	_vertices = new float[12];
-  _coord2D = new int[8];
+  _coord2D = new float[8];
   _indices = new GLuint[4];
 
   for (size_t i = 0 ; i < 12 ; i++)
@@ -30,7 +29,7 @@ igElement::igElement(sf::Vector2<double> position) :
   glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferData(   GL_ARRAY_BUFFER, (12*sizeof *_vertices) + (8*sizeof *_coord2D), NULL, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, (12*sizeof *_vertices) + (8*sizeof *_coord2D), NULL, GL_STREAM_DRAW);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 

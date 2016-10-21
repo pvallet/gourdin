@@ -45,8 +45,8 @@ void AnimationManager::update(sf::Time elapsed, float nOrientation) {
   _currentOrient = getClosestOrient(nOrientation);
 }
 
-sf::IntRect AnimationManager::getCurrentSprite() const {
-	sf::IntRect sprite = _animInfo.find(_currentAnim)->second.sprite;
+sf::FloatRect AnimationManager::getCurrentSprite() const {
+	sf::FloatRect sprite = _animInfo.at(_currentAnim).sprite;
 
   sprite.left += _currentSprite * sprite.width;
   sprite.top += _currentOrient * sprite.height;

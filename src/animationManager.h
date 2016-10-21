@@ -17,7 +17,7 @@ public:
 
 	inline void bindCurrentTexture() const {_texManager.bindTexture(_currentAnim);}
 
-	sf::IntRect getCurrentSprite() const;
+	sf::FloatRect getCurrentSprite() const;
 	inline float getMaxHeightFactor() const {
 		return (float) _texManager.getMaxHeight() / (float) _animInfo.at(_currentAnim).sprite.height;
 	}

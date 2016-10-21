@@ -197,15 +197,15 @@ void Game::update(sf::Time elapsed) {
       // Calculate new corners
       glm::vec3 corners3[4];
 
-      float width = _e[i]->getW();
+      float width = _e[i]->getSize().x;
 
       corners3[0] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getH(),
+                                newHeight + _e[i]->getSize().y,
                                 _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
       corners3[1] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getH(),
+                                newHeight + _e[i]->getSize().y,
                                 _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
 
 
@@ -290,8 +290,6 @@ void Game::render() const {
     }
   }
 
-  glUseProgram(0);
-
   // igElements
 
   // glEnable (GL_BLEND);
@@ -303,6 +301,8 @@ void Game::render() const {
   }
 
   // glDisable(GL_BLEND);
+
+  glUseProgram(0);
 }
 
 void Game::select(sf::IntRect rect, bool add) {

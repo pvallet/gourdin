@@ -45,7 +45,8 @@ void TreeTexManager::load(std::string path) {
        	std::ostringstream treePath;
 	      treePath << path << i << "_" << j << ".png";
 
-        _flora[i].size.push_back(loadTexture(treePath.str()));
+        sf::Vector2u sizeU = loadTexture(treePath.str());
+        _flora[i].size.push_back(sf::Vector2f(sizeU.x,sizeU.y));
 
         _flora[i].texIndices.push_back(currentIndex);
         currentIndex++;

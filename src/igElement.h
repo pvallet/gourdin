@@ -19,7 +19,7 @@ public:
 
 	virtual void update(sf::Time elapsed, float theta);
 	void set3DCorners(glm::vec3 nCorners[4]);
-	void set2DCorners(sf::IntRect nCorners) {_corners2 = nCorners;}
+	void set2DCorners(const sf::IntRect& nCorners) {_corners2 = nCorners;}
 	inline void setDepth(float nDepth) {_depth = nDepth;}
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
@@ -29,15 +29,14 @@ public:
 
 	inline sf::Vector2<double> getPos() const {return _pos;}
 	inline float getOrientation() const {return _orientation;}
-	inline float getH() const {return _height;}
-	inline float getW() const {return _height * (float) (_coord2D[2]-_coord2D[0]) / (float) (_coord2D[5]-_coord2D[1]);}
+	inline sf::Vector2f getSize() const {return _size;}
 	inline sf::IntRect get2DCorners() const {return _corners2;}
 	inline float getDepth() const {return _depth;}
 	inline bool getVisible() const {return _visible;}
 
 protected:
 	sf::Vector2<double> _pos;
-	float _height;
+	sf::Vector2f _size;
 
 	sf::IntRect _corners2;
 
@@ -52,7 +51,7 @@ protected:
 	GLuint _ibo;
 
 	float* _vertices;
-	int* _coord2D;
+	float* _coord2D;
 	GLuint* _indices;
 
 private:

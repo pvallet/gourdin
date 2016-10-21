@@ -9,7 +9,11 @@ igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager 
 	_speed(0.),
 	_moving(false),
 	_dead(false),
-	_graphics(graphics) {}
+	_graphics(graphics) {
+	_size.x = _graphics.getCurrentSprite().width;
+	_size.y = _graphics.getCurrentSprite().height;
+	_size /= _size.y;
+}
 
 void igMovingElement::draw() const {
 	_graphics.bindCurrentTexture();
@@ -17,7 +21,7 @@ void igMovingElement::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(2, 2, GL_INT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
@@ -36,9 +40,11 @@ void igMovingElement::draw() const {
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
-	_height /= _graphics.getCurrentSprite().height;
+	_size.x /= _graphics.getCurrentSprite().width;
+	_size.y /= _graphics.getCurrentSprite().height;
 	_graphics.launchAnimation(type);
-	_height *= _graphics.getCurrentSprite().height;
+	_size.x *= _graphics.getCurrentSprite().width;
+	_size.y *= _graphics.getCurrentSprite().height;
 }
 
 void igMovingElement::stop() {
@@ -61,7 +67,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 		}
 	}
 
-	sf::IntRect rect = _graphics.getCurrentSprite();
+	sf::FloatRect rect = _graphics.getCurrentSprite();
 	_coord2D[0] = rect.left;
 	_coord2D[1] = rect.top;
 	_coord2D[2] = rect.left + rect.width;
