@@ -1,4 +1,4 @@
-#include "AnimationManagerInitializer.h"
+#include "animationManagerInitializer.h"
 
 #include <sstream>
 

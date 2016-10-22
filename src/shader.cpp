@@ -74,8 +74,8 @@ bool Shader::load() {
   glAttachShader(_programID, _fragmentID);
 
   glBindAttribLocation(_programID, 0, "in_Vertex");
-  glBindAttribLocation(_programID, 1, "in_Normal");
-  glBindAttribLocation(_programID, 2, "in_TexCoord0");
+  glBindAttribLocation(_programID, 1, "in_TexCoord0");
+	glBindAttribLocation(_programID, 2, "in_Normal");
 
   glLinkProgram(_programID);
 

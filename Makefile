@@ -2,7 +2,7 @@ CIBLE = out
 SRCS =  $(wildcard src/*.cpp)
 LIBS =  -lsfml-graphics -lsfml-window -lsfml-system -lGL -lGLEW -ltinyxml -fopenmp
 
-CFLAGS = -Wall -std=c++11 -g
+CFLAGS = -Wall -std=c++11 -O3
 
 OBJS = $(addprefix obj/,$(notdir $(SRCS:.cpp=.o)))
 

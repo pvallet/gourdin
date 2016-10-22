@@ -11,8 +11,8 @@ public:
   static double cubic_interpolate(double before_p0, double p0, double p1, double after_p1, double t);
 
 private:
-  int _size;
-  int _octaves;
+  size_t _size;
+  size_t _octaves;
   double _frequency;
   double _persistence;
 

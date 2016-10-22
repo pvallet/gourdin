@@ -7,7 +7,6 @@
 class Ocean : public Chunk {
 public:
 	Ocean(sf::Vector2i chunkPosition, GLuint tex);
-	~Ocean() {}
 
 	virtual void calculateFrustum(const Camera* camera);
 

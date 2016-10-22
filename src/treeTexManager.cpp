@@ -41,7 +41,7 @@ void TreeTexManager::load(std::string path) {
   for (unsigned int i = 0 ; i < NB_BIOMES ; i++) {
     _flora[i].texIndices.clear();
     if (_flora[i].biome != NO_DEFINED_BIOME) {
-      for (size_t j = 0 ; j < _flora[i].nbTrees ; j++) {
+      for (int j = 0 ; j < _flora[i].nbTrees ; j++) {
        	std::ostringstream treePath;
 	      treePath << path << i << "_" << j << ".png";
 

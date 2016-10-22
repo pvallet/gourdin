@@ -2,7 +2,6 @@
 
 in vec3 in_Vertex;
 in vec2 in_TexCoord0;
-// in vec3 in_Normal;
 
 out vec2 UV;
 

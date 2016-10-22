@@ -24,9 +24,9 @@ Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTe
 		_heights.push_back(std::vector<float>(DEFAULT_MAP_SIZE, 0.0f));
 	}
 
-	_vertices   = new float [3*4*(_size-1)*(_size-1)];
-  _normals    = new float [3*4*(_size-1)*(_size-1)];
-  _coord      = new float [2*4*(_size-1)*(_size-1)];
+	_vertices.resize(3*4*(_size-1)*(_size-1));
+	_coord	 .resize(2*4*(_size-1)*(_size-1));
+	_normals .resize(3*4*(_size-1)*(_size-1));
 }
 
 void Heightmap::generate(std::vector<Constraint> constraints) {
@@ -38,7 +38,7 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 		}
 	}*/
 
-  int size1 = _size-1;
+  size_t size1 = _size-1;
 
   double step =  CHUNK_SIZE / (double) size1;
 
@@ -61,25 +61,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
       _heights[i][j] = 0.;
 
-      int chosenTriangle = 1000;
-      std::ostringstream tamere;
-      tamere << "chosen cell " << tmpRegions[i][j]->id << " Center " << tmpRegions[i][j]->x << " " << tmpRegions[i][j]->y <<
-              " - Point Coords - " << x << " " << y << " " << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(x1, y1)) << std::endl;
-
-			tamere << "Other cells dists ";
-
-      for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers.size() ; k++){
-          tamere << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(tmpRegions[i][j]->centers[k]->x, tmpRegions[i][j]->centers[k]->y)) << " ";
-      }
-
-			tamere << std::endl;
-
       // Linear interpolation to get the height
       double s, t;
-      bool testPassed = false;
-      double minS = 1000;
-      double minT = 1000;
-      int minK = 0;
       for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
         if (!tmpRegions[i][j]->edges[k]->mapEdge) {
 
@@ -91,9 +74,6 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
           s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
           t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
 
-          tamere << "Triangle coords " << tmpRegions[i][j]->edges[k]->x << " " << tmpRegions[i][j]->edges[k]->y << " - " <<
-                  x2 << " " << y2 << " - " << x3 << " " << y3 << std::endl << "Barycentric coordinates " << s << " " << t << std::endl;
-
           if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
             _heights[i][j] = s       * tmpRegions[i][j]->elevation +
                             t       * tmpRegions[i][j]->edges[k]->corner0->elevation +
@@ -102,66 +82,9 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
               	_heights[i][j] = 0;
             // _heights[i][j] *=  sqrt(_heights[i][j]);
             _heights[i][j] *=  HEIGHT_FACTOR;
-
-            chosenTriangle = k;
-
-						tamere << "kestufoula" << std::endl;
-
-						testPassed = true;
-          }
-
-          else if (s < minS) {
-            minS = s;
-            minT = t;
-            minK = k;
           }
         }
 			}
-
-			// tamere << std::endl;
-			//
-			// x1 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->x;
-      // y1 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->y;
-			//
-			// tamere << "RECHOSEN CELL" << tmpRegions[i][j]->id << " Center " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->x << " " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->y <<
-      //         " - Point Coords - " << x << " " << y << " " << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(x1, y1)) << std::endl;
-			//
-			// tamere << "Other cells dists ";
-			//
-      // for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers.size() ; k++){
-      //     tamere << vu::norm(sf::Vector2<double>(x, y) - sf::Vector2<double>(tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->centers[k]->x, tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->centers[k]->y)) << " ";
-      // }
-			//
-			// tamere << std::endl;
-			//
-			// for (unsigned int k = 0 ; k < tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges.size() ; k++) {
-      //   if (!tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->mapEdge) {
-			//
-			// 		x2 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner0->x;
-      //     y2 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner0->y;
-      //     x3 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner1->x;
-      //     y3 = tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->corner1->y;
-			//
-      //     s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-      //     t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-			//
-      //     tamere << "Triangle coords 2 " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->x << " " << tmpRegions[i][j]->centers[tmpRegions[i][j]->centers.size()-2]->edges[k]->y << " - " <<
-      //             x2 << " " << y2 << " - " << x3 << " " << y3 << std::endl << "Barycentric coordinates " << s << " " << t << std::endl;
-      //   }
-      // }
-
-      // if (!testPassed) {
-      //   _heights[i][j] = minS * tmpRegions[i][j]->elevation +
-      //                   minT * tmpRegions[i][j]->edges[minK]->corner0->elevation +
-      //                   (1-minS-minT) * tmpRegions[i][j]->edges[minK]->corner1->elevation;
-      //   if (_heights[i][j] < 0)
-      //       _heights[i][j] = 0;
-      //   _heights[i][j] *=  sqrt(_heights[i][j]);
-      //   _heights[i][j] *=  HEIGHT_FACTOR;
-      // }
-
-      // if (chosenTriangle == 1000 && tmpRegions[i][j]->biome != OCEAN && tmpRegions[i][j]->id == 1050)
-      //     std::cout << tamere.str() << std::endl << std::endl;
 
       if (i != size1 && j != size1) // We must not put the last indices in the ibo
         _regions[tmpRegions[i][j]->id].count++;
@@ -302,10 +225,14 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferData(GL_ARRAY_BUFFER, 2*(3*4*(_size-1)*(_size-1)*sizeof *_vertices) + (2*4*(_size-1)*(_size-1)*sizeof *_coord), NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, (3*4*(_size-1)*(_size-1)*sizeof *_vertices), _vertices);
-  glBufferSubData(GL_ARRAY_BUFFER, (3*4*(_size-1)*(_size-1)*sizeof *_vertices), (3*4*(_size-1)*(_size-1)*sizeof *_normals), _normals);
-  glBufferSubData(GL_ARRAY_BUFFER, 2*(3*4*(_size-1)*(_size-1)*sizeof *_vertices), (2*4*(_size-1)*(_size-1)*sizeof *_coord), _coord);
+	size_t bufferSizeVertices = _vertices.size()*sizeof _vertices[0];
+	size_t bufferSizeCoord		= _coord.size()*sizeof _coord[0];
+	size_t bufferSizeNormals	= _normals.size()*sizeof _normals[0];
+
+  glBufferData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeCoord + bufferSizeNormals, NULL, GL_STATIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices, &_vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, bufferSizeVertices, bufferSizeCoord, &_coord[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeCoord, bufferSizeNormals, &_normals[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -398,8 +325,10 @@ void Heightmap::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(3*4*(_size-1)*(_size-1)*sizeof *_vertices));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*3*4*(_size-1)*(_size-1)*sizeof *_vertices));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0]));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0] + _coord.size()*sizeof _coord[0]));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 

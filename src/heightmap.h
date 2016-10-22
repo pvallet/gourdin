@@ -8,7 +8,7 @@
 #include "map.h"
 
 // #define HEIGHT_FACTOR 1000.
-#define HEIGHT_FACTOR 0
+#define HEIGHT_FACTOR 1.
 
 typedef struct Region Region;
 struct Region {
@@ -21,7 +21,6 @@ class Heightmap : public Chunk {
 
 public:
 	Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTexManager, Map* map);
-	~Heightmap() {}
 
 	void generate(std::vector<Constraint> constraints);
 	void draw() const;
@@ -35,17 +34,16 @@ public:
 
 private:
 	int compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const; // 1 if they are all outside, -1 inside, else 0
-	int _size;
+	size_t _size;
 	int _seed;
 
-	float* _vertices;
-	float* _normals;
-	float* _coord;
+	std::vector<float> _vertices;
+	std::vector<float> _coord;
+	std::vector<float> _normals;
 
 	sf::Vector3f _corners[4]; // For frustum culling
 	sf::Vector3f _lowests[4];
 	sf::Vector3f _highests[4];
-
 
 	std::map<int, Region> _regions;
 

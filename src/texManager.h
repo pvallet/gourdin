@@ -9,7 +9,7 @@
 
 class TexManager {
 public:
-	TerrainTexManager() {}
+	TexManager() {}
 
 	sf::Vector2u loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);

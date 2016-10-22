@@ -22,8 +22,8 @@ int main() {
   assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
 
   glEnable(GL_DEPTH_TEST);
-  // glCullFace (GL_BACK);
-  // glEnable (GL_CULL_FACE);
+  glCullFace (GL_BACK);
+  glEnable (GL_CULL_FACE);
 
   Controller controller(&window);
 

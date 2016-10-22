@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "AnimationManagerInitializer.h"
+#include "animationManagerInitializer.h"
 
 class AnimationManager {
 public:

@@ -15,10 +15,12 @@
 Game::Game(Camera* camera, Map* map) :
   _cam(camera),
   _map(map),
-  _hmapShader("src/shaders/testShader.vert", "src/shaders/testShader.frag") {}
+  _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
+  _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag") {}
 
 void Game::init() {
   _hmapShader.load();
+  _igEShader.load();
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _treeTexManager.load("res/trees/");
@@ -274,8 +276,6 @@ void Game::render() const {
   // Heightmap
 
   glUseProgram(_hmapShader.getProgramID());
-  glActiveTexture(GL_TEXTURE0);
-  glUniform1i(glGetUniformLocation(_hmapShader.getProgramID(), "tex"), 0);
 
   for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
     if (it->second->isVisible()) {
@@ -292,15 +292,16 @@ void Game::render() const {
 
   // igElements
 
-  // glEnable (GL_BLEND);
-  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glUseProgram(_igEShader.getProgramID());
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   for (auto it = _vis.begin() ; it != _vis.end() ; ++it) {
     _hmapShader.sendModelMatrix(_cam, glm::mat4(1.f));
     (*it)->draw();
   }
 
-  // glDisable(GL_BLEND);
+  glDisable(GL_BLEND);
 
   glUseProgram(0);
 }
@@ -354,7 +355,7 @@ void Game::addLion(sf::Vector2i screenTarget) {
   _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
 }
 
-void Game::generateHerd(sf::Vector2f pos, int count) {
+void Game::generateHerd(sf::Vector2f pos, size_t count) {
   srand(time(NULL));
   double r, theta;
   sf::Vector2<double> p, diff;
@@ -394,7 +395,7 @@ void Game::generateForests(sf::Vector2i pos) {
   double r, theta;
   sf::Vector2<double> p, diff;
   bool add;
-  int count, nbTrees;
+  size_t count, nbTrees;
 
   std::vector<Tree*> tmp;
 

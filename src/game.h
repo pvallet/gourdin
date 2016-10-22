@@ -17,7 +17,7 @@
 #include "tree.h"
 
 #include "animationManager.h"
-#include "AnimationManagerInitializer.h"
+#include "animationManagerInitializer.h"
 #include "map.h"
 #include "texManager.h"
 #include "treeTexManager.h"
@@ -45,7 +45,7 @@ public:
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
-	void generateHerd(sf::Vector2f pos, int count);
+	void generateHerd(sf::Vector2f pos, size_t count);
 
 	inline std::set<igElement*> getSelection() const {return _sel;}
 	inline std::vector<igElement*> getElements() const {return _e;}
@@ -67,6 +67,7 @@ private:
 	TexManager _terrainTexManager;
 	TreeTexManager _treeTexManager;
 	Shader _hmapShader;
+  Shader _igEShader;
 
 	std::map<sf::Vector2i, Chunk*, compChunkPos> _terrain;
 	std::set<sf::Vector2i, compChunkPos> _terrainBorder;

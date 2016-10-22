@@ -22,8 +22,8 @@ Ocean::Ocean(sf::Vector2i chunkPosition, GLuint tex) :
   glBufferData(	GL_ARRAY_BUFFER, (32*sizeof *_vertices), NULL, GL_STATIC_DRAW);
 
   glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *_vertices), _vertices);
-  glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (12*sizeof *_normals), _normals);
-  glBufferSubData(GL_ARRAY_BUFFER, (24*sizeof *_vertices), (8*sizeof *_coord), _coord);
+	glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord), _coord);
+  glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices) + (8*sizeof *_coord), (12*sizeof *_normals), _normals);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -123,8 +123,8 @@ void Ocean::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(24*sizeof *_vertices));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices + 8*sizeof *_coord));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
