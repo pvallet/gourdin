@@ -94,7 +94,7 @@ double Perlin::getValue(double x, double y) const {
   double f = _frequency;
   double amplitude = 1.;
 
-  for(int i = 0; i < _octaves; i++) {
+  for (size_t i = 0; i < _octaves; i++) {
     r += smooth_noise(x * f, y * f, i) * amplitude;
     amplitude *= _persistence;
     f *= 2;

@@ -25,7 +25,7 @@ void Game::init() {
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _treeTexManager.load("res/trees/");
 
-  _cam->translate(CHUNK_BEGIN_Y*CHUNK_SIZE,CHUNK_BEGIN_X*CHUNK_SIZE);
+  _cam->setPointedPos(sf::Vector2f(CHUNK_BEGIN_X*CHUNK_SIZE,CHUNK_BEGIN_Y*CHUNK_SIZE));
 
   Heightmap* hmap[4];
 
@@ -57,18 +57,7 @@ void Game::init() {
   _antilopeTexManager.load("res/animals/antilope/");
   _lionTexManager.load("res/animals/lion/");
 
-  generateHerd(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
-}
-
-Game::~Game() {
-	for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-      //// delete it->second;
-  }
-
-  // delete _skybox;
-  for (unsigned int i = 0 ; i < _e.size() ; i++) {
-    // delete _e[i];
-  }
+  generateHerd(sf::Vector2<double>(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
 }
 
 void Game::generateHeightmap(sf::Vector2i pos) {
@@ -147,32 +136,33 @@ sf::Vector2i Game::neighbour(sf::Vector2i pos, int index) const {
 void Game::update(sf::Time elapsed) {
   int camPosX = _cam->getPointedPos().x < 0 ? _cam->getPointedPos().x / CHUNK_SIZE - 1 : _cam->getPointedPos().x / CHUNK_SIZE;
   int camPosY = _cam->getPointedPos().y < 0 ? _cam->getPointedPos().y / CHUNK_SIZE - 1 : _cam->getPointedPos().y / CHUNK_SIZE;
-  _cam->setHeight( _terrain[sf::Vector2i(camPosX, camPosY)]
+
+  _cam->setHeight( _terrain.at(sf::Vector2i(camPosX, camPosY))
                           ->getHeight(_cam->getPointedPos().x - CHUNK_SIZE * camPosX,
                                       _cam->getPointedPos().y - CHUNK_SIZE * camPosY));
 
   for (auto it = _terrainBorder.begin() ; it != _terrainBorder.end() ; ++it) {
-      if (_terrain[(*it)]->isVisible())
-          generateNeighbourChunks(*it);
+    if (_terrain.at(*it)->isVisible())
+      generateNeighbourChunks(*it);
   }
 
   for (unsigned int i = 0 ; i < _e.size() ; i++) {
-      if (_e[i]->getAbstractType() != igE) {
-          igMovingElement* igM = (igMovingElement*) _e[i];
-          if (igM->getMovingType() == PREY) {
-              Antilope* atlp = (Antilope*) igM;
-              atlp->updateState(_e);
-          }
-
-          else if (igM->getMovingType() == HUNTER) {
-              Lion* lion = (Lion*) igM;
-              lion->kill(_e);
-          }
+    if (_e[i]->getAbstractType() != igE) {
+      igMovingElement* igM = (igMovingElement*) _e[i];
+      if (igM->getMovingType() == PREY) {
+        Antilope* atlp = (Antilope*) igM;
+        atlp->updateState(_e);
       }
+
+      else if (igM->getMovingType() == HUNTER) {
+        Lion* lion = (Lion*) igM;
+        lion->kill(_e);
+      }
+    }
   }
 
   for (auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-      it->second->calculateFrustum(_cam);
+    it->second->calculateFrustum(_cam);
   }
 
   _vis.clear();
@@ -184,15 +174,13 @@ void Game::update(sf::Time elapsed) {
     if (_terrain.find(sf::Vector2i(chunkPosX, chunkPosY)) != _terrain.end() &&
         _terrain.at(sf::Vector2i(chunkPosX, chunkPosY))->isVisible()) {
 
-      //std::cout << chunkPosX << " " << chunkPosY << std::endl;
-
       _e[i]->update(elapsed, _cam->getTheta()); // Choose the right sprite and update pos
 
       chunkPosX = _e[i]->getPos().x / CHUNK_SIZE;
       chunkPosY = _e[i]->getPos().y / CHUNK_SIZE;
 
       // No test yet to see if the element can move to its new pos (no collision)
-      double newHeight =   _terrain[sf::Vector2i(chunkPosX, chunkPosY)]
+      double newHeight =   _terrain.at(sf::Vector2i(chunkPosX, chunkPosY))
                            ->getHeight(_e[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
                                        _e[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
 
@@ -202,40 +190,37 @@ void Game::update(sf::Time elapsed) {
       float width = _e[i]->getSize().x;
 
       corners3[0] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getSize().y,
-                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight + _e[i]->getSize().y);
 
 
       corners3[1] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getSize().y,
-                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
+                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight + _e[i]->getSize().y);
 
 
       corners3[2] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight,
-                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2);
+                                _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight);
 
 
       corners3[3] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight,
-                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2);
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight);
 
       _e[i]->set3DCorners(corners3);
 
       // Calculate their projections
 
-
-      // gluProject(corners3[0].x,corners3[0].y,corners3[0].z,modelview,projection,viewport,&left,  &top,   &trash);
-      // gluProject(corners3[1].x,corners3[1].y,corners3[1].z,modelview,projection,viewport,&right, &trash, &trash);
-      // gluProject(corners3[3].x,corners3[3].y,corners3[3].z,modelview,projection,viewport,&trash, &bot,   &depth);
-
       // TODO optimize with only 2 matrix multiplications
 
-      glm::mat4 viewProjection = _cam->getViewProjectionMatrix();
+      glm::mat4 modelView = _cam->getViewProjectionMatrix() * glm::translate(glm::mat4(1.f),
+        glm::vec3(CHUNK_SIZE * chunkPosX, CHUNK_SIZE * chunkPosY, 0.f)
+      );
 
       glm::vec4 cornersProjNorm[4];
       for (size_t i = 0; i < 4; i++) {
-        cornersProjNorm[i] = viewProjection * glm::vec4(corners3[i], 1.0);
+        cornersProjNorm[i] = modelView * glm::vec4(corners3[i], 1.0);
       }
 
       double w = _cam->getW();
@@ -243,11 +228,11 @@ void Game::update(sf::Time elapsed) {
 
       double left, top, right, bot, depth;
 
-      left  = w * cornersProjNorm[0].x + 1./2;
-      top   = h * cornersProjNorm[0].y + 1./2;
-      right = w * cornersProjNorm[1].x + 1./2;
-      bot   = h * cornersProjNorm[3].y + 1./2;
-      depth = cornersProjNorm[3].z + 1./2;
+      left  = w * (cornersProjNorm[0].x + 1.)/2;
+      top   = h * (cornersProjNorm[0].y + 1.)/2;
+      right = w * (cornersProjNorm[1].x + 1.)/2;
+      bot   = h * (cornersProjNorm[3].y + 1.)/2;
+      depth = (cornersProjNorm[3].z + 1.)/2;
 
       top = h-top;
       bot = h-bot;
@@ -280,10 +265,13 @@ void Game::render() const {
   for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
     if (it->second->isVisible()) {
       glm::mat4 modelview = glm::translate(glm::mat4(1.f),
-        glm::vec3(CHUNK_SIZE * it->first.x, 0.0f, CHUNK_SIZE * it->first.y)
+        glm::vec3(CHUNK_SIZE * it->first.x, CHUNK_SIZE * it->first.y, 0.f)
       );
 
       _hmapShader.sendModelMatrix(_cam, modelview);
+
+      // _hmapShader.sendModelMatrix(_cam, glm::mat4(1.f));
+
 
       it->second->draw();
 
@@ -355,11 +343,13 @@ void Game::addLion(sf::Vector2i screenTarget) {
   _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
 }
 
-void Game::generateHerd(sf::Vector2f pos, size_t count) {
+void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
   srand(time(NULL));
   double r, theta;
   sf::Vector2<double> p, diff;
   bool add;
+
+  _e.push_back(new Lion(pos, AnimationManager(_lionTexManager)));
 
   std::vector<Antilope*> tmp;
 
@@ -445,7 +435,7 @@ sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
   GLfloat d;
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
-  glm::vec4 screenCoord(screenTarget.x, screenTarget.y, d, 1.0);
+  glm::vec4 screenCoord(2*screenTarget.x / (float)_cam->getW()-1, 2*screenTarget.y  / (float)_cam->getH()-1, 2*d-1, 1.0);
 
   glm::vec4 modelCoord = glm::inverse(_cam->getViewProjectionMatrix()) * screenCoord;
 

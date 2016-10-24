@@ -76,8 +76,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
           if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
             _heights[i][j] = s       * tmpRegions[i][j]->elevation +
-                            t       * tmpRegions[i][j]->edges[k]->corner0->elevation +
-                            (1-s-t) * tmpRegions[i][j]->edges[k]->corner1->elevation;
+                             t       * tmpRegions[i][j]->edges[k]->corner0->elevation +
+                             (1-s-t) * tmpRegions[i][j]->edges[k]->corner1->elevation;
             if (_heights[i][j] < 0)
               	_heights[i][j] = 0;
             // _heights[i][j] *=  sqrt(_heights[i][j]);
@@ -124,17 +124,17 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   for (size_t i = 1 ; i < size1 ; i++) {
     for (size_t j = 1 ; j < size1 ; j++) {
-      neighbourVec[0] = sf::Vector3f(step,  _heights[i-1][j] - _heights[i][j], 0.f);
-      neighbourVec[1] = sf::Vector3f(0.f,   _heights[i][j-1] - _heights[i][j], step);
-      neighbourVec[2] = sf::Vector3f(-step, _heights[i+1][j] - _heights[i][j], 0.f);
-      neighbourVec[3] = sf::Vector3f(0.f,   _heights[i][j+1] - _heights[i][j], -step);
+      neighbourVec[0] = sf::Vector3f(step,  0.f,   _heights[i-1][j] - _heights[i][j]);
+      neighbourVec[1] = sf::Vector3f(0.f,   step,  _heights[i][j-1] - _heights[i][j]);
+      neighbourVec[2] = sf::Vector3f(-step, 0.f,   _heights[i+1][j] - _heights[i][j]);
+      neighbourVec[3] = sf::Vector3f(0.f,   -step, _heights[i][j+1] - _heights[i][j]);
 
       normal = vu::cross(neighbourVec[0], neighbourVec[1]) +
                vu::cross(neighbourVec[1], neighbourVec[2]) +
                vu::cross(neighbourVec[2], neighbourVec[3]) +
                vu::cross(neighbourVec[3], neighbourVec[0]);
 
-      normal /= -1.f * vu::norm(normal); // Because our coordinate system is indirect
+      normal /= vu::norm(normal);
 
       normalsTmp[i][j] = normal;
     }
@@ -155,13 +155,13 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   // Top left corner
   #pragma omp parallel for
 	for (size_t i = 0 ; i < size1 ; i++) {
-	for (size_t j = 0 ; j < size1 ; j++) {
+		for (size_t j = 0 ; j < size1 ; j++) {
       _coord[2*i*size1 + 2*j]     = (float) i / (float) size1 * TEX_FACTOR;
       _coord[2*i*size1 + 2*j + 1] = (float) j / (float) size1 * TEX_FACTOR;
 
-      _vertices[3*i*size1 + 3*j] 	  = i * step;
-      _vertices[3*i*size1 + 3*j + 1] = _heights[i][j];
-      _vertices[3*i*size1 + 3*j + 2] = j * step;
+      _vertices[3*i*size1 + 3*j] 		 = i * step;
+      _vertices[3*i*size1 + 3*j + 1] = j * step;
+      _vertices[3*i*size1 + 3*j + 2] = _heights[i][j];
 
       _normals[3*i*size1 + 3*j]     = normalsTmp[i][j].x;
       _normals[3*i*size1 + 3*j + 1] = normalsTmp[i][j].y;
@@ -178,8 +178,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
       _coord[2*size1*size1 + 2*i*size1 + 2*j + 1] = (float) (j+1) / (float) size1 * TEX_FACTOR;
 
       _vertices[3*size1*size1 + 3*i*size1 + 3*j]     = i * step;
-      _vertices[3*size1*size1 + 3*i*size1 + 3*j + 1] = _heights[i][j+1];
-      _vertices[3*size1*size1 + 3*i*size1 + 3*j + 2] = (j+1) * step;
+      _vertices[3*size1*size1 + 3*i*size1 + 3*j + 1] = (j+1) * step;
+      _vertices[3*size1*size1 + 3*i*size1 + 3*j + 2] = _heights[i][j+1];
 
       _normals[3*size1*size1 + 3*i*size1 + 3*j]     = normalsTmp[i][j+1].x;
       _normals[3*size1*size1 + 3*i*size1 + 3*j + 1] = normalsTmp[i][j+1].y;
@@ -196,8 +196,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
       _coord[4*size1*size1 + 2*i*size1 + 2*j + 1] = (float) j / (float) size1 * TEX_FACTOR;
 
       _vertices[6*size1*size1 + 3*i*size1 + 3*j]     = (i+1) * step;
-      _vertices[6*size1*size1 + 3*i*size1 + 3*j + 1] = _heights[i+1][j];
-      _vertices[6*size1*size1 + 3*i*size1 + 3*j + 2] = j * step;
+      _vertices[6*size1*size1 + 3*i*size1 + 3*j + 1] = j * step;
+      _vertices[6*size1*size1 + 3*i*size1 + 3*j + 2] = _heights[i+1][j];
 
       _normals[6*size1*size1 + 3*i*size1 + 3*j]     = normalsTmp[i+1][j].x;
       _normals[6*size1*size1 + 3*i*size1 + 3*j + 1] = normalsTmp[i+1][j].y;
@@ -214,8 +214,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
       _coord[6*size1*size1 + 2*i*size1 + 2*j + 1] = (float) (j+1) / (float) size1 * TEX_FACTOR;
 
       _vertices[9*size1*size1 + 3*i*size1 + 3*j]     = (i+1) * step;
-      _vertices[9*size1*size1 + 3*i*size1 + 3*j + 1] = _heights[i+1][j+1];
-      _vertices[9*size1*size1 + 3*i*size1 + 3*j + 2] = (j+1) * step;
+      _vertices[9*size1*size1 + 3*i*size1 + 3*j + 1] = (j+1) * step;
+      _vertices[9*size1*size1 + 3*i*size1 + 3*j + 2] = _heights[i+1][j+1];
 
       _normals[9*size1*size1 + 3*i*size1 + 3*j]     = normalsTmp[i+1][j+1].x;
       _normals[9*size1*size1 + 3*i*size1 + 3*j + 1] = normalsTmp[i+1][j+1].y;
@@ -249,10 +249,10 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  _corners[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][0], _chunkPos.y * CHUNK_SIZE);
-  _corners[1] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][size1], (_chunkPos.y+1) * CHUNK_SIZE);
-  _corners[2] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][size1], (_chunkPos.y+1) * CHUNK_SIZE);
-  _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][0], _chunkPos.y * CHUNK_SIZE);
+  _corners[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[0][0]);
+  _corners[1] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[0][size1]);
+  _corners[2] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
+  _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[size1][0]);
 
   float minH = HEIGHT_FACTOR;
   int iMin = 0;
@@ -271,8 +271,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     }
   }
 
-  _lowests[0]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][iMin], _chunkPos.y * CHUNK_SIZE + iMin * step);
-  _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _heights[0][iMax], _chunkPos.y * CHUNK_SIZE + iMax * step);
+  _lowests[0]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[0][iMin]);
+  _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[0][iMax]);
 
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[size1][i] < minH) {
@@ -286,8 +286,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     }
   }
 
-  _lowests[1]  = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][iMin], _chunkPos.y * CHUNK_SIZE + iMin * step);
-  _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _heights[size1][iMax], _chunkPos.y * CHUNK_SIZE + iMax * step);
+  _lowests[1]  = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[size1][iMin]);
+  _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[size1][iMax]);
 
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][0] < minH) {
@@ -301,8 +301,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     }
   }
 
-  _lowests[2]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _heights[iMin][0], _chunkPos.y * CHUNK_SIZE);
-  _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _heights[iMax][0], _chunkPos.y * CHUNK_SIZE);
+  _lowests[2]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _chunkPos.y * CHUNK_SIZE, _heights[iMin][0]);
+  _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _chunkPos.y * CHUNK_SIZE, _heights[iMax][0]);
 
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][size1] < minH) {
@@ -316,8 +316,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     }
   }
 
-  _lowests[3]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _heights[iMin][size1], (_chunkPos.y+1) * CHUNK_SIZE);
-  _highests[3] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _heights[iMax][size1], (_chunkPos.y+1) * CHUNK_SIZE);
+  _lowests[3]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMin][size1]);
+  _highests[3] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMax][size1]);
 
 }
 
@@ -402,10 +402,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
 
     // Bottom of the view
     sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - camera->getFov() / 2.);
-    float tmp;
-    tmp = norm.y;
-    norm.y = norm.z;
-    norm.z = tmp;
+
     sf::Vector3f pos = camera->getPos();
 
     if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_highests) == 1) {
@@ -415,9 +412,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
 
     // Top
     norm = vu::carthesian(1., theta, phi + 90. + camera->getFov() / 2.);
-    tmp = norm.y;
-    norm.y = norm.z;
-    norm.z = tmp;
+
     norm *= -1.f;
 
     if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_lowests) == 1) {
@@ -430,9 +425,6 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     vu::Mat3f rot;
     rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), - alpha);
     norm = rot.multiply(norm);
-    tmp = norm.y;
-    norm.y = norm.z;
-    norm.z = tmp;
 
     if (compareToPoints(pos,norm,_corners) == 1) {
       _visible = false;
@@ -443,9 +435,6 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     norm = vu::carthesian(1., theta - 90.f, 90.f);
     rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), alpha);
     norm = rot.multiply(norm);
-    tmp = norm.y;
-    norm.y = norm.z;
-    norm.z = tmp;
 
     if (compareToPoints(pos,norm,_corners) == 1) {
       _visible = false;
@@ -461,28 +450,28 @@ Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {
 
   if(fromChunkPos == sf::Vector2i(_chunkPos.x+1, _chunkPos.y)) {
     for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(CHUNK_SIZE, _heights[_size-1][i], i * CHUNK_SIZE / (_size-1));
+      c.vertices[i] = sf::Vector3f(CHUNK_SIZE, i * CHUNK_SIZE / (_size-1), _heights[_size-1][i]);
 
     c.type = XN;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x-1, _chunkPos.y)) {
     for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(0.f, _heights[0][i], i * CHUNK_SIZE / (_size-1));
+      c.vertices[i] = sf::Vector3f(0.f, i * CHUNK_SIZE / (_size-1), _heights[0][i]);
 
     c.type = XP;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y+1)) {
     for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(i * CHUNK_SIZE / (_size-1), _heights[i][_size-1], CHUNK_SIZE);
+      c.vertices[i] = sf::Vector3f(i * CHUNK_SIZE / (_size-1), CHUNK_SIZE, _heights[i][_size-1]);
 
     c.type = YN;
   }
 
   else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y-1)) {
     for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f( i * CHUNK_SIZE / (_size-1), _heights[i][0], 0.f);
+      c.vertices[i] = sf::Vector3f( i * CHUNK_SIZE / (_size-1), 0.f, _heights[i][0]);
 
     c.type = YP;
   }

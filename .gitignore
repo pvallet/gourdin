@@ -4,29 +4,6 @@
 *.o
 *.obj
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
 *.layout
 
 *.jpg
@@ -40,3 +17,7 @@ scientific_stuff
 out
 .tags
 build/
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+

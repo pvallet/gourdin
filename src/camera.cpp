@@ -28,15 +28,13 @@ void Camera::resize(unsigned int W, unsigned int H) {
 
 void Camera::apply() {
   sf::Vector3f tmp = sf::Vector3f(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
-  // y and z are inverted
-  _pos.x = tmp.x;
-  _pos.y = tmp.z;
-  _pos.z = tmp.y;
+
+  _pos = tmp;
 
   _view = glm::lookAt (
 	  glm::vec3(_pos.x, _pos.y, _pos.z),
-    glm::vec3(_x, _height, _y),
-    glm::vec3(0., 1., 0.)
+    glm::vec3(_x, _y, _height),
+    glm::vec3(0., 0., 1.)
   );
   //_r*sin((_phi-90.)*rad)*cos(_theta*rad), _r*sin((_phi-90))*rad*sin(_theta*rad), _r*cos((_phi-90.)*rad));
 

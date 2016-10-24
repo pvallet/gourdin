@@ -6,11 +6,11 @@
 Ocean::Ocean(sf::Vector2i chunkPosition, GLuint tex) :
 	Chunk(chunkPosition),
 	_vertices{0, 0, 0,
-			 0, 0, CHUNK_SIZE,
+			 0, CHUNK_SIZE, 0,
 			 CHUNK_SIZE, 0, 0,
-			 CHUNK_SIZE, 0, CHUNK_SIZE},
+			 CHUNK_SIZE, CHUNK_SIZE, 0},
 
-	_normals {0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0},
+	_normals {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1},
 	_coord {0, 0,  0, TEX_FACTOR,  TEX_FACTOR, 0,  TEX_FACTOR, TEX_FACTOR},
 	_indices {0, 1, 2, 3},
 	_tex(tex) {
@@ -40,10 +40,10 @@ Ocean::Ocean(sf::Vector2i chunkPosition, GLuint tex) :
 int Ocean::compareToCorners(sf::Vector3f cam, sf::Vector3f vec) const {
   float dots[4];
 
-  dots[0] = vu::dot(sf::Vector3f(_chunkPos.x * CHUNK_SIZE, 0, _chunkPos.y * CHUNK_SIZE)-cam, vec);
-  dots[1] = vu::dot(sf::Vector3f(_chunkPos.x * CHUNK_SIZE, 0, (_chunkPos.y+1) * CHUNK_SIZE)-cam, vec);
-  dots[2] = vu::dot(sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, 0, (_chunkPos.y+1) * CHUNK_SIZE)-cam, vec);
-  dots[3] = vu::dot(sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, 0, _chunkPos.y * CHUNK_SIZE)-cam, vec);
+  dots[0] = vu::dot(sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE,0)-cam, vec);
+  dots[1] = vu::dot(sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE,0)-cam, vec);
+  dots[2] = vu::dot(sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE,0)-cam, vec);
+  dots[3] = vu::dot(sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE,0)-cam, vec);
 
   if (dots[0] >= 0.f && dots[1] >= 0.f &&
     dots[2] >= 0.f && dots[3] >= 0.f )
@@ -64,10 +64,6 @@ void Ocean::calculateFrustum(const Camera* camera) {
 
   // Bottom of the view
   sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - camera->getFov() / 2.);
-  float tmp;
-  tmp = norm.y;
-  norm.y = norm.z;
-  norm.z = tmp;
   sf::Vector3f pos = camera->getPos();
 
   if (compareToCorners(pos,norm) == 1) {
@@ -77,9 +73,6 @@ void Ocean::calculateFrustum(const Camera* camera) {
 
   // Top
   norm = vu::carthesian(1., theta, phi + 90. + camera->getFov() / 2.);
-  tmp = norm.y;
-  norm.y = norm.z;
-  norm.z = tmp;
   norm *= -1.f;
 
   if (compareToCorners(pos,norm) == 1) {
@@ -92,9 +85,6 @@ void Ocean::calculateFrustum(const Camera* camera) {
   vu::Mat3f rot;
   rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), - alpha);
   norm = rot.multiply(norm);
-  tmp = norm.y;
-  norm.y = norm.z;
-  norm.z = tmp;
 
   if (compareToCorners(pos,norm) == 1) {
     _visible = false;
@@ -105,9 +95,6 @@ void Ocean::calculateFrustum(const Camera* camera) {
   norm = vu::carthesian(1., theta - 90.f, 90.f);
   rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), alpha);
   norm = rot.multiply(norm);
-  tmp = norm.y;
-  norm.y = norm.z;
-  norm.z = tmp;
 
   if (compareToCorners(pos,norm) == 1) {
     _visible = false;

@@ -24,6 +24,7 @@ private:
 	sf::RectangleShape _rectSelect;
 	sf::Font _font;
 	sf::Text _fpsCounter;
+	sf::Text _posDisplay;
 	sf::Sprite _minimap;
 	Map _map;
 

@@ -34,7 +34,6 @@ struct compDepth {
 class Game {
 public:
 	Game(Camera* camera, Map* map);
-	~Game();
 
   void init();
 
@@ -45,7 +44,7 @@ public:
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
-	void generateHerd(sf::Vector2f pos, size_t count);
+	void generateHerd(sf::Vector2<double> pos, size_t count);
 
 	inline std::set<igElement*> getSelection() const {return _sel;}
 	inline std::vector<igElement*> getElements() const {return _e;}

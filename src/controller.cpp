@@ -26,6 +26,11 @@ void Controller::init() {
   _fpsCounter.setCharacterSize(10);
   _fpsCounter.setColor(sf::Color::White);
 
+  _posDisplay.setPosition(sf::Vector2f(0, 10));
+  _posDisplay.setFont(_font);
+  _posDisplay.setCharacterSize(10);
+  _posDisplay.setColor(sf::Color::White);
+
   _rectSelect.setFillColor(sf::Color::Transparent);
   _rectSelect.setOutlineThickness(1);
   _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
@@ -94,14 +99,20 @@ void Controller::render() {
 
     _window->draw(miniCamPos);
 
-    // FPS
+    // info
 
     int fps = 1. / _elapsed.asSeconds();
     std::ostringstream convert;
     convert << fps;
     _fpsCounter.setString("FPS: " + convert.str());
-
     _window->draw(_fpsCounter);
+
+    convert.str(""); convert.clear();
+    convert << "X: " << _camera.getPointedPos().x << "\n"
+            << "Y: " << _camera.getPointedPos().y;
+    _posDisplay.setString(convert.str());
+    _window->draw(_posDisplay);
+
     _window->display();
     _window->popGLStates();
   }
@@ -125,9 +136,9 @@ void Controller::run() {
       else if (event.type == sf::Event::MouseButtonPressed) {
         if (_minimap.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
           _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.x - _minimap.getPosition().x) /
-                                        (float) _minimap.getTextureRect().width * _map.getMaxCoord(),
-                                        (float) (event.mouseButton.y - _minimap.getPosition().y) /
-                                        (float) _minimap.getTextureRect().height * _map.getMaxCoord()));
+                                         (float) _minimap.getTextureRect().width * _map.getMaxCoord(),
+                                         (float) (event.mouseButton.y - _minimap.getPosition().y) /
+                                         (float) _minimap.getTextureRect().height * _map.getMaxCoord()));
         }
 
         else {
@@ -212,30 +223,30 @@ void Controller::run() {
     // Move _camera
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-      _camera.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
       _camera.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
 
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+      _camera.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
+
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
       //_camera.rotate(0., - ROTATION_ANGLE_PS * _elapsed.asSeconds()); // for the mouse wheel
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
       //_camera.rotate(0., ROTATION_ANGLE_PS * _elapsed.asSeconds());
 
     if (sf::Mouse::getPosition().x == 0)
-      _camera.translate(TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
-
-    if (sf::Mouse::getPosition().y == 0)
-      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
-
-    if ((int) sf::Mouse::getPosition().x == (int) _camera.getW() - 1)
       _camera.translate(- TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
 
-    if ((int) sf::Mouse::getPosition().y == (int) _camera.getH() - 1)
+    if (sf::Mouse::getPosition().y == 0)
       _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+
+    if ((int) sf::Mouse::getPosition().x == (int) _camera.getW() - 1)
+      _camera.translate(TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
+
+    if ((int) sf::Mouse::getPosition().y == (int) _camera.getH() - 1)
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
     _camera.apply();
     _game.update(_elapsed);
