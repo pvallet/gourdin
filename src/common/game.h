@@ -8,7 +8,6 @@
 
 #include "heightmap.h"
 #include "ocean.h"
-#include "skybox.h"
 #include "camera.h"
 
 #include "igElement.h"
@@ -70,5 +69,4 @@ private:
 
 	std::map<sf::Vector2i, Chunk*, compChunkPos> _terrain;
 	std::set<sf::Vector2i, compChunkPos> _terrainBorder;
-	Skybox* _skybox;
 };

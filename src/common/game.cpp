@@ -52,8 +52,6 @@ void Game::init() {
     generateForests(hmap[i]->getChunkPos());
   }
 
-  _skybox = new Skybox("res/skybox/skybox", _cam);
-
   _antilopeTexManager.load("res/animals/antilope/");
   _lionTexManager.load("res/animals/lion/");
 
@@ -248,14 +246,6 @@ void Game::update(sf::Time elapsed) {
 void Game::render() const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Skybox
-
-  /*glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-  glDepthMask(GL_FALSE);
-  _skybox->draw();
-  glDepthMask(GL_TRUE);
-  glDisable(GL_TEXTURE_CUBE_MAP_ARB);*/
-
   // Heightmap
 
   glUseProgram(_hmapShader.getProgramID());
@@ -433,7 +423,10 @@ sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
   GLfloat d;
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
-  glm::vec4 screenCoord(2*screenTarget.x / (float)_cam->getW()-1, 2*screenTarget.y  / (float)_cam->getH()-1, 2*d-1, 1.0);
+  float X = 2*screenTarget.x / (float)_cam->getW()-1;
+  float Y = 2*screenTarget.y  / (float)_cam->getH()-1;
+
+  glm::vec4 screenCoord(X, Y, 2*d-1, 1.0);
 
   glm::vec4 modelCoord = glm::inverse(_cam->getViewProjectionMatrix()) * screenCoord;
 
