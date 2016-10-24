@@ -398,12 +398,14 @@ int Heightmap::compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f*
 void Heightmap::calculateFrustum(const Camera* camera) {
     float theta = camera->getTheta();
     float phi   = camera->getPhi();
-    float alpha = camera->getFov() * camera->getRatio() / 2;
+    float alpha = camera->getFov() * camera->getRatio() / 2.;
 
     // Bottom of the view
-    sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - camera->getFov() / 2.);
+    sf::Vector3f norm = vu::carthesian(1., theta, phi - camera->getFov()/2. + 90.);
 
     sf::Vector3f pos = camera->getPos();
+
+		_visible = true;
 
     if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_highests) == 1) {
       _visible = false;
@@ -411,9 +413,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     }
 
     // Top
-    norm = vu::carthesian(1., theta, phi + 90. + camera->getFov() / 2.);
-
-    norm *= -1.f;
+    norm = vu::carthesian(1., theta, phi + camera->getFov()/2. - 90.);
 
     if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_lowests) == 1) {
       _visible = false;
@@ -427,7 +427,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     norm = rot.multiply(norm);
 
     if (compareToPoints(pos,norm,_corners) == 1) {
-      _visible = false;
+      _visible = true;
       return;
     }
 
@@ -437,11 +437,9 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     norm = rot.multiply(norm);
 
     if (compareToPoints(pos,norm,_corners) == 1) {
-      _visible = false;
+      _visible = true;
       return;
     }
-
-    _visible = true;
 }
 
 Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {

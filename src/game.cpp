@@ -214,13 +214,11 @@ void Game::update(sf::Time elapsed) {
 
       // TODO optimize with only 2 matrix multiplications
 
-      glm::mat4 modelView = _cam->getViewProjectionMatrix() * glm::translate(glm::mat4(1.f),
-        glm::vec3(CHUNK_SIZE * chunkPosX, CHUNK_SIZE * chunkPosY, 0.f)
-      );
+      glm::mat4 viewProj = _cam->getViewProjectionMatrix();
 
       glm::vec4 cornersProjNorm[4];
       for (size_t i = 0; i < 4; i++) {
-        cornersProjNorm[i] = modelView * glm::vec4(corners3[i], 1.0);
+        cornersProjNorm[i] = viewProj * glm::vec4(corners3[i], 1.0);
       }
 
       double w = _cam->getW();
@@ -439,5 +437,6 @@ sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
 
   glm::vec4 modelCoord = glm::inverse(_cam->getViewProjectionMatrix()) * screenCoord;
 
-  return sf::Vector2<double>(modelCoord.x,modelCoord.z);
+  return sf::Vector2<double>( modelCoord.x + _cam->getPointedPos().x,
+                              modelCoord.y + _cam->getPointedPos().y);
 }

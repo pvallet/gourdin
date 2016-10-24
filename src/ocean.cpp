@@ -60,7 +60,7 @@ int Ocean::compareToCorners(sf::Vector3f cam, sf::Vector3f vec) const {
 void Ocean::calculateFrustum(const Camera* camera) {
   float theta = camera->getTheta();
   float phi   = camera->getPhi();
-  float alpha = camera->getFov() * camera->getRatio() / 2;
+  float alpha = camera->getFov() * camera->getRatio() / 2.;
 
   // Bottom of the view
   sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - camera->getFov() / 2.);

@@ -1,10 +1,8 @@
 #include "camera.h"
 #include "vecUtils.h"
 
-#include <SFML/OpenGL.hpp>
-
 Camera::Camera() :
-  _fovAngle(45.f),
+  _fovAngle(45),
 	_aspectRatio(1.f),
 	_nearPlane(0.1f),
 	_farPlane(100000.0),
@@ -21,22 +19,20 @@ void Camera::resize(unsigned int W, unsigned int H) {
 
 	glViewport (0, 0, (GLint)W, (GLint)H);
   _aspectRatio = static_cast<float>(W)/static_cast<float>(H);
-  _projection = glm::perspective(_fovAngle, _aspectRatio, _nearPlane, _farPlane);
+  float fovAngleRadians = 45 * M_PI / 180.;
+  _projection = glm::perspective(fovAngleRadians, _aspectRatio, _nearPlane, _farPlane);
 
   _viewProjection = _projection * _view;
 }
 
 void Camera::apply() {
-  sf::Vector3f tmp = sf::Vector3f(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
-
-  _pos = tmp;
+  _pos = sf::Vector3f(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
 
   _view = glm::lookAt (
-	  glm::vec3(_pos.x, _pos.y, _pos.z),
+	  vu::convertGLM(_pos),
     glm::vec3(_x, _y, _height),
-    glm::vec3(0., 0., 1.)
+    vu::convertGLM(vu::carthesian(1., _theta, _phi + _fovAngle/2. - 90.))
   );
-  //_r*sin((_phi-90.)*rad)*cos(_theta*rad), _r*sin((_phi-90))*rad*sin(_theta*rad), _r*cos((_phi-90.)*rad));
 
   _viewProjection = _projection * _view;
 }

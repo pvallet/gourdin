@@ -24,6 +24,8 @@ sf::Vector3f carthesian(float r, float theta, float phi);
 
 sf::Vector3f convertSFML(glm::vec3 u);
 
+glm::vec3 convertGLM(sf::Vector3f u);
+
 float angle(const sf::Vector2f& u, const sf::Vector2f& v);
 
 double angle(const sf::Vector2<double>& u, const sf::Vector2<double>& v);
