@@ -23,8 +23,15 @@ igElement::igElement(sf::Vector2<double> position) :
   for (size_t i = 0 ; i < 12 ; i++)
     _vertices[i] = 0.f;
 
-  for (size_t i = 0 ; i < 8 ; i++)
-    _coord2D[i] = 0;
+	// Default coordinates that pastes the whole texture to the rectangle
+	_coord2D[0] = 1;
+	_coord2D[1] = 0;
+  _coord2D[2] = 0;
+  _coord2D[3] = 0;
+  _coord2D[4] = 0;
+  _coord2D[5] = 1;
+	_coord2D[6] = 1;
+	_coord2D[7] = 1;
 
   glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);

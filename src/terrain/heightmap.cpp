@@ -104,12 +104,12 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
     for (size_t j = 0 ; j < size1 ; j++) {
       region = &_regions[tmpRegions[i][j]->id];
       region->indices[region->cursor]     =               + i*size1 + j;
-      region->indices[region->cursor + 1] =   size1*size1 + i*size1 + j;
-      region->indices[region->cursor + 2] = 2*size1*size1 + i*size1 + j;
+      region->indices[region->cursor + 1] = 2*size1*size1 + i*size1 + j;
+      region->indices[region->cursor + 2] =   size1*size1 + i*size1 + j;
 
       region->indices[region->cursor + 3] =   size1*size1 + i*size1 + j;
-      region->indices[region->cursor + 4] = 3*size1*size1 + i*size1 + j;
-      region->indices[region->cursor + 5] = 2*size1*size1 + i*size1 + j;
+      region->indices[region->cursor + 4] = 2*size1*size1 + i*size1 + j;
+      region->indices[region->cursor + 5] = 3*size1*size1 + i*size1 + j;
 
       region->cursor += 6;
     }
@@ -250,8 +250,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   _corners[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[0][0]);
-  _corners[1] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[0][size1]);
-  _corners[2] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
+	_corners[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
+  _corners[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[0][size1]);
   _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[size1][0]);
 
   float minH = HEIGHT_FACTOR;

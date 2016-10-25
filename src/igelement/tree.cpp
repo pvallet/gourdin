@@ -9,15 +9,6 @@ Tree::Tree(sf::Vector2<double> position, TreeTexManager* manager, Biome biome, i
 
   _size = _manager->getSize(_biome, _index);
 
-  _coord2D[0] = 0;
-  _coord2D[1] = 0;
-  _coord2D[2] = 1;
-  _coord2D[3] = 0;
-  _coord2D[4] = 1;
-  _coord2D[5] = 1;
-  _coord2D[6] = 0;
-  _coord2D[7] = 1;
-
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord2D), _coord2D);

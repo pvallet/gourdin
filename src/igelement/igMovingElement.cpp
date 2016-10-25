@@ -51,13 +51,13 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 	}
 
 	sf::FloatRect rect = _graphics.getCurrentSprite();
-	_coord2D[0] = rect.left;
+	_coord2D[0] = rect.left + rect.width;
 	_coord2D[1] = rect.top;
-	_coord2D[2] = rect.left + rect.width;
+	_coord2D[2] = rect.left;
 	_coord2D[3] = rect.top;
-	_coord2D[4] = rect.left + rect.width;
+	_coord2D[4] = rect.left;
 	_coord2D[5] = rect.top + rect.height;
-	_coord2D[6] = rect.left;
+	_coord2D[6] = rect.left + rect.width;
 	_coord2D[7] = rect.top + rect.height;
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);

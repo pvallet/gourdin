@@ -187,24 +187,23 @@ void Game::update(sf::Time elapsed) {
 
       float width = _e[i]->getSize().x;
 
-      corners3[0] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getSize().y);
 
-
-      corners3[1] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
+      corners3[0] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
                                 _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2,
                                 newHeight + _e[i]->getSize().y);
 
+      corners3[1] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight + _e[i]->getSize().y);
 
-      corners3[2] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
+      corners3[2] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
+                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
+                                newHeight);
+
+      corners3[3] = glm::vec3(  _e[i]->getPos().x - sin(_cam->getTheta()*M_PI/180.)*width/2,
                                 _e[i]->getPos().y + cos(_cam->getTheta()*M_PI/180.)*width/2,
                                 newHeight);
 
-
-      corners3[3] = glm::vec3(  _e[i]->getPos().x + sin(_cam->getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y - cos(_cam->getTheta()*M_PI/180.)*width/2,
-                                newHeight);
 
       _e[i]->set3DCorners(corners3);
 

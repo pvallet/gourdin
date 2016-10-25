@@ -6,8 +6,8 @@
 Ocean::Ocean(sf::Vector2i chunkPosition, GLuint tex) :
 	Chunk(chunkPosition),
 	_vertices{0, 0, 0,
+			CHUNK_SIZE, 0, 0,
 			 0, CHUNK_SIZE, 0,
-			 CHUNK_SIZE, 0, 0,
 			 CHUNK_SIZE, CHUNK_SIZE, 0},
 
 	_normals {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1},
