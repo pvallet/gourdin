@@ -175,7 +175,7 @@ void Controller::run() {
       else if (event.type == sf::Event::MouseMoved) {
         if (_selecting) {
           _rectSelect.setSize(sf::Vector2f(event.mouseMove.x - _rectSelect.getPosition().x,
-                                          event.mouseMove.y - _rectSelect.getPosition().y));
+                                           event.mouseMove.y - _rectSelect.getPosition().y));
         }
       }
 
@@ -229,24 +229,22 @@ void Controller::run() {
       _camera.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
-      //_camera.rotate(0., - ROTATION_ANGLE_PS * _elapsed.asSeconds()); // for the mouse wheel
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
-      //_camera.rotate(0., ROTATION_ANGLE_PS * _elapsed.asSeconds());
+      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
     if (sf::Mouse::getPosition().x == 0)
       _camera.translate(- TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Mouse::getPosition().y == 0)
-      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
     if ((int) sf::Mouse::getPosition().x == (int) _camera.getW() - 1)
       _camera.translate(TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
 
     if ((int) sf::Mouse::getPosition().y == (int) _camera.getH() - 1)
-      _camera.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      _camera.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
 
     _camera.apply();
     _game.update(_elapsed);

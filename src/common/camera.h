@@ -15,8 +15,8 @@ public:
 	Camera();
 	void resize(unsigned int W, unsigned int H);
 
-	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta-90.)*RAD)+dWinY*sin((_theta-90.)*RAD);
-																										_y +=	dWinX*sin((_theta-90.)*RAD)-dWinY*cos((_theta-90.)*RAD);}
+	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.)*RAD)+dWinY*sin((_theta+90.)*RAD);
+																										_y +=	dWinX*sin((_theta+90.)*RAD)-dWinY*cos((_theta+90.)*RAD);}
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
 	inline void zoom (float dr) {_r += dr;}
 	void apply ();

@@ -210,28 +210,24 @@ void Game::update(sf::Time elapsed) {
 
       // Calculate their projections
 
-      // TODO optimize with only 2 matrix multiplications
-
       glm::mat4 viewProj = _cam->getViewProjectionMatrix();
 
-      glm::vec4 cornersProjNorm[4];
+      glm::vec3 cornersProjNorm[4];
       for (size_t i = 0; i < 4; i++) {
-        cornersProjNorm[i] = viewProj * glm::vec4(corners3[i], 1.0);
+        cornersProjNorm[i] = glm::project(corners3[i], glm::mat4(1.f), viewProj,
+          glm::vec4(0,0,_cam->getW(),_cam->getH()));
       }
-
-      double w = _cam->getW();
-      double h = _cam->getH();
 
       double left, top, right, bot, depth;
 
-      left  = w * (cornersProjNorm[0].x + 1.)/2;
-      top   = h * (cornersProjNorm[0].y + 1.)/2;
-      right = w * (cornersProjNorm[1].x + 1.)/2;
-      bot   = h * (cornersProjNorm[3].y + 1.)/2;
-      depth = (cornersProjNorm[3].z + 1.)/2;
+      left  = cornersProjNorm[0].x;
+      top   = cornersProjNorm[0].y;
+      right = cornersProjNorm[1].x;
+      bot   = cornersProjNorm[3].y;
+      depth = cornersProjNorm[3].z;
 
-      top = h-top;
-      bot = h-bot;
+      top = _cam->getH()-top;
+      bot = _cam->getH()-bot;
 
       sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
@@ -423,13 +419,9 @@ sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
   GLfloat d;
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
-  float X = 2*screenTarget.x / (float)_cam->getW()-1;
-  float Y = 2*screenTarget.y  / (float)_cam->getH()-1;
+  glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
+    glm::mat4(1.), _cam->getViewProjectionMatrix(),
+    glm::vec4(0,0,_cam->getW(),_cam->getH()));
 
-  glm::vec4 screenCoord(X, Y, 2*d-1, 1.0);
-
-  glm::vec4 modelCoord = glm::inverse(_cam->getViewProjectionMatrix()) * screenCoord;
-
-  return sf::Vector2<double>( modelCoord.x + _cam->getPointedPos().x,
-                              modelCoord.y + _cam->getPointedPos().y);
+  return sf::Vector2<double>( modelCoord.x, modelCoord.y);
 }
