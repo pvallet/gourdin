@@ -1,7 +1,11 @@
 #pragma once
+
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <SFML/System.hpp>
+
 #include <vector>
+
 #include "camera.h"
 #include "utils.h"
 
@@ -20,9 +24,11 @@ public:
 	Chunk(sf::Vector2i chunkPosition);
 	virtual ~Chunk();
 
-	virtual void calculateFrustum(const Camera* camera) = 0; // Returns true if the chunk is to be displayed
 	virtual void draw() const = 0;
 	virtual float getHeight(float x, float y) const = 0;
+
+	// Set visible to false if there is no need to display the chunk
+	virtual void computeCulling(const Camera* camera);
 
 	// To join the chunk with neighbours ones. Used with the perlin version.
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const {Constraint c; c.type = NONE; return c;}
@@ -34,10 +40,13 @@ public:
 	inline bool isVisible() const {return _visible;}
 
 protected:
+	int compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const;
 	GLuint _vbo;
 	GLuint _ibo;
 
 	sf::Vector2i _chunkPos;
+
+	sf::Vector3f _corners[4]; // For frustum culling
 
 	bool _visible;
 };

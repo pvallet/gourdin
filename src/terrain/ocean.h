@@ -8,8 +8,6 @@ class Ocean : public Chunk {
 public:
 	Ocean(sf::Vector2i chunkPosition, GLuint tex);
 
-	virtual void calculateFrustum(const Camera* camera);
-
 	virtual void draw() const;
 
 	virtual float getHeight(float x, float y) const {return 0.f;};

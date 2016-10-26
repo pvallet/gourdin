@@ -9,8 +9,8 @@
 
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
-#define CHUNK_BEGIN_X 10
-#define CHUNK_BEGIN_Y 10
+#define CHUNK_BEGIN_X 11
+#define CHUNK_BEGIN_Y 23
 
 Game::Game(Camera* camera, Map* map) :
   _cam(camera),
@@ -160,7 +160,7 @@ void Game::update(sf::Time elapsed) {
   }
 
   for (auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-    it->second->calculateFrustum(_cam);
+    it->second->computeCulling(_cam);
   }
 
   _vis.clear();
