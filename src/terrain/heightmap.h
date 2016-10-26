@@ -7,8 +7,7 @@
 #include "texManager.h"
 #include "map.h"
 
-// #define HEIGHT_FACTOR 1000.
-#define HEIGHT_FACTOR 1.
+#define HEIGHT_FACTOR 1000.
 
 typedef struct Region Region;
 struct Region {

@@ -407,7 +407,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
 
 		_visible = true;
 
-    if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_highests) == 1) {
+    if (compareToPoints(pos,norm,_corners) == 1) {// && compareToPoints(pos,norm,_highests) == 1) {
       _visible = false;
       return;
     }
@@ -415,7 +415,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     // Top
     norm = vu::carthesian(1., theta, phi + camera->getFov()/2. - 90.);
 
-    if (compareToPoints(pos,norm,_corners) == 1 && compareToPoints(pos,norm,_lowests) == 1) {
+    if (compareToPoints(pos,norm,_corners) == 1) {// && compareToPoints(pos,norm,_lowests) == 1) {
       _visible = false;
       return;
     }
@@ -427,7 +427,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     norm = rot.multiply(norm);
 
     if (compareToPoints(pos,norm,_corners) == 1) {
-      _visible = true;
+      _visible = false;
       return;
     }
 
@@ -437,7 +437,7 @@ void Heightmap::calculateFrustum(const Camera* camera) {
     norm = rot.multiply(norm);
 
     if (compareToPoints(pos,norm,_corners) == 1) {
-      _visible = true;
+      _visible = false;
       return;
     }
 }

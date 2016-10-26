@@ -9,8 +9,8 @@
 
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
-#define CHUNK_BEGIN_X 30
-#define CHUNK_BEGIN_Y 11
+#define CHUNK_BEGIN_X 10
+#define CHUNK_BEGIN_Y 10
 
 Game::Game(Camera* camera, Map* map) :
   _cam(camera),
@@ -331,8 +331,6 @@ void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
   double r, theta;
   sf::Vector2<double> p, diff;
   bool add;
-
-  _e.push_back(new Lion(pos, AnimationManager(_lionTexManager)));
 
   std::vector<Antilope*> tmp;
 

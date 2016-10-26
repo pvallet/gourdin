@@ -45,8 +45,10 @@ public:
 	void addLion(sf::Vector2i screenTarget);
 	void generateHerd(sf::Vector2<double> pos, size_t count);
 
-	inline std::set<igElement*> getSelection() const {return _sel;}
-	inline std::vector<igElement*> getElements() const {return _e;}
+	inline const std::set<igElement*>& getSelection() const {return _sel;}
+	inline const std::vector<igElement*>& getElements() const {return _e;}
+  inline const std::map<sf::Vector2i, Chunk*, compChunkPos>& getGeneratedTerrain() const {return _terrain;}
+  inline const std::set<sf::Vector2i, compChunkPos>& getBorderTerrain() const {return _terrainBorder;}
 
 private:
 	sf::Vector2i neighbour(sf::Vector2i pos, int index) const;

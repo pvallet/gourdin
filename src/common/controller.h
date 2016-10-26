@@ -19,6 +19,11 @@ public:
 	void render();
 
 private:
+	void renderLifeBars();
+	void renderMinimap();
+	void renderLog();
+
+
 	bool _addSelect;
 	bool _selecting;
 	sf::RectangleShape _rectSelect;

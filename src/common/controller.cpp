@@ -41,77 +41,128 @@ void Controller::init() {
 	_camera.resize(_window->getSize().x, _window->getSize().y );
 }
 
+void Controller::renderLifeBars() {
+  sf::RectangleShape lifeBar(sf::Vector2f(20., 2.));
+  lifeBar.setFillColor(sf::Color::Green);
+
+  sf::RectangleShape fullLifeBar(sf::Vector2f(20., 2.));
+  fullLifeBar.setFillColor(sf::Color::Transparent);
+  fullLifeBar.setOutlineColor(sf::Color::Black);
+  fullLifeBar.setOutlineThickness(1);
+
+  std::set<igElement*> sel = _game.getSelection();
+  sf::IntRect corners;
+  float maxHeightFactor;
+
+  for(auto it = sel.begin(); it != sel.end(); ++it) {
+    corners = (*it)->get2DCorners();
+    Controllable* ctrl = (Controllable*) (*it);
+    maxHeightFactor = ctrl->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+
+    if (ctrl->getMovingType() == HUNTER) {
+      Lion* lion = (Lion*) ctrl;
+      lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
+    }
+
+    lifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+    fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+
+    _window->draw(lifeBar);
+    _window->draw(fullLifeBar);
+    lifeBar.setSize(sf::Vector2f(20., 2.));
+  }
+}
+
+void Controller::renderMinimap() {
+  // Background image
+  _window->draw(_minimap);
+
+  // Position of the viewer
+  sf::Vector2f viewerPos( _minimap.getPosition().x +
+    (float) _minimap.getTextureRect().height * _camera.getPointedPos().y / _map.getMaxCoord(),
+                          _minimap.getPosition().y +
+    (float) _minimap.getTextureRect().width  * _camera.getPointedPos().x / _map.getMaxCoord());
+
+  sf::CircleShape miniCamPos(3);
+  miniCamPos.setPointCount(8);
+  miniCamPos.setFillColor(sf::Color::Black);
+  miniCamPos.setPosition( viewerPos - sf::Vector2f(miniCamPos.getRadius(),
+                                                   miniCamPos.getRadius()));
+
+  float theta = _camera.getTheta();
+  sf::RectangleShape miniCamDir(sf::Vector2f(6, 2));
+  miniCamDir.setFillColor(sf::Color::Black);
+  miniCamDir.setPosition(viewerPos - sf::Vector2f(cos(-theta*RAD), sin(-theta*RAD)));
+  miniCamDir.setRotation(-theta-90);
+
+  _window->draw(miniCamPos);
+  _window->draw(miniCamDir);
+
+  // Highlight generated chunks
+  float miniChunkSize = _minimap.getTextureRect().height / NB_CHUNKS;
+
+  sf::RectangleShape miniChunk(sf::Vector2f(miniChunkSize, miniChunkSize));
+  miniChunk.setFillColor(sf::Color::Black);
+  sf::Color edge(0,0,0,200);
+  sf::Color fog(0,0,0,100);
+
+  const std::map<sf::Vector2i, Chunk*, compChunkPos>& genTrn = _game.getGeneratedTerrain();
+  const std::set<sf::Vector2i, compChunkPos>& borderTrn = _game.getBorderTerrain();
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      sf::Vector2i currentPos(i,j);
+      miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+
+      if (genTrn.find(currentPos) == genTrn.end()) {
+        miniChunk.setFillColor(sf::Color::Black);
+        _window->draw(miniChunk);
+      }
+
+      else if (borderTrn.find(currentPos) != borderTrn.end()) {
+        miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+        miniChunk.setFillColor(edge);
+        _window->draw(miniChunk);
+      }
+
+      else if (!genTrn.at(currentPos)->isVisible()) {
+        miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+        miniChunk.setFillColor(fog);
+        _window->draw(miniChunk);
+      }
+    }
+  }
+}
+
+void Controller::renderLog() {
+  int fps = 1. / _elapsed.asSeconds();
+  std::ostringstream convert;
+  convert << fps;
+  _fpsCounter.setString("FPS: " + convert.str());
+  _window->draw(_fpsCounter);
+
+  convert.str(""); convert.clear();
+  convert << "X: " << _camera.getPointedPos().x << "\n"
+          << "Y: " << _camera.getPointedPos().y;
+  _posDisplay.setString(convert.str());
+  _window->draw(_posDisplay);
+}
+
 void Controller::render() {
   if (_running) {
-
-    // Game
-
     // _window->clear(sf::Color::Black);
     _game.render();
     _window->pushGLStates();
 
-    // Life bars
+    renderLifeBars();
 
-    sf::RectangleShape lifeBar(sf::Vector2f(20., 2.));
-    lifeBar.setFillColor(sf::Color::Green);
-    lifeBar.setOutlineThickness(0);
-    sf::RectangleShape fullLifeBar(sf::Vector2f(20., 2.));
-    fullLifeBar.setFillColor(sf::Color::Transparent);
-    fullLifeBar.setOutlineColor(sf::Color::Black);
-    fullLifeBar.setOutlineThickness(1);
-
-    std::set<igElement*> sel = _game.getSelection();
-    sf::IntRect corners;
-    float maxHeightFactor;
-
-    for(auto it = sel.begin(); it != sel.end(); ++it) {
-      corners = (*it)->get2DCorners();
-      Controllable* ctrl = (Controllable*) (*it);
-      maxHeightFactor = ctrl->getMaxHeightFactor(); // The lifeBar must not change when switching animations
-
-      if (ctrl->getMovingType() == HUNTER) {
-        Lion* lion = (Lion*) ctrl;
-        lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
-      }
-
-      lifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - corners.height*maxHeightFactor + corners.height - 5);
-      fullLifeBar.setPosition(corners.left + corners.width/2 - 10, corners.top - corners.height*maxHeightFactor + corners.height - 5);
-      _window->draw(lifeBar);
-      _window->draw(fullLifeBar);
-      lifeBar.setSize(sf::Vector2f(20., 2.));
-    }
-
-    // RectSelect
+    renderLog();
+    renderMinimap();
 
     _window->draw(_rectSelect);
 
-    // Minimap
-    _window->draw(_minimap);
-
-    sf::CircleShape miniCamPos(3);
-    miniCamPos.setPointCount(8);
-    miniCamPos.setFillColor(sf::Color::Black);
-    miniCamPos.setPosition( _minimap.getPosition().x - miniCamPos.getRadius() / 2 +
-                            (float) _minimap.getTextureRect().height * _camera.getPointedPos().x / _map.getMaxCoord(),
-
-                            _minimap.getPosition().y - miniCamPos.getRadius() / 2 +
-                            (float) _minimap.getTextureRect().width  * _camera.getPointedPos().y / _map.getMaxCoord());
-
-    _window->draw(miniCamPos);
-
-    // info
-
-    int fps = 1. / _elapsed.asSeconds();
-    std::ostringstream convert;
-    convert << fps;
-    _fpsCounter.setString("FPS: " + convert.str());
-    _window->draw(_fpsCounter);
-
-    convert.str(""); convert.clear();
-    convert << "X: " << _camera.getPointedPos().x << "\n"
-            << "Y: " << _camera.getPointedPos().y;
-    _posDisplay.setString(convert.str());
-    _window->draw(_posDisplay);
 
     _window->display();
     _window->popGLStates();
@@ -135,10 +186,10 @@ void Controller::run() {
 
       else if (event.type == sf::Event::MouseButtonPressed) {
         if (_minimap.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
-          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.x - _minimap.getPosition().x) /
-                                         (float) _minimap.getTextureRect().width * _map.getMaxCoord(),
-                                         (float) (event.mouseButton.y - _minimap.getPosition().y) /
-                                         (float) _minimap.getTextureRect().height * _map.getMaxCoord()));
+          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimap.getPosition().y) /
+                                         (float) _minimap.getTextureRect().height * _map.getMaxCoord(),
+                                         (float) (event.mouseButton.x - _minimap.getPosition().x) /
+                                         (float) _minimap.getTextureRect().width * _map.getMaxCoord()));
         }
 
         else {
@@ -220,7 +271,7 @@ void Controller::run() {
 
     }
 
-    // Move _camera
+    // Move camera
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
       _camera.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);

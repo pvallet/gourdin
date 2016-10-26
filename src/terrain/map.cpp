@@ -9,7 +9,7 @@
 #define MAP_MAX_COORD 600.
 
 Map::Map() :
-	_nbChunks(50),
+	_nbChunks(NB_CHUNKS),
 	_maxCoord(_nbChunks * CHUNK_SIZE) {}
 
 void Map::load(std::string path) {
