@@ -12,9 +12,8 @@
 #define CHUNK_BEGIN_X 11
 #define CHUNK_BEGIN_Y 23
 
-Game::Game(Camera* camera, Map* map) :
+Game::Game(Camera* camera) :
   _cam(camera),
-  _map(map),
   _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag") {}
 
@@ -25,16 +24,18 @@ void Game::init() {
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _treeTexManager.load("res/trees/");
 
+  _map.load("res/map/");
+
   _cam->setPointedPos(sf::Vector2f(CHUNK_BEGIN_X*CHUNK_SIZE,CHUNK_BEGIN_Y*CHUNK_SIZE));
 
   Heightmap* hmap[4];
 
   srand(time(NULL));
 
-  hmap[0] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y), rand(), &_terrainTexManager, _map);
-  hmap[1] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y - 1), rand(), &_terrainTexManager, _map);
-  hmap[2] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y), rand(), &_terrainTexManager, _map);
-  hmap[3] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y - 1), rand(), &_terrainTexManager, _map);
+  hmap[0] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y), rand(), _terrainTexManager, _map);
+  hmap[1] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y - 1), rand(), _terrainTexManager, _map);
+  hmap[2] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y), rand(), _terrainTexManager, _map);
+  hmap[3] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y - 1), rand(), _terrainTexManager, _map);
 
   hmap[0]->generate(std::vector<Constraint>());
   _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
@@ -71,7 +72,7 @@ void Game::generateHeightmap(sf::Vector2i pos) {
     }
   }
 
-  Heightmap* hmap = new Heightmap(pos, rand(), &_terrainTexManager, _map);
+  Heightmap* hmap = new Heightmap(pos, rand(), _terrainTexManager, _map);
   hmap->generate(c);
   _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
   _terrainBorder.insert(hmap->getChunkPos());
@@ -85,15 +86,15 @@ void Game::generateNeighbourChunks(sf::Vector2i pos) {
 
       if (_terrain.find(tmp) == _terrain.end()) { // We only add the neighbour if it's not already generated
         // If the chunk to be generated is not handled by the _map, we generate an ocean
-        if (tmp.x < 0 || tmp.x >= _map->getNbChunks() || tmp.y < 0 || tmp.y >= _map->getNbChunks()) {
+        if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS) {
           _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
           _terrainBorder.insert(tmp);
         }
 
-        else if (_map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map->getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
-                 _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map->getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
+        else if (_map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
 
           _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
           _terrainBorder.insert(tmp);
@@ -370,7 +371,7 @@ void Game::generateForests(sf::Vector2i pos) {
 
   std::vector<Tree*> tmp;
 
-  std::vector<Center*> centers = _map->getCentersInChunk(pos);
+  std::vector<Center*> centers = _map.getCentersInChunk(pos);
 
   for (unsigned int i = 0 ; i < centers.size() ; i++) {
     if (centers[i]->biome >= 11) { // No forests in other biomes
@@ -391,7 +392,7 @@ void Game::generateForests(sf::Vector2i pos) {
           diff = tmp[k]->getPos() - p;
 
           if (diff.x * diff.x + diff.y * diff.y < _treeTexManager.getDensity(centers[i]->biome) ||
-            _map->getClosestCenter(p)->biome != centers[i]->biome) {
+            _map.getClosestCenter(p)->biome != centers[i]->biome) {
             add = false;
           }
         }

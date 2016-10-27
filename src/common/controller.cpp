@@ -1,8 +1,9 @@
 #include "controller.h"
+
 #include <set>
 #include <string>
 #include <sstream>
-#include "igElement.h"
+
 #include "lion.h"
 
 #define ROTATION_ANGLE_PS 60. // PS = per second
@@ -15,12 +16,12 @@ Controller::Controller(sf::RenderWindow* window) :
   _rectSelect(sf::Vector2f(0., 0.)),
   _running(true),
 	_window(window),
-  _game(&_camera, &_map) {}
+  _game(&_camera) {}
 
 void Controller::init() {
-  _map.load("res/map/");
   _game.init();
 
+  // Log
   _font.loadFromFile("res/Arial.ttf");
   _fpsCounter.setFont(_font);
   _fpsCounter.setCharacterSize(10);
@@ -31,12 +32,22 @@ void Controller::init() {
   _posDisplay.setCharacterSize(10);
   _posDisplay.setColor(sf::Color::White);
 
+  // Mouse
   _rectSelect.setFillColor(sf::Color::Transparent);
   _rectSelect.setOutlineThickness(1);
   _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
 
-  _minimap.setTexture(*(_map.getMinimap()));
-  _minimap.setPosition(sf::Vector2f(0.f, _window->getSize().y - _minimap.getTextureRect().height));
+  //
+  sf::Image mapImg;
+  if (!mapImg.loadFromFile("res/map/map.png")) {
+    std::cerr << "Unable to open file: " << "res/map/map.png" << std::endl;
+  }
+
+  _minimapTexture.loadFromImage(mapImg);
+	_minimapTexture.setSmooth(true);
+
+  _minimapSprite.setTexture(_minimapTexture);
+  _minimapSprite.setPosition(sf::Vector2f(0.f, _window->getSize().y - _minimapSprite.getTextureRect().height));
 
 	_camera.resize(_window->getSize().x, _window->getSize().y );
 }
@@ -77,13 +88,13 @@ void Controller::renderLifeBars() {
 
 void Controller::renderMinimap() {
   // Background image
-  _window->draw(_minimap);
+  _window->draw(_minimapSprite);
 
   // Position of the viewer
-  sf::Vector2f viewerPos( _minimap.getPosition().x +
-    (float) _minimap.getTextureRect().height * _camera.getPointedPos().y / _map.getMaxCoord(),
-                          _minimap.getPosition().y +
-    (float) _minimap.getTextureRect().width  * _camera.getPointedPos().x / _map.getMaxCoord());
+  sf::Vector2f viewerPos( _minimapSprite.getPosition().x +
+    (float) _minimapSprite.getTextureRect().height * _camera.getPointedPos().y / MAX_COORD,
+                          _minimapSprite.getPosition().y +
+    (float) _minimapSprite.getTextureRect().width  * _camera.getPointedPos().x / MAX_COORD);
 
   sf::CircleShape miniCamPos(3);
   miniCamPos.setPointCount(8);
@@ -101,7 +112,7 @@ void Controller::renderMinimap() {
   _window->draw(miniCamDir);
 
   // Highlight generated chunks
-  float miniChunkSize = _minimap.getTextureRect().height / NB_CHUNKS;
+  float miniChunkSize = _minimapSprite.getTextureRect().height / NB_CHUNKS;
 
   sf::RectangleShape miniChunk(sf::Vector2f(miniChunkSize, miniChunkSize));
   miniChunk.setFillColor(sf::Color::Black);
@@ -114,7 +125,7 @@ void Controller::renderMinimap() {
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       sf::Vector2i currentPos(i,j);
-      miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+      miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
 
       if (genTrn.find(currentPos) == genTrn.end()) {
         miniChunk.setFillColor(sf::Color::Black);
@@ -122,13 +133,13 @@ void Controller::renderMinimap() {
       }
 
       else if (borderTrn.find(currentPos) != borderTrn.end()) {
-        miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+        miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
         miniChunk.setFillColor(edge);
         _window->draw(miniChunk);
       }
 
       else if (!genTrn.at(currentPos)->isVisible()) {
-        miniChunk.setPosition(_minimap.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
+        miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
         miniChunk.setFillColor(fog);
         _window->draw(miniChunk);
       }
@@ -185,11 +196,11 @@ void Controller::run() {
         _camera.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
 
       else if (event.type == sf::Event::MouseButtonPressed) {
-        if (_minimap.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
-          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimap.getPosition().y) /
-                                         (float) _minimap.getTextureRect().height * _map.getMaxCoord(),
-                                         (float) (event.mouseButton.x - _minimap.getPosition().x) /
-                                         (float) _minimap.getTextureRect().width * _map.getMaxCoord()));
+        if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
+          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
+                                         (float) _minimapSprite.getTextureRect().height * MAX_COORD,
+                                         (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /
+                                         (float) _minimapSprite.getTextureRect().width * MAX_COORD));
         }
 
         else {

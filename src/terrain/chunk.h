@@ -40,6 +40,7 @@ public:
 	inline bool isVisible() const {return _visible;}
 
 protected:
+	// 1 if they are all outside, -1 inside, else 0
 	int compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const;
 	GLuint _vbo;
 	GLuint _ibo;

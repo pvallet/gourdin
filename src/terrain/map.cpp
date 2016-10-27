@@ -1,58 +1,27 @@
 #include "map.h"
-#include "utils.h"
-#include "vecUtils.h"
+
 #include <omp.h>
 #include <tinyxml.h>
+
 #include <iostream>
 #include <sstream>
 
+#include "vecUtils.h"
+
+// The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.
 
-Map::Map() :
-	_nbChunks(NB_CHUNKS),
-	_maxCoord(_nbChunks * CHUNK_SIZE) {}
+Map::~Map() {
 
-void Map::load(std::string path) {
-	_minimap = new sf::Texture();
+	// delete[] _data;
+	// delete[] _dataset.ptr();
+	// delete[] _kdIndex;
+}
 
-	std::ostringstream texPath;
-  texPath << path << "map.png";
-
-  sf::Image mapImg;
-
-  if (!mapImg.loadFromFile(texPath.str())) {
-    std::cerr << "Unable to open file: " << path << std::endl;
-  }
-
-  _minimap->loadFromImage(mapImg);
-	_minimap->setSmooth(true);
-
-  // Parse the XML file
-
-  std::ostringstream xmlPath;
-  xmlPath << path << "map.xml";
-
-  TiXmlDocument doc(xmlPath.str());
-  if(!doc.LoadFile()) {
-    std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
-    std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
-  }
-
-  TiXmlHandle hDoc(&doc);
+void Map::loadCenters(const TiXmlHandle& hRoot) {
 	TiXmlElement *elem, *elem2;
-	TiXmlHandle hRoot(0);
 	TiXmlHandle hSub(0);
 
-	elem = hDoc.FirstChildElement().Element();
-	if (!elem) return;
-
-	int size;
-	elem->QueryIntAttribute("size", &size);
-	_centers.resize(size);
-
-	hRoot = TiXmlHandle(elem);
-
-	// Centers
 	Center center;
 	std::string str;
 	int id;
@@ -104,10 +73,12 @@ void Map::load(std::string path) {
 		center.edges.  resize(center.edgeIDs.size());
 		center.corners.resize(center.cornerIDs.size());
 
-		_centers[center.id] = new Center(center);
+		_centers[center.id] = std::unique_ptr<Center>(new Center(center));
 	}
+}
 
-	// Edges
+void Map::loadEdges(const TiXmlHandle& hRoot) {
+	TiXmlElement *elem;
 	Edge edge;
 	elem = hRoot.FirstChild("edges").FirstChild().Element();
 	for(; elem; elem = elem->NextSiblingElement()) {
@@ -121,8 +92,6 @@ void Map::load(std::string path) {
 			edge.mapEdge = true;
 			edge.x = 0.;
 			edge.y = 0.;
-			edge.corner0 = 0;
-			edge.corner1 = 0;
 		}
 
 		else {
@@ -134,11 +103,19 @@ void Map::load(std::string path) {
 
 		if (edge.id >= (int) _edges.size())
 			_edges.resize(edge.id + 1);
-		_edges[edge.id] = new Edge(edge);
+		_edges[edge.id] = std::unique_ptr<Edge>(new Edge(edge));
 	}
+}
 
-	// Corners
+void Map::loadCorners(const TiXmlHandle& hRoot) {
+	TiXmlElement *elem, *elem2;
+	TiXmlHandle hSub(0);
+
 	Corner corner;
+	std::string str;
+
+	int id;
+
 	elem = hRoot.FirstChild("corners").FirstChild().Element();
 	for(; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &corner.id);
@@ -188,80 +165,118 @@ void Map::load(std::string path) {
 
 		if (corner.id >= (int) _corners.size())
 			_corners.resize(corner.id + 1);
-		_corners[corner.id] = new Corner(corner);
+		_corners[corner.id] = std::unique_ptr<Corner>(new Corner(corner));
 	}
+}
 
-	// Convert to game coordinates
-	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
-		_centers[i]->x *= _maxCoord / MAP_MAX_COORD;
-		_centers[i]->y *= _maxCoord / MAP_MAX_COORD;
-	}
-
-	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
-		if (!_edges[i]->mapEdge) {
-			_edges[i]->x *= _maxCoord / MAP_MAX_COORD;
-			_edges[i]->y *= _maxCoord / MAP_MAX_COORD;
-		}
-	}
-
-	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
-		_corners[i]->x *= _maxCoord / MAP_MAX_COORD;
-		_corners[i]->y *= _maxCoord / MAP_MAX_COORD;
-	}
-
-	// Set the pointers thanks to the indices
+void Map::setPointersInDataStructures() {
 	#pragma omp parallel for
 	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
 		for (unsigned int j = 0 ; j < _centers[i]->centerIDs.size() ; j++) {
-			_centers[i]->centers[j] = _centers[_centers[i]->centerIDs[j]];
+			_centers[i]->centers[j] = _centers[_centers[i]->centerIDs[j]].get();
 		}
 
 		for (unsigned int j = 0 ; j < _centers[i]->edgeIDs.size() ; j++) {
-			_centers[i]->edges[j] = _edges[_centers[i]->edgeIDs[j]];
+			_centers[i]->edges[j] = _edges[_centers[i]->edgeIDs[j]].get();
 		}
 
 		for (unsigned int j = 0 ; j < _centers[i]->cornerIDs.size() ; j++) {
-			_centers[i]->corners[j] = _corners[_centers[i]->cornerIDs[j]];
+			_centers[i]->corners[j] = _corners[_centers[i]->cornerIDs[j]].get();
 		}
 	}
 
 	#pragma omp parallel for
 	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
 		if (!_edges[i]->mapEdge) {
-			_edges[i]->center0 = _centers[_edges[i]->center0ID];
-			_edges[i]->center1 = _centers[_edges[i]->center1ID];
-			_edges[i]->corner0 = _corners[_edges[i]->corner0ID];
-			_edges[i]->corner1 = _corners[_edges[i]->corner1ID];
+			_edges[i]->center0 = _centers[_edges[i]->center0ID].get();
+			_edges[i]->center1 = _centers[_edges[i]->center1ID].get();
+			_edges[i]->corner0 = _corners[_edges[i]->corner0ID].get();
+			_edges[i]->corner1 = _corners[_edges[i]->corner1ID].get();
 		}
 	}
 
 	#pragma omp parallel for
 	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
 		for (unsigned int j = 0 ; j < _corners[i]->centerIDs.size() ; j++) {
-			_corners[i]->centers[j] = _centers[_corners[i]->centerIDs[j]];
+			_corners[i]->centers[j] = _centers[_corners[i]->centerIDs[j]].get();
 		}
 
 		for (unsigned int j = 0 ; j < _corners[i]->edgeIDs.size() ; j++) {
-			_corners[i]->edges[j] = _edges[_corners[i]->edgeIDs[j]];
+			_corners[i]->edges[j] = _edges[_corners[i]->edgeIDs[j]].get();
 		}
 
 		for (unsigned int j = 0 ; j < _corners[i]->cornerIDs.size() ; j++) {
-			_corners[i]->corners[j] = _corners[_corners[i]->cornerIDs[j]];
+			_corners[i]->corners[j] = _corners[_corners[i]->cornerIDs[j]].get();
+		}
+	}
+}
+
+void Map::load(std::string path) {
+	std::ostringstream xmlPath;
+  xmlPath << path << "map.xml";
+
+  TiXmlDocument doc(xmlPath.str());
+  if(!doc.LoadFile()) {
+    std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
+    std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
+  }
+
+  TiXmlHandle hDoc(&doc);
+	TiXmlElement *elem;
+	TiXmlHandle hRoot(0);
+
+	elem = hDoc.FirstChildElement().Element();
+	if (!elem) return;
+
+	int size;
+	elem->QueryIntAttribute("size", &size);
+
+	_centers.resize(size);
+
+	hRoot = TiXmlHandle(elem);
+
+	loadCenters(hRoot);
+	loadEdges(hRoot);
+	loadCorners(hRoot);
+
+	// Convert to game coordinates
+
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+		_centers[i]->x *= MAX_COORD / MAP_MAX_COORD;
+		_centers[i]->y *= MAX_COORD / MAP_MAX_COORD;
+	}
+
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+		if (!_edges[i]->mapEdge) {
+			_edges[i]->x *= MAX_COORD / MAP_MAX_COORD;
+			_edges[i]->y *= MAX_COORD / MAP_MAX_COORD;
 		}
 	}
 
+	#pragma omp parallel for
+	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
+		_corners[i]->x *= MAX_COORD / MAP_MAX_COORD;
+		_corners[i]->y *= MAX_COORD / MAP_MAX_COORD;
+	}
 
-	_data = new double[_centers.size()*2];
+	setPointersInDataStructures();
 
+	// Initialize the kdIndex to perform geometric manipulations with centers (such as nearest center)
+
+	_data.resize(_centers.size()*2);
+
+	#pragma omp parallel for
 	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
 		_data[2*i]   = _centers[i]->x;
 		_data[2*i+1] = _centers[i]->y;
 	}
 
-	_dataset = flann::Matrix<double>(_data, _centers.size(), 2);
+	_dataset = flann::Matrix<double>(&_data[0], _centers.size(), 2);
 
-	_kdIndex = new flann::Index<flann::L2<double> >(_dataset, flann::KDTreeIndexParams(4));
+	_kdIndex = std::unique_ptr<flann::Index<flann::L2<double> > >(
+		new flann::Index<flann::L2<double> >(_dataset, flann::KDTreeIndexParams(4)));
 
 	_kdIndex->buildIndex();
 }
@@ -318,24 +333,6 @@ Biome Map::biomeAttrib(std::string str) const {
 		return GRASSLAND;
 }
 
-Map::~Map() {
-	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
-		// delete _centers[i];
-	}
-
-	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
-		// delete _edges[i];
-	}
-
-	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
-		// delete _corners[i];
-	}
-
-	// delete[] _data;
-	// delete[] _dataset.ptr();
-	// delete[] _kdIndex;
-}
-
 Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
 	double queryData[2];
 	queryData[0] = pos.x;
@@ -348,7 +345,7 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
 
   _kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(_centers.size()));
 
-	return _centers[indices[0][0]];
+	return _centers[indices[0][0]].get();
 }
 
 std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
@@ -372,7 +369,7 @@ std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
   		_centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
   		_centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
 
-  		res.push_back(_centers[indices[0][i]]);
+  		res.push_back(_centers[indices[0][i]].get());
   	}
   }
 

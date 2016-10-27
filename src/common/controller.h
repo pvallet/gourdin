@@ -6,7 +6,6 @@
 
 #include "camera.h"
 #include "game.h"
-#include "map.h"
 
 
 class Controller {
@@ -23,15 +22,14 @@ private:
 	void renderMinimap();
 	void renderLog();
 
-
 	bool _addSelect;
 	bool _selecting;
 	sf::RectangleShape _rectSelect;
 	sf::Font _font;
 	sf::Text _fpsCounter;
 	sf::Text _posDisplay;
-	sf::Sprite _minimap;
-	Map _map;
+	sf::Sprite _minimapSprite;
+	sf::Texture _minimapTexture;
 
 	bool _running;
 	sf::Clock _frameClock;

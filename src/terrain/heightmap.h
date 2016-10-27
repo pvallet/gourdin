@@ -15,7 +15,7 @@
 class Heightmap : public Chunk {
 
 public:
-	Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTexManager, Map* map);
+	Heightmap(sf::Vector2i chunkPosition, int seed, const TexManager& terrainTexManager, const Map& map);
 
 	void generate(std::vector<Constraint> constraints);
 	void draw() const;
@@ -29,8 +29,7 @@ private:
 	void getMapInfo();
 	void fillBufferData();
 	void generateBuffers();
-	void computeLowestsHighests();
-	int compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const; // 1 if they are all outside, -1 inside, else 0
+
 	size_t _size;
 	int _seed;
 
@@ -38,12 +37,9 @@ private:
 	std::vector<float> _coord;
 	std::vector<float> _normals;
 
-	sf::Vector3f _lowests[4]; // For more culling than frustum
-	sf::Vector3f _highests[4];
-
 	std::map<Biome, std::vector<GLuint> > _indices;
 
 	std::vector<std::vector<float> > _heights;
-	TexManager* _terrainTexManager;
-	Map* _map;
+	const TexManager& _terrainTexManager;
+	const Map& _map;
 };

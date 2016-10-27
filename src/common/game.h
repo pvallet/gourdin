@@ -1,7 +1,8 @@
 #pragma once
+
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
+
 #include <map>
 #include <vector>
 #include <set>
@@ -10,7 +11,6 @@
 #include "ocean.h"
 #include "camera.h"
 
-#include "igElement.h"
 #include "lion.h"
 #include "antilope.h"
 #include "tree.h"
@@ -19,7 +19,7 @@
 #include "animationManagerInitializer.h"
 #include "map.h"
 #include "texManager.h"
-#include "treeTexManager.h"
+
 #include "shader.h"
 #include "utils.h"
 
@@ -32,7 +32,7 @@ struct compDepth {
 
 class Game {
 public:
-	Game(Camera* camera, Map* map);
+	Game(Camera* camera);
 
   void init();
 
@@ -61,7 +61,7 @@ private:
 	std::vector<igElement*> _e; // Elements
 	Camera* _cam;
 
-	Map* _map;
+	Map _map;
   AnimationManagerInitializer _antilopeTexManager;
   AnimationManagerInitializer _lionTexManager;
 	TexManager _terrainTexManager;

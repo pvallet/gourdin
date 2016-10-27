@@ -7,21 +7,21 @@
 #include "perlin.h"
 #include "vecUtils.h"
 
-#define DEFAULT_MAP_SIZE 33 // +1 to join with other chunks
+#define DEFAULT_CHUNK_SUBD 33 // +1 to join with other chunks
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 #define SMOOTH_RANGE 20. // Percentage
 
 
-Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, TexManager* terrainTexManager, Map* map) :
+Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, const TexManager& terrainTexManager, const Map& map) :
 	Chunk(chunkPosition),
-	_size(DEFAULT_MAP_SIZE),
+	_size(DEFAULT_CHUNK_SUBD),
   _seed(seed),
   _terrainTexManager(terrainTexManager),
   _map(map) {
 
-  for (unsigned int i = 0 ; i < DEFAULT_MAP_SIZE ; i++) {
-		_heights.push_back(std::vector<float>(DEFAULT_MAP_SIZE, 0.0f));
+  for (unsigned int i = 0 ; i < _size ; i++) {
+		_heights.push_back(std::vector<float>(_size, 0.f));
 	}
 
 	_vertices.resize(3*_size*_size);
@@ -44,12 +44,10 @@ void Heightmap::getMapInfo() {
     y = _chunkPos.y * CHUNK_SIZE;
 
     for (size_t j = 0 ; j < _size ; j++) {
-      tmpRegions[i][j] = _map->getClosestCenter(sf::Vector2<double>(x, y));
+      tmpRegions[i][j] = _map.getClosestCenter(sf::Vector2<double>(x, y));
 
       x1 = tmpRegions[i][j]->x;
       y1 = tmpRegions[i][j]->y;
-
-      _heights[i][j] = 0.;
 
       // Linear interpolation to get the height
       double s, t;
@@ -189,75 +187,6 @@ void Heightmap::generateBuffers() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void Heightmap::computeLowestsHighests() {
-	size_t size1 = _size-1;
-	double step =  CHUNK_SIZE / (double) size1;
-	float minH = HEIGHT_FACTOR;
-  int iMin = 0;
-  int iMax = 0;
-  float maxH = 0.;
-
-  for (size_t i = 0 ; i < _size ; i++) {
-    if (_heights[0][i] < minH) {
-      iMin = i;
-      minH = _heights[0][i];
-    }
-
-    if (_heights[0][i] > maxH) {
-      iMax = i;
-      maxH = _heights[0][i];
-    }
-  }
-
-  _lowests[0]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[0][iMin]);
-  _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[0][iMax]);
-
-  for (size_t i = 0 ; i < _size ; i++) {
-    if (_heights[size1][i] < minH) {
-      iMin = i;
-      minH = _heights[size1][i];
-    }
-
-    if (_heights[size1][i] > maxH) {
-      iMax = i;
-      maxH = _heights[size1][i];
-    }
-  }
-
-  _lowests[1]  = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[size1][iMin]);
-  _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[size1][iMax]);
-
-  for (size_t i = 0 ; i < _size ; i++) {
-    if (_heights[i][0] < minH) {
-      iMin = i;
-      minH = _heights[i][0];
-    }
-
-    if (_heights[i][0] > maxH) {
-      iMax = i;
-      maxH = _heights[i][0];
-    }
-  }
-
-  _lowests[2]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _chunkPos.y * CHUNK_SIZE, _heights[iMin][0]);
-  _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _chunkPos.y * CHUNK_SIZE, _heights[iMax][0]);
-
-  for (size_t i = 0 ; i < _size ; i++) {
-    if (_heights[i][size1] < minH) {
-      iMin = i;
-      minH = _heights[i][size1];
-    }
-
-    if (_heights[i][size1] > maxH) {
-      iMax = i;
-      maxH = _heights[i][size1];
-    }
-  }
-
-  _lowests[3]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMin][size1]);
-  _highests[3] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMax][size1]);
-}
-
 void Heightmap::generate(std::vector<Constraint> constraints) {
   size_t size1 = _size-1;
 	double step =  CHUNK_SIZE / (double) size1;
@@ -272,8 +201,6 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 	_corners[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
   _corners[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[0][size1]);
   _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[size1][0]);
-
-  computeLowestsHighests();
 }
 
 void Heightmap::draw() const {
@@ -293,7 +220,7 @@ void Heightmap::draw() const {
 
   int cursor = 0;
   for (auto it = _indices.begin(); it != _indices.end() ; ++it ) {
-    _terrainTexManager->bindTexture(it->first);
+    _terrainTexManager.bindTexture(it->first);
 
     glDrawElements(GL_TRIANGLES, it->second.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(cursor));
     cursor += it->second.size() * sizeof(GLuint);
@@ -329,25 +256,6 @@ void Heightmap::saveToImage() const {
   convert << _chunkPos.x << "." << _chunkPos.y << ".png";
 
 	texture.copyToImage().saveToFile(convert.str());
-}
-
-int Heightmap::compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* points) const {
-    float dots[4];
-
-    for (size_t i = 0 ; i < 4 ; i++) {
-        dots[i] = vu::dot(points[i]-cam, vec);
-    }
-
-    if (dots[0] >= 0.f && dots[1] >= 0.f &&
-      	dots[2] >= 0.f && dots[3] >= 0.f )
-      return 1;
-
-    else if (dots[0] <= 0.f && dots[1] <= 0.f &&
-             dots[2] <= 0.f && dots[3] <= 0.f )
-      return -1;
-
-    else
-      return 0;
 }
 
 Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {

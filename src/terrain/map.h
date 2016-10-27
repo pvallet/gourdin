@@ -1,15 +1,16 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
 #include <flann/flann.hpp>
-#include <map>
-#include <vector>
-#include <string>
+
 #include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "camera.h"
 #include "utils.h"
+
+class TiXmlHandle;
 
 struct Center;
 struct Edge;
@@ -44,10 +45,12 @@ struct Edge {
 	double x; // Midpoint coordinates
 	double y;
 	int river;
+
 	int center0ID; // Only for initialisation
 	int center1ID;
 	int corner0ID;
 	int corner1ID;
+
 	Center* center0;
 	Center* center1;
 	Corner* corner0;
@@ -79,34 +82,27 @@ struct Corner {
 
 class Map {
 public:
-	Map();
+	Map() {}
 	~Map();
 
 	void load(std::string path);
-
-	inline sf::Texture* getMinimap() const {return _minimap;}
-	inline std::vector<Center*> getCenters() const {return _centers;}
-	inline std::vector<Edge*> 	getEdges()   const {return _edges;}
-	inline std::vector<Corner*> getCorners() const {return _corners;}
-	inline int getNbChunks() const {return _nbChunks;}
-	inline double getMaxCoord() const {return _maxCoord;}
 
 	Center* getClosestCenter(sf::Vector2<double> pos) const;
 	std::vector<Center*> getCentersInChunk(sf::Vector2i chunkPos) const;
 
 private:
+	void loadCenters(const TiXmlHandle& hRoot);
+	void loadEdges(const TiXmlHandle& hRoot);
+	void loadCorners(const TiXmlHandle& hRoot);
+	void setPointersInDataStructures();
 	bool boolAttrib(std::string str) const;
 	Biome biomeAttrib(std::string str) const;
 
-	sf::Texture* _minimap;
-	std::vector<Center*> _centers;
-	std::vector<Edge*>   _edges;
-	std::vector<Corner*> _corners;
+	std::vector<std::unique_ptr<Center> > _centers;
+	std::vector<std::unique_ptr<Edge> >   _edges;
+	std::vector<std::unique_ptr<Corner> > _corners;
 
-	int _nbChunks; // Number of chunks on a row
-	double _maxCoord;
-
-	double* _data;
+	std::vector<double> _data;
 	flann::Matrix<double> _dataset; // For knn searches
-	flann::Index<flann::L2<double> >* _kdIndex;
+	std::unique_ptr<flann::Index<flann::L2<double> > > _kdIndex;
 };
