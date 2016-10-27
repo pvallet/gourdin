@@ -10,18 +10,18 @@
 
 #define RAD M_PI / 180.
 
+class Controller;
+class Game;
+
 class Camera {
 public:
-	Camera();
-	void resize(unsigned int W, unsigned int H);
+	static Camera& getInstance() {
+    static Camera instance;
+    return instance;
+  }
 
-	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.)*RAD)+dWinY*sin((_theta+90.)*RAD);
-																										_y +=	dWinX*sin((_theta+90.)*RAD)-dWinY*cos((_theta+90.)*RAD);}
-	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
-	inline void zoom (float dr) {_r += dr;}
-	void apply ();
-  inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}
-  inline void setHeight(float nHeight) {_height = nHeight;}
+	Camera(Camera const&)          = delete;
+	void operator=(Camera const&)  = delete;
 
 	inline unsigned int getW() const {return _W;}
 	inline unsigned int getH() const {return _H;}
@@ -33,7 +33,22 @@ public:
   inline sf::Vector2<double> getPointedPos() const {return sf::Vector2<double>(_x, _y);}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 
+	friend Controller;
+	friend Game;
+
 private:
+	Camera();
+
+	void resize(unsigned int W, unsigned int H);
+
+	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.)*RAD)+dWinY*sin((_theta+90.)*RAD);
+																										_y +=	dWinX*sin((_theta+90.)*RAD)-dWinY*cos((_theta+90.)*RAD);}
+	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
+	inline void zoom (float dr) {_r += dr;}
+	void apply ();
+  inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}
+  inline void setHeight(float nHeight) {_height = nHeight;}
+
 	unsigned int _W, _H;
 
   float _fovAngle;

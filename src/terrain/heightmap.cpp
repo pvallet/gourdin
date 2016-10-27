@@ -74,6 +74,36 @@ void Heightmap::getMapInfo() {
         }
 			}
 
+			// Replay
+
+			// if (_heights[i][j] == 0 && tmpRegions[i][j]->biome != OCEAN) {
+			// 	for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
+	    //     if (!tmpRegions[i][j]->edges[k]->mapEdge) {
+			//
+			// 			x2 = tmpRegions[i][j]->edges[k]->corner0->x;
+	    //       y2 = tmpRegions[i][j]->edges[k]->corner0->y;
+	    //       x3 = tmpRegions[i][j]->edges[k]->corner1->x;
+	    //       y3 = tmpRegions[i][j]->edges[k]->corner1->y;
+			//
+	    //       s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+	    //       t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+			//
+			// 			double x4 = tmpRegions[i][j]->edges[k]->center0->x;
+			// 			double y4 = tmpRegions[i][j]->edges[k]->center0->y;
+			// 			double x5 = tmpRegions[i][j]->edges[k]->center1->x;
+			// 			double y5 = tmpRegions[i][j]->edges[k]->center1->y;
+			// 			std::cout << x << " " << y << std::endl;
+			// 			std::cout << x1 << " " << y1 << std::endl;
+			// 			std::cout << x2 << " " << y2 << std::endl;
+			// 			std::cout << x3 << " " << y3 << std::endl;
+			// 			std::cout << x4 << " " << y4 << std::endl;
+			// 			std::cout << x5 << " " << y5 << std::endl;
+	    //     }
+			// 	}
+			// 	std::cin >> _heights[i][j];
+			// }
+
+
       y += step;
     }
 

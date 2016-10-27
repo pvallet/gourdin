@@ -4,9 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-#include "camera.h"
 #include "game.h"
-
 
 class Controller {
 public:
@@ -36,6 +34,5 @@ private:
 	sf::Time _elapsed;
 	sf::RenderWindow* _window;
 
-	Camera _camera;
 	Game _game;
 };

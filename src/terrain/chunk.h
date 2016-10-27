@@ -6,7 +6,6 @@
 
 #include <vector>
 
-#include "camera.h"
 #include "utils.h"
 
 #define TEX_FACTOR 3.f // Number of times the texture is repeated per chunk
@@ -28,7 +27,7 @@ public:
 	virtual float getHeight(float x, float y) const = 0;
 
 	// Set visible to false if there is no need to display the chunk
-	virtual void computeCulling(const Camera* camera);
+	virtual void computeCulling();
 
 	// To join the chunk with neighbours ones. Used with the perlin version.
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const {Constraint c; c.type = NONE; return c;}

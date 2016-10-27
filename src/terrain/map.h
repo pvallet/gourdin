@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "camera.h"
 #include "utils.h"
 
 class TiXmlHandle;

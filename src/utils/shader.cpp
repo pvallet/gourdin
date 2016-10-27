@@ -167,7 +167,8 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     return true;
 }
 
-void Shader::sendModelMatrix(Camera *cam, const glm::mat4& model) const {
-	glm::mat4 MVP = cam->getViewProjectionMatrix() * model;
+void Shader::sendModelMatrix(const glm::mat4& model) const {
+	Camera& cam = Camera::getInstance();
+	glm::mat4 MVP = cam.getViewProjectionMatrix() * model;
 	glUniformMatrix4fv(_matrixID, 1, GL_FALSE, &MVP[0][0]);
 }

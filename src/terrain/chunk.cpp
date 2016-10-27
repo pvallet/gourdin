@@ -1,5 +1,6 @@
 #include "chunk.h"
 
+#include "camera.h"
 #include "vecUtils.h"
 
 Chunk::Chunk(sf::Vector2i chunkPosition) :
@@ -33,14 +34,16 @@ int Chunk::compareToPoints(sf::Vector3f cam, sf::Vector3f vec, sf::Vector3f* poi
       return 0;
 }
 
-void Chunk::computeCulling(const Camera* camera) {
-  float theta = camera->getTheta();
-  float phi   = camera->getPhi();
-  float alpha = camera->getFov() * camera->getRatio() / 2.;
+void Chunk::computeCulling() {
+	Camera& cam = Camera::getInstance();
+
+  float theta = cam.getTheta();
+  float phi   = cam.getPhi();
+  float alpha = cam.getFov() * cam.getRatio() / 2.;
 
   // Bottom of the view
-  sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - camera->getFov() / 2.);
-  sf::Vector3f pos = camera->getPos();
+  sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - cam.getFov() / 2.);
+  sf::Vector3f pos = cam.getPos();
 
   if (compareToPoints(pos,norm,_corners) == 1) {
     _visible = false;
@@ -48,7 +51,7 @@ void Chunk::computeCulling(const Camera* camera) {
   }
 
   // Top
-  norm = vu::carthesian(1., theta, phi + 90. + camera->getFov() / 2.);
+  norm = vu::carthesian(1., theta, phi + 90. + cam.getFov() / 2.);
   norm *= -1.f;
 
   if (compareToPoints(pos,norm,_corners) == 1) {

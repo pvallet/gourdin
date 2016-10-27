@@ -9,8 +9,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-class Camera;
-
 class Shader {
 public:
 
@@ -25,7 +23,7 @@ public:
   bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
   inline GLuint getProgramID() const {return _programID;}
 
-  void sendModelMatrix(Camera *cam, const glm::mat4& model) const;
+  void sendModelMatrix(const glm::mat4& model) const;
 
 private:
 

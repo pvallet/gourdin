@@ -9,7 +9,6 @@
 
 #include "heightmap.h"
 #include "ocean.h"
-#include "camera.h"
 
 #include "lion.h"
 #include "antilope.h"
@@ -32,7 +31,7 @@ struct compDepth {
 
 class Game {
 public:
-	Game(Camera* camera);
+	Game();
 
   void init();
 
@@ -59,7 +58,6 @@ private:
 	std::set<igElement*> _sel; // Selection
 	std::set<igElement*, compDepth> _vis; // Visible
 	std::vector<igElement*> _e; // Elements
-	Camera* _cam;
 
 	Map _map;
   AnimationManagerInitializer _antilopeTexManager;
