@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include <tinyxml.h>
+#include "tinyxml.h"
 
 void AnimationManagerInitializer::load(std::string folderPath) {
   std::string xmlFile = folderPath + "animInfo.xml";
