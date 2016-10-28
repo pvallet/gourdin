@@ -59,11 +59,6 @@ sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) {
 }
 
 int AnimationManager::getClosestOrient(float orientation) {
-  /*if (tmp < 0.)
-      tmp += 360.;
-
-  if (tmp > 180.)
-      tmp = 360. - tmp;*/
 
   float oriStep = 360. / (float) _animInfo[_currentAnim].orientations;
 

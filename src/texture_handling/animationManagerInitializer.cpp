@@ -17,7 +17,8 @@ void AnimationManagerInitializer::load(std::string folderPath) {
   TiXmlHandle hdl(&doc);
   TiXmlElement *elem = hdl.FirstChildElement().FirstChildElement().Element();
 
-  assert(elem && "Empty xml file");
+  if (elem == nullptr)
+    std::cerr << "Empty xml file: " << xmlFile << std::endl;
 
   _maxHeight = 0;
 

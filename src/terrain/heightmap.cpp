@@ -44,66 +44,46 @@ void Heightmap::getMapInfo() {
     y = _chunkPos.y * CHUNK_SIZE;
 
     for (size_t j = 0 ; j < _size ; j++) {
-      tmpRegions[i][j] = _map.getClosestCenter(sf::Vector2<double>(x, y));
+			Center* currentCenter = _map.getClosestCenter(sf::Vector2<double>(x, y));
+      tmpRegions[i][j] = currentCenter;
 
-      x1 = tmpRegions[i][j]->x;
-      y1 = tmpRegions[i][j]->y;
+			bool tryNextAdjacentCenter = true;
+			size_t currentAdjacentCenter = 0;
+			do {
+				x1 = tmpRegions[i][j]->x;
+	      y1 = tmpRegions[i][j]->y;
+				
+	      for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
+	        if (!tmpRegions[i][j]->edges[k]->mapEdge) {
 
-      // Linear interpolation to get the height
-      double s, t;
-      for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
-        if (!tmpRegions[i][j]->edges[k]->mapEdge) {
+						x2 = tmpRegions[i][j]->edges[k]->corner0->x;
+	          y2 = tmpRegions[i][j]->edges[k]->corner0->y;
+	          x3 = tmpRegions[i][j]->edges[k]->corner1->x;
+	          y3 = tmpRegions[i][j]->edges[k]->corner1->y;
 
-					x2 = tmpRegions[i][j]->edges[k]->corner0->x;
-          y2 = tmpRegions[i][j]->edges[k]->corner0->y;
-          x3 = tmpRegions[i][j]->edges[k]->corner1->x;
-          y3 = tmpRegions[i][j]->edges[k]->corner1->y;
+						// Linear interpolation to get the height
+	          double s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+	          double t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
 
-          s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-          t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+	          if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
+	            _heights[i][j] = s       * tmpRegions[i][j]->elevation +
+	                             t       * tmpRegions[i][j]->edges[k]->corner0->elevation +
+	                             (1-s-t) * tmpRegions[i][j]->edges[k]->corner1->elevation;
+	            if (_heights[i][j] < 0)
+	              	_heights[i][j] = 0;
 
-          if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
-            _heights[i][j] = s       * tmpRegions[i][j]->elevation +
-                             t       * tmpRegions[i][j]->edges[k]->corner0->elevation +
-                             (1-s-t) * tmpRegions[i][j]->edges[k]->corner1->elevation;
-            if (_heights[i][j] < 0)
-              	_heights[i][j] = 0;
+	            _heights[i][j] *=  HEIGHT_FACTOR;
+							tryNextAdjacentCenter = false;
+							break;
+	          }
+	        }
+				}
 
-            _heights[i][j] *=  HEIGHT_FACTOR;
-          }
-        }
-			}
-
-			// Replay
-
-			// if (_heights[i][j] == 0 && tmpRegions[i][j]->biome != OCEAN) {
-			// 	for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
-	    //     if (!tmpRegions[i][j]->edges[k]->mapEdge) {
-			//
-			// 			x2 = tmpRegions[i][j]->edges[k]->corner0->x;
-	    //       y2 = tmpRegions[i][j]->edges[k]->corner0->y;
-	    //       x3 = tmpRegions[i][j]->edges[k]->corner1->x;
-	    //       y3 = tmpRegions[i][j]->edges[k]->corner1->y;
-			//
-	    //       s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-	    //       t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-			//
-			// 			double x4 = tmpRegions[i][j]->edges[k]->center0->x;
-			// 			double y4 = tmpRegions[i][j]->edges[k]->center0->y;
-			// 			double x5 = tmpRegions[i][j]->edges[k]->center1->x;
-			// 			double y5 = tmpRegions[i][j]->edges[k]->center1->y;
-			// 			std::cout << x << " " << y << std::endl;
-			// 			std::cout << x1 << " " << y1 << std::endl;
-			// 			std::cout << x2 << " " << y2 << std::endl;
-			// 			std::cout << x3 << " " << y3 << std::endl;
-			// 			std::cout << x4 << " " << y4 << std::endl;
-			// 			std::cout << x5 << " " << y5 << std::endl;
-	    //     }
-			// 	}
-			// 	std::cin >> _heights[i][j];
-			// }
-
-
+				if (tryNextAdjacentCenter) {
+					tmpRegions[i][j] = currentCenter->centers[currentAdjacentCenter];
+					currentAdjacentCenter++;
+				}
+			} while (tryNextAdjacentCenter);
       y += step;
     }
 
