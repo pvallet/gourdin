@@ -9,7 +9,7 @@
 #include "utils.h"
 
 #define ROTATION_ANGLE_PS 60. // PS = per second
-#define TRANSLATION_VALUE_PS 60.
+#define TRANSLATION_VALUE_PS 70.
 #define ZOOM_FACTOR 10.
 
 Controller::Controller(sf::RenderWindow* window) :
@@ -170,7 +170,6 @@ void Controller::renderLog() {
 
 void Controller::render() {
   if (_running) {
-    // _window->clear(sf::Color::Black);
     _game.render();
     _window->pushGLStates();
 
@@ -292,6 +291,8 @@ void Controller::run() {
     }
 
     // Move cam
+    double realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
+      cam.getZoomFactor();
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
       cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
@@ -300,22 +301,22 @@ void Controller::run() {
       cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      cam.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      cam.translate(0., - realTranslationValue);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      cam.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      cam.translate(0., realTranslationValue);
 
     if (sf::Mouse::getPosition().x == 0)
-      cam.translate(- TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
+      cam.translate(- realTranslationValue, 0.);
 
     if (sf::Mouse::getPosition().y == 0)
-      cam.translate(0., - TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      cam.translate(0., - realTranslationValue);
 
     if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
-      cam.translate(TRANSLATION_VALUE_PS * _elapsed.asSeconds(), 0.);
+      cam.translate(realTranslationValue, 0.);
 
     if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
-      cam.translate(0., TRANSLATION_VALUE_PS * _elapsed.asSeconds());
+      cam.translate(0., realTranslationValue);
 
     cam.apply();
     _game.update(_elapsed);

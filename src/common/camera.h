@@ -10,6 +10,8 @@
 
 #define RAD M_PI / 180.
 
+#define INIT_R 150.
+
 class Controller;
 class Game;
 
@@ -32,6 +34,7 @@ public:
   inline float getRatio() const {return _aspectRatio;}
   inline sf::Vector2<double> getPointedPos() const {return sf::Vector2<double>(_x, _y);}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
+	inline float getZoomFactor() const {return _r / INIT_R;}
 
 	friend Controller;
 	friend Game;

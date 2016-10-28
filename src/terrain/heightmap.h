@@ -21,6 +21,8 @@ public:
 	void draw() const;
 	void saveToImage() const;
 
+	virtual void computeCulling();
+
 	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const;
 	float getHeight(float x, float y) const; // linear interpolation
 	inline int getSize() const {return _size;}
@@ -29,6 +31,7 @@ private:
 	void getMapInfo();
 	void fillBufferData();
 	void generateBuffers();
+	void computeLowestsHighests();
 
 	size_t _size;
 	int _seed;
@@ -38,6 +41,9 @@ private:
 	std::vector<float> _normals;
 
 	std::map<Biome, std::vector<GLuint> > _indices;
+
+	sf::Vector3f _lowests[4]; // To adapt frustum culling
+	sf::Vector3f _highests[4];
 
 	std::vector<std::vector<float> > _heights;
 	const TexManager& _terrainTexManager;

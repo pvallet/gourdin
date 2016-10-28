@@ -1,10 +1,10 @@
 #include "heightmap.h"
-#include <SFML/Graphics.hpp>
+
 #include <iostream>
 #include <sstream>
 #include <omp.h>
 
-#include "perlin.h"
+#include "camera.h"
 #include "vecUtils.h"
 
 #define DEFAULT_CHUNK_SUBD 33 // +1 to join with other chunks
@@ -39,7 +39,6 @@ void Heightmap::getMapInfo() {
   double y, y1, y2, y3;
   x = _chunkPos.x * CHUNK_SIZE;
 
-	// #pragma omp parallel for
   for (size_t i = 0 ; i < _size ; i++) {
     y = _chunkPos.y * CHUNK_SIZE;
 
@@ -52,7 +51,7 @@ void Heightmap::getMapInfo() {
 			do {
 				x1 = tmpRegions[i][j]->x;
 	      y1 = tmpRegions[i][j]->y;
-				
+
 	      for (unsigned int k = 0 ; k < tmpRegions[i][j]->edges.size() ; k++) {
 	        if (!tmpRegions[i][j]->edges[k]->mapEdge) {
 
@@ -197,6 +196,81 @@ void Heightmap::generateBuffers() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void Heightmap::computeLowestsHighests() {
+	size_t size1 = _size-1;
+	double step =  CHUNK_SIZE / (double) size1;
+	float minH = HEIGHT_FACTOR;
+	float maxH = 0.;
+  int iMin = 0;
+  int iMax = 0;
+
+  for (size_t i = 0 ; i < _size ; i++) {
+    if (_heights[0][i] < minH) {
+      iMin = i;
+      minH = _heights[0][i];
+    }
+
+    if (_heights[0][i] > maxH) {
+      iMax = i;
+      maxH = _heights[0][i];
+    }
+  }
+
+  _lowests[0]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[0][iMin]);
+  _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[0][iMax]);
+
+	minH = HEIGHT_FACTOR;
+	maxH = 0.;
+  for (size_t i = 0 ; i < _size ; i++) {
+    if (_heights[size1][i] < minH) {
+      iMin = i;
+      minH = _heights[size1][i];
+    }
+
+    if (_heights[size1][i] > maxH) {
+      iMax = i;
+      maxH = _heights[size1][i];
+    }
+  }
+
+  _lowests[1]  = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMin * step, _heights[size1][iMin]);
+  _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[size1][iMax]);
+
+	minH = HEIGHT_FACTOR;
+	maxH = 0.;
+  for (size_t i = 0 ; i < _size ; i++) {
+    if (_heights[i][0] < minH) {
+      iMin = i;
+      minH = _heights[i][0];
+    }
+
+    if (_heights[i][0] > maxH) {
+      iMax = i;
+      maxH = _heights[i][0];
+    }
+  }
+
+  _lowests[2]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, _chunkPos.y * CHUNK_SIZE, _heights[iMin][0]);
+  _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _chunkPos.y * CHUNK_SIZE, _heights[iMax][0]);
+
+	minH = HEIGHT_FACTOR;
+	maxH = 0.;
+  for (size_t i = 0 ; i < _size ; i++) {
+    if (_heights[i][size1] < minH) {
+      iMin = i;
+      minH = _heights[i][size1];
+    }
+
+    if (_heights[i][size1] > maxH) {
+      iMax = i;
+      maxH = _heights[i][size1];
+    }
+  }
+
+  _lowests[3]  = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMin * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMin][size1]);
+  _highests[3] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMax][size1]);
+}
+
 void Heightmap::generate(std::vector<Constraint> constraints) {
   size_t size1 = _size-1;
 	double step =  CHUNK_SIZE / (double) size1;
@@ -211,6 +285,8 @@ void Heightmap::generate(std::vector<Constraint> constraints) {
 	_corners[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
   _corners[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[0][size1]);
   _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[size1][0]);
+
+	computeLowestsHighests();
 }
 
 void Heightmap::draw() const {
@@ -266,6 +342,57 @@ void Heightmap::saveToImage() const {
   convert << _chunkPos.x << "." << _chunkPos.y << ".png";
 
 	texture.copyToImage().saveToFile(convert.str());
+}
+
+void Heightmap::computeCulling() {
+	Camera& cam = Camera::getInstance();
+
+  float theta = cam.getTheta();
+  float phi   = cam.getPhi();
+  float alpha = cam.getFov() * cam.getRatio() / 2.;
+
+  // Bottom of the view
+  sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - cam.getFov() / 2.);
+  sf::Vector3f pos = cam.getPos();
+
+  if (compareToPoints(pos,norm,_corners) == 1 &&
+			compareToPoints(pos,norm,_highests) == 1) {
+    _visible = false;
+    return;
+  }
+
+  // Top
+  norm = vu::carthesian(1., theta, phi + 90. + cam.getFov() / 2.);
+  norm *= -1.f;
+
+  if (compareToPoints(pos,norm,_corners) == 1 &&
+			compareToPoints(pos,norm,_lowests) == 1) {
+    _visible = false;
+    return;
+  }
+
+  // Right
+  norm = vu::carthesian(1., theta + 90.f, 90.f);
+  vu::Mat3f rot;
+  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), - alpha);
+  norm = rot.multiply(norm);
+
+  if (compareToPoints(pos,norm,_corners) == 1) {
+    _visible = false;
+    return;
+  }
+
+  // Left
+  norm = vu::carthesian(1., theta - 90.f, 90.f);
+  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), alpha);
+  norm = rot.multiply(norm);
+
+  if (compareToPoints(pos,norm,_corners) == 1) {
+    _visible = false;
+    return;
+  }
+
+  _visible = true;
 }
 
 Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {

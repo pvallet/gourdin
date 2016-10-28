@@ -7,7 +7,7 @@ Camera::Camera() :
 	_nearPlane(0.1f),
 	_farPlane(100000.0),
 	_x(0.f), _y(0.f), _height(0.f),
-	_r(150.0),
+	_r(INIT_R),
 	_phi(60.f),
 	_theta(0.f),
   _projection(1.f),
