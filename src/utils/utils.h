@@ -3,7 +3,7 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-#define CHUNK_SIZE 256.
+#define CHUNK_SIZE 512.
 #define NB_CHUNKS 50
 #define MAX_COORD (CHUNK_SIZE*NB_CHUNKS)
 

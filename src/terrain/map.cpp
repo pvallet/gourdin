@@ -11,13 +11,6 @@
 // The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.
 
-Map::~Map() {
-
-	// delete[] _data;
-	// delete[] _dataset.ptr();
-	// delete[] _kdIndex;
-}
-
 void Map::loadCenters(const TiXmlHandle& hRoot) {
 	TiXmlElement *elem, *elem2;
 	TiXmlHandle hSub(0);
@@ -211,6 +204,39 @@ void Map::setPointersInDataStructures() {
 	}
 }
 
+void Map::sortCenters(float tolerance) {
+	_centersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
+
+	for (size_t i = 0; i < _centers.size(); i++) {
+		for (size_t j = std::max(0,         (int) ((_centers[i]->x - tolerance) / CHUNK_SIZE));
+								j < std::min(NB_CHUNKS, (int) ((_centers[i]->x + tolerance) / CHUNK_SIZE) + 1); j++) {
+		for (size_t k = std::max(0,         (int) ((_centers[i]->y - tolerance) / CHUNK_SIZE));
+								k < std::min(NB_CHUNKS, (int) ((_centers[i]->y + tolerance) / CHUNK_SIZE) + 1); k++) {
+
+			_centersInChunks[j*NB_CHUNKS + k].centers.push_back(_centers[i].get());
+		}
+		}
+	}
+
+	// Initialize the kdIndex to compute the nearest center for each chunk
+	for (auto it = _centersInChunks.begin(); it != _centersInChunks.end(); it++) {
+		it->data.resize(it->centers.size()*2);
+
+		#pragma omp parallel for
+		for (unsigned int i = 0 ; i < it->centers.size() ; i++) {
+			it->data[2*i]   = it->centers[i]->x;
+			it->data[2*i+1] = it->centers[i]->y;
+		}
+
+		it->dataset = flann::Matrix<double>(&(it->data[0]), it->centers.size(), 2);
+
+		it->kdIndex = std::unique_ptr<flann::Index<flann::L2<double> > >(
+			new flann::Index<flann::L2<double> >(it->dataset, flann::KDTreeIndexParams(4)));
+
+		it->kdIndex->buildIndex();
+	}
+}
+
 void Map::load(std::string path) {
 	std::ostringstream xmlPath;
   xmlPath << path << "map.xml";
@@ -263,22 +289,7 @@ void Map::load(std::string path) {
 
 	setPointersInDataStructures();
 
-	// Initialize the kdIndex to perform geometric manipulations with centers (such as nearest center)
-
-	_data.resize(_centers.size()*2);
-
-	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
-		_data[2*i]   = _centers[i]->x;
-		_data[2*i+1] = _centers[i]->y;
-	}
-
-	_dataset = flann::Matrix<double>(&_data[0], _centers.size(), 2);
-
-	_kdIndex = std::unique_ptr<flann::Index<flann::L2<double> > >(
-		new flann::Index<flann::L2<double> >(_dataset, flann::KDTreeIndexParams(4)));
-
-	_kdIndex->buildIndex();
+	sortCenters(1.2*CHUNK_SIZE);
 }
 
 bool Map::boolAttrib(std::string str) const {
@@ -343,33 +354,27 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
   std::vector<std::vector<int> > indices;
   std::vector<std::vector<double> > dists;
 
-  _kdIndex->knnSearch(query, indices, dists, 1, flann::SearchParams(_centers.size()));
+	sf::Vector2i chunkPos(pos.x / CHUNK_SIZE, pos.y / CHUNK_SIZE);
+	size_t index = chunkPos.x * NB_CHUNKS + chunkPos.y;
 
-	return _centers[indices[0][0]].get();
+  _centersInChunks[index].kdIndex->knnSearch(
+		query, indices, dists, 1, flann::SearchParams(_centersInChunks[index].centers.size()));
+
+	return _centersInChunks[index].centers[indices[0][0]];
 }
 
 std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
-	double queryData[2];
-	queryData[0] = chunkPos.x * CHUNK_SIZE + CHUNK_SIZE / 2;
-	queryData[1] = chunkPos.y * CHUNK_SIZE + CHUNK_SIZE / 2;
-
-	flann::Matrix<double> query(queryData, 1, 2);
-
-  std::vector<std::vector<int> > indices;
-  std::vector<std::vector<double> > dists;
-
-  // Flann weirdly expects the square of the radius
-  _kdIndex->radiusSearch(query, indices, dists, CHUNK_SIZE*CHUNK_SIZE/2, flann::SearchParams(_centers.size()));
 
   std::vector<Center*> res;
-  for (unsigned int i = 0 ; i < indices[0].size() ; i++) {
+  for (auto it  = _centersInChunks[chunkPos.x*NB_CHUNKS + chunkPos.y].centers.begin();
+						it != _centersInChunks[chunkPos.x*NB_CHUNKS + chunkPos.y].centers.end(); it++) {
 
-  	if (_centers[indices[0][i]]->x >= chunkPos.x * CHUNK_SIZE &&
-  		_centers[indices[0][i]]->x <= (chunkPos.x+1) * CHUNK_SIZE &&
-  		_centers[indices[0][i]]->y >= chunkPos.y * CHUNK_SIZE &&
-  		_centers[indices[0][i]]->y <= (chunkPos.y+1) * CHUNK_SIZE) {
+  	if ((*it)->x >= chunkPos.x * CHUNK_SIZE &&
+	  		(*it)->x <= (chunkPos.x+1) * CHUNK_SIZE &&
+	  		(*it)->y >= chunkPos.y * CHUNK_SIZE &&
+	  		(*it)->y <= (chunkPos.y+1) * CHUNK_SIZE) {
 
-  		res.push_back(_centers[indices[0][i]].get());
+  		res.push_back((*it));
   	}
   }
 

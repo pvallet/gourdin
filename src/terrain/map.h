@@ -15,7 +15,6 @@ struct Center;
 struct Edge;
 struct Corner;
 
-typedef struct Center Center;
 struct Center {
 	int id;
 	double x;
@@ -37,7 +36,6 @@ struct Center {
 	std::vector<Corner*> corners;
 };
 
-typedef struct Edge Edge;
 struct Edge {
 	int id;
 	bool mapEdge;
@@ -56,7 +54,6 @@ struct Edge {
 	Corner* corner1;
 };
 
-typedef struct Corner Corner;
 struct Corner {
 	int id;
 	double x;
@@ -79,10 +76,17 @@ struct Corner {
 	std::vector<Corner*> corners;
 };
 
+struct CentersInChunk {
+	std::vector<double> data;
+	flann::Matrix<double> dataset; // For knn searches
+	std::unique_ptr<flann::Index<flann::L2<double> > > kdIndex;
+
+	std::vector<Center*> centers;
+};
+
 class Map {
 public:
 	Map() {}
-	~Map();
 
 	void load(std::string path);
 
@@ -94,6 +98,7 @@ private:
 	void loadEdges(const TiXmlHandle& hRoot);
 	void loadCorners(const TiXmlHandle& hRoot);
 	void setPointersInDataStructures();
+	void sortCenters(float tolerance);
 	bool boolAttrib(std::string str) const;
 	Biome biomeAttrib(std::string str) const;
 
@@ -101,7 +106,7 @@ private:
 	std::vector<std::unique_ptr<Edge> >   _edges;
 	std::vector<std::unique_ptr<Corner> > _corners;
 
-	std::vector<double> _data;
-	flann::Matrix<double> _dataset; // For knn searches
-	std::unique_ptr<flann::Index<flann::L2<double> > > _kdIndex;
+	// Contains the centers that are near to a given chunk. The chunks are sorted
+	// as chunk.x * NB_CHUNKS + chunk.y
+	std::vector<CentersInChunk> _centersInChunks;
 };

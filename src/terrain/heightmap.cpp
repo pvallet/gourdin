@@ -8,9 +8,10 @@
 #include "vecUtils.h"
 
 #define DEFAULT_CHUNK_SUBD 33 // +1 to join with other chunks
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
-
+#define HEIGHT_FACTOR 1000.
 #define SMOOTH_RANGE 20. // Percentage
+
+#define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 
 Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, const TexManager& terrainTexManager, const Map& map) :

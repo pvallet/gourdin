@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <ctime>
 
-#define CHUNK_BEGIN_X 11
+#define CHUNK_BEGIN_X 12
 #define CHUNK_BEGIN_Y 23
 
 #define MIN_ANTILOPE_PROX 5.f

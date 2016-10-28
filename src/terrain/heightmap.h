@@ -10,8 +10,6 @@
 #include "texManager.h"
 #include "map.h"
 
-#define HEIGHT_FACTOR 1000.
-
 class Heightmap : public Chunk {
 
 public:
