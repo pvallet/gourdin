@@ -21,10 +21,3 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 double randomD();
 
 float randomF();
-
-struct compChunkPos {
-  bool operator()(const sf::Vector2i & a, const sf::Vector2i & b) const
-  {
-    return a.x != b.x ? a.x < b.x : a.y < b.y;
-  }
-};

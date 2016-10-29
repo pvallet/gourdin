@@ -20,7 +20,7 @@ public:
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 
-	void kill(std::vector<igElement*> neighbors);
+	void kill(std::vector<igMovingElement*> neighbors);
 
 private:
 	float _stamina; // Percentage

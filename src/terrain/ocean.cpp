@@ -3,8 +3,8 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-Ocean::Ocean(sf::Vector2i chunkPosition, GLuint tex) :
-	Chunk(chunkPosition),
+Ocean::Ocean(size_t x, size_t y, GLuint tex) :
+	Chunk(x,y),
 	_vertices{0, 0, 0,
 			CHUNK_SIZE, 0, 0,
 			 0, CHUNK_SIZE, 0,

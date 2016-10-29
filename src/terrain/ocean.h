@@ -6,7 +6,7 @@
 
 class Ocean : public Chunk {
 public:
-	Ocean(sf::Vector2i chunkPosition, GLuint tex);
+	Ocean(size_t x, size_t y, GLuint tex);
 
 	virtual void draw() const;
 

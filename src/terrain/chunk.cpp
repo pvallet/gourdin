@@ -3,8 +3,8 @@
 #include "camera.h"
 #include "vecUtils.h"
 
-Chunk::Chunk(sf::Vector2i chunkPosition) :
-	_chunkPos(chunkPosition),
+Chunk::Chunk(size_t x, size_t y) :
+	_chunkPos(x,y),
 	_visible(false) {
 	glGenBuffers(1, &_vbo);
 	glGenBuffers(1, &_ibo);

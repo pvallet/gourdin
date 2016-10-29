@@ -57,7 +57,7 @@ sf::Time Antilope::generateTimePhase(sf::Time average) const {
 					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
-void Antilope::updateState(std::vector<igElement*> neighbors) {
+void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 	// Get info
 
 	sf::Vector2<double> closestRep;
@@ -67,38 +67,35 @@ void Antilope::updateState(std::vector<igElement*> neighbors) {
 	int nbFlee = 0;
 	double distance;
 	double minRepDst = _repulsionRadius;
-	igMovingElement* igM;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
-		if (neighbors[i]->getAbstractType() != igE && neighbors[i] != this) {
-			igM = (igMovingElement*) neighbors[i];
-
-			if (igM->getMovingType() == PREY) {
-				distance = vu::norm(_pos - igM->getPos());
+		if (neighbors[i] != this) {
+			if (neighbors[i]->getMovingType() == PREY) {
+				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _repulsionRadius) {
 					if (distance < minRepDst) {
-						closestRep = igM->getPos();
+						closestRep = neighbors[i]->getPos();
 						minRepDst = distance;
 					}
 				}
 
 				else if (distance < _orientationRadius) {
-					meanDir += igM->getDirection();
+					meanDir += neighbors[i]->getDirection();
 					nbDir++;
 				}
 
 				else if (distance < _attractionRadius) {
-					baryAttract += igM->getPos();
+					baryAttract += neighbors[i]->getPos();
 					nbAttract++;
 				}
 			}
 
-			else if (igM->getMovingType() == HUNTER) {
-				distance = vu::norm(_pos - igM->getPos());
+			else if (neighbors[i]->getMovingType() == HUNTER) {
+				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _lineOfSight) {
-					baryFlee += igM->getPos();
+					baryFlee += neighbors[i]->getPos();
 					nbFlee++;
 				}
 			}

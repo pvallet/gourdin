@@ -13,15 +13,14 @@
 class Heightmap : public Chunk {
 
 public:
-	Heightmap(sf::Vector2i chunkPosition, int seed, const TexManager& terrainTexManager, const Map& map);
+	Heightmap(size_t x, size_t y, const TexManager& terrainTexManager, const Map& map);
 
-	void generate(std::vector<Constraint> constraints);
+	void generate();
 	void draw() const;
 	void saveToImage() const;
 
 	virtual void computeCulling();
 
-	virtual Constraint getConstraint(sf::Vector2i fromChunkPos) const;
 	float getHeight(float x, float y) const; // linear interpolation
 	inline int getSize() const {return _size;}
 
@@ -32,7 +31,6 @@ private:
 	void computeLowestsHighests();
 
 	size_t _size;
-	int _seed;
 
 	std::vector<float> _vertices;
 	std::vector<float> _coord;

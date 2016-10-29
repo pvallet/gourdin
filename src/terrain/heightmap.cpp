@@ -14,10 +14,9 @@
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 
-Heightmap::Heightmap(sf::Vector2i chunkPosition, int seed, const TexManager& terrainTexManager, const Map& map) :
-	Chunk(chunkPosition),
+Heightmap::Heightmap(size_t x, size_t y, const TexManager& terrainTexManager, const Map& map) :
+	Chunk(x,y),
 	_size(DEFAULT_CHUNK_SUBD),
-  _seed(seed),
   _terrainTexManager(terrainTexManager),
   _map(map) {
 
@@ -272,7 +271,7 @@ void Heightmap::computeLowestsHighests() {
   _highests[3] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, (_chunkPos.y+1) * CHUNK_SIZE,  _heights[iMax][size1]);
 }
 
-void Heightmap::generate(std::vector<Constraint> constraints) {
+void Heightmap::generate() {
   size_t size1 = _size-1;
 	double step =  CHUNK_SIZE / (double) size1;
 
@@ -394,44 +393,6 @@ void Heightmap::computeCulling() {
   }
 
   _visible = true;
-}
-
-Constraint Heightmap::getConstraint(sf::Vector2i fromChunkPos) const {
-  Constraint c;
-  c.vertices = std::vector<sf::Vector3f>(_size);
-
-  if(fromChunkPos == sf::Vector2i(_chunkPos.x+1, _chunkPos.y)) {
-    for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(CHUNK_SIZE, i * CHUNK_SIZE / (_size-1), _heights[_size-1][i]);
-
-    c.type = XN;
-  }
-
-  else if(fromChunkPos == sf::Vector2i(_chunkPos.x-1, _chunkPos.y)) {
-    for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(0.f, i * CHUNK_SIZE / (_size-1), _heights[0][i]);
-
-    c.type = XP;
-  }
-
-  else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y+1)) {
-    for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f(i * CHUNK_SIZE / (_size-1), CHUNK_SIZE, _heights[i][_size-1]);
-
-    c.type = YN;
-  }
-
-  else if(fromChunkPos == sf::Vector2i(_chunkPos.x, _chunkPos.y-1)) {
-    for (size_t i = 0 ; i < _size ; i++)
-      c.vertices[i] = sf::Vector3f( i * CHUNK_SIZE / (_size-1), 0.f, _heights[i][0]);
-
-    c.type = YP;
-  }
-
-  else
-    c.type = NONE;
-
-  return c;
 }
 
 float Heightmap::getHeight(float x, float y) const {

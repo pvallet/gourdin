@@ -8,7 +8,7 @@
 
 class Controller {
 public:
-	Controller(sf::RenderWindow* window);
+	Controller(sf::RenderWindow& window);
 
 	void init();
 	void run();
@@ -32,7 +32,7 @@ private:
 	bool _running;
 	sf::Clock _frameClock;
 	sf::Time _elapsed;
-	sf::RenderWindow* _window;
+	sf::RenderWindow& _window;
 
 	Game _game;
 };

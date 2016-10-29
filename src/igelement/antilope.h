@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/System.hpp>
+
 #include "igMovingElement.h"
 
 enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
@@ -12,7 +13,7 @@ public:
 	virtual MovingType getMovingType() const {return PREY;}
 
 	// React to the environment
-	void updateState(std::vector<igElement*> neighbors);
+	void updateState(std::vector<igMovingElement*> neighbors);
 
 	void beginIdle();
 	void beginFleeing();

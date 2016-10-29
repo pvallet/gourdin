@@ -12,7 +12,7 @@
 #define TRANSLATION_VALUE_PS 70.
 #define ZOOM_FACTOR 10.
 
-Controller::Controller(sf::RenderWindow* window) :
+Controller::Controller(sf::RenderWindow& window) :
  	_addSelect(false),
   _selecting(false),
   _rectSelect(sf::Vector2f(0., 0.)),
@@ -49,11 +49,11 @@ void Controller::init() {
 	_minimapTexture.setSmooth(true);
 
   _minimapSprite.setTexture(_minimapTexture);
-  _minimapSprite.setPosition(sf::Vector2f(0.f, _window->getSize().y - _minimapSprite.getTextureRect().height));
+  _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
 
   // cam
   Camera& cam = Camera::getInstance();
-	cam.resize(_window->getSize().x, _window->getSize().y );
+	cam.resize(_window.getSize().x, _window.getSize().y );
 }
 
 void Controller::renderLifeBars() {
@@ -84,8 +84,8 @@ void Controller::renderLifeBars() {
     fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
       corners.top - corners.height*maxHeightFactor + corners.height - 5);
 
-    _window->draw(lifeBar);
-    _window->draw(fullLifeBar);
+    _window.draw(lifeBar);
+    _window.draw(fullLifeBar);
     lifeBar.setSize(sf::Vector2f(20., 2.));
   }
 }
@@ -94,7 +94,7 @@ void Controller::renderMinimap() {
   Camera& cam = Camera::getInstance();
 
   // Background image
-  _window->draw(_minimapSprite);
+  _window.draw(_minimapSprite);
 
   // Position of the viewer
   sf::Vector2f viewerPos( _minimapSprite.getPosition().x +
@@ -114,8 +114,8 @@ void Controller::renderMinimap() {
   miniCamDir.setPosition(viewerPos - sf::Vector2f(cos(-theta*RAD), sin(-theta*RAD)));
   miniCamDir.setRotation(-theta-90);
 
-  _window->draw(miniCamPos);
-  _window->draw(miniCamDir);
+  _window.draw(miniCamPos);
+  _window.draw(miniCamDir);
 
   // Highlight generated chunks
   float miniChunkSize = _minimapSprite.getTextureRect().height / NB_CHUNKS;
@@ -125,29 +125,27 @@ void Controller::renderMinimap() {
   sf::Color edge(0,0,0,200);
   sf::Color fog(0,0,0,100);
 
-  const std::map<sf::Vector2i, Chunk*, compChunkPos>& genTrn = _game.getGeneratedTerrain();
-  const std::set<sf::Vector2i, compChunkPos>& borderTrn = _game.getBorderTerrain();
+  const std::vector<std::vector<ChunkStatus> > chunkStatus = _game.getChunkStatus();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      sf::Vector2i currentPos(i,j);
       miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
 
-      if (genTrn.find(currentPos) == genTrn.end()) {
-        miniChunk.setFillColor(sf::Color::Black);
-        _window->draw(miniChunk);
-      }
+      switch (chunkStatus[i][j]) {
+        case NOT_GENERATED:
+          miniChunk.setFillColor(sf::Color::Black);
+          _window.draw(miniChunk);
+          break;
 
-      else if (borderTrn.find(currentPos) != borderTrn.end()) {
-        miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
-        miniChunk.setFillColor(edge);
-        _window->draw(miniChunk);
-      }
+        case EDGE:
+          miniChunk.setFillColor(edge);
+          _window.draw(miniChunk);
+          break;
 
-      else if (!genTrn.at(currentPos)->isVisible()) {
-        miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
-        miniChunk.setFillColor(fog);
-        _window->draw(miniChunk);
+        case NOT_VISIBLE:
+          miniChunk.setFillColor(fog);
+          _window.draw(miniChunk);
+          break;
       }
     }
   }
@@ -159,30 +157,30 @@ void Controller::renderLog() {
   std::ostringstream convert;
   convert << fps;
   _fpsCounter.setString("FPS: " + convert.str());
-  _window->draw(_fpsCounter);
+  _window.draw(_fpsCounter);
 
   convert.str(""); convert.clear();
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y;
   _posDisplay.setString(convert.str());
-  _window->draw(_posDisplay);
+  _window.draw(_posDisplay);
 }
 
 void Controller::render() {
   if (_running) {
     _game.render();
-    _window->pushGLStates();
+    _window.pushGLStates();
 
     renderLifeBars();
 
     renderLog();
     renderMinimap();
 
-    _window->draw(_rectSelect);
+    _window.draw(_rectSelect);
 
 
-    _window->display();
-    _window->popGLStates();
+    _window.display();
+    _window.popGLStates();
   }
 }
 
@@ -193,7 +191,7 @@ void Controller::run() {
     sf::Event event;
     _elapsed = _frameClock.restart();
 
-    while (_window->pollEvent(event)) {
+    while (_window.pollEvent(event)) {
       if (event.type == sf::Event::Closed)
         _running = false;
 
@@ -204,7 +202,7 @@ void Controller::run() {
         cam.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
 
       else if (event.type == sf::Event::MouseButtonPressed) {
-        if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window->getSize().y - event.mouseButton.y))) {
+        if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window.getSize().y - event.mouseButton.y))) {
           _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
                                          (float) _minimapSprite.getTextureRect().height * MAX_COORD,
                                          (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /

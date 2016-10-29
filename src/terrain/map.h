@@ -91,7 +91,7 @@ public:
 	void load(std::string path);
 
 	Center* getClosestCenter(sf::Vector2<double> pos) const;
-	std::vector<Center*> getCentersInChunk(sf::Vector2i chunkPos) const;
+	std::vector<Center*> getCentersInChunk(size_t x, size_t y) const;
 
 private:
 	void loadCenters(const TiXmlHandle& hRoot);

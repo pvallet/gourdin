@@ -86,23 +86,20 @@ void Lion::setTarget(sf::Vector2<double> t) {
 	}
 }
 
-void Lion::kill(std::vector<igElement*> neighbors) {
+void Lion::kill(std::vector<igMovingElement*> neighbors) {
 	float distance;
-	igMovingElement* igM;
 	igMovingElement* closest = NULL;
 	float nearestDist = _range;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
-		if (neighbors[i]->getAbstractType() != igE && neighbors[i] != this) {
-			igM = (igMovingElement*) neighbors[i];
-
-			if (igM->getMovingType() == PREY) {
-				distance = vu::norm(_pos - igM->getPos());
+		if (neighbors[i] != this) {
+			if (neighbors[i]->getMovingType() == PREY) {
+				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _range) {
 					if (distance < nearestDist) {
 						nearestDist = distance;
-						closest = igM;
+						closest = neighbors[i];
 					}
 				}
 			}

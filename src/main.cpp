@@ -25,7 +25,7 @@ int main() {
   glCullFace (GL_BACK);
   glEnable (GL_CULL_FACE);
 
-  Controller controller(&window);
+  Controller controller(window);
 
   controller.init();
 

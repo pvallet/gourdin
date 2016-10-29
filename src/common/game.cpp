@@ -21,6 +21,8 @@ Game::Game() :
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag") {}
 
 void Game::init() {
+  srand(time(NULL));
+
   _hmapShader.load();
   _igEShader.load();
 
@@ -29,33 +31,18 @@ void Game::init() {
 
   _map.load("res/map/");
 
-  Camera& cam = Camera::getInstance();
-  cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X*CHUNK_SIZE,CHUNK_BEGIN_Y*CHUNK_SIZE));
+  std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
+  _chunkStatus.resize(NB_CHUNKS, initializer);
 
-  Heightmap* hmap[4];
-
-  srand(time(NULL));
-
-  hmap[0] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y), rand(), _terrainTexManager, _map);
-  hmap[1] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X,CHUNK_BEGIN_Y - 1), rand(), _terrainTexManager, _map);
-  hmap[2] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y), rand(), _terrainTexManager, _map);
-  hmap[3] = new Heightmap(sf::Vector2i(CHUNK_BEGIN_X - 1,CHUNK_BEGIN_Y - 1), rand(), _terrainTexManager, _map);
-
-  hmap[0]->generate(std::vector<Constraint>());
-  _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[0]->getChunkPos(), hmap[0]));
-  _terrainBorder.insert(hmap[0]->getChunkPos());
-
-  for (size_t i = 1 ; i < 4 ; i++) {
-    std::vector<Constraint> c;
-
-    for (size_t j = 0 ; j < i ; j++)
-      c.push_back(hmap[j]->getConstraint(hmap[i]->getChunkPos()));
-
-    hmap[i]->generate(c);
-    _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap[i]->getChunkPos(), hmap[i]));
-    _terrainBorder.insert(hmap[i]->getChunkPos());
-    generateForests(hmap[i]->getChunkPos());
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    std::vector<std::unique_ptr<Chunk> > initializer2(NB_CHUNKS);
+    _terrain.push_back(std::move(initializer2));
   }
+
+  Camera& cam = Camera::getInstance();
+  cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+
 
   _antilopeTexManager.load("res/animals/antilope/");
   _lionTexManager.load("res/animals/lion/");
@@ -63,77 +50,59 @@ void Game::init() {
   generateHerd(sf::Vector2<double>(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
 }
 
-void Game::generateHeightmap(sf::Vector2i pos) {
-  sf::Vector2i tmp;
-  std::vector<Constraint> c;
-
-  for (size_t j = 0 ; j < 4 ; j++) { // Get constraints
-    tmp = neighbour(pos,j);
-    std::map<sf::Vector2i, Chunk*>::iterator it = _terrain.find(tmp);
-
-    if (it != _terrain.end()) {
-      c.push_back(it->second->getConstraint(pos));
-    }
-  }
-
-  Heightmap* hmap = new Heightmap(pos, rand(), _terrainTexManager, _map);
-  hmap->generate(c);
-  _terrain.insert(std::pair<sf::Vector2i, Chunk*>(hmap->getChunkPos(), hmap));
-  _terrainBorder.insert(hmap->getChunkPos());
+void Game::generateHeightmap(size_t x, size_t y) {
+  Heightmap* newHeightmap = new Heightmap(x, y, _terrainTexManager, _map);
+  newHeightmap->generate();
+  _terrain[x][y] = std::unique_ptr<Chunk>(newHeightmap);
+  _chunkStatus[x][y] = EDGE;
+  generateForests(x,y);
 }
 
-void Game::generateNeighbourChunks(sf::Vector2i pos) {
-  if (_terrainBorder.find(pos) != _terrainBorder.end()) {
+sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
+  assert(index < 4 && "Error in Game::neighbour: Index out of bounds");
+  switch(index) {
+    case 0:
+      return sf::Vector2i(x-1,y);
+      break;
+    case 1:
+      return sf::Vector2i(x+1,y);
+      break;
+    case 2:
+      return sf::Vector2i(x,y-1);
+      break;
+    case 3:
+      return sf::Vector2i(x,y+1);
+      break;
+  }
+}
+
+void Game::generateNeighbourChunks(size_t x, size_t y) {
+  if (_chunkStatus[x][y] == EDGE) {
     sf::Vector2i tmp;
     for (size_t i = 0; i < 4; i++) {
-      tmp = neighbour(pos,i);
+      tmp = neighbour(x,y,i);
 
-      if (_terrain.find(tmp) == _terrain.end()) { // We only add the neighbour if it's not already generated
-        // If the chunk to be generated is not handled by the _map, we generate an ocean
-        if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS) {
-          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
-          _terrainBorder.insert(tmp);
-        }
+      if (_chunkStatus[tmp.x][tmp.y] == NOT_GENERATED) {
+        // If the chunk to be generated is not handled by the map, we don't do anything
+        if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
+
 
         else if (_map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
                  _map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
                  _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
                  _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
 
-          _terrain.insert(std::pair<sf::Vector2i, Chunk*>(tmp, new Ocean(tmp, _terrainTexManager.getTexID(OCEAN))));
-          _terrainBorder.insert(tmp);
+          _terrain[tmp.x][tmp.y] = std::unique_ptr<Chunk>(new Ocean(tmp.x, tmp.y, _terrainTexManager.getTexID(OCEAN)));
+          _chunkStatus[tmp.x][tmp.y] = EDGE;
         }
 
-        else {
-          generateHeightmap(tmp);
-          generateForests(tmp);
-        }
+        else
+          generateHeightmap(tmp.x,tmp.y);
       }
     }
-
-    _terrainBorder.erase(pos);
   }
-}
 
-sf::Vector2i Game::neighbour(sf::Vector2i pos, int index) const {
-  switch(index) {
-    case 0:
-      return sf::Vector2i(pos.x-1,pos.y);
-      break;
-    case 1:
-      return sf::Vector2i(pos.x+1,pos.y);
-      break;
-    case 2:
-      return sf::Vector2i(pos.x,pos.y-1);
-      break;
-    case 3:
-      return sf::Vector2i(pos.x,pos.y+1);
-      break;
-    default:
-      return sf::Vector2i(pos.x,pos.y);
-      std::cerr << "Error in Game::neighbour: Index out of bounds" << std::endl;
-      break;
-  }
+  _chunkStatus[x][y] = NOT_VISIBLE;
 }
 
 void Game::update(sf::Time elapsed) {
@@ -141,80 +110,93 @@ void Game::update(sf::Time elapsed) {
   int camPosX = cam.getPointedPos().x < 0 ? cam.getPointedPos().x / CHUNK_SIZE - 1 : cam.getPointedPos().x / CHUNK_SIZE;
   int camPosY = cam.getPointedPos().y < 0 ? cam.getPointedPos().y / CHUNK_SIZE - 1 : cam.getPointedPos().y / CHUNK_SIZE;
 
-  cam.setHeight( _terrain.at(sf::Vector2i(camPosX, camPosY))
-                          ->getHeight(cam.getPointedPos().x - CHUNK_SIZE * camPosX,
-                                      cam.getPointedPos().y - CHUNK_SIZE * camPosY));
+  // Update camera
+  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED)
+    generateHeightmap(camPosX, camPosY);
 
-  for (auto it = _terrainBorder.begin() ; it != _terrainBorder.end() ; ++it) {
-    if (_terrain.at(*it)->isVisible())
-      generateNeighbourChunks(*it);
-  }
+  cam.setHeight( _terrain[camPosX][camPosY]
+    ->getHeight(cam.getPointedPos().x - CHUNK_SIZE * camPosX,
+                cam.getPointedPos().y - CHUNK_SIZE * camPosY));
 
-  for (unsigned int i = 0 ; i < _e.size() ; i++) {
-    if (_e[i]->getAbstractType() != igE) {
-      igMovingElement* igM = (igMovingElement*) _e[i];
-      if (igM->getMovingType() == PREY) {
-        Antilope* atlp = (Antilope*) igM;
-        atlp->updateState(_e);
-      }
+  // Update terrains
+  #pragma omp parallel for collapse(2)
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] != NOT_GENERATED) {
+        _terrain[i][j]->computeCulling();
 
-      else if (igM->getMovingType() == HUNTER) {
-        Lion* lion = (Lion*) igM;
-        lion->kill(_e);
+        if (_chunkStatus[i][j] == EDGE) {
+          if (_terrain[i][j]->isVisible())
+            generateNeighbourChunks(i,j);
+        }
+
+        else {
+          if (_terrain[i][j]->isVisible())
+            _chunkStatus[i][j] = VISIBLE;
+          else
+            _chunkStatus[i][j] = NOT_VISIBLE;
+        }
       }
     }
   }
 
-  for (auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-    it->second->computeCulling();
+  // Compute moving elements interactions
+  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
+    if (_igElements[i]->getAbstractType() != igE) {
+      igMovingElement* igM = (igMovingElement*) _igElements[i].get();
+      if (igM->getMovingType() == PREY) {
+        Antilope* atlp = (Antilope*) igM;
+        atlp->updateState(_igMovingElements);
+      }
+
+      else if (igM->getMovingType() == HUNTER) {
+        Lion* lion = (Lion*) igM;
+        // TODO send only part of the elements
+        lion->kill(_igMovingElements);
+      }
+    }
   }
 
-  _vis.clear();
+  _visibleElmts.clear();
 
-  for (unsigned int i = 0 ; i < _e.size() ; i++) {
-    int chunkPosX = _e[i]->getPos().x / CHUNK_SIZE;
-    int chunkPosY = _e[i]->getPos().y / CHUNK_SIZE;
+  // Update in game elements characteristics
+  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
+    _igElements[i]->update(elapsed, cam.getTheta()); // Choose the right sprite and update pos
 
-    if (_terrain.find(sf::Vector2i(chunkPosX, chunkPosY)) != _terrain.end() &&
-        _terrain.at(sf::Vector2i(chunkPosX, chunkPosY))->isVisible()) {
+    int chunkPosX = _igElements[i]->getPos().x / CHUNK_SIZE;
+    int chunkPosY = _igElements[i]->getPos().y / CHUNK_SIZE;
 
-      _e[i]->update(elapsed, cam.getTheta()); // Choose the right sprite and update pos
-
-      chunkPosX = _e[i]->getPos().x / CHUNK_SIZE;
-      chunkPosY = _e[i]->getPos().y / CHUNK_SIZE;
+    if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
       // No test yet to see if the element can move to its new pos (no collision)
-      double newHeight =   _terrain.at(sf::Vector2i(chunkPosX, chunkPosY))
-                           ->getHeight(_e[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
-                                       _e[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
+      double newHeight =   _terrain[chunkPosX][chunkPosY]
+                           ->getHeight(_igElements[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
+                                       _igElements[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
 
       // Calculate new corners
       glm::vec3 corners3[4];
+      float width = _igElements[i]->getSize().x;
 
-      float width = _e[i]->getSize().x;
+      corners3[0] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
+                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
+                                newHeight + _igElements[i]->getSize().y);
 
+      corners3[1] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
+                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
+                                newHeight + _igElements[i]->getSize().y);
 
-      corners3[0] = glm::vec3(  _e[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getSize().y);
-
-      corners3[1] = glm::vec3(  _e[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
-                                newHeight + _e[i]->getSize().y);
-
-      corners3[2] = glm::vec3(  _e[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[2] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
+                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
                                 newHeight);
 
-      corners3[3] = glm::vec3(  _e[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _e[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[3] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
+                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
                                 newHeight);
 
 
-      _e[i]->set3DCorners(corners3);
+      _igElements[i]->set3DCorners(corners3);
 
       // Calculate their projections
-
       glm::mat4 viewProj = cam.getViewProjectionMatrix();
 
       glm::vec3 cornersProjNorm[4];
@@ -223,23 +205,21 @@ void Game::update(sf::Time elapsed) {
           glm::vec4(0,0,cam.getW(),cam.getH()));
       }
 
-      double left, top, right, bot, depth;
-
-      left  = cornersProjNorm[0].x;
-      top   = cornersProjNorm[0].y;
-      right = cornersProjNorm[1].x;
-      bot   = cornersProjNorm[3].y;
-      depth = cornersProjNorm[3].z;
+      double left  = cornersProjNorm[0].x;
+      double top   = cornersProjNorm[0].y;
+      double right = cornersProjNorm[1].x;
+      double bot   = cornersProjNorm[3].y;
+      double depth = cornersProjNorm[3].z;
 
       top = cam.getH()-top;
       bot = cam.getH()-bot;
 
       sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
 
-      _e[i]->set2DCorners(cornersRect);
-      _e[i]->setDepth(depth);
+      _igElements[i]->set2DCorners(cornersRect);
+      _igElements[i]->setDepth(depth);
 
-      _vis.insert(_e[i]);
+      _visibleElmts.insert(_igElements[i].get());
     }
   }
 }
@@ -251,16 +231,18 @@ void Game::render() const {
 
   glUseProgram(_hmapShader.getProgramID());
 
-  for(auto it = _terrain.begin() ; it != _terrain.end() ; ++it) {
-    if (it->second->isVisible()) {
-      glm::mat4 modelview = glm::translate(glm::mat4(1.f),
-        glm::vec3(CHUNK_SIZE * it->first.x, CHUNK_SIZE * it->first.y, 0.f)
-      );
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] == VISIBLE) {
+        glm::mat4 modelview = glm::translate(glm::mat4(1.f),
+          glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
+        );
 
-      _hmapShader.sendModelMatrix(modelview);
+        _hmapShader.sendModelMatrix(modelview);
 
-      it->second->draw();
+        _terrain[i][j]->draw();
 
+      }
     }
   }
 
@@ -270,7 +252,7 @@ void Game::render() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  for (auto it = _vis.begin() ; it != _vis.end() ; ++it) {
+  for (auto it = _visibleElmts.begin() ; it != _visibleElmts.end() ; ++it) {
     _hmapShader.sendModelMatrix(glm::mat4(1.f));
     (*it)->draw();
   }
@@ -282,11 +264,11 @@ void Game::render() const {
 
 void Game::select(sf::IntRect rect, bool add) {
   if (!add)
-    _sel.clear();
+    _selectedElmts.clear();
 
-  for (unsigned int i = 0 ; i < _e.size() ; i++) {
-    if (_sel.find(_e[i]) == _sel.end()) { // _e[i] is not selected yet, we can bother to calculate
-      sf::IntRect c = _e[i]->get2DCorners();
+  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
+    if (_selectedElmts.find(_igElements[i].get()) == _selectedElmts.end()) { // _igElements[i] is not selected yet, we can bother to calculate
+      sf::IntRect c = _igElements[i]->get2DCorners();
 
       int centerX, centerY;
 
@@ -294,16 +276,16 @@ void Game::select(sf::IntRect rect, bool add) {
       centerY = c.top + c.height / 2;
 
       if (rect.contains(centerX, centerY)) {
-        if (_e[i]->getAbstractType() == CTRL)
-          _sel.insert(_e[i]);
+        if (_igElements[i]->getAbstractType() == CTRL)
+          _selectedElmts.insert(_igElements[i].get());
       }
 
       else if (   c.contains(rect.left, rect.top) ||
                   c.contains(rect.left + rect.width, rect.top) ||
                   c.contains(rect.left + rect.width, rect.top + rect.height) ||
                   c.contains(rect.left, rect.top + rect.height)  ) {
-        if (_e[i]->getAbstractType() == CTRL)
-          _sel.insert(_e[i]);
+        if (_igElements[i]->getAbstractType() == CTRL)
+          _selectedElmts.insert(_igElements[i].get());
       }
     }
   }
@@ -312,7 +294,7 @@ void Game::select(sf::IntRect rect, bool add) {
 void Game::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2<double> target = get2DCoord(screenTarget);
 
-  for(auto it = _sel.begin(); it != _sel.end(); ++it) {
+  for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
     if ((*it)->getAbstractType() == CTRL) {
       Controllable* tmp = (Controllable*) *it;
       tmp->setTarget(target);
@@ -321,17 +303,17 @@ void Game::moveSelection(sf::Vector2i screenTarget) {
 }
 
 void Game::moveCamera(sf::Vector2f newAimedPos) {
-  generateHeightmap(sf::Vector2i(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE));
+  generateHeightmap(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(newAimedPos);
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {
-  _e.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
+  _igMovingElements.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
+  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
 }
 
 void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
-  srand(time(NULL));
   double r, theta;
   sf::Vector2<double> p, diff;
   bool add;
@@ -361,12 +343,12 @@ void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
   }
 
   for (size_t i = 0 ; i < count ; i++) {
-    _e.push_back(tmp[i]);
+    _igElements.push_back(std::unique_ptr<igElement>(tmp[i]));
+    _igMovingElements.push_back(tmp[i]);
   }
 }
 
-void Game::generateForests(sf::Vector2i pos) {
-  srand(time(NULL));
+void Game::generateForests(size_t x, size_t y) {
   double r, theta;
   sf::Vector2<double> p, diff;
   bool add;
@@ -374,7 +356,7 @@ void Game::generateForests(sf::Vector2i pos) {
 
   std::vector<Tree*> tmp;
 
-  std::vector<Center*> centers = _map.getCentersInChunk(pos);
+  std::vector<Center*> centers = _map.getCentersInChunk(x,y);
 
   for (unsigned int i = 0 ; i < centers.size() ; i++) {
     if (centers[i]->biome >= 11) { // No forests in other biomes
@@ -408,7 +390,7 @@ void Game::generateForests(sf::Vector2i pos) {
       }
 
       for (size_t j = 0 ; j < count ; j++) {
-        _e.push_back(tmp[j]);
+        _igElements.push_back(std::unique_ptr<igElement>(tmp[j]));
       }
     }
   }

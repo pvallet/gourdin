@@ -363,16 +363,16 @@ Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
 	return _centersInChunks[index].centers[indices[0][0]];
 }
 
-std::vector<Center*> Map::getCentersInChunk(sf::Vector2i chunkPos) const {
+std::vector<Center*> Map::getCentersInChunk(size_t x, size_t y) const {
 
   std::vector<Center*> res;
-  for (auto it  = _centersInChunks[chunkPos.x*NB_CHUNKS + chunkPos.y].centers.begin();
-						it != _centersInChunks[chunkPos.x*NB_CHUNKS + chunkPos.y].centers.end(); it++) {
+  for (auto it  = _centersInChunks[x*NB_CHUNKS + y].centers.begin();
+						it != _centersInChunks[x*NB_CHUNKS + y].centers.end(); it++) {
 
-  	if ((*it)->x >= chunkPos.x * CHUNK_SIZE &&
-	  		(*it)->x <= (chunkPos.x+1) * CHUNK_SIZE &&
-	  		(*it)->y >= chunkPos.y * CHUNK_SIZE &&
-	  		(*it)->y <= (chunkPos.y+1) * CHUNK_SIZE) {
+  	if ((*it)->x >=     x * CHUNK_SIZE &&
+	  		(*it)->x <= (x+1) * CHUNK_SIZE &&
+	  		(*it)->y >=     y * CHUNK_SIZE &&
+	  		(*it)->y <= (y+1) * CHUNK_SIZE) {
 
   		res.push_back((*it));
   	}
