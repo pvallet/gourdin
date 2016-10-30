@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-igMovingElement::igMovingElement(sf::Vector2<double> position, AnimationManager graphics) :
+igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics) :
 	igElement(position),
 	_speed(0.),
 	_moving(false),
@@ -42,7 +42,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 
 	if (!_dead) {
 		if (_direction.x != 0. || _direction.y != 0.) {
-			float ori = vu::angle(sf::Vector2<double>(1.0f,0.0f), _direction);
+			float ori = vu::angle(sf::Vector2f(1.0f,0.0f), _direction);
 			setOrientation(ori - _camOrientation);
 
 			_pos.x += _direction.x * _speed * elapsed.asSeconds();

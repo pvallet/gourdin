@@ -53,9 +53,9 @@ private:
   void generateNeighbourChunks(size_t x, size_t y);
 	void generateHeightmap      (size_t x, size_t y);
   void generateForests        (size_t x, size_t y);
-  void generateHerd(sf::Vector2<double> pos, size_t count);
+  void generateHerd(sf::Vector2f pos, size_t count);
 
-	sf::Vector2<double> get2DCoord(sf::Vector2i screenTarget) const;
+	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 
   std::vector<std::unique_ptr<igElement> > _igElements; // Elements
 

@@ -9,8 +9,7 @@ enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 class Antilope : public igMovingElement {
 public:
-	Antilope(sf::Vector2<double> position, AnimationManager graphics);
-	virtual MovingType getMovingType() const {return PREY;}
+	Antilope(sf::Vector2f position, AnimationManager graphics);
 
 	// React to the environment
 	void updateState(std::vector<igMovingElement*> neighbors);

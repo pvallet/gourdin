@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-Antilope::Antilope(sf::Vector2<double> position, AnimationManager graphics) :
+Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	igMovingElement(position, graphics),
 	_lineOfSightStandard(50.),
 	_repulsionRadius(8.),
@@ -53,24 +53,24 @@ void Antilope::beginRecovering() {
 
 sf::Time Antilope::generateTimePhase(sf::Time average) const {
 	return 	average +
-					sf::seconds(randomF() * average.asSeconds() * 0.8f)
+					sf::seconds(random() * average.asSeconds() * 0.8f)
 					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
 void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 	// Get info
 
-	sf::Vector2<double> closestRep;
-	sf::Vector2<double> baryAttract, baryFlee, meanDir;
+	sf::Vector2f closestRep;
+	sf::Vector2f baryAttract, baryFlee, meanDir;
 	int nbDir = 0;
 	int nbAttract = 0;
 	int nbFlee = 0;
-	double distance;
-	double minRepDst = _repulsionRadius;
+	float distance;
+	float minRepDst = _repulsionRadius;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
 		if (neighbors[i] != this) {
-			if (neighbors[i]->getMovingType() == PREY) {
+			if (dynamic_cast<Antilope*>(neighbors[i])) {
 				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _repulsionRadius) {
@@ -91,7 +91,7 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 				}
 			}
 
-			else if (neighbors[i]->getMovingType() == HUNTER) {
+			else if (dynamic_cast<Antilope*>(neighbors[i])) {
 				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _lineOfSight) {
@@ -110,7 +110,7 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 				beginFleeing();
 
 			if (nbAttract != 0 && nbAttract <= 2) {
-				_direction = baryAttract / (double) nbAttract - _pos;
+				_direction = baryAttract / (float) nbAttract - _pos;
 				_direction /= vu::norm(_direction);
 			}
 
@@ -130,7 +130,7 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 					}
 
 					else {
-						float theta = randomD() * 2. * M_PI;
+						float theta = RANDOMF * 2. * M_PI;
 						_direction.x = cos(theta);
 						_direction.y = sin(theta);
 					}
@@ -153,9 +153,9 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 			}
 
 			else if (nbDir != 0) {
-				sf::Vector2<double> zbla = meanDir / (double) nbDir;
+				sf::Vector2f zbla = meanDir / (float) nbDir;
 				if (zbla.x != 0 && zbla.y != 0) {
-					_direction = meanDir / (double) nbDir;
+					_direction = meanDir / (float) nbDir;
 					_direction /= vu::norm(_direction);
 				}
 
@@ -166,18 +166,18 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 			}
 
 			else if (nbAttract != 0) {
-				_direction = baryAttract / (double) nbAttract - _pos;
+				_direction = baryAttract / (float) nbAttract - _pos;
 				_direction /= vu::norm(_direction);
 			}
 
 			else if (nbFlee != 0) {
-				_direction = _pos - baryFlee / (double) nbFlee;
+				_direction = _pos - baryFlee / (float) nbFlee;
 				_direction /= vu::norm(_direction);
 			}
 
 			// Take into account the hunter for half as much
 			if (nbFlee != 0) {
-				_direction = _pos - baryFlee / (double) nbFlee;
+				_direction = _pos - baryFlee / (float) nbFlee;
 				_direction /= vu::norm(_direction);
 			}
 
@@ -207,9 +207,9 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 			}
 
 			else if (nbDir != 0) { // TODO : Hysteresis
-				sf::Vector2<double> zbla = meanDir / (double) nbDir;
+				sf::Vector2f zbla = meanDir / (float) nbDir;
 				if (zbla.x != 0 && zbla.y != 0) {
-					_direction = meanDir / (double) nbDir;
+					_direction = meanDir / (float) nbDir;
 					_direction /= vu::norm(_direction);
 				}
 
@@ -222,8 +222,8 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 			}
 
 			else if (nbAttract != 0 &&
-					(_bStatus == ATTRACTION || vu::norm(baryAttract / (double) nbAttract - _pos) < _attractionRadius * 0.8) ) {
-				_direction = baryAttract / (double) nbAttract - _pos;
+					(_bStatus == ATTRACTION || vu::norm(baryAttract / (float) nbAttract - _pos) < _attractionRadius * 0.8) ) {
+				_direction = baryAttract / (float) nbAttract - _pos;
 				_direction /= vu::norm(_direction);
 				_bStatus = ATTRACTION;
 			}

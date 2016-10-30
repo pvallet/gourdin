@@ -9,13 +9,10 @@
 
 // ig = ingame
 
-enum abstractType {igE, igME, CTRL};
-
 class igElement {
 public:
-	igElement(sf::Vector2<double> position);
+	igElement(sf::Vector2f position);
 	virtual ~igElement();
-	inline virtual abstractType getAbstractType() const {return igE;}
 
 	virtual void update(sf::Time elapsed, float theta);
 	void set3DCorners(glm::vec3 nCorners[4]);
@@ -27,7 +24,7 @@ public:
 
 	// Getters
 
-	inline sf::Vector2<double> getPos() const {return _pos;}
+	inline sf::Vector2f getPos() const {return _pos;}
 	inline float getOrientation() const {return _orientation;}
 	inline sf::Vector2f getSize() const {return _size;}
 	inline sf::IntRect get2DCorners() const {return _corners2;}
@@ -35,7 +32,7 @@ public:
 	inline bool getVisible() const {return _visible;}
 
 protected:
-	sf::Vector2<double> _pos;
+	sf::Vector2f _pos;
 	sf::Vector2f _size;
 
 	sf::IntRect _corners2;

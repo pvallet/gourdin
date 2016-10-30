@@ -1,7 +1,7 @@
 #include "tree.h"
 #include "animationManager.h"
 
-Tree::Tree(sf::Vector2<double> position, TreeTexManager* manager, Biome biome, int index) :
+Tree::Tree(sf::Vector2f position, TreeTexManager* manager, Biome biome, int index) :
 	igElement(position),
 	_manager(manager),
 	_biome(biome),
@@ -14,6 +14,8 @@ Tree::Tree(sf::Vector2<double> position, TreeTexManager* manager, Biome biome, i
   glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord2D), _coord2D);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	_glCheckError();
 }
 
 void Tree::draw() const {

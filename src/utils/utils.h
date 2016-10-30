@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SFML/System.hpp>
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
@@ -9,6 +10,8 @@
 
 #define NB_BIOMES 20
 
+#define RANDOMF (rand() / (float) RAND_MAX)
+
 enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			SNOW, TUNDRA, BARE, SCORCHED,
 			TAIGA, SHRUBLAND, TEMPERATE_DESERT,
@@ -17,7 +20,6 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			NO_DEFINED_BIOME
 		};
 
+void _check_gl_error(const char *file, int line);
 
-double randomD();
-
-float randomF();
+#define _glCheckError() _check_gl_error(__FILE__,__LINE__)

@@ -1,8 +1,11 @@
 #include "lion.h"
-#include "vecUtils.h"
+
 #include <iostream>
 
-Lion::Lion(sf::Vector2<double> position, AnimationManager graphics) :
+#include "antilope.h"
+#include "vecUtils.h"
+
+Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	Controllable(position, graphics),
 	_stamina(100),
 	_catchBreathSpeed(25.),
@@ -79,7 +82,7 @@ void Lion::beginAttacking() {
 	}
 }
 
-void Lion::setTarget(sf::Vector2<double> t) {
+void Lion::setTarget(sf::Vector2f t) {
 	Controllable::setTarget(t);
 	if (_status == WAITING) {
 		beginWalking();
@@ -93,7 +96,7 @@ void Lion::kill(std::vector<igMovingElement*> neighbors) {
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
 		if (neighbors[i] != this) {
-			if (neighbors[i]->getMovingType() == PREY) {
+			if (dynamic_cast<Antilope*>(neighbors[i])) {
 				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _range) {

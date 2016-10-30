@@ -31,19 +31,19 @@ Heightmap::Heightmap(size_t x, size_t y, const TexManager& terrainTexManager, co
 
 void Heightmap::getMapInfo() {
 	size_t size1 = _size-1;
-	double step =  CHUNK_SIZE / (double) size1;
+	float step =  CHUNK_SIZE / (float) size1;
 
   Center* tmpRegions[_size][_size];
 
-  double x, x1, x2, x3;
-  double y, y1, y2, y3;
+  float x, x1, x2, x3;
+  float y, y1, y2, y3;
   x = _chunkPos.x * CHUNK_SIZE;
 
   for (size_t i = 0 ; i < _size ; i++) {
     y = _chunkPos.y * CHUNK_SIZE;
 
     for (size_t j = 0 ; j < _size ; j++) {
-			Center* currentCenter = _map.getClosestCenter(sf::Vector2<double>(x, y));
+			Center* currentCenter = _map.getClosestCenter(sf::Vector2f(x, y));
       tmpRegions[i][j] = currentCenter;
 
 			bool tryNextAdjacentCenter = true;
@@ -61,8 +61,8 @@ void Heightmap::getMapInfo() {
 	          y3 = tmpRegions[i][j]->edges[k]->corner1->y;
 
 						// Linear interpolation to get the height
-	          double s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-	          double t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+	          float s = ((y2-y3)*(x-x3)+(x3-x2)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+	          float t = ((y3-y1)*(x-x3)+(x1-x3)*(y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
 
 	          if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
 	            _heights[i][j] = s       * tmpRegions[i][j]->elevation +
@@ -110,7 +110,7 @@ void Heightmap::getMapInfo() {
 
 void Heightmap::fillBufferData() {
 	size_t size1 = _size-1;
-	double step =  CHUNK_SIZE / (double) size1;
+	float step =  CHUNK_SIZE / (float) size1;
 
 	sf::Vector3f normalsTmp[_size][_size];
 
@@ -194,11 +194,13 @@ void Heightmap::generateBuffers() {
   }
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	_glCheckError();
 }
 
 void Heightmap::computeLowestsHighests() {
 	size_t size1 = _size-1;
-	double step =  CHUNK_SIZE / (double) size1;
+	float step =  CHUNK_SIZE / (float) size1;
 	float minH = HEIGHT_FACTOR;
 	float maxH = 0.;
   int iMin = 0;
@@ -273,7 +275,7 @@ void Heightmap::computeLowestsHighests() {
 
 void Heightmap::generate() {
   size_t size1 = _size-1;
-	double step =  CHUNK_SIZE / (double) size1;
+	float step =  CHUNK_SIZE / (float) size1;
 
   getMapInfo();
 

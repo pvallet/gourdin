@@ -17,15 +17,15 @@ struct Corner;
 
 struct Center {
 	int id;
-	double x;
-	double y;
+	float x;
+	float y;
 	bool water;
 	bool ocean;
 	bool coast;
 	bool border;
 	Biome biome;
-	double elevation;
-	double moisture;
+	float elevation;
+	float moisture;
 
 	std::vector<int> centerIDs; // Only for initialisation
 	std::vector<int> edgeIDs;
@@ -39,8 +39,8 @@ struct Center {
 struct Edge {
 	int id;
 	bool mapEdge;
-	double x; // Midpoint coordinates
-	double y;
+	float x; // Midpoint coordinates
+	float y;
 	int river;
 
 	int center0ID; // Only for initialisation
@@ -56,14 +56,14 @@ struct Edge {
 
 struct Corner {
 	int id;
-	double x;
-	double y;
+	float x;
+	float y;
 	bool water;
 	bool ocean;
 	bool coast;
 	bool border;
-	double elevation;
-	double moisture;
+	float elevation;
+	float moisture;
 	int river;
 	int downslope; // Index of the lowest adjacent corner
 
@@ -77,9 +77,9 @@ struct Corner {
 };
 
 struct CentersInChunk {
-	std::vector<double> data;
-	flann::Matrix<double> dataset; // For knn searches
-	std::unique_ptr<flann::Index<flann::L2<double> > > kdIndex;
+	std::vector<float> data;
+	flann::Matrix<float> dataset; // For knn searches
+	std::unique_ptr<flann::Index<flann::L2<float> > > kdIndex;
 
 	std::vector<Center*> centers;
 };
@@ -90,7 +90,7 @@ public:
 
 	void load(std::string path);
 
-	Center* getClosestCenter(sf::Vector2<double> pos) const;
+	Center* getClosestCenter(sf::Vector2f pos) const;
 	std::vector<Center*> getCentersInChunk(size_t x, size_t y) const;
 
 private:

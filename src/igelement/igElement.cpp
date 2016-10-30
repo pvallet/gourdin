@@ -1,4 +1,5 @@
 #include "igElement.h"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <cmath>
@@ -9,12 +10,12 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-igElement::igElement(sf::Vector2<double> position) :
+igElement::igElement(sf::Vector2f position) :
 	_pos(position),
 	_camOrientation(0.),
 	_visible(false) {
 
-	_orientation = randomF() * 360.f;
+	_orientation = random() * 360.f;
 
 	_vertices = new float[12];
   _coord2D = new float[8];
@@ -51,14 +52,13 @@ igElement::igElement(sf::Vector2<double> position) :
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, 4 * sizeof *_indices, _indices);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	_glCheckError();
 }
 
 igElement::~igElement() {
 	glDeleteBuffers(1, &_vbo);
 	glDeleteBuffers(1, &_ibo);
-	// delete[] _vertices;
-	// delete[] _coord2D;
-	// delete[] _indices;
 }
 
 void igElement::update(sf::Time elapsed, float theta) {
@@ -79,6 +79,8 @@ void igElement::set3DCorners(glm::vec3 nCorners[4]) {
   glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *_vertices), _vertices);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	_glCheckError();
 }
 
 void igElement::setOrientation(float nOrientation) {

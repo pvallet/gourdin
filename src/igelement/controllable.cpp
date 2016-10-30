@@ -2,7 +2,7 @@
 #include "vecUtils.h"
 #include <iostream>
 
-Controllable::Controllable(sf::Vector2<double> position, AnimationManager graphics) :
+Controllable::Controllable(sf::Vector2f position, AnimationManager graphics) :
  	igMovingElement(position, graphics) {
 
 }
@@ -19,7 +19,7 @@ void Controllable::update(sf::Time elapsed, float theta) {
 	}
 }
 
-void Controllable::setTarget(sf::Vector2<double> t) {
+void Controllable::setTarget(sf::Vector2f t) {
 	if (!_dead) {
 		_moving = true;
 		_target = t;

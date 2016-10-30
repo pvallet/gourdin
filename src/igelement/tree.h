@@ -5,7 +5,7 @@
 
 class Tree : public igElement {
 public:
-	Tree(sf::Vector2<double> position, TreeTexManager* _manager, Biome _biome, int _index);
+	Tree(sf::Vector2f position, TreeTexManager* _manager, Biome _biome, int _index);
 
 	void draw() const;
 

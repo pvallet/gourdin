@@ -27,8 +27,9 @@ void Game::init() {
   _igEShader.load();
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
-  _treeTexManager.load("res/trees/");
-
+  _treeTexManager.    load("res/trees/");
+  _antilopeTexManager.load("res/animals/antilope/");
+  _lionTexManager.    load("res/animals/lion/");
   _map.load("res/map/");
 
   std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
@@ -43,11 +44,8 @@ void Game::init() {
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
-
-  _antilopeTexManager.load("res/animals/antilope/");
-  _lionTexManager.load("res/animals/lion/");
-
-  generateHerd(sf::Vector2<double>(CHUNK_BEGIN_X * CHUNK_SIZE, CHUNK_BEGIN_Y * CHUNK_SIZE), 20);
+  generateHerd(     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20);
 }
 
 void Game::generateHeightmap(size_t x, size_t y) {
@@ -87,10 +85,10 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
         if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
 
 
-        else if (_map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2<double>(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2<double>((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
+        else if (_map.getClosestCenter(sf::Vector2f(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2f(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2f((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
+                 _map.getClosestCenter(sf::Vector2f((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
 
           _terrain[tmp.x][tmp.y] = std::unique_ptr<Chunk>(new Ocean(tmp.x, tmp.y, _terrainTexManager.getTexID(OCEAN)));
           _chunkStatus[tmp.x][tmp.y] = EDGE;
@@ -141,20 +139,15 @@ void Game::update(sf::Time elapsed) {
   }
 
   // Compute moving elements interactions
-  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
-    if (_igElements[i]->getAbstractType() != igE) {
-      igMovingElement* igM = (igMovingElement*) _igElements[i].get();
-      if (igM->getMovingType() == PREY) {
-        Antilope* atlp = (Antilope*) igM;
-        atlp->updateState(_igMovingElements);
-      }
+  for (size_t i = 0; i < _igMovingElements.size(); i++) {
+    Antilope* atlp;
+    Lion* lion;
 
-      else if (igM->getMovingType() == HUNTER) {
-        Lion* lion = (Lion*) igM;
-        // TODO send only part of the elements
-        lion->kill(_igMovingElements);
-      }
-    }
+    if (atlp = dynamic_cast<Antilope*>(_igMovingElements[i]))
+      atlp->updateState(_igMovingElements);
+
+    else if (lion = dynamic_cast<Lion*>(_igMovingElements[i]))
+      lion->kill(_igMovingElements);
   }
 
   _visibleElmts.clear();
@@ -169,7 +162,7 @@ void Game::update(sf::Time elapsed) {
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
       // No test yet to see if the element can move to its new pos (no collision)
-      double newHeight =   _terrain[chunkPosX][chunkPosY]
+      float newHeight =   _terrain[chunkPosX][chunkPosY]
                            ->getHeight(_igElements[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
                                        _igElements[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
 
@@ -205,11 +198,11 @@ void Game::update(sf::Time elapsed) {
           glm::vec4(0,0,cam.getW(),cam.getH()));
       }
 
-      double left  = cornersProjNorm[0].x;
-      double top   = cornersProjNorm[0].y;
-      double right = cornersProjNorm[1].x;
-      double bot   = cornersProjNorm[3].y;
-      double depth = cornersProjNorm[3].z;
+      float left  = cornersProjNorm[0].x;
+      float top   = cornersProjNorm[0].y;
+      float right = cornersProjNorm[1].x;
+      float bot   = cornersProjNorm[3].y;
+      float depth = cornersProjNorm[3].z;
 
       top = cam.getH()-top;
       bot = cam.getH()-bot;
@@ -260,6 +253,8 @@ void Game::render() const {
   glDisable(GL_BLEND);
 
   glUseProgram(0);
+
+  _glCheckError();
 }
 
 void Game::select(sf::IntRect rect, bool add) {
@@ -276,7 +271,7 @@ void Game::select(sf::IntRect rect, bool add) {
       centerY = c.top + c.height / 2;
 
       if (rect.contains(centerX, centerY)) {
-        if (_igElements[i]->getAbstractType() == CTRL)
+        if (dynamic_cast<Lion*>(_igElements[i].get()))
           _selectedElmts.insert(_igElements[i].get());
       }
 
@@ -284,7 +279,7 @@ void Game::select(sf::IntRect rect, bool add) {
                   c.contains(rect.left + rect.width, rect.top) ||
                   c.contains(rect.left + rect.width, rect.top + rect.height) ||
                   c.contains(rect.left, rect.top + rect.height)  ) {
-        if (_igElements[i]->getAbstractType() == CTRL)
+        if (dynamic_cast<Lion*>(_igElements[i].get()))
           _selectedElmts.insert(_igElements[i].get());
       }
     }
@@ -292,12 +287,12 @@ void Game::select(sf::IntRect rect, bool add) {
 }
 
 void Game::moveSelection(sf::Vector2i screenTarget) {
-  sf::Vector2<double> target = get2DCoord(screenTarget);
+  sf::Vector2f target = get2DCoord(screenTarget);
 
   for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    if ((*it)->getAbstractType() == CTRL) {
-      Controllable* tmp = (Controllable*) *it;
-      tmp->setTarget(target);
+    Controllable* ctrl;
+    if (ctrl = dynamic_cast<Controllable*>(*it)) {
+      ctrl->setTarget(target);
     }
   }
 }
@@ -313,17 +308,17 @@ void Game::addLion(sf::Vector2i screenTarget) {
   _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
 }
 
-void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
-  double r, theta;
-  sf::Vector2<double> p, diff;
+void Game::generateHerd(sf::Vector2f pos, size_t count) {
+  float r, theta;
+  sf::Vector2f p, diff;
   bool add;
 
   std::vector<Antilope*> tmp;
 
   for (size_t i = 0 ; i < count ; i++) {
     add = true;
-    r = sqrt(randomD()) * HERD_RADIUS * sqrt(count);
-    theta = randomD() * 2*M_PI;
+    r = sqrt(RANDOMF) * HERD_RADIUS * sqrt(count);
+    theta = RANDOMF * 2*M_PI;
 
     p.x = pos.x + r*cos(theta);
     p.y = pos.y + r*sin(theta);
@@ -349,8 +344,8 @@ void Game::generateHerd(sf::Vector2<double> pos, size_t count) {
 }
 
 void Game::generateForests(size_t x, size_t y) {
-  double r, theta;
-  sf::Vector2<double> p, diff;
+  float r, theta;
+  sf::Vector2f p, diff;
   bool add;
   size_t count, nbTrees;
 
@@ -367,8 +362,8 @@ void Game::generateForests(size_t x, size_t y) {
 
       for (size_t j = 0 ; j < nbTrees ; j++) {
         add = true;
-        r = sqrt(randomD()) * _treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
-        theta = randomD() * 2*M_PI;
+        r = sqrt(RANDOMF) * _treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
+        theta = RANDOMF * 2*M_PI;
 
         p.x = centers[i]->x + r*cos(theta);
         p.y = centers[i]->y + r*sin(theta);
@@ -385,7 +380,7 @@ void Game::generateForests(size_t x, size_t y) {
         if (add) {
           count++;
           tmp.push_back(new Tree(p, &_treeTexManager, centers[i]->biome,
-            (int) ((randomD() - 0.01f) * _treeTexManager.getNBTrees(centers[i]->biome))));
+            (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(centers[i]->biome))));
         }
       }
 
@@ -396,7 +391,7 @@ void Game::generateForests(size_t x, size_t y) {
   }
 }
 
-sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
+sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
@@ -407,5 +402,5 @@ sf::Vector2<double> Game::get2DCoord(sf::Vector2i screenTarget) const {
     glm::mat4(1.), cam.getViewProjectionMatrix(),
     glm::vec4(0,0, cam.getW(), cam.getH()));
 
-  return sf::Vector2<double>( modelCoord.x, modelCoord.y);
+  return sf::Vector2f( modelCoord.x, modelCoord.y);
 }

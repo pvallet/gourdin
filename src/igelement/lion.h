@@ -6,7 +6,7 @@ enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING};
 
 class Lion : public Controllable {
 public:
-	Lion(sf::Vector2<double> position, AnimationManager _graphics);
+	Lion(sf::Vector2f position, AnimationManager _graphics);
 
 	virtual void update(sf::Time elapsed, float theta);
 
@@ -15,8 +15,7 @@ public:
 	void beginWalking();
 	void beginAttacking();
 
-	virtual void setTarget(sf::Vector2<double> t);
-	virtual MovingType getMovingType() const {return HUNTER;}
+	virtual void setTarget(sf::Vector2f t);
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 

@@ -71,22 +71,23 @@ void Controller::renderLifeBars() {
 
   for(auto it = sel.begin(); it != sel.end(); ++it) {
     corners = (*it)->get2DCorners();
-    Controllable* ctrl = (Controllable*) (*it);
-    maxHeightFactor = ctrl->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+    Controllable* ctrl;
+    if (ctrl = dynamic_cast<Controllable*>(*it)) {
+      maxHeightFactor = ctrl->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-    if (ctrl->getMovingType() == HUNTER) {
-      Lion* lion = (Lion*) ctrl;
-      lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
+      Lion* lion;
+      if (lion = dynamic_cast<Lion*>(ctrl))
+        lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
+
+      lifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+      fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+
+      _window.draw(lifeBar);
+      _window.draw(fullLifeBar);
+      lifeBar.setSize(sf::Vector2f(20., 2.));
     }
-
-    lifeBar.setPosition(corners.left + corners.width/2 - 10,
-      corners.top - corners.height*maxHeightFactor + corners.height - 5);
-    fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
-      corners.top - corners.height*maxHeightFactor + corners.height - 5);
-
-    _window.draw(lifeBar);
-    _window.draw(fullLifeBar);
-    lifeBar.setSize(sf::Vector2f(20., 2.));
   }
 }
 
@@ -255,16 +256,19 @@ void Controller::run() {
           case sf::Keyboard::LShift: {
               std::set<igElement*> sel = _game.getSelection();
 
-              for (auto it = sel.begin() ; it != sel.end() ; ++it) {
-                  Controllable* ctrl = (Controllable*) (*it);
+              for (auto it = sel.begin(); it != sel.end(); ++it) {
 
-                  if (ctrl->getMovingType() == HUNTER) {
-                      Lion* lion = (Lion*) ctrl;
+                Controllable* ctrl;
+                if (ctrl = dynamic_cast<Controllable*>(*it)) {
+
+                  Lion* lion;
+                  if (lion = dynamic_cast<Lion*>(ctrl)) {
                       if (lion->isRunning())
                           lion->beginWalking();
                       else
                           lion->beginRunning();
                   }
+                }
               }}
               break;
           default:
@@ -289,7 +293,7 @@ void Controller::run() {
     }
 
     // Move cam
-    double realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
+    float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
       cam.getZoomFactor();
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
@@ -319,5 +323,7 @@ void Controller::run() {
     cam.apply();
     _game.update(_elapsed);
     render();
+
+    _glCheckError();
   }
 }

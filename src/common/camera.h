@@ -32,7 +32,7 @@ public:
   inline float getPhi() const {return _phi;}
   inline float getFov() const {return _fovAngle;}
   inline float getRatio() const {return _aspectRatio;}
-  inline sf::Vector2<double> getPointedPos() const {return sf::Vector2<double>(_x, _y);}
+  inline sf::Vector2f getPointedPos() const {return sf::Vector2f(_x, _y);}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 	inline float getZoomFactor() const {return _r / INIT_R;}
 
@@ -59,7 +59,7 @@ private:
   float _nearPlane;
   float _farPlane;
 
-  double _x, _y, _height;
+  float _x, _y, _height;
   float _r, _phi, _theta; // The camera points towards the center of the sphere
   sf::Vector3f _pos;
 

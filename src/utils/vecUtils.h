@@ -8,13 +8,9 @@ namespace vu {
 
 float norm(const sf::Vector2f& v);
 
-double norm(const sf::Vector2<double>& v);
-
 float norm(const sf::Vector3f& v);
 
 float dot(const sf::Vector2f& u, const sf::Vector2f& v);
-
-double dot(const sf::Vector2<double>& u, const sf::Vector2<double>& v);
 
 float dot(const sf::Vector3f& u, const sf::Vector3f& v);
 
@@ -27,8 +23,6 @@ sf::Vector3f convertSFML(glm::vec3 u);
 glm::vec3 convertGLM(sf::Vector3f u);
 
 float angle(const sf::Vector2f& u, const sf::Vector2f& v);
-
-double angle(const sf::Vector2<double>& u, const sf::Vector2<double>& v);
 
 class Mat3f {
 

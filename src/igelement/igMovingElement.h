@@ -6,14 +6,10 @@
 #include "igElement.h"
 #include "animationManager.h"
 
-enum MovingType {PREY, HUNTER};
-
 class igMovingElement : public igElement {
 public:
-	igMovingElement(sf::Vector2<double> position, AnimationManager graphics);
-	inline virtual abstractType getAbstractType() const {return igME;}
-	virtual MovingType getMovingType() const = 0;
-
+	igMovingElement(sf::Vector2f position, AnimationManager graphics);
+	
 	void draw() const;
 
 	void launchAnimation (ANM_TYPE type);
@@ -22,7 +18,7 @@ public:
 	virtual void die();
 
 	inline virtual float getMaxHeightFactor() {return _graphics.getMaxHeightFactor();}
-	inline sf::Vector2<double> getDirection() const {return _direction;}
+	inline sf::Vector2f getDirection() const {return _direction;}
 	inline float getSpeed() const {return _speed;}
 	inline bool isDead() const {return _dead;}
 
@@ -33,5 +29,5 @@ protected:
 
 	AnimationManager _graphics;
 
-	sf::Vector2<double> _direction; // Normalized vector towards the target
+	sf::Vector2f _direction; // Normalized vector towards the target
 };

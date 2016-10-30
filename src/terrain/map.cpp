@@ -21,8 +21,8 @@ void Map::loadCenters(const TiXmlHandle& hRoot) {
 	elem = hRoot.FirstChild("centers").FirstChild().Element();
 	for (; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &center.id);
-		elem->QueryDoubleAttribute("x", &center.x);
-		elem->QueryDoubleAttribute("y", &center.y);
+		elem->QueryFloatAttribute("x", &center.x);
+		elem->QueryFloatAttribute("y", &center.y);
 
 		elem->QueryStringAttribute("water", &str);
 		center.water = boolAttrib(str);
@@ -36,8 +36,8 @@ void Map::loadCenters(const TiXmlHandle& hRoot) {
 		elem->QueryStringAttribute("biome", &str);
 		center.biome = biomeAttrib(str);
 
-		elem->QueryDoubleAttribute("elevation", &center.elevation);
-		elem->QueryDoubleAttribute("moisture", &center.moisture);
+		elem->QueryFloatAttribute("elevation", &center.elevation);
+		elem->QueryFloatAttribute("moisture", &center.moisture);
 
 
 		hSub = TiXmlHandle(elem);
@@ -81,7 +81,7 @@ void Map::loadEdges(const TiXmlHandle& hRoot) {
 		elem->QueryIntAttribute("center1", &edge.center1ID);
 
 		// If the edge touches the edge of the map, there are no ends
-		if (elem->QueryDoubleAttribute("x", &edge.x) == TIXML_NO_ATTRIBUTE) {
+		if (elem->QueryFloatAttribute("x", &edge.x) == TIXML_NO_ATTRIBUTE) {
 			edge.mapEdge = true;
 			edge.x = 0.;
 			edge.y = 0.;
@@ -89,7 +89,7 @@ void Map::loadEdges(const TiXmlHandle& hRoot) {
 
 		else {
 			edge.mapEdge = false;
-			elem->QueryDoubleAttribute("y", &edge.y);
+			elem->QueryFloatAttribute("y", &edge.y);
 			elem->QueryIntAttribute("corner0", &edge.corner0ID);
 			elem->QueryIntAttribute("corner1", &edge.corner1ID);
 		}
@@ -112,8 +112,8 @@ void Map::loadCorners(const TiXmlHandle& hRoot) {
 	elem = hRoot.FirstChild("corners").FirstChild().Element();
 	for(; elem; elem = elem->NextSiblingElement()) {
 		elem->QueryIntAttribute("id", &corner.id);
-		elem->QueryDoubleAttribute("x", &corner.x);
-		elem->QueryDoubleAttribute("y", &corner.y);
+		elem->QueryFloatAttribute("x", &corner.x);
+		elem->QueryFloatAttribute("y", &corner.y);
 
 		elem->QueryStringAttribute("water", &str);
 		corner.water = boolAttrib(str);
@@ -124,8 +124,8 @@ void Map::loadCorners(const TiXmlHandle& hRoot) {
 		elem->QueryStringAttribute("border", &str);
 		corner.border = boolAttrib(str);
 
-		elem->QueryDoubleAttribute("elevation", &corner.elevation);
-		elem->QueryDoubleAttribute("moisture", &corner.moisture);
+		elem->QueryFloatAttribute("elevation", &corner.elevation);
+		elem->QueryFloatAttribute("moisture", &corner.moisture);
 
 		elem->QueryIntAttribute("river", &corner.river);
 		elem->QueryIntAttribute("downslope", &corner.downslope);
@@ -228,10 +228,10 @@ void Map::sortCenters(float tolerance) {
 			it->data[2*i+1] = it->centers[i]->y;
 		}
 
-		it->dataset = flann::Matrix<double>(&(it->data[0]), it->centers.size(), 2);
+		it->dataset = flann::Matrix<float>(&(it->data[0]), it->centers.size(), 2);
 
-		it->kdIndex = std::unique_ptr<flann::Index<flann::L2<double> > >(
-			new flann::Index<flann::L2<double> >(it->dataset, flann::KDTreeIndexParams(4)));
+		it->kdIndex = std::unique_ptr<flann::Index<flann::L2<float> > >(
+			new flann::Index<flann::L2<float> >(it->dataset, flann::KDTreeIndexParams(4)));
 
 		it->kdIndex->buildIndex();
 	}
@@ -344,15 +344,15 @@ Biome Map::biomeAttrib(std::string str) const {
 		return GRASSLAND;
 }
 
-Center* Map::getClosestCenter(sf::Vector2<double> pos) const {
-	double queryData[2];
+Center* Map::getClosestCenter(sf::Vector2f pos) const {
+	float queryData[2];
 	queryData[0] = pos.x;
 	queryData[1] = pos.y;
 
-	flann::Matrix<double> query(queryData, 1, 2);
+	flann::Matrix<float> query(queryData, 1, 2);
 
   std::vector<std::vector<int> > indices;
-  std::vector<std::vector<double> > dists;
+  std::vector<std::vector<float> > dists;
 
 	sf::Vector2i chunkPos(pos.x / CHUNK_SIZE, pos.y / CHUNK_SIZE);
 	size_t index = chunkPos.x * NB_CHUNKS + chunkPos.y;
