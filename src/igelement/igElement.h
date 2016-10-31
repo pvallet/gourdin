@@ -47,9 +47,9 @@ protected:
 	GLuint _vbo;
 	GLuint _ibo;
 
-	float* _vertices;
-	float* _coord2D;
-	GLuint* _indices;
+	std::array<float, 12> _vertices;
+	std::array<float, 8>  _coord2D;
+	std::array<GLuint, 4> _indices;
 
 private:
 	float _orientation; // Angle between the front of the sprite and the camera

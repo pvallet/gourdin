@@ -20,6 +20,10 @@ private:
 	void renderMinimap();
 	void renderLog();
 
+	void moveCamera();
+	void handleClick(sf::Event event);
+	void handleKeyPressed(sf::Event event);
+
 	bool _addSelect;
 	bool _selecting;
 	sf::RectangleShape _rectSelect;

@@ -62,7 +62,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-	glBufferSubData(GL_ARRAY_BUFFER, (12*sizeof *_vertices), (8*sizeof *_coord2D), _coord2D);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord2D), &_coord2D[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

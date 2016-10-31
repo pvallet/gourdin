@@ -379,7 +379,7 @@ void Game::generateForests(size_t x, size_t y) {
 
         if (add) {
           count++;
-          tmp.push_back(new Tree(p, &_treeTexManager, centers[i]->biome,
+          tmp.push_back(new Tree(p, _treeTexManager, centers[i]->biome,
             (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(centers[i]->biome))));
         }
       }

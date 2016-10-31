@@ -185,6 +185,94 @@ void Controller::render() {
   }
 }
 
+void Controller::moveCamera() {
+  Camera& cam = Camera::getInstance();
+
+  float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
+    cam.getZoomFactor();
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    cam.translate(0., - realTranslationValue);
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    cam.translate(0., realTranslationValue);
+
+  if (sf::Mouse::getPosition().x == 0)
+    cam.translate(- realTranslationValue, 0.);
+
+  if (sf::Mouse::getPosition().y == 0)
+    cam.translate(0., - realTranslationValue);
+
+  if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
+    cam.translate(realTranslationValue, 0.);
+
+  if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
+    cam.translate(0., realTranslationValue);
+}
+
+void Controller::handleClick(sf::Event event) {
+  if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window.getSize().y - event.mouseButton.y))) {
+    _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
+                                   (float) _minimapSprite.getTextureRect().height * MAX_COORD,
+                                   (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /
+                                   (float) _minimapSprite.getTextureRect().width * MAX_COORD));
+  }
+
+  else {
+    // Begin selection
+    if (event.mouseButton.button == sf::Mouse::Left) {
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+          _addSelect = true;
+      else
+          _addSelect = false;
+
+      _selecting = true;
+      _rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
+    }
+
+    // Move selection
+    if (event.mouseButton.button == sf::Mouse::Right) {
+      if (_game.getSelection().empty())
+        _game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+      else
+        _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+    }
+  }
+}
+
+void Controller::handleKeyPressed(sf::Event event) {
+  switch(event.key.code) {
+    case sf::Keyboard::Escape:
+      _running = false;
+      break;
+
+    case sf::Keyboard::LShift:
+      std::set<igElement*> sel = _game.getSelection();
+
+      for (auto it = sel.begin(); it != sel.end(); ++it) {
+
+        Controllable* ctrl;
+        if (ctrl = dynamic_cast<Controllable*>(*it)) {
+
+          Lion* lion;
+          if (lion = dynamic_cast<Lion*>(ctrl)) {
+              if (lion->isRunning())
+                  lion->beginWalking();
+              else
+                  lion->beginRunning();
+          }
+        }
+      }
+      break;
+  }
+}
+
 void Controller::run() {
   Camera& cam = Camera::getInstance();
 
@@ -203,39 +291,13 @@ void Controller::run() {
         cam.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
 
       else if (event.type == sf::Event::MouseButtonPressed) {
-        if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window.getSize().y - event.mouseButton.y))) {
-          _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
-                                         (float) _minimapSprite.getTextureRect().height * MAX_COORD,
-                                         (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /
-                                         (float) _minimapSprite.getTextureRect().width * MAX_COORD));
-        }
-
-        else {
-          // Begin selection
-          if (event.mouseButton.button == sf::Mouse::Left) {
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-                _addSelect = true;
-            else
-                _addSelect = false;
-
-            _selecting = true;
-            _rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
-          }
-
-          // Move selection
-          if (event.mouseButton.button == sf::Mouse::Right) {
-            if (_game.getSelection().empty())
-              _game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-            else
-              _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-          }
-        }
+        handleClick(event);
       }
 
       else if (event.type == sf::Event::MouseButtonReleased) {
         if (event.mouseButton.button == sf::Mouse::Left) {
           _game.select(sf::IntRect( _rectSelect.getPosition().x, _rectSelect.getPosition().y,
-                                  _rectSelect.getSize().x, _rectSelect.getSize().y), _addSelect);
+                                    _rectSelect.getSize().x, _rectSelect.getSize().y), _addSelect);
           _selecting = false;
           _rectSelect.setSize(sf::Vector2f(0,0));
         }
@@ -249,77 +311,27 @@ void Controller::run() {
       }
 
       else if (event.type == sf::Event::KeyPressed) {
-        switch(event.key.code) {
-          case sf::Keyboard::Escape:
-              _running = false;
-              break;
-          case sf::Keyboard::LShift: {
-              std::set<igElement*> sel = _game.getSelection();
-
-              for (auto it = sel.begin(); it != sel.end(); ++it) {
-
-                Controllable* ctrl;
-                if (ctrl = dynamic_cast<Controllable*>(*it)) {
-
-                  Lion* lion;
-                  if (lion = dynamic_cast<Lion*>(ctrl)) {
-                      if (lion->isRunning())
-                          lion->beginWalking();
-                      else
-                          lion->beginRunning();
-                  }
-                }
-              }}
-              break;
-          default:
-              break;
-        }
+        handleKeyPressed(event);
       }
 
       else if (event.type == sf::Event::KeyReleased) {
         switch(event.key.code) {
-            case sf::Keyboard::Delete: {
-              std::set<igElement*> sel = _game.getSelection();
-              Controllable* ctrl = (Controllable*) (*sel.begin());
-              ctrl->die();
+          case sf::Keyboard::Delete:
+            std::set<igElement*> sel = _game.getSelection();
+            Controllable* ctrl;
+            
+            for (auto it = sel.begin(); it != sel.end(); it++) {
+              if (ctrl = dynamic_cast<Controllable*>(*it)) {
+                ctrl->die();
+                break;
+              }
             }
-            break;
-
-            default:
-              break;
         }
       }
 
     }
 
-    // Move cam
-    float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
-      cam.getZoomFactor();
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-      cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-      cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      cam.translate(0., - realTranslationValue);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      cam.translate(0., realTranslationValue);
-
-    if (sf::Mouse::getPosition().x == 0)
-      cam.translate(- realTranslationValue, 0.);
-
-    if (sf::Mouse::getPosition().y == 0)
-      cam.translate(0., - realTranslationValue);
-
-    if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
-      cam.translate(realTranslationValue, 0.);
-
-    if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
-      cam.translate(0., realTranslationValue);
-
+    moveCamera();
     cam.apply();
     _game.update(_elapsed);
     render();

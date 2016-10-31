@@ -23,7 +23,7 @@ public:
 	void load(std::string path);
 
 	inline sf::Vector2f getSize(Biome biome, int index) const {return _flora[biome].size[index] * _heightFactor;}
-	inline void bind(Biome biome, int index) {bindTexture(_flora[biome].texIndices[index]);}
+	inline void bind(Biome biome, int index) const {bindTexture(_flora[biome].texIndices[index]);}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
 	inline float getExtension(Biome biome) const {return _flora[biome].extension;}

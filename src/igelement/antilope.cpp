@@ -1,8 +1,11 @@
 #include "antilope.h"
-#include "vecUtils.h"
-#include "utils.h"
+
 #include <cmath>
 #include <iostream>
+
+#include "lion.h"
+#include "utils.h"
+#include "vecUtils.h"
 
 Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	igMovingElement(position, graphics),
@@ -10,12 +13,12 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	_repulsionRadius(8.),
 	_orientationRadius(15.),
 	_attractionRadius(50.),
-	_speedWalking(5.),
-	_speedRunning(11.),
+	_speedWalking(7.),
+	_speedRunning(15.),
 	_aStatus(IDLE),
 	_bStatus(ORIENTATION) {
 
-	_size *= 5.f;
+	_size *= 7.f;
 	_lineOfSight = _lineOfSightStandard;
 
 	_averageRecovering = sf::seconds(3.f);
@@ -53,20 +56,14 @@ void Antilope::beginRecovering() {
 
 sf::Time Antilope::generateTimePhase(sf::Time average) const {
 	return 	average +
-					sf::seconds(random() * average.asSeconds() * 0.8f)
+					sf::seconds(RANDOMF * average.asSeconds() * 0.8f)
 					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
-void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
-	// Get info
-
-	sf::Vector2f closestRep;
-	sf::Vector2f baryAttract, baryFlee, meanDir;
-	int nbDir = 0;
-	int nbAttract = 0;
-	int nbFlee = 0;
+BoidsInfo Antilope::getInfoFromNeighbors(const std::vector<igMovingElement*>& neighbors) const {
+	BoidsInfo res;
 	float distance;
-	float minRepDst = _repulsionRadius;
+	res.minRepDst = _repulsionRadius;
 
 	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
 		if (neighbors[i] != this) {
@@ -74,161 +71,172 @@ void Antilope::updateState(std::vector<igMovingElement*> neighbors) {
 				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _repulsionRadius) {
-					if (distance < minRepDst) {
-						closestRep = neighbors[i]->getPos();
-						minRepDst = distance;
+					if (distance < res.minRepDst) {
+						res.closestRep = neighbors[i]->getPos();
+						res.minRepDst = distance;
 					}
 				}
 
 				else if (distance < _orientationRadius) {
-					meanDir += neighbors[i]->getDirection();
-					nbDir++;
+					res.sumOfDirs += neighbors[i]->getDirection();
+					res.nbDir++;
 				}
 
 				else if (distance < _attractionRadius) {
-					baryAttract += neighbors[i]->getPos();
-					nbAttract++;
+					res.sumPosAttract += neighbors[i]->getPos();
+					res.nbAttract++;
 				}
 			}
 
-			else if (dynamic_cast<Antilope*>(neighbors[i])) {
+			else if (dynamic_cast<Lion*>(neighbors[i])) {
 				distance = vu::norm(_pos - neighbors[i]->getPos());
 
 				if (distance < _lineOfSight) {
-					baryFlee += neighbors[i]->getPos();
-					nbFlee++;
+					res.sumPosFlee += neighbors[i]->getPos();
+					res.nbFlee++;
 				}
 			}
 		}
 	}
 
-	// Interpret the info
+	return res;
+}
 
-	switch (_aStatus) {
-		case IDLE:
-			if (nbFlee != 0)
-				beginFleeing();
+void Antilope::reactWhenIdle(const BoidsInfo& info) {
+	if (info.nbFlee != 0)
+		beginFleeing();
 
-			if (nbAttract != 0 && nbAttract <= 2) {
-				_direction = baryAttract / (float) nbAttract - _pos;
-				_direction /= vu::norm(_direction);
-			}
+	if (info.nbAttract != 0 && info.nbAttract <= 2) {
+		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
+		_direction /= vu::norm(_direction);
+	}
 
-			else if (_beginPhase.getElapsedTime() > _timePhase) {
-				if (_moving) {
-					_speed = 0.f;
-					_moving = false;
-					launchAnimation(WAIT);
-					_timePhase = generateTimePhase(_averageEating);
-					_beginPhase.restart();
-				}
+	else if (_beginPhase.getElapsedTime() > _timePhase) {
+		if (_moving) {
+			_speed = 0.f;
+			_moving = false;
+			launchAnimation(WAIT);
+			_timePhase = generateTimePhase(_averageEating);
+			_beginPhase.restart();
+		}
 
-				else {
-					if (minRepDst != _repulsionRadius) { // There is someone inside the repulsion radius
-						_direction = _pos - closestRep;
-						_direction /= vu::norm(_direction);
-					}
-
-					else {
-						float theta = RANDOMF * 2. * M_PI;
-						_direction.x = cos(theta);
-						_direction.y = sin(theta);
-					}
-
-					_speed = _speedWalking;
-					_moving = true;
-					launchAnimation(WALK);
-					_timePhase = generateTimePhase(_averageFindingFood);
-					_beginPhase.restart();
-				}
-			}
-
-		break;
-
-		case FLEEING: {
-			// Take into account the closest elements
-			if (minRepDst != _repulsionRadius) {
-				_direction = _pos - closestRep;
-				_direction /= vu::norm(_direction);
-			}
-
-			else if (nbDir != 0) {
-				sf::Vector2f zbla = meanDir / (float) nbDir;
-				if (zbla.x != 0 && zbla.y != 0) {
-					_direction = meanDir / (float) nbDir;
-					_direction /= vu::norm(_direction);
-				}
-
-				else {
-					_direction.x = 1.;
-					_direction.y = 0.;
-				}
-			}
-
-			else if (nbAttract != 0) {
-				_direction = baryAttract / (float) nbAttract - _pos;
-				_direction /= vu::norm(_direction);
-			}
-
-			else if (nbFlee != 0) {
-				_direction = _pos - baryFlee / (float) nbFlee;
-				_direction /= vu::norm(_direction);
-			}
-
-			// Take into account the hunter for half as much
-			if (nbFlee != 0) {
-				_direction = _pos - baryFlee / (float) nbFlee;
+		else {
+			if (info.minRepDst != _repulsionRadius) { // There is someone inside the repulsion radius
+				_direction = _pos - info.closestRep;
 				_direction /= vu::norm(_direction);
 			}
 
 			else {
-				beginRecovering();
-				_timePhase = generateTimePhase(_averageRecovering);
-				_beginPhase.restart();
+				float theta = RANDOMF * 2. * M_PI;
+				_direction.x = cos(theta);
+				_direction.y = sin(theta);
 			}
 
+			_speed = _speedWalking;
+			_moving = true;
+			launchAnimation(WALK);
+			_timePhase = generateTimePhase(_averageFindingFood);
+			_beginPhase.restart();
 		}
-		break;
+	}
+}
 
-		case RECOVERING: {
-			if (nbFlee != 0)
-				beginFleeing();
-
-			else if (_beginPhase.getElapsedTime() > _timePhase) {
-				beginIdle();
-				_beginPhase.restart();
-			}
-
-			else if (minRepDst != _repulsionRadius &&
-					(_bStatus == REPULSION || vu::norm(_pos-closestRep) < _repulsionRadius * 0.8) ) {
-				_direction = _pos - closestRep;
-				_direction /= vu::norm(_direction);
-				_bStatus = REPULSION;
-			}
-
-			else if (nbDir != 0) { // TODO : Hysteresis
-				sf::Vector2f zbla = meanDir / (float) nbDir;
-				if (zbla.x != 0 && zbla.y != 0) {
-					_direction = meanDir / (float) nbDir;
-					_direction /= vu::norm(_direction);
-				}
-
-				else {
-					_direction.x = 1.;
-					_direction.y = 0.;
-				}
-
-				_bStatus = ORIENTATION;
-			}
-
-			else if (nbAttract != 0 &&
-					(_bStatus == ATTRACTION || vu::norm(baryAttract / (float) nbAttract - _pos) < _attractionRadius * 0.8) ) {
-				_direction = baryAttract / (float) nbAttract - _pos;
-				_direction /= vu::norm(_direction);
-				_bStatus = ATTRACTION;
-			}
-		}
-		break;
+void Antilope::reactWhenFleeing(const BoidsInfo& info) {
+	// Take into account the closest elements
+	if (info.minRepDst != _repulsionRadius) {
+		_direction = _pos - info.closestRep;
+		_direction /= vu::norm(_direction);
 	}
 
+	else if (info.nbDir != 0) {
+		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
+		if (zbla.x != 0 && zbla.y != 0) {
+			_direction = info.sumOfDirs / (float) info.nbDir;
+			_direction /= vu::norm(_direction);
+		}
+
+		else {
+			_direction.x = 1.;
+			_direction.y = 0.;
+		}
+	}
+
+	else if (info.nbAttract != 0) {
+		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
+		_direction /= vu::norm(_direction);
+	}
+
+	else if (info.nbFlee != 0) {
+		_direction = _pos - info.sumPosFlee / (float) info.nbFlee;
+		_direction /= vu::norm(_direction);
+	}
+
+	// Take into account the hunter for half as much
+	if (info.nbFlee != 0) {
+		_direction = _pos - info.sumPosFlee / (float) info.nbFlee;
+		_direction /= vu::norm(_direction);
+	}
+
+	else {
+		beginRecovering();
+		_timePhase = generateTimePhase(_averageRecovering);
+		_beginPhase.restart();
+	}
+}
+
+void Antilope::reactWhenRecovering(const BoidsInfo& info) {
+	if (info.nbFlee != 0)
+		beginFleeing();
+
+	else if (_beginPhase.getElapsedTime() > _timePhase) {
+		beginIdle();
+		_beginPhase.restart();
+	}
+
+	else if (info.minRepDst != _repulsionRadius &&
+			(_bStatus == REPULSION || vu::norm(_pos-info.closestRep) < _repulsionRadius * 0.8) ) {
+		_direction = _pos - info.closestRep;
+		_direction /= vu::norm(_direction);
+		_bStatus = REPULSION;
+	}
+
+	else if (info.nbDir != 0) { // TODO : Hysteresis
+		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
+		if (zbla.x != 0 && zbla.y != 0) {
+			_direction = info.sumOfDirs / (float) info.nbDir;
+			_direction /= vu::norm(_direction);
+		}
+
+		else {
+			_direction.x = 1.;
+			_direction.y = 0.;
+		}
+
+		_bStatus = ORIENTATION;
+	}
+
+	else if (info.nbAttract != 0 &&
+			(_bStatus == ATTRACTION || vu::norm(info.sumPosAttract / (float) info.nbAttract - _pos) < _attractionRadius * 0.8) ) {
+		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
+		_direction /= vu::norm(_direction);
+		_bStatus = ATTRACTION;
+	}
+}
+
+void Antilope::updateState(const std::vector<igMovingElement*>& neighbors) {
+	BoidsInfo info = getInfoFromNeighbors(neighbors);
+
+	switch (_aStatus) {
+		case IDLE:
+			reactWhenIdle(info);
+			break;
+
+		case FLEEING:
+			reactWhenFleeing(info);
+			break;
+
+		case RECOVERING:
+			reactWhenRecovering(info);
+			break;
+	}
 }

@@ -15,11 +15,7 @@ igElement::igElement(sf::Vector2f position) :
 	_camOrientation(0.),
 	_visible(false) {
 
-	_orientation = random() * 360.f;
-
-	_vertices = new float[12];
-  _coord2D = new float[8];
-  _indices = new GLuint[4];
+	_orientation = RANDOMF * 360.f;
 
   for (size_t i = 0 ; i < 12 ; i++)
     _vertices[i] = 0.f;
@@ -37,7 +33,8 @@ igElement::igElement(sf::Vector2f position) :
   glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferData(GL_ARRAY_BUFFER, (12*sizeof *_vertices) + (8*sizeof *_coord2D), NULL, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, (sizeof(_vertices)) + (sizeof(_coord2D)), NULL, GL_STREAM_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord2D), &_coord2D[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -48,8 +45,8 @@ igElement::igElement(sf::Vector2f position) :
   glGenBuffers(1, &_ibo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * sizeof *_indices, NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, 4 * sizeof *_indices, _indices);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), NULL, GL_STATIC_DRAW);
+  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -76,7 +73,7 @@ void igElement::set3DCorners(glm::vec3 nCorners[4]) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, (12*sizeof *_vertices), _vertices);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -96,7 +93,7 @@ void igElement::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(12*sizeof *_vertices));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 

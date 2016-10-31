@@ -10,12 +10,12 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	_stamina(100),
 	_catchBreathSpeed(25.),
 	_loseBreathSpeed(10.),
-	_speedWalking(7.),
-	_speedRunning(15.),
+	_speedWalking(10.),
+	_speedRunning(21.),
 	_range(5.),
 	_status(WAITING) {
 
-	_size *= 5.f;
+	_size *= 7.f;
 	_speed = _speedWalking;
 	_animAttack = graphics.getAnimationTime(ATTACK);
 }
@@ -110,7 +110,7 @@ void Lion::kill(std::vector<igMovingElement*> neighbors) {
 	}
 
 	if (nearestDist != _range && !closest->isDead()) {
-		beginAttacking();
 		_prey = closest;
+		beginAttacking();
 	}
 }

@@ -9,7 +9,7 @@
 class igMovingElement : public igElement {
 public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
-	
+
 	void draw() const;
 
 	void launchAnimation (ANM_TYPE type);
@@ -17,7 +17,7 @@ public:
 	virtual void stop();
 	virtual void die();
 
-	inline virtual float getMaxHeightFactor() {return _graphics.getMaxHeightFactor();}
+	inline virtual float getMaxHeightFactor() const {return _graphics.getMaxHeightFactor();}
 	inline sf::Vector2f getDirection() const {return _direction;}
 	inline float getSpeed() const {return _speed;}
 	inline bool isDead() const {return _dead;}
