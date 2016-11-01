@@ -9,12 +9,12 @@
 
 Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	igMovingElement(position, graphics),
-	_lineOfSightStandard(50.),
-	_repulsionRadius(8.),
-	_orientationRadius(15.),
-	_attractionRadius(50.),
-	_speedWalking(7.),
-	_speedRunning(15.),
+	_lineOfSightStandard(50.f),
+	_repulsionRadius(8.f),
+	_orientationRadius(15.f),
+	_attractionRadius(50.f),
+	_speedWalking(7.f),
+	_speedRunning(15.f),
 	_aStatus(IDLE),
 	_bStatus(ORIENTATION) {
 
@@ -127,7 +127,7 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 			}
 
 			else {
-				float theta = RANDOMF * 2. * M_PI;
+				float theta = RANDOMF * 2.f * M_PI;
 				_direction.x = cos(theta);
 				_direction.y = sin(theta);
 			}
@@ -156,8 +156,8 @@ void Antilope::reactWhenFleeing(const BoidsInfo& info) {
 		}
 
 		else {
-			_direction.x = 1.;
-			_direction.y = 0.;
+			_direction.x = 1.f;
+			_direction.y = 0.f;
 		}
 	}
 
@@ -208,8 +208,8 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 		}
 
 		else {
-			_direction.x = 1.;
-			_direction.y = 0.;
+			_direction.x = 1.f;
+			_direction.y = 0.f;
 		}
 
 		_bStatus = ORIENTATION;

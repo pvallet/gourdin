@@ -15,10 +15,10 @@ public:
 private:
 	int compareToCorners(sf::Vector3f cam, sf::Vector3f vec) const;
 
-	float _vertices[12];
-	float _normals[12];
-	float _coord[8];
-	GLuint _indices[4];
+	std::array<float,12> _vertices;
+	std::array<float,12> _normals;
+	std::array<float,8>  _coord;
+	std::array<GLuint,4> _indices;
 
 	GLuint _tex;
 };

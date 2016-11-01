@@ -44,7 +44,7 @@ void AnimationManagerInitializer::load(std::string folderPath) {
       anm.pause = sf::milliseconds(pausems);
     }
 
-    anm.sprite = sf::FloatRect(0, 0, 1. / anm.steps, 1. / anm.orientations);
+    anm.sprite = sf::FloatRect(0, 0, 1.f / anm.steps, 1.f / anm.orientations);
 
     std::ostringstream convert;
     convert << folderPath << i << ".png";

@@ -8,11 +8,11 @@
 Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	Controllable(position, graphics),
 	_stamina(100),
-	_catchBreathSpeed(25.),
-	_loseBreathSpeed(10.),
-	_speedWalking(10.),
-	_speedRunning(21.),
-	_range(5.),
+	_catchBreathSpeed(25.f),
+	_loseBreathSpeed(10.f),
+	_speedWalking(10.f),
+	_speedRunning(21.f),
+	_range(5.f),
 	_status(WAITING) {
 
 	_size *= 7.f;
@@ -58,7 +58,7 @@ void Lion::stop() {
 }
 
 void Lion::beginRunning() {
-	if (_stamina > 0.) {
+	if (_stamina > 0.f) {
 		_moving = true;
 		_status = RUNNING;
 		_speed = _speedRunning;

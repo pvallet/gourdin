@@ -24,7 +24,7 @@ sf::Vector3f vu::cross(const sf::Vector3f& u, const sf::Vector3f& v) {
 
 sf::Vector3f vu::carthesian(float r, float theta, float phi) {
     sf::Vector3f u;
-    float rad = M_PI / 180.;
+    float rad = M_PI / 180.f;
 
     u.x = r*sin(phi*rad)*cos(theta*rad);
     u.y = r*sin(phi*rad)*sin(theta*rad);
@@ -54,16 +54,16 @@ glm::vec3 vu::convertGLM(sf::Vector3f u) {
 }
 
 float vu::angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if one is the vector (0,0), else value in degrees
-	int sign = u.x * v.y - u.y * v.x >= 0. ? 1 : -1; // Cross >= 0
+	int sign = u.x * v.y - u.y * v.x >= 0.f ? 1 : -1; // Cross >= 0
     float lengths = norm(u)*norm(v);
 
-    if (lengths == 0.) {
+    if (lengths == 0.f) {
         return -1.f;
     }
 
     else {
     	float nDot = dot(u,v) / lengths;
 
-        return sign * acos(nDot) * 180. / M_PI;
+        return sign * acos(nDot) * 180.f / M_PI;
     }
 }

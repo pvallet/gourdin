@@ -76,6 +76,7 @@ bool Shader::load() {
   glBindAttribLocation(_programID, 0, "in_Vertex");
   glBindAttribLocation(_programID, 1, "in_TexCoord0");
 	glBindAttribLocation(_programID, 2, "in_Normal");
+	glBindAttribLocation(_programID, 3, "in_Alpha_value");
 
   glLinkProgram(_programID);
 

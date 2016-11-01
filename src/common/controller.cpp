@@ -8,14 +8,14 @@
 #include "lion.h"
 #include "utils.h"
 
-#define ROTATION_ANGLE_PS 60. // PS = per second
-#define TRANSLATION_VALUE_PS 70.
-#define ZOOM_FACTOR 10.
+#define ROTATION_ANGLE_PS 60.f // PS = per second
+#define TRANSLATION_VALUE_PS 70.f
+#define ZOOM_FACTOR 10.f
 
 Controller::Controller(sf::RenderWindow& window) :
  	_addSelect(false),
   _selecting(false),
-  _rectSelect(sf::Vector2f(0., 0.)),
+  _rectSelect(sf::Vector2f(0.f, 0.f)),
   _running(true),
 	_window(window),
   _game() {}
@@ -57,10 +57,10 @@ void Controller::init() {
 }
 
 void Controller::renderLifeBars() {
-  sf::RectangleShape lifeBar(sf::Vector2f(20., 2.));
+  sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
   lifeBar.setFillColor(sf::Color::Green);
 
-  sf::RectangleShape fullLifeBar(sf::Vector2f(20., 2.));
+  sf::RectangleShape fullLifeBar(sf::Vector2f(20.f, 2.f));
   fullLifeBar.setFillColor(sf::Color::Transparent);
   fullLifeBar.setOutlineColor(sf::Color::Black);
   fullLifeBar.setOutlineThickness(1);
@@ -77,7 +77,7 @@ void Controller::renderLifeBars() {
 
       Lion* lion;
       if (lion = dynamic_cast<Lion*>(ctrl))
-        lifeBar.setSize(sf::Vector2f(20.* lion->getStamina() / 100., 2.));
+        lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
 
       lifeBar.setPosition(corners.left + corners.width/2 - 10,
         corners.top - corners.height*maxHeightFactor + corners.height - 5);
@@ -86,7 +86,7 @@ void Controller::renderLifeBars() {
 
       _window.draw(lifeBar);
       _window.draw(fullLifeBar);
-      lifeBar.setSize(sf::Vector2f(20., 2.));
+      lifeBar.setSize(sf::Vector2f(20.f, 2.f));
     }
   }
 }
@@ -154,7 +154,7 @@ void Controller::renderMinimap() {
 
 void Controller::renderLog() {
   Camera& cam = Camera::getInstance();
-  int fps = 1. / _elapsed.asSeconds();
+  int fps = 1.f / _elapsed.asSeconds();
   std::ostringstream convert;
   convert << fps;
   _fpsCounter.setString("FPS: " + convert.str());
@@ -192,28 +192,28 @@ void Controller::moveCamera() {
     cam.getZoomFactor();
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-    cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
+    cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-    cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.);
+    cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-    cam.translate(0., - realTranslationValue);
+    cam.translate(0.f, - realTranslationValue);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-    cam.translate(0., realTranslationValue);
+    cam.translate(0.f, realTranslationValue);
 
   if (sf::Mouse::getPosition().x == 0)
-    cam.translate(- realTranslationValue, 0.);
+    cam.translate(- realTranslationValue, 0.f);
 
   if (sf::Mouse::getPosition().y == 0)
-    cam.translate(0., - realTranslationValue);
+    cam.translate(0.f, - realTranslationValue);
 
   if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
-    cam.translate(realTranslationValue, 0.);
+    cam.translate(realTranslationValue, 0.f);
 
   if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
-    cam.translate(0., realTranslationValue);
+    cam.translate(0.f, realTranslationValue);
 }
 
 void Controller::handleClick(sf::Event event) {
@@ -319,7 +319,7 @@ void Controller::run() {
           case sf::Keyboard::Delete:
             std::set<igElement*> sel = _game.getSelection();
             Controllable* ctrl;
-            
+
             for (auto it = sel.begin(); it != sel.end(); it++) {
               if (ctrl = dynamic_cast<Controllable*>(*it)) {
                 ctrl->die();

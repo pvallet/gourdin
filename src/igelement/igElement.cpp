@@ -12,7 +12,7 @@
 
 igElement::igElement(sf::Vector2f position) :
 	_pos(position),
-	_camOrientation(0.),
+	_camOrientation(0.f),
 	_visible(false) {
 
 	_orientation = RANDOMF * 360.f;
@@ -83,10 +83,10 @@ void igElement::set3DCorners(glm::vec3 nCorners[4]) {
 void igElement::setOrientation(float nOrientation) {
 	_orientation = nOrientation;
 
-	if (_orientation < 0.)
-		_orientation += 360. + 360 * (int) (-_orientation / 360);
+	if (_orientation < 0.f)
+		_orientation += 360.f + 360 * (int) (-_orientation / 360);
 	else
-		_orientation -= 360. * (int) (_orientation / 360);
+		_orientation -= 360.f * (int) (_orientation / 360);
 }
 
 void igElement::draw() const {

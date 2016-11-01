@@ -10,21 +10,23 @@
 #include <cstdlib>
 #include <ctime>
 
-#define CHUNK_BEGIN_X 12
-#define CHUNK_BEGIN_Y 23
+#define CHUNK_BEGIN_X 13
+#define CHUNK_BEGIN_Y 13
 
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
 
 Game::Game() :
   _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
-  _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag") {}
+  _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
+  _hmapTransitionShader("src/shaders/terrainTexTransitions.vert", "src/shaders/terrainTexTransitions.frag") {}
 
 void Game::init() {
   srand(time(NULL));
 
   _hmapShader.load();
   _igEShader.load();
+  _hmapTransitionShader.load();
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _treeTexManager.    load("res/trees/");
@@ -85,11 +87,7 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
         if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
 
 
-        else if (_map.getClosestCenter(sf::Vector2f(tmp.x * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2f(tmp.x * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2f((tmp.x+1) * CHUNK_SIZE, tmp.y * CHUNK_SIZE))->biome == OCEAN &&
-                 _map.getClosestCenter(sf::Vector2f((tmp.x+1) * CHUNK_SIZE, (tmp.y+1) * CHUNK_SIZE))->biome == OCEAN) {
-
+        else if (_map.isOcean(tmp.x, tmp.y)) {
           _terrain[tmp.x][tmp.y] = std::unique_ptr<Chunk>(new Ocean(tmp.x, tmp.y, _terrainTexManager.getTexID(OCEAN)));
           _chunkStatus[tmp.x][tmp.y] = EDGE;
         }
@@ -159,6 +157,11 @@ void Game::update(sf::Time elapsed) {
     int chunkPosX = _igElements[i]->getPos().x / CHUNK_SIZE;
     int chunkPosY = _igElements[i]->getPos().y / CHUNK_SIZE;
 
+    if (chunkPosX == NB_CHUNKS)
+      chunkPosX--;
+    if (chunkPosY == NB_CHUNKS)
+      chunkPosY--;
+
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
       // No test yet to see if the element can move to its new pos (no collision)
@@ -170,20 +173,20 @@ void Game::update(sf::Time elapsed) {
       glm::vec3 corners3[4];
       float width = _igElements[i]->getSize().x;
 
-      corners3[0] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[0] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.f)*width/2,
+                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.f)*width/2,
                                 newHeight + _igElements[i]->getSize().y);
 
-      corners3[1] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[1] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.f)*width/2,
+                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.f)*width/2,
                                 newHeight + _igElements[i]->getSize().y);
 
-      corners3[2] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[2] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.f)*width/2,
+                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.f)*width/2,
                                 newHeight);
 
-      corners3[3] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.)*width/2,
-                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.)*width/2,
+      corners3[3] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.f)*width/2,
+                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.f)*width/2,
                                 newHeight);
 
 
@@ -222,11 +225,12 @@ void Game::render() const {
 
   // Heightmap
 
-  glUseProgram(_hmapShader.getProgramID());
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] == VISIBLE) {
+        glUseProgram(_hmapShader.getProgramID());
+
         glm::mat4 modelview = glm::translate(glm::mat4(1.f),
           glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
         );
@@ -235,6 +239,17 @@ void Game::render() const {
 
         _terrain[i][j]->draw();
 
+        Heightmap* hmap;
+        if (hmap = dynamic_cast<Heightmap*>(_terrain[i][j].get())) {
+          glDisable(GL_DEPTH_TEST);
+          glEnable (GL_BLEND);
+          glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glUseProgram(_hmapTransitionShader.getProgramID());
+          _hmapTransitionShader.sendModelMatrix(modelview);
+          hmap->drawTransitions();
+          glDisable(GL_BLEND);
+          glEnable(GL_DEPTH_TEST);
+        }
       }
     }
   }
@@ -399,7 +414,7 @@ sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
   glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
-    glm::mat4(1.), cam.getViewProjectionMatrix(),
+    glm::mat4(1.f), cam.getViewProjectionMatrix(),
     glm::vec4(0,0, cam.getW(), cam.getH()));
 
   return sf::Vector2f( modelCoord.x, modelCoord.y);

@@ -70,6 +70,7 @@ private:
 	TexManager _terrainTexManager;
 	TreeTexManager _treeTexManager;
 	Shader _hmapShader;
+  Shader _hmapTransitionShader;
   Shader _igEShader;
 
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;

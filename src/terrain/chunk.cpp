@@ -39,10 +39,10 @@ void Chunk::computeCulling() {
 
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
-  float alpha = cam.getFov() * cam.getRatio() / 2.;
+  float alpha = cam.getFov() * cam.getRatio() / 2.f;
 
   // Bottom of the view
-  sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - cam.getFov() / 2.);
+  sf::Vector3f norm = vu::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
   sf::Vector3f pos = cam.getPos();
 
   if (compareToPoints(pos,norm,_corners) == 1) {
@@ -51,7 +51,7 @@ void Chunk::computeCulling() {
   }
 
   // Top
-  norm = vu::carthesian(1., theta, phi + 90. + cam.getFov() / 2.);
+  norm = vu::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f);
   norm *= -1.f;
 
   if (compareToPoints(pos,norm,_corners) == 1) {
@@ -60,9 +60,9 @@ void Chunk::computeCulling() {
   }
 
   // Right
-  norm = vu::carthesian(1., theta + 90.f, 90.f);
+  norm = vu::carthesian(1.f, theta + 90.f, 90.f);
   vu::Mat3f rot;
-  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), - alpha);
+  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), - alpha);
   norm = rot.multiply(norm);
 
   if (compareToPoints(pos,norm,_corners) == 1) {
@@ -71,8 +71,8 @@ void Chunk::computeCulling() {
   }
 
   // Left
-  norm = vu::carthesian(1., theta - 90.f, 90.f);
-  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), alpha);
+  norm = vu::carthesian(1.f, theta - 90.f, 90.f);
+  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), alpha);
   norm = rot.multiply(norm);
 
   if (compareToPoints(pos,norm,_corners) == 1) {

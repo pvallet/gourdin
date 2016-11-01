@@ -19,7 +19,7 @@ void Camera::resize(unsigned int W, unsigned int H) {
 
 	glViewport (0, 0, (GLint)W, (GLint)H);
   _aspectRatio = static_cast<float>(W)/static_cast<float>(H);
-  float fovAngleRadians = 45 * M_PI / 180.;
+  float fovAngleRadians = 45 * M_PI / 180.f;
   _projection = glm::perspective(fovAngleRadians, _aspectRatio, _nearPlane, _farPlane);
 
   _viewProjection = _projection * _view;
@@ -31,7 +31,7 @@ void Camera::apply() {
   _view = glm::lookAt (
 	  vu::convertGLM(_pos),
     glm::vec3(_x, _y, _height),
-    vu::convertGLM(vu::carthesian(1., _theta, _phi + _fovAngle/2. - 90.))
+    vu::convertGLM(vu::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f))
   );
 
   _viewProjection = _projection * _view;

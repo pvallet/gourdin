@@ -6,7 +6,7 @@
 
 igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics) :
 	igElement(position),
-	_speed(0.),
+	_speed(0.f),
 	_moving(false),
 	_dead(false),
 	_graphics(graphics) {
@@ -41,7 +41,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 	igElement::update(elapsed, theta);
 
 	if (!_dead) {
-		if (_direction.x != 0. || _direction.y != 0.) {
+		if (_direction.x != 0.f || _direction.y != 0.f) {
 			float ori = vu::angle(sf::Vector2f(1.0f,0.0f), _direction);
 			setOrientation(ori - _camOrientation);
 
@@ -69,7 +69,7 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 
 void igMovingElement::die() {
 	launchAnimation(DIE);
-	_speed = 0.;
+	_speed = 0.f;
 	_moving = false;
 	_dead = true;
 	_graphics.die();

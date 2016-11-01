@@ -6,7 +6,7 @@ set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
 # set (CMAKE_CXX_STANDARD 11)
 
-set(extra_flags "-std=c++11 -O3")
+set(extra_flags "-std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${extra_flags}")
 
 add_definitions(-D_USE_MATH_DEFINES)

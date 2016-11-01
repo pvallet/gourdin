@@ -60,7 +60,7 @@ sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) {
 
 int AnimationManager::getClosestOrient(float orientation) {
 
-  float oriStep = 360. / (float) _animInfo[_currentAnim].orientations;
+  float oriStep = 360.f / (float) _animInfo[_currentAnim].orientations;
 
   return (_animInfo[_currentAnim].orientations - (int) std::round(orientation / oriStep)) % 8;
 }

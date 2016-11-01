@@ -51,7 +51,7 @@ public:
   }
 
   inline void rotation(sf::Vector3f n, float angle) {
-    angle *= M_PI / 180.;
+    angle *= M_PI / 180.f;
     m[0]=1+(1-cos(angle))*(n.x*n.x-1);            m[3]=-n.z*sin(angle)+(1-cos(angle))*n.x*n.y; m[6]=n.y*sin(angle)+(1-cos(angle))*n.x*n.z;
     m[1]=n.z*sin(angle)+(1-cos(angle))*n.x*n.y;   m[4]=1+(1-cos(angle))*(n.y*n.y-1);           m[7]=-n.x*sin(angle)+(1-cos(angle))*n.y*n.z;
     m[2]=-n.y*sin(angle)+(1-cos(angle))*n.x*n.z;  m[5]=n.x*sin(angle)+(1-cos(angle))*n.y*n.y;  m[8]=1+(1-cos(angle))*(n.z*n.z-1);

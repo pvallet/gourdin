@@ -8,8 +8,7 @@
 #include "vecUtils.h"
 
 #define DEFAULT_CHUNK_SUBD 33 // +1 to join with other chunks
-#define HEIGHT_FACTOR 1000.
-#define SMOOTH_RANGE 20. // Percentage
+#define HEIGHT_FACTOR 1000.f
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
@@ -29,11 +28,20 @@ Heightmap::Heightmap(size_t x, size_t y, const TexManager& terrainTexManager, co
 	_normals .resize(3*_size*_size);
 }
 
-void Heightmap::getMapInfo() {
+Heightmap::~Heightmap() {
+	for (auto it = _transitionData.begin(); it != _transitionData.end(); it++) {
+		glDeleteBuffers(1,&(it->second.vbo));
+		glDeleteBuffers(1,&(it->second.ibo));
+	}
+}
+
+std::vector<std::vector<Biome> > Heightmap::getMapInfo() {
 	size_t size1 = _size-1;
 	float step =  CHUNK_SIZE / (float) size1;
 
   Center* tmpRegions[_size][_size];
+	std::vector<Biome> initBiome(_size);
+	std::vector<std::vector<Biome> > biomes(_size, initBiome);
 
   float x, x1, x2, x3;
   float y, y1, y2, y3;
@@ -83,29 +91,14 @@ void Heightmap::getMapInfo() {
 					currentAdjacentCenter++;
 				}
 			} while (tryNextAdjacentCenter);
+			biomes[i][j] = tmpRegions[i][j]->biome;
       y += step;
     }
 
     x += step;
   }
 
-
-  for (size_t i = 0 ; i < size1 ; i++) {
-    for (size_t j = 0 ; j < size1 ; j++) {
-			// Set the indices for the two triangles that will constitute a square which
-			// top left corner will be of position (i,j)
-
-      std::vector<GLuint>& currentIndices = _indices[tmpRegions[i][j]->biome];
-
-      currentIndices.push_back( 		i*_size + j);
-      currentIndices.push_back( (i+1)*_size + j);
-      currentIndices.push_back( 		i*_size + j+1);
-
-			currentIndices.push_back( 		i*_size + j+1);
-      currentIndices.push_back( (i+1)*_size + j);
-      currentIndices.push_back( (i+1)*_size + j+1);
-    }
-  }
+	return biomes;
 }
 
 void Heightmap::fillBufferData() {
@@ -169,17 +162,121 @@ void Heightmap::fillBufferData() {
   }
 }
 
-void Heightmap::generateBuffers() {
+void Heightmap::addPointToTransitionData(Biome biome, size_t i, size_t j, float distance) {
+	// Copy info from generated map
+	for (size_t k = 0; k < 3; k++) {
+		_transitionData[biome].vertices.push_back(_vertices[3*i*_size + 3*j + k]);
+		_transitionData[biome].normals.push_back(_normals[3*i*_size + 3*j + k]);
+	}
+	for (size_t k = 0; k < 2; k++) {
+		_transitionData[biome].coord.push_back(_coord[2*i*_size + 2*j + k]);
+	}
+
+	_transitionData[biome].distances.push_back(distance / TERRAIN_TEX_TRANSITION_SIZE / 2 + 0.5);
+}
+
+// Fill vertices, tex coord and normals that will be fed to the shader handling the transition between textures
+std::vector<std::vector<bool> > Heightmap::computeTransitionData() {
+	size_t size1 = _size - 1;
+	float step =  CHUNK_SIZE / (float) size1;
+	std::vector<bool> initPlainTexture(size1,true);
+	std::vector<std::vector<bool> > plainTexture(size1,initPlainTexture);
+
+	std::set<Edge*> edgesInChunk = _map.getEdgesInChunk(_chunkPos.x, _chunkPos.y);
+
+	sf::Vector2f chunkCoord(CHUNK_SIZE*_chunkPos.x, CHUNK_SIZE*_chunkPos.y);
+
+	for (auto edge = edgesInChunk.begin(); edge != edgesInChunk.end(); edge++) {
+		for (size_t i = std::max(0,     (int)    (((*edge)->beginX - chunkCoord.x) / step));
+						    i < std::min(size1, (size_t) (((*edge)->endX   - chunkCoord.x) / step)); i++) {
+		for (size_t j = std::max(0,     (int)    (((*edge)->beginY - chunkCoord.y) / step));
+		            j < std::min(size1, (size_t) (((*edge)->endY   - chunkCoord.y) / step)); j++) {
+
+			size_t currentI[4] = {i, i+1, i, i+1};
+			size_t currentJ[4] = {j, j, j+1, j+1};
+
+			sf::Vector2f pointCoord[4];
+			float distance[4];
+
+			for (size_t k = 0; k < 4; k++) {
+				pointCoord[k] = sf::Vector2f(chunkCoord.x + step * currentI[k], chunkCoord.y + step * currentJ[k]);
+				distance[k] = (*edge)->getDistanceToEdge(pointCoord[k]);
+
+				if (distance[k] <= TERRAIN_TEX_TRANSITION_SIZE)
+					plainTexture[i][j] = false;
+			}
+
+			if (!plainTexture[i][j]) {
+				for (size_t k = 0; k < 4; k++) {
+					if ((*edge)->isOnSameSideAsCenter0(pointCoord[k])) {
+						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], distance[k]);
+						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], -distance[k]);
+					}
+
+					else {
+						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], -distance[k]);
+						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], distance[k]);
+					}
+				}
+			}
+		}
+		}
+	}
+
+	return plainTexture;
+}
+
+void Heightmap::computeIndices(const std::vector<std::vector<Biome> >& biomes,
+	                             const std::vector<std::vector<bool> >& isPlainTexture) {
+
+	// Plain texture indices
+	for (size_t i = 0 ; i < _size-1 ; i++) {
+		for (size_t j = 0 ; j < _size-1 ; j++) {
+			if (isPlainTexture[i][j]) {
+				// Set the indices for the two triangles that will constitute a square which
+				// top left corner will be of position (i,j)
+
+				std::vector<GLuint>& currentIndices = _indicesPlainTexture[biomes[i][j]];
+
+				currentIndices.push_back( 		i*_size + j);
+				currentIndices.push_back( (i+1)*_size + j);
+				currentIndices.push_back( 		i*_size + j+1);
+
+				currentIndices.push_back( 		i*_size + j+1);
+				currentIndices.push_back( (i+1)*_size + j);
+				currentIndices.push_back( (i+1)*_size + j+1);
+			}
+		}
+	}
+
+	// Indices for transition between textures
+	// The vertices are stored forming squares, with duplicates. We only need to join them:
+	// 0 --- 2
+	// |     |  yields 0 1 2 2 1 3
+	// 1 --- 3
+	for (auto it = _transitionData.begin(); it != _transitionData.end(); it++) {
+		for (size_t i = 0; i < it->second.vertices.size() / 3; i+=4) {
+			it->second.indices.push_back(i);
+			it->second.indices.push_back(i+1);
+			it->second.indices.push_back(i+2);
+			it->second.indices.push_back(i+2);
+			it->second.indices.push_back(i+1);
+			it->second.indices.push_back(i+3);
+		}
+	}
+}
+
+void Heightmap::generateBuffersPlain() {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 	size_t bufferSizeVertices = _vertices.size()*sizeof _vertices[0];
-	size_t bufferSizeCoord		= _coord.size()*sizeof _coord[0];
-	size_t bufferSizeNormals	= _normals.size()*sizeof _normals[0];
+	size_t bufferSizeCoord		= _coord.   size()*sizeof _coord[0];
+	size_t bufferSizeNormals	= _normals. size()*sizeof _normals[0];
 
   glBufferData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeCoord + bufferSizeNormals, NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices, &_vertices[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, bufferSizeVertices, bufferSizeCoord, &_coord[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeCoord, bufferSizeNormals, &_normals[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices , &_vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices , bufferSizeCoord, &_coord[0]);
+  glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices + bufferSizeCoord, bufferSizeNormals, &_normals[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -188,7 +285,7 @@ void Heightmap::generateBuffers() {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6*(_size-1)*(_size-1) * sizeof(GLuint), NULL, GL_STATIC_DRAW);
 
   int cursor = 0;
-  for (auto it = _indices.begin(); it != _indices.end() ; ++it ) {
+  for (auto it = _indicesPlainTexture.begin(); it != _indicesPlainTexture.end() ; ++it ) {
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, cursor, it->second.size() * sizeof(GLuint), &(it->second[0]));
     cursor += it->second.size() * sizeof(GLuint);
   }
@@ -198,11 +295,42 @@ void Heightmap::generateBuffers() {
 	_glCheckError();
 }
 
+void Heightmap::generateBuffersTransition() {
+	for (auto it = _transitionData.begin(); it != _transitionData.end(); it++) {
+		glGenBuffers(1, &(it->second.vbo));
+		glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
+
+		size_t sizeVertices = it->second.vertices. size()*sizeof it->second.vertices[0];
+		size_t sizeCoord		= it->second.coord.    size()*sizeof it->second.coord[0];
+		size_t sizeNormals	= it->second.normals.  size()*sizeof it->second.normals[0];
+		size_t sizeDistances= it->second.distances.size()*sizeof it->second.distances[0];
+		size_t sizeIndices	= it->second.indices.  size()*sizeof it->second.indices[0];
+
+		glBufferData(GL_ARRAY_BUFFER, sizeVertices + sizeCoord + sizeNormals + sizeDistances, NULL, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeVertices , &(it->second.vertices[0]));
+		glBufferSubData(GL_ARRAY_BUFFER,    sizeVertices , sizeCoord , &(it->second.coord[0]));
+		glBufferSubData(GL_ARRAY_BUFFER,    sizeVertices + sizeCoord , sizeNormals , &(it->second.normals[0]));
+		glBufferSubData(GL_ARRAY_BUFFER,    sizeVertices + sizeCoord + sizeNormals , sizeDistances, &(it->second.distances[0]));
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		glGenBuffers(1, &(it->second.ibo));
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
+
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeIndices, NULL, GL_STATIC_DRAW);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeIndices, &(it->second.indices[0]));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		_glCheckError();
+	}
+}
+
 void Heightmap::computeLowestsHighests() {
 	size_t size1 = _size-1;
 	float step =  CHUNK_SIZE / (float) size1;
 	float minH = HEIGHT_FACTOR;
-	float maxH = 0.;
+	float maxH = 0.f;
   int iMin = 0;
   int iMax = 0;
 
@@ -222,7 +350,7 @@ void Heightmap::computeLowestsHighests() {
   _highests[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[0][iMax]);
 
 	minH = HEIGHT_FACTOR;
-	maxH = 0.;
+	maxH = 0.f;
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[size1][i] < minH) {
       iMin = i;
@@ -239,7 +367,7 @@ void Heightmap::computeLowestsHighests() {
   _highests[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE + iMax * step, _heights[size1][iMax]);
 
 	minH = HEIGHT_FACTOR;
-	maxH = 0.;
+	maxH = 0.f;
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][0] < minH) {
       iMin = i;
@@ -256,7 +384,7 @@ void Heightmap::computeLowestsHighests() {
   _highests[2] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE + iMax * step, _chunkPos.y * CHUNK_SIZE, _heights[iMax][0]);
 
 	minH = HEIGHT_FACTOR;
-	maxH = 0.;
+	maxH = 0.f;
   for (size_t i = 0 ; i < _size ; i++) {
     if (_heights[i][size1] < minH) {
       iMin = i;
@@ -277,11 +405,16 @@ void Heightmap::generate() {
   size_t size1 = _size-1;
 	float step =  CHUNK_SIZE / (float) size1;
 
-  getMapInfo();
+  std::vector<std::vector<Biome> > biomeInfo = getMapInfo();
 
-  fillBufferData();
+	fillBufferData();
 
-	generateBuffers();
+	std::vector<std::vector<bool> > plainTextureInfo = computeTransitionData();
+
+	computeIndices(biomeInfo, plainTextureInfo);
+
+	generateBuffersPlain();
+	generateBuffersTransition();
 
   _corners[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE, _heights[0][0]);
 	_corners[1] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE, _heights[size1][size1]);
@@ -307,7 +440,7 @@ void Heightmap::draw() const {
 	glEnableVertexAttribArray(2);
 
   int cursor = 0;
-  for (auto it = _indices.begin(); it != _indices.end() ; ++it ) {
+  for (auto it = _indicesPlainTexture.begin(); it != _indicesPlainTexture.end() ; ++it ) {
     _terrainTexManager.bindTexture(it->first);
 
     glDrawElements(GL_TRIANGLES, it->second.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(cursor));
@@ -322,6 +455,46 @@ void Heightmap::draw() const {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Heightmap::drawTransitions() const {
+	for (auto it = _transitionData.begin(); it != _transitionData.end(); it++) {
+		_terrainTexManager.bindTexture(it->first);
+
+		glBindBuffer(GL_ARRAY_BUFFER, it->second.vbo);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(it->second.vertices.size()*sizeof it->second.vertices[0]));
+
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(it->second.vertices.size()*sizeof it->second.vertices[0] +
+			              it->second.coord.   size()*sizeof it->second.coord[0]));
+
+		glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0,
+			BUFFER_OFFSET(it->second.vertices.size()*sizeof it->second.vertices[0] +
+			              it->second.coord.   size()*sizeof it->second.coord[0] +
+									  it->second.normals. size()*sizeof it->second.normals[0]));
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
+
+		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(3);
+
+		glDrawElements(GL_TRIANGLES, it->second.indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		glDisableVertexAttribArray(3);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 void Heightmap::saveToImage() const {
@@ -351,10 +524,10 @@ void Heightmap::computeCulling() {
 
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
-  float alpha = cam.getFov() * cam.getRatio() / 2.;
+  float alpha = cam.getFov() * cam.getRatio() / 2.f;
 
   // Bottom of the view
-  sf::Vector3f norm = vu::carthesian(1., theta, phi + 90. - cam.getFov() / 2.);
+  sf::Vector3f norm = vu::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
   sf::Vector3f pos = cam.getPos();
 
   if (compareToPoints(pos,norm,_corners) == 1 &&
@@ -364,7 +537,7 @@ void Heightmap::computeCulling() {
   }
 
   // Top
-  norm = vu::carthesian(1., theta, phi + 90. + cam.getFov() / 2.);
+  norm = vu::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f);
   norm *= -1.f;
 
   if (compareToPoints(pos,norm,_corners) == 1 &&
@@ -374,9 +547,9 @@ void Heightmap::computeCulling() {
   }
 
   // Right
-  norm = vu::carthesian(1., theta + 90.f, 90.f);
+  norm = vu::carthesian(1.f, theta + 90.f, 90.f);
   vu::Mat3f rot;
-  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), - alpha);
+  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), - alpha);
   norm = rot.multiply(norm);
 
   if (compareToPoints(pos,norm,_corners) == 1) {
@@ -385,8 +558,8 @@ void Heightmap::computeCulling() {
   }
 
   // Left
-  norm = vu::carthesian(1., theta - 90.f, 90.f);
-  rot.rotation(vu::carthesian(1., theta + 180., 90.f - phi), alpha);
+  norm = vu::carthesian(1.f, theta - 90.f, 90.f);
+  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), alpha);
   norm = rot.multiply(norm);
 
   if (compareToPoints(pos,norm,_corners) == 1) {

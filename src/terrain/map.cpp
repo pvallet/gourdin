@@ -6,10 +6,32 @@
 #include <iostream>
 #include <sstream>
 
-#include "vecUtils.h"
 
 // The coordinates system in the XML file ends at MAP_MAX_COORD
-#define MAP_MAX_COORD 600.
+#define MAP_MAX_COORD 600.f
+
+float Edge::getDistanceToEdge(sf::Vector2f pos) {
+	sf::Vector2f a(corner1->x - corner0->x, corner1->y - corner0->y);
+  sf::Vector2f b(pos.x      - corner0->x, pos.y      - corner0->y);
+
+  float ab = vu::dot(a,b);
+
+  if (ab <= 0)
+    return vu::norm(b);
+  else {
+    float aa = vu::dot(a,a);
+    if (ab < aa) {
+      sf::Vector2f g = b - ab/aa * a;
+      return vu::norm(g);
+    }
+    else
+      return vu::norm(sf::Vector2f(pos.x - corner1->x, pos.y - corner1->y));
+  }
+}
+
+bool Edge::isOnSameSideAsCenter0(sf::Vector2f pos) const {
+	return (vu::dot(normalToCenter0, pos-sf::Vector2f(corner0->x, corner0->y)) >= 0);
+}
 
 void Map::loadCenters(const TiXmlHandle& hRoot) {
 	TiXmlElement *elem, *elem2;
@@ -63,7 +85,7 @@ void Map::loadCenters(const TiXmlHandle& hRoot) {
 		}
 
 		center.centers.resize(center.centerIDs.size());
-		center.edges.  resize(center.edgeIDs.size());
+		center.edges.  resize(center.edgeIDs.  size());
 		center.corners.resize(center.cornerIDs.size());
 
 		_centers[center.id] = std::unique_ptr<Center>(new Center(center));
@@ -83,8 +105,8 @@ void Map::loadEdges(const TiXmlHandle& hRoot) {
 		// If the edge touches the edge of the map, there are no ends
 		if (elem->QueryFloatAttribute("x", &edge.x) == TIXML_NO_ATTRIBUTE) {
 			edge.mapEdge = true;
-			edge.x = 0.;
-			edge.y = 0.;
+			edge.x = 0.f;
+			edge.y = 0.f;
 		}
 
 		else {
@@ -207,6 +229,10 @@ void Map::setPointersInDataStructures() {
 void Map::sortCenters(float tolerance) {
 	_centersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
 
+	for (auto it = _centersInChunks.begin(); it != _centersInChunks.end(); it++) {
+		it->isOcean = true;
+	}
+
 	for (size_t i = 0; i < _centers.size(); i++) {
 		for (size_t j = std::max(0,         (int) ((_centers[i]->x - tolerance) / CHUNK_SIZE));
 								j < std::min(NB_CHUNKS, (int) ((_centers[i]->x + tolerance) / CHUNK_SIZE) + 1); j++) {
@@ -214,6 +240,9 @@ void Map::sortCenters(float tolerance) {
 								k < std::min(NB_CHUNKS, (int) ((_centers[i]->y + tolerance) / CHUNK_SIZE) + 1); k++) {
 
 			_centersInChunks[j*NB_CHUNKS + k].centers.push_back(_centers[i].get());
+
+			if (_centers[i]->biome != OCEAN)
+				_centersInChunks[j*NB_CHUNKS + k].isOcean = false;
 		}
 		}
 	}
@@ -234,6 +263,47 @@ void Map::sortCenters(float tolerance) {
 			new flann::Index<flann::L2<float> >(it->dataset, flann::KDTreeIndexParams(4)));
 
 		it->kdIndex->buildIndex();
+	}
+}
+
+void Map::computeEdgeBoundingBoxes() {
+	for (size_t i = 0; i < _edges.size(); i++) {
+		if (!_edges[i]->mapEdge) {
+			_edges[i]->beginX = std::min(_edges[i]->corner0->x, _edges[i]->corner1->x) - TERRAIN_TEX_TRANSITION_SIZE;
+			_edges[i]->endX   = std::max(_edges[i]->corner0->x, _edges[i]->corner1->x) + TERRAIN_TEX_TRANSITION_SIZE;
+			_edges[i]->beginY = std::min(_edges[i]->corner0->y, _edges[i]->corner1->y) - TERRAIN_TEX_TRANSITION_SIZE;
+			_edges[i]->endY   = std::max(_edges[i]->corner0->y, _edges[i]->corner1->y) + TERRAIN_TEX_TRANSITION_SIZE;
+
+			sf::Vector2f edge(     _edges[i]->corner1->x - _edges[i]->corner0->x,
+				                     _edges[i]->corner1->y - _edges[i]->corner0->y);
+			sf::Vector2f toCenter0(_edges[i]->center0->x - _edges[i]->corner0->x,
+				                     _edges[i]->center0->y - _edges[i]->corner0->y);
+
+			sf::Vector2f project = (vu::dot(edge,toCenter0)/(float) pow(vu::norm(edge),2)) * edge;
+
+			_edges[i]->normalToCenter0 = toCenter0 - project;
+		}
+	}
+
+}
+
+void Map::sortEdges() {
+	_edgesInChunks.resize(NB_CHUNKS*NB_CHUNKS);
+
+	for (auto e = _edges.begin(); e != _edges.end(); e++) {
+		if (!(*e)->mapEdge) {
+			// We only need the edges that are a border between two different biomes
+			if ((*e)->center0->biome != (*e)->center1->biome) {
+				for (size_t i = std::max(0,         (int) ((*e)->beginX / CHUNK_SIZE));
+										i < std::min(NB_CHUNKS, (int) ((*e)->endX   / CHUNK_SIZE) + 1); i++) {
+				for (size_t j = std::max(0,         (int) ((*e)->beginY / CHUNK_SIZE));
+										j < std::min(NB_CHUNKS, (int) ((*e)->endY   / CHUNK_SIZE) + 1); j++) {
+
+					_edgesInChunks[i*NB_CHUNKS + j].insert(e->get());
+				}
+				}
+			}
+		}
 	}
 }
 
@@ -290,6 +360,8 @@ void Map::load(std::string path) {
 	setPointersInDataStructures();
 
 	sortCenters(1.2*CHUNK_SIZE);
+	computeEdgeBoundingBoxes();
+	sortEdges();
 }
 
 bool Map::boolAttrib(std::string str) const {

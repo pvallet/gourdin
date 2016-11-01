@@ -68,9 +68,9 @@ float Perlin::smooth_noise(float x, float y, int octave) const {
 
 
 float Perlin::getValue(float x, float y) const {
-  float r = 0.;
+  float r = 0.f;
   float f = _frequency;
-  float amplitude = 1.;
+  float amplitude = 1.f;
 
   for (size_t i = 0; i < _octaves; i++) {
     r += smooth_noise(x * f, y * f, i) * amplitude;
@@ -78,7 +78,7 @@ float Perlin::getValue(float x, float y) const {
     f *= 2;
   }
 
-  float geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.
+  float geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.f
 
   return r * geo_lim;
 }

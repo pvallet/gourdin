@@ -8,9 +8,9 @@
 
 #include <cmath>
 
-#define RAD M_PI / 180.
+#define RAD M_PI / 180.f
 
-#define INIT_R 150.
+#define INIT_R 150.f
 
 class Controller;
 class Game;
@@ -44,8 +44,8 @@ private:
 
 	void resize(unsigned int W, unsigned int H);
 
-	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.)*RAD)+dWinY*sin((_theta+90.)*RAD);
-																										_y +=	dWinX*sin((_theta+90.)*RAD)-dWinY*cos((_theta+90.)*RAD);}
+	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.f)*RAD)+dWinY*sin((_theta+90.f)*RAD);
+																										_y +=	dWinX*sin((_theta+90.f)*RAD)-dWinY*cos((_theta+90.f)*RAD);}
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
 	inline void zoom (float dr) {_r += dr;}
 	void apply ();
