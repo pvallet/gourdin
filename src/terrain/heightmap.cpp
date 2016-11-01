@@ -208,14 +208,33 @@ std::vector<std::vector<bool> > Heightmap::computeTransitionData() {
 
 			if (!plainTexture[i][j]) {
 				for (size_t k = 0; k < 4; k++) {
+					bool invertedBiomes;
+					Biome firstBiome, secondBiome;
+					// The first biome should have alpha = 1 to avoid blending with the background
+					if ((*edge)->center0->biome <= (*edge)->center1->biome) {
+						firstBiome  = (*edge)->center0->biome;
+						secondBiome = (*edge)->center1->biome;
+						invertedBiomes = false;
+					} else {
+						firstBiome  = (*edge)->center1->biome;
+						secondBiome = (*edge)->center0->biome;
+						invertedBiomes = true;
+					}
+
+					addPointToTransitionData(firstBiome, currentI[k],currentJ[k], TERRAIN_TEX_TRANSITION_SIZE);
+
 					if ((*edge)->isOnSameSideAsCenter0(pointCoord[k])) {
-						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], distance[k]);
-						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], -distance[k]);
+						if (invertedBiomes)
+							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], distance[k]);
+						else
+							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], -distance[k]);
 					}
 
 					else {
-						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], -distance[k]);
-						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], distance[k]);
+						if (invertedBiomes)
+							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], -distance[k]);
+						else
+							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], distance[k]);
 					}
 				}
 			}
