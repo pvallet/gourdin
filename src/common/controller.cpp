@@ -335,7 +335,5 @@ void Controller::run() {
     cam.apply();
     _game.update(_elapsed);
     render();
-
-    _glCheckError();
   }
 }

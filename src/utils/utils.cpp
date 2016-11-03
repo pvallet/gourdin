@@ -6,8 +6,10 @@
 #include <iostream>
 #include <string>
 
-void _check_gl_error(const char *file, int line) {
+bool _check_gl_error(const char *file, int line) {
   GLenum err (glGetError());
+
+  bool isError = false;
 
   while(err != GL_NO_ERROR) {
     std::string error;
@@ -24,5 +26,8 @@ void _check_gl_error(const char *file, int line) {
 
     std::cerr << "GL_" << error << " - " << file << ":" << line << std::endl;
     err = glGetError();
+    isError = true;
   }
+
+  return isError;
 }

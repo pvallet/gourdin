@@ -13,7 +13,9 @@
 igElement::igElement(sf::Vector2f position) :
 	_pos(position),
 	_camOrientation(0.f),
-	_visible(false) {
+	_visible(false),
+	_vbo(0),
+	_ibo(0) {
 
 	_orientation = RANDOMF * 360.f;
 
@@ -76,8 +78,6 @@ void igElement::set3DCorners(glm::vec3 nCorners[4]) {
   glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	_glCheckError();
 }
 
 void igElement::setOrientation(float nOrientation) {

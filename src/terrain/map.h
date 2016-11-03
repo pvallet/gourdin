@@ -109,9 +109,12 @@ public:
 	void load(std::string path);
 
 	Center* getClosestCenter(sf::Vector2f pos) const;
-	std::vector<Center*> getCentersInChunk(size_t x, size_t y) const;
-	inline std::set<Edge*> getEdgesInChunk(size_t x, size_t y) const {
+	std::vector<Center*>               getCentersInChunk(size_t x, size_t y) const;
+	inline const std::set<Edge*>&      getEdgesInChunk  (size_t x, size_t y) const {
 		return _edgesInChunks[x*NB_CHUNKS + y];
+	}
+	inline const std::vector<Corner*>& getCornersInChunk(size_t x, size_t y) const {
+		return _cornersInChunks[x*NB_CHUNKS + y];
 	}
 
 	inline bool isOcean(size_t x, size_t y) const {
@@ -126,6 +129,7 @@ private:
 	void sortCenters(float tolerance);
 	void computeEdgeBoundingBoxes();
 	void sortEdges();
+	void sortCorners();
 	bool boolAttrib(std::string str) const;
 	Biome biomeAttrib(std::string str) const;
 
@@ -134,8 +138,9 @@ private:
 	std::vector<std::unique_ptr<Corner> > _corners;
 
 	// Contains the centers that are near to a given chunk. The chunks are sorted
-	// as chunk.x * NB_CHUNKS + chunk.y
+	// as chunk.x * NB_CHUNKS + chunk.y with tolerance computed by computeCenterToleranceToChunk
 	std::vector<CentersInChunk> _centersInChunks;
-	// Contains the edges that have at least one corner in the chunk
+	// Contains the edges that intersect the chunk with tolerance TERRAIN_TEX_TRANSITION_SIZE
 	std::vector<std::set<Edge*> > _edgesInChunks;
+	std::vector<std::vector<Corner*> > _cornersInChunks;
 };

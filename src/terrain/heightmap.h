@@ -42,7 +42,9 @@ private:
 	void fillBufferData();
 
 	void addPointToTransitionData(Biome biome, size_t i, size_t j, float distance);
+	void correctDistance(Biome biome, size_t k, float distance);
 	std::vector<std::vector<bool> > computeTransitionData();
+	void computeJoints();
 	void computeIndices(const std::vector<std::vector<Biome> >& biomes,
 		                  const std::vector<std::vector<bool> >& isPlainTexture);
 

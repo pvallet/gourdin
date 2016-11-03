@@ -17,10 +17,12 @@ float Edge::getDistanceToEdge(sf::Vector2f pos) {
   float ab = vu::dot(a,b);
 
   if (ab <= 0)
+	// if (false)
     return vu::norm(b);
   else {
     float aa = vu::dot(a,a);
     if (ab < aa) {
+		// if (true) {
       sf::Vector2f g = b - ab/aa * a;
       return vu::norm(g);
     }
@@ -307,6 +309,21 @@ void Map::sortEdges() {
 	}
 }
 
+void Map::sortCorners() {
+	_cornersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
+
+	for (size_t i = 0; i < _corners.size(); i++) {
+		for (size_t j = std::max(0,         (int) ((_corners[i]->x - TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE));
+								j < std::min(NB_CHUNKS, (int) ((_corners[i]->x + TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE) + 1); j++) {
+		for (size_t k = std::max(0,         (int) ((_corners[i]->y - TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE));
+								k < std::min(NB_CHUNKS, (int) ((_corners[i]->y + TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE) + 1); k++) {
+
+			_cornersInChunks[j*NB_CHUNKS + k].push_back(_corners[i].get());
+		}
+		}
+	}
+}
+
 void Map::load(std::string path) {
 	std::ostringstream xmlPath;
   xmlPath << path << "map.xml";
@@ -362,6 +379,7 @@ void Map::load(std::string path) {
 	sortCenters(1.2*CHUNK_SIZE);
 	computeEdgeBoundingBoxes();
 	sortEdges();
+	sortCorners();
 }
 
 bool Map::boolAttrib(std::string str) const {

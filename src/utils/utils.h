@@ -6,7 +6,7 @@
 #define NB_CHUNKS 50
 #define MAX_COORD (CHUNK_SIZE*NB_CHUNKS)
 
-#define TERRAIN_TEX_TRANSITION_SIZE 30.
+#define TERRAIN_TEX_TRANSITION_SIZE 20.
 
 #define NB_BIOMES 20
 
@@ -20,6 +20,6 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			NO_DEFINED_BIOME
 		};
 
-void _check_gl_error(const char *file, int line);
+bool _check_gl_error(const char *file, int line);
 
 #define _glCheckError() _check_gl_error(__FILE__,__LINE__)

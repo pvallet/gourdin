@@ -57,6 +57,9 @@ std::vector<std::vector<Biome> > Heightmap::getMapInfo() {
 			bool tryNextAdjacentCenter = true;
 			size_t currentAdjacentCenter = 0;
 			do {
+				if (currentAdjacentCenter == currentCenter->centers.size())
+					tryNextAdjacentCenter = false;
+
 				x1 = tmpRegions[i][j]->x;
 	      y1 = tmpRegions[i][j]->y;
 
@@ -175,66 +178,75 @@ void Heightmap::addPointToTransitionData(Biome biome, size_t i, size_t j, float 
 	_transitionData[biome].distances.push_back(distance / TERRAIN_TEX_TRANSITION_SIZE / 2 + 0.5);
 }
 
+void Heightmap::correctDistance(Biome biome, size_t k, float distance) {
+	_transitionData[biome].distances.end()[-4+k] = std::min(
+	_transitionData[biome].distances.end()[-4+k],
+	(float) (distance / TERRAIN_TEX_TRANSITION_SIZE / 2 + 0.5));
+}
+
 // Fill vertices, tex coord and normals that will be fed to the shader handling the transition between textures
 std::vector<std::vector<bool> > Heightmap::computeTransitionData() {
 	size_t size1 = _size - 1;
 	float step =  CHUNK_SIZE / (float) size1;
 	std::vector<bool> initPlainTexture(size1,true);
-	std::vector<std::vector<bool> > plainTexture(size1,initPlainTexture);
+	std::vector<std::vector<bool> > isPlainTexture(size1,initPlainTexture);
 
-	std::set<Edge*> edgesInChunk = _map.getEdgesInChunk(_chunkPos.x, _chunkPos.y);
+	const std::set<Edge*>& edgesInChunk = _map.getEdgesInChunk(_chunkPos.x, _chunkPos.y);
 
 	sf::Vector2f chunkCoord(CHUNK_SIZE*_chunkPos.x, CHUNK_SIZE*_chunkPos.y);
 
 	for (auto edge = edgesInChunk.begin(); edge != edgesInChunk.end(); edge++) {
 		for (size_t i = std::max(0,     (int)    (((*edge)->beginX - chunkCoord.x) / step));
-						    i < std::min(size1, (size_t) (((*edge)->endX   - chunkCoord.x) / step)); i++) {
+						    i < std::min(size1, (size_t) (((*edge)->endX   - chunkCoord.x) / step)+1); i++) {
 		for (size_t j = std::max(0,     (int)    (((*edge)->beginY - chunkCoord.y) / step));
-		            j < std::min(size1, (size_t) (((*edge)->endY   - chunkCoord.y) / step)); j++) {
+		            j < std::min(size1, (size_t) (((*edge)->endY   - chunkCoord.y) / step)+1); j++) {
 
 			size_t currentI[4] = {i, i+1, i, i+1};
 			size_t currentJ[4] = {j, j, j+1, j+1};
 
 			sf::Vector2f pointCoord[4];
 			float distance[4];
+			bool isJoint = false;
 
 			for (size_t k = 0; k < 4; k++) {
 				pointCoord[k] = sf::Vector2f(chunkCoord.x + step * currentI[k], chunkCoord.y + step * currentJ[k]);
-				distance[k] = (*edge)->getDistanceToEdge(pointCoord[k]);
 
-				if (distance[k] <= TERRAIN_TEX_TRANSITION_SIZE)
-					plainTexture[i][j] = false;
+				if (vu::norm(pointCoord[k] - sf::Vector2f((*edge)->corner0->x, (*edge)->corner0->y)) <= TERRAIN_TEX_TRANSITION_SIZE ||
+				    vu::norm(pointCoord[k] - sf::Vector2f((*edge)->corner1->x, (*edge)->corner1->y)) <= TERRAIN_TEX_TRANSITION_SIZE) {
+					isJoint = true;
+					isPlainTexture[i][j] = false;
+					break;
+				}
+
+				else {
+					distance[k] = (*edge)->getDistanceToEdge(pointCoord[k]);
+
+					if (distance[k] <= TERRAIN_TEX_TRANSITION_SIZE)
+						isPlainTexture[i][j] = false;
+				}
 			}
 
-			if (!plainTexture[i][j]) {
+			if (!isPlainTexture[i][j] && !isJoint) {
 				for (size_t k = 0; k < 4; k++) {
-					bool invertedBiomes;
-					Biome firstBiome, secondBiome;
+					Biome firstBiome;
 					// The first biome should have alpha = 1 to avoid blending with the background
-					if ((*edge)->center0->biome <= (*edge)->center1->biome) {
+					if ((*edge)->center0->biome <= (*edge)->center1->biome)
 						firstBiome  = (*edge)->center0->biome;
-						secondBiome = (*edge)->center1->biome;
-						invertedBiomes = false;
-					} else {
+					else
 						firstBiome  = (*edge)->center1->biome;
-						secondBiome = (*edge)->center0->biome;
-						invertedBiomes = true;
-					}
-
-					addPointToTransitionData(firstBiome, currentI[k],currentJ[k], TERRAIN_TEX_TRANSITION_SIZE);
 
 					if ((*edge)->isOnSameSideAsCenter0(pointCoord[k])) {
-						if (invertedBiomes)
-							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], distance[k]);
-						else
-							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], -distance[k]);
+						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k],
+							(*edge)->center0->biome != firstBiome ? distance[k] : TERRAIN_TEX_TRANSITION_SIZE);
+						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k],
+							(*edge)->center1->biome != firstBiome ? - distance[k] : TERRAIN_TEX_TRANSITION_SIZE);
 					}
 
 					else {
-						if (invertedBiomes)
-							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], -distance[k]);
-						else
-							addPointToTransitionData(secondBiome, currentI[k],currentJ[k], distance[k]);
+						addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k],
+							(*edge)->center0->biome != firstBiome ? - distance[k] : TERRAIN_TEX_TRANSITION_SIZE);
+						addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k],
+							(*edge)->center1->biome != firstBiome ? distance[k] : TERRAIN_TEX_TRANSITION_SIZE);
 					}
 				}
 			}
@@ -242,7 +254,107 @@ std::vector<std::vector<bool> > Heightmap::computeTransitionData() {
 		}
 	}
 
-	return plainTexture;
+	return isPlainTexture;
+}
+
+void Heightmap::computeJoints() {
+	size_t size1 = _size - 1;
+	float step =  CHUNK_SIZE / (float) size1;
+
+	const std::set<Edge*>& edgesInChunk = _map.getEdgesInChunk(_chunkPos.x, _chunkPos.y);
+	const std::vector<Corner*>& cornersInChunk = _map.getCornersInChunk(_chunkPos.x, _chunkPos.y);
+	sf::Vector2f chunkCoord(CHUNK_SIZE*_chunkPos.x, CHUNK_SIZE*_chunkPos.y);
+
+	for (auto corner = cornersInChunk.begin(); corner != cornersInChunk.end(); corner++) {
+		std::vector<Edge*> edgesAround;
+
+		for (size_t i = 0; i < (*corner)->edges.size(); i++) {
+			if (edgesInChunk.find((*corner)->edges[i]) != edgesInChunk.end())
+				edgesAround.push_back((*corner)->edges[i]);
+		}
+
+		for (size_t i = std::max(0,     (int)    (((*corner)->x - TERRAIN_TEX_TRANSITION_SIZE - chunkCoord.x) / step));
+						    i < std::min(size1, (size_t) (((*corner)->x + TERRAIN_TEX_TRANSITION_SIZE - chunkCoord.x) / step)+1); i++) {
+		for (size_t j = std::max(0,     (int)    (((*corner)->y - TERRAIN_TEX_TRANSITION_SIZE - chunkCoord.y) / step));
+		            j < std::min(size1, (size_t) (((*corner)->y + TERRAIN_TEX_TRANSITION_SIZE - chunkCoord.y) / step)+1); j++) {
+
+			// Find the biome that will be drawn first to draw it without alpha blending
+			Biome firstBiome = (*corner)->centers[0]->biome;
+
+			for (size_t k = 0; k < (*corner)->centers.size(); k++) {
+				if ((*corner)->centers[k]->biome < firstBiome)
+					firstBiome = (*corner)->centers[k]->biome;
+			}
+
+			// Find if we are in a situation handled separately
+			std::vector<Biome> notFirstBiome;
+			for (size_t k = 0; k < (*corner)->centers.size(); k++) {
+				if ((*corner)->centers[k]->biome != firstBiome)
+					notFirstBiome.push_back((*corner)->centers[k]->biome);
+			}
+
+			bool needToComputeMax = (notFirstBiome.size() == 2 && notFirstBiome[0] == notFirstBiome[1]);
+
+			size_t currentI[4] = {i, i+1, i, i+1};
+			size_t currentJ[4] = {j, j, j+1, j+1};
+
+			sf::Vector2f pointCoord[4];
+			// Compute positions of the corners and send the first square with the non alpha texture
+			for (size_t k = 0; k < 4; k++) {
+				pointCoord[k] = sf::Vector2f(chunkCoord.x + step * currentI[k], chunkCoord.y + step * currentJ[k]);
+				addPointToTransitionData(firstBiome, currentI[k],currentJ[k], TERRAIN_TEX_TRANSITION_SIZE);
+			}
+
+			std::set<Biome> alreadyProcessed;
+
+			for (auto edge = edgesAround.begin(); edge != edgesAround.end(); edge++ {
+
+				for (size_t k = 0; k < 4; k++) {
+					float distance = (*edge)->getDistanceToEdge(pointCoord[k]);
+
+					// When a junction has 2 times firstBiome or 3 different biomes, we need to
+					// compute the min of the distances yielded by the edges
+					// When a junction has 1 firstBiome and 2 times another one, we need to
+					// compute the max
+					if ((*edge)->isOnSameSideAsCenter0(pointCoord[k])) {
+						if ((*edge)->center0->biome != firstBiome) {
+							if (alreadyProcessed.find((*edge)->center0->biome) == alreadyProcessed.end() || needToComputeMax)
+								addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], distance);
+							else
+								correctDistance((*edge)->center0->biome, k, distance);
+						}
+
+						if ((*edge)->center1->biome != firstBiome) {
+							if (alreadyProcessed.find((*edge)->center1->biome) == alreadyProcessed.end() || needToComputeMax)
+								addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], -distance);
+							else
+								correctDistance((*edge)->center1->biome, k, -distance);
+						}
+					}
+
+					else {
+						if ((*edge)->center0->biome != firstBiome) {
+							if (alreadyProcessed.find((*edge)->center0->biome) == alreadyProcessed.end() || needToComputeMax)
+								addPointToTransitionData((*edge)->center0->biome, currentI[k],currentJ[k], -distance);
+							else
+								correctDistance((*edge)->center0->biome, k, -distance);
+						}
+
+						if ((*edge)->center1->biome != firstBiome) {
+							if (alreadyProcessed.find((*edge)->center1->biome) == alreadyProcessed.end() || needToComputeMax)
+								addPointToTransitionData((*edge)->center1->biome, currentI[k],currentJ[k], distance);
+							else
+								correctDistance((*edge)->center1->biome, k, distance);
+						}
+					}
+				}
+
+				alreadyProcessed.insert((*edge)->center0->biome);
+				alreadyProcessed.insert((*edge)->center1->biome);
+			}
+		}
+		}
+	}
 }
 
 void Heightmap::computeIndices(const std::vector<std::vector<Biome> >& biomes,
@@ -429,6 +541,8 @@ void Heightmap::generate() {
 	fillBufferData();
 
 	std::vector<std::vector<bool> > plainTextureInfo = computeTransitionData();
+
+	computeJoints();
 
 	computeIndices(biomeInfo, plainTextureInfo);
 

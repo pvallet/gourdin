@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <ctime>
 
-#define CHUNK_BEGIN_X 13
-#define CHUNK_BEGIN_Y 13
+#define CHUNK_BEGIN_X 14
+#define CHUNK_BEGIN_Y 16
 
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
@@ -55,7 +55,21 @@ void Game::generateHeightmap(size_t x, size_t y) {
   newHeightmap->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newHeightmap);
   _chunkStatus[x][y] = EDGE;
-  generateForests(x,y);
+  // generateForests(x,y);
+  _igMovingElements.push_back(new Lion(sf::Vector2f(x * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager)));
+  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+  _igMovingElements.push_back(new Lion(sf::Vector2f(x * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager)));
+  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+  _igMovingElements.push_back(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager)));
+  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+  _igMovingElements.push_back(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager)));
+  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+
+  // std::vector<Corner*> bite = _map.getCornersInChunk(x,y);
+  // for (auto it = bite.begin(); it != bite.end(); it++) {
+  //   _igElements.push_back(std::unique_ptr<igElement>(new Tree(
+  //     sf::Vector2f((*it)->x, (*it)->y), _treeTexManager, TEMPERATE_DESERT,0)));
+  // }
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
@@ -82,18 +96,22 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
     for (size_t i = 0; i < 4; i++) {
       tmp = neighbour(x,y,i);
 
-      if (_chunkStatus[tmp.x][tmp.y] == NOT_GENERATED) {
-        // If the chunk to be generated is not handled by the map, we don't do anything
-        if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
+      // We check if the neighbour chunk is within the map space.
+      // If not, we should generate oceans TODO
+      if (tmp.x >= 0 && tmp.x < _chunkStatus.size() && tmp.y >= 0 && tmp.y < _chunkStatus.size()) {
+        if (_chunkStatus[tmp.x][tmp.y] == NOT_GENERATED) {
+          // If the chunk to be generated is not handled by the map, we don't do anything
+          if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
 
 
-        else if (_map.isOcean(tmp.x, tmp.y)) {
-          _terrain[tmp.x][tmp.y] = std::unique_ptr<Chunk>(new Ocean(tmp.x, tmp.y, _terrainTexManager.getTexID(OCEAN)));
-          _chunkStatus[tmp.x][tmp.y] = EDGE;
+          else if (_map.isOcean(tmp.x, tmp.y)) {
+            _terrain[tmp.x][tmp.y] = std::unique_ptr<Chunk>(new Ocean(tmp.x, tmp.y, _terrainTexManager.getTexID(OCEAN)));
+            _chunkStatus[tmp.x][tmp.y] = EDGE;
+          }
+
+          else
+            generateHeightmap(tmp.x,tmp.y);
         }
-
-        else
-          generateHeightmap(tmp.x,tmp.y);
       }
     }
   }
@@ -107,15 +125,15 @@ void Game::update(sf::Time elapsed) {
   int camPosY = cam.getPointedPos().y < 0 ? cam.getPointedPos().y / CHUNK_SIZE - 1 : cam.getPointedPos().y / CHUNK_SIZE;
 
   // Update camera
-  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED)
+  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED) {
     generateHeightmap(camPosX, camPosY);
+  }
 
   cam.setHeight( _terrain[camPosX][camPosY]
     ->getHeight(cam.getPointedPos().x - CHUNK_SIZE * camPosX,
                 cam.getPointedPos().y - CHUNK_SIZE * camPosY));
 
   // Update terrains
-  #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] != NOT_GENERATED) {
@@ -189,7 +207,6 @@ void Game::update(sf::Time elapsed) {
                                 _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.f)*width/2,
                                 newHeight);
 
-
       _igElements[i]->set3DCorners(corners3);
 
       // Calculate their projections
@@ -223,13 +240,43 @@ void Game::update(sf::Time elapsed) {
 void Game::render() const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Heightmap
+  // Heightmap transitions
 
+  glDepthFunc(GL_LEQUAL);
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glUseProgram(_hmapTransitionShader.getProgramID());
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] == VISIBLE) {
-        glUseProgram(_hmapShader.getProgramID());
+        Heightmap* hmap;
+        if (hmap = dynamic_cast<Heightmap*>(_terrain[i][j].get())) {
+          glm::mat4 modelview = glm::translate(glm::mat4(1.f),
+            glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
+          );
+
+          _hmapTransitionShader.sendModelMatrix(modelview);
+          hmap->drawTransitions();
+        }
+      }
+    }
+  }
+
+
+  glDisable(GL_BLEND);
+
+  // Heightmap
+
+  glDepthFunc(GL_LESS);
+
+
+  glUseProgram(_hmapShader.getProgramID());
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] == VISIBLE) {
 
         glm::mat4 modelview = glm::translate(glm::mat4(1.f),
           glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
@@ -238,18 +285,6 @@ void Game::render() const {
         _hmapShader.sendModelMatrix(modelview);
 
         _terrain[i][j]->draw();
-
-        Heightmap* hmap;
-        if (hmap = dynamic_cast<Heightmap*>(_terrain[i][j].get())) {
-          glDisable(GL_DEPTH_TEST);
-          glEnable (GL_BLEND);
-          glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-          glUseProgram(_hmapTransitionShader.getProgramID());
-          _hmapTransitionShader.sendModelMatrix(modelview);
-          hmap->drawTransitions();
-          glDisable(GL_BLEND);
-          glEnable(GL_DEPTH_TEST);
-        }
       }
     }
   }
