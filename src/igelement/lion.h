@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "controllable.h"
 
 enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING};
@@ -19,7 +21,7 @@ public:
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 
-	void kill(std::vector<igMovingElement*> neighbors);
+	void kill(const std::set<igMovingElement*>& neighbors);
 
 private:
 	float _stamina; // Percentage

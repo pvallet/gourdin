@@ -307,8 +307,7 @@ void Heightmap::computeJoints() {
 
 			std::set<Biome> alreadyProcessed;
 
-			for (auto edge = edgesAround.begin(); edge != edgesAround.end(); edge++ {
-
+			for (auto edge = edgesAround.begin(); edge != edgesAround.end(); edge++) {
 				for (size_t k = 0; k < 4; k++) {
 					float distance = (*edge)->getDistanceToEdge(pointCoord[k]);
 

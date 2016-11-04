@@ -60,39 +60,39 @@ sf::Time Antilope::generateTimePhase(sf::Time average) const {
 					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
-BoidsInfo Antilope::getInfoFromNeighbors(const std::vector<igMovingElement*>& neighbors) const {
+BoidsInfo Antilope::getInfoFromNeighbors(const std::set<igMovingElement*>& neighbors) const {
 	BoidsInfo res;
 	float distance;
 	res.minRepDst = _repulsionRadius;
 
-	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
-		if (neighbors[i] != this) {
-			if (dynamic_cast<Antilope*>(neighbors[i])) {
-				distance = vu::norm(_pos - neighbors[i]->getPos());
+	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+		if ((*it) != this) {
+			if (dynamic_cast<Antilope*>(*it)) {
+				distance = vu::norm(_pos - (*it)->getPos());
 
 				if (distance < _repulsionRadius) {
 					if (distance < res.minRepDst) {
-						res.closestRep = neighbors[i]->getPos();
+						res.closestRep = (*it)->getPos();
 						res.minRepDst = distance;
 					}
 				}
 
 				else if (distance < _orientationRadius) {
-					res.sumOfDirs += neighbors[i]->getDirection();
+					res.sumOfDirs += (*it)->getDirection();
 					res.nbDir++;
 				}
 
 				else if (distance < _attractionRadius) {
-					res.sumPosAttract += neighbors[i]->getPos();
+					res.sumPosAttract += (*it)->getPos();
 					res.nbAttract++;
 				}
 			}
 
-			else if (dynamic_cast<Lion*>(neighbors[i])) {
-				distance = vu::norm(_pos - neighbors[i]->getPos());
+			else if (dynamic_cast<Lion*>((*it))) {
+				distance = vu::norm(_pos - (*it)->getPos());
 
 				if (distance < _lineOfSight) {
-					res.sumPosFlee += neighbors[i]->getPos();
+					res.sumPosFlee += (*it)->getPos();
 					res.nbFlee++;
 				}
 			}
@@ -223,7 +223,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	}
 }
 
-void Antilope::updateState(const std::vector<igMovingElement*>& neighbors) {
+void Antilope::updateState(const std::set<igMovingElement*>& neighbors) {
 	BoidsInfo info = getInfoFromNeighbors(neighbors);
 
 	switch (_aStatus) {

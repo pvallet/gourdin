@@ -65,29 +65,26 @@ void Controller::renderLifeBars() {
   fullLifeBar.setOutlineColor(sf::Color::Black);
   fullLifeBar.setOutlineThickness(1);
 
-  std::set<igElement*> sel = _game.getSelection();
+  std::set<Controllable*> sel = _game.getSelection();
   sf::IntRect corners;
   float maxHeightFactor;
 
   for(auto it = sel.begin(); it != sel.end(); ++it) {
     corners = (*it)->get2DCorners();
-    Controllable* ctrl;
-    if (ctrl = dynamic_cast<Controllable*>(*it)) {
-      maxHeightFactor = ctrl->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+    maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-      Lion* lion;
-      if (lion = dynamic_cast<Lion*>(ctrl))
-        lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
+    Lion* lion;
+    if (lion = dynamic_cast<Lion*>(*it))
+      lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
 
-      lifeBar.setPosition(corners.left + corners.width/2 - 10,
-        corners.top - corners.height*maxHeightFactor + corners.height - 5);
-      fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
-        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+    lifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+    fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
 
-      _window.draw(lifeBar);
-      _window.draw(fullLifeBar);
-      lifeBar.setSize(sf::Vector2f(20.f, 2.f));
-    }
+    _window.draw(lifeBar);
+    _window.draw(fullLifeBar);
+    lifeBar.setSize(sf::Vector2f(20.f, 2.f));
   }
 }
 
@@ -252,24 +249,47 @@ void Controller::handleKeyPressed(sf::Event event) {
       _running = false;
       break;
 
-    case sf::Keyboard::LShift:
-      std::set<igElement*> sel = _game.getSelection();
+    // Go back to selection
+    case sf::Keyboard::Space: {
+      std::set<Controllable*> sel = _game.getSelection();
+      sf::Vector2f barycenter;
+      float nbSelected = 0;
 
       for (auto it = sel.begin(); it != sel.end(); ++it) {
+        Lion* lion;
+        if (lion = dynamic_cast<Lion*>(*it)) {
+          barycenter += lion->getPos();
+          nbSelected++;
+        }
+      }
+      Camera& cam = Camera::getInstance();
+      cam.setPointedPos(barycenter / nbSelected);
+      break;
+    }
 
-        Controllable* ctrl;
-        if (ctrl = dynamic_cast<Controllable*>(*it)) {
+    // Make the lions run
+    case sf::Keyboard::LShift: {
+      std::set<Controllable*> sel = _game.getSelection();
 
-          Lion* lion;
-          if (lion = dynamic_cast<Lion*>(ctrl)) {
-              if (lion->isRunning())
-                  lion->beginWalking();
-              else
-                  lion->beginRunning();
+      bool makeThemAllRun = false;
+      bool generalStrategyChosen = false;
+      for (auto it = sel.begin(); it != sel.end(); ++it) {
+        Lion* lion;
+        if (lion = dynamic_cast<Lion*>(*it)) {
+          if (!generalStrategyChosen) {
+            generalStrategyChosen = true;
+            makeThemAllRun = !lion->isRunning();
+          }
+          else {
+            if (makeThemAllRun)
+              lion->beginRunning();
+            else
+              lion->beginWalking();
           }
         }
       }
       break;
+    }
   }
 }
 
@@ -317,14 +337,11 @@ void Controller::run() {
       else if (event.type == sf::Event::KeyReleased) {
         switch(event.key.code) {
           case sf::Keyboard::Delete:
-            std::set<igElement*> sel = _game.getSelection();
-            Controllable* ctrl;
+            std::set<Controllable*> sel = _game.getSelection();
 
             for (auto it = sel.begin(); it != sel.end(); it++) {
-              if (ctrl = dynamic_cast<Controllable*>(*it)) {
-                ctrl->die();
-                break;
-              }
+              (*it)->die();
+              break;
             }
         }
       }

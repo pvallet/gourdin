@@ -42,7 +42,7 @@ public:
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
 
-	inline const std::set<igElement*>& getSelection() const {return _selectedElmts;}
+	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
 	inline const std::vector<std::unique_ptr<igElement> >& getElements() const {return _igElements;}
 
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
@@ -54,15 +54,16 @@ private:
 	void generateHeightmap      (size_t x, size_t y);
   void generateForests        (size_t x, size_t y);
   void generateHerd(sf::Vector2f pos, size_t count);
+  void updateMovingElementsStates() ;
 
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 
   std::vector<std::unique_ptr<igElement> > _igElements; // Elements
 
   // Raw pointers because the ownership is in _igElements
-	std::set<igElement*> _selectedElmts; // Selection
+	std::set<Controllable*> _selectedElmts; // Selection
 	std::set<igElement*, compDepth> _visibleElmts; // Visible
-  std::vector<igMovingElement*> _igMovingElements;
+  std::set<igMovingElement*> _igMovingElements;
 
 	Map _map;
   AnimationManagerInitializer _antilopeTexManager;

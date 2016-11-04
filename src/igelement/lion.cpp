@@ -89,27 +89,28 @@ void Lion::setTarget(sf::Vector2f t) {
 	}
 }
 
-void Lion::kill(std::vector<igMovingElement*> neighbors) {
+void Lion::kill(const std::set<igMovingElement*>& neighbors) {
 	float distance;
 	igMovingElement* closest = NULL;
 	float nearestDist = _range;
 
-	for (unsigned int i = 0 ; i < neighbors.size() ; i++) {
-		if (neighbors[i] != this) {
-			if (dynamic_cast<Antilope*>(neighbors[i])) {
-				distance = vu::norm(_pos - neighbors[i]->getPos());
+	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+		if (*it != this) {
+			Antilope *atlp;
+			if (atlp = dynamic_cast<Antilope*>(*it)) {
+				distance = vu::norm(_pos - atlp->getPos());
 
 				if (distance < _range) {
 					if (distance < nearestDist) {
 						nearestDist = distance;
-						closest = neighbors[i];
+						closest = atlp;
 					}
 				}
 			}
 		}
 	}
 
-	if (nearestDist != _range && !closest->isDead()) {
+	if (closest) {
 		_prey = closest;
 		beginAttacking();
 	}

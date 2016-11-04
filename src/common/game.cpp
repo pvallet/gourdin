@@ -55,15 +55,11 @@ void Game::generateHeightmap(size_t x, size_t y) {
   newHeightmap->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newHeightmap);
   _chunkStatus[x][y] = EDGE;
-  // generateForests(x,y);
-  _igMovingElements.push_back(new Lion(sf::Vector2f(x * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager)));
-  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
-  _igMovingElements.push_back(new Lion(sf::Vector2f(x * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager)));
-  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
-  _igMovingElements.push_back(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager)));
-  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
-  _igMovingElements.push_back(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager)));
-  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+  generateForests(x,y);
+  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f(x * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager))));
+  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f(x * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager))));
+  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager))));
+  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager))));
 
   // std::vector<Corner*> bite = _map.getCornersInChunk(x,y);
   // for (auto it = bite.begin(); it != bite.end(); it++) {
@@ -119,6 +115,39 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
   _chunkStatus[x][y] = NOT_VISIBLE;
 }
 
+void Game::updateMovingElementsStates() {
+  // Remove the dead elements from the selection and the interacting elements
+  std::vector<igMovingElement*> toDelete;
+  for (auto it = _selectedElmts.begin(); it != _selectedElmts.end(); it++) {
+    if ((*it)->isDead())
+      toDelete.push_back(*it);
+  }
+  for (size_t i = 0; i < toDelete.size(); i++) {
+    _selectedElmts.erase((Controllable*) toDelete[i]);
+  }
+  toDelete.clear();
+
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    if ((*it)->isDead())
+      toDelete.push_back(*it);
+  }
+  for (size_t i = 0; i < toDelete.size(); i++) {
+    _igMovingElements.erase(toDelete[i]);
+  }
+
+  // Compute moving elements interactions
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    Antilope* atlp;
+    Lion* lion;
+
+    if (atlp = dynamic_cast<Antilope*>(*it))
+      atlp->updateState(_igMovingElements);
+
+    else if (lion = dynamic_cast<Lion*>(*it))
+      lion->kill(_igMovingElements);
+  }
+}
+
 void Game::update(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
   int camPosX = cam.getPointedPos().x < 0 ? cam.getPointedPos().x / CHUNK_SIZE - 1 : cam.getPointedPos().x / CHUNK_SIZE;
@@ -154,17 +183,7 @@ void Game::update(sf::Time elapsed) {
     }
   }
 
-  // Compute moving elements interactions
-  for (size_t i = 0; i < _igMovingElements.size(); i++) {
-    Antilope* atlp;
-    Lion* lion;
-
-    if (atlp = dynamic_cast<Antilope*>(_igMovingElements[i]))
-      atlp->updateState(_igMovingElements);
-
-    else if (lion = dynamic_cast<Lion*>(_igMovingElements[i]))
-      lion->kill(_igMovingElements);
-  }
+  updateMovingElementsStates();
 
   _visibleElmts.clear();
 
@@ -312,25 +331,28 @@ void Game::select(sf::IntRect rect, bool add) {
     _selectedElmts.clear();
 
   for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
-    if (_selectedElmts.find(_igElements[i].get()) == _selectedElmts.end()) { // _igElements[i] is not selected yet, we can bother to calculate
-      sf::IntRect c = _igElements[i]->get2DCorners();
+    Controllable *ctrl = dynamic_cast<Controllable*>(_igElements[i].get());
+    if (ctrl) {
+      if (_selectedElmts.find(ctrl) == _selectedElmts.end()) { // _igElements[i] is not selected yet, we can bother to calculate
+        sf::IntRect c = ctrl->get2DCorners();
 
-      int centerX, centerY;
+        int centerX, centerY;
 
-      centerX = c.left + c.width / 2;
-      centerY = c.top + c.height / 2;
+        centerX = c.left + c.width / 2;
+        centerY = c.top + c.height / 2;
 
-      if (rect.contains(centerX, centerY)) {
-        if (dynamic_cast<Lion*>(_igElements[i].get()))
-          _selectedElmts.insert(_igElements[i].get());
-      }
+        if (rect.contains(centerX, centerY)) {
+          if (dynamic_cast<Lion*>(ctrl))
+            _selectedElmts.insert(ctrl);
+        }
 
-      else if (   c.contains(rect.left, rect.top) ||
-                  c.contains(rect.left + rect.width, rect.top) ||
-                  c.contains(rect.left + rect.width, rect.top + rect.height) ||
-                  c.contains(rect.left, rect.top + rect.height)  ) {
-        if (dynamic_cast<Lion*>(_igElements[i].get()))
-          _selectedElmts.insert(_igElements[i].get());
+        else if (   c.contains(rect.left, rect.top) ||
+                    c.contains(rect.left + rect.width, rect.top) ||
+                    c.contains(rect.left + rect.width, rect.top + rect.height) ||
+                    c.contains(rect.left, rect.top + rect.height)  ) {
+          if (dynamic_cast<Lion*>(ctrl))
+            _selectedElmts.insert(ctrl);
+        }
       }
     }
   }
@@ -354,8 +376,9 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {
-  _igMovingElements.push_back(new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager)));
-  _igElements.push_back(std::unique_ptr<igElement>(_igMovingElements.back()));
+  Lion *newLion = new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager));
+  _igMovingElements.insert(newLion);
+  _igElements.push_back(std::unique_ptr<igElement>(newLion));
 }
 
 void Game::generateHerd(sf::Vector2f pos, size_t count) {
@@ -389,7 +412,7 @@ void Game::generateHerd(sf::Vector2f pos, size_t count) {
 
   for (size_t i = 0 ; i < count ; i++) {
     _igElements.push_back(std::unique_ptr<igElement>(tmp[i]));
-    _igMovingElements.push_back(tmp[i]);
+    _igMovingElements.insert(tmp[i]);
   }
 }
 
