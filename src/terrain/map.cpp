@@ -17,12 +17,10 @@ float Edge::getDistanceToEdge(sf::Vector2f pos) {
   float ab = vu::dot(a,b);
 
   if (ab <= 0)
-	// if (false)
     return vu::norm(b);
   else {
     float aa = vu::dot(a,a);
     if (ab < aa) {
-		// if (true) {
       sf::Vector2f g = b - ab/aa * a;
       return vu::norm(g);
     }
@@ -262,7 +260,7 @@ void Map::sortCenters(float tolerance) {
 		it->dataset = flann::Matrix<float>(&(it->data[0]), it->centers.size(), 2);
 
 		it->kdIndex = std::unique_ptr<flann::Index<flann::L2<float> > >(
-			new flann::Index<flann::L2<float> >(it->dataset, flann::KDTreeIndexParams(4)));
+			new flann::Index<flann::L2<float> >(it->dataset, flann::KDTreeIndexParams(1)));
 
 		it->kdIndex->buildIndex();
 	}
@@ -438,17 +436,18 @@ Center* Map::getClosestCenter(sf::Vector2f pos) const {
 	float queryData[2];
 	queryData[0] = pos.x;
 	queryData[1] = pos.y;
+	int indicesData[1];
+	float distsData[1];
 
-	flann::Matrix<float> query(queryData, 1, 2);
-
-  std::vector<std::vector<int> > indices;
-  std::vector<std::vector<float> > dists;
+	flann::Matrix<float> query(queryData,   1, 2);
+	flann::Matrix<int> indices(indicesData, 1, 1);
+  flann::Matrix<float> dists(distsData,   1, 1);
 
 	sf::Vector2i chunkPos(pos.x / CHUNK_SIZE, pos.y / CHUNK_SIZE);
 	size_t index = chunkPos.x * NB_CHUNKS + chunkPos.y;
 
   _centersInChunks[index].kdIndex->knnSearch(
-		query, indices, dists, 1, flann::SearchParams(_centersInChunks[index].centers.size()));
+		query, indices, dists, 1, flann::SearchParams(flann::FLANN_CHECKS_UNLIMITED));
 
 	return _centersInChunks[index].centers[indices[0][0]];
 }

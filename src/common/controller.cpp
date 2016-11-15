@@ -280,7 +280,7 @@ void Controller::handleKeyPressed(sf::Event event) {
             generalStrategyChosen = true;
             makeThemAllRun = !lion->isRunning();
           }
-          else {
+          if (generalStrategyChosen) {
             if (makeThemAllRun)
               lion->beginRunning();
             else

@@ -3,7 +3,8 @@
 #include <iostream>
 
 Controllable::Controllable(sf::Vector2f position, AnimationManager graphics) :
- 	igMovingElement(position, graphics) {
+ 	igMovingElement(position, graphics),
+  _target(position) {
 
 }
 

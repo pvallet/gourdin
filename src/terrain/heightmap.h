@@ -25,7 +25,7 @@ class Heightmap : public Chunk {
 
 public:
 	Heightmap(size_t x, size_t y, const TexManager& terrainTexManager, const Map& map);
-	~Heightmap();
+	virtual ~Heightmap();
 
 	void generate();
 	void draw() const;

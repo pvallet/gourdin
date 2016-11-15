@@ -15,7 +15,7 @@ public:
   Shader();
   Shader(Shader const &shader);
   Shader(std::string vertexSource, std::string fragmentSource);
-  ~Shader();
+  virtual ~Shader();
 
   Shader& operator=(Shader const &shader);
 

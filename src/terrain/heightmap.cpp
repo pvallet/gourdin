@@ -166,16 +166,25 @@ void Heightmap::fillBufferData() {
 }
 
 void Heightmap::addPointToTransitionData(Biome biome, size_t i, size_t j, float distance) {
+  TransitionData& currentTransitionData = _transitionData[biome];
 	// Copy info from generated map
+  size_t vertBack = currentTransitionData.vertices.size();
+  size_t normBack = currentTransitionData.normals.size();
+  size_t coordBack = currentTransitionData.coord.size();
+
+  currentTransitionData.vertices.resize(vertBack+3);
+  currentTransitionData.normals.resize(normBack+3);
+  currentTransitionData.coord.resize(coordBack+2);
+
 	for (size_t k = 0; k < 3; k++) {
-		_transitionData[biome].vertices.push_back(_vertices[3*i*_size + 3*j + k]);
-		_transitionData[biome].normals.push_back(_normals[3*i*_size + 3*j + k]);
+		currentTransitionData.vertices[vertBack+k] = _vertices[3*i*_size + 3*j + k];
+		currentTransitionData.normals[normBack+k] = _normals[3*i*_size + 3*j + k];
 	}
 	for (size_t k = 0; k < 2; k++) {
-		_transitionData[biome].coord.push_back(_coord[2*i*_size + 2*j + k]);
+		currentTransitionData.coord[coordBack+k] = _coord[2*i*_size + 2*j + k];
 	}
 
-	_transitionData[biome].distances.push_back(distance / TERRAIN_TEX_TRANSITION_SIZE / 2 + 0.5);
+	currentTransitionData.distances.push_back(distance / TERRAIN_TEX_TRANSITION_SIZE / 2 + 0.5);
 }
 
 void Heightmap::correctDistance(Biome biome, size_t k, float distance) {
@@ -368,13 +377,16 @@ void Heightmap::computeIndices(const std::vector<std::vector<Biome> >& biomes,
 
 				std::vector<GLuint>& currentIndices = _indicesPlainTexture[biomes[i][j]];
 
-				currentIndices.push_back( 		i*_size + j);
-				currentIndices.push_back( (i+1)*_size + j);
-				currentIndices.push_back( 		i*_size + j+1);
+        size_t back = currentIndices.size();
+        currentIndices.resize(back+6);
 
-				currentIndices.push_back( 		i*_size + j+1);
-				currentIndices.push_back( (i+1)*_size + j);
-				currentIndices.push_back( (i+1)*_size + j+1);
+				currentIndices[back]   =  		 i*_size + j;
+				currentIndices[back+1] =  (i+1)*_size + j;
+				currentIndices[back+2] =  		 i*_size + j+1;
+
+				currentIndices[back+3] =  		 i*_size + j+1;
+				currentIndices[back+4] =  (i+1)*_size + j;
+				currentIndices[back+5] =  (i+1)*_size + j+1;
 			}
 		}
 	}
@@ -385,13 +397,16 @@ void Heightmap::computeIndices(const std::vector<std::vector<Biome> >& biomes,
 	// |     |  yields 0 1 2 2 1 3
 	// 1 --- 3
 	for (auto it = _transitionData.begin(); it != _transitionData.end(); it++) {
+    it->second.indices.resize(it->second.vertices.size()/3/4*6);
+    size_t j = 0;
 		for (size_t i = 0; i < it->second.vertices.size() / 3; i+=4) {
-			it->second.indices.push_back(i);
-			it->second.indices.push_back(i+1);
-			it->second.indices.push_back(i+2);
-			it->second.indices.push_back(i+2);
-			it->second.indices.push_back(i+1);
-			it->second.indices.push_back(i+3);
+			it->second.indices[6*j] = i;
+			it->second.indices[6*j+1] = i+1;
+			it->second.indices[6*j+2] = i+2;
+			it->second.indices[6*j+3] = i+2;
+			it->second.indices[6*j+4] = i+1;
+			it->second.indices[6*j+5] = i+3;
+      j++;
 		}
 	}
 }

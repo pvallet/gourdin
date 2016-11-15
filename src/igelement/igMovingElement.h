@@ -9,6 +9,7 @@
 class igMovingElement : public igElement {
 public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
+	virtual ~igMovingElement() {}
 
 	void draw() const;
 

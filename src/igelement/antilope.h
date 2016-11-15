@@ -21,6 +21,7 @@ struct BoidsInfo {
 class Antilope : public igMovingElement {
 public:
 	Antilope(sf::Vector2f position, AnimationManager graphics);
+	virtual ~Antilope() {}
 
 	// React to the environment
 	void updateState(const std::set<igMovingElement*>& neighbors);

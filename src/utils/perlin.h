@@ -6,6 +6,7 @@
 class Perlin {
 public:
   Perlin(int seed, int size);
+  virtual ~Perlin() {}
 
   float getValue(float x, float y) const;
 

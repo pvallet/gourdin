@@ -7,6 +7,7 @@
 class Ocean : public Chunk {
 public:
 	Ocean(size_t x, size_t y, GLuint tex);
+	virtual ~Ocean() {}
 
 	virtual void draw() const;
 

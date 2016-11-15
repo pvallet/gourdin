@@ -58,7 +58,7 @@ void Lion::stop() {
 }
 
 void Lion::beginRunning() {
-	if (_stamina > 0.f) {
+	if (_target != _pos && _stamina > 0.f) {
 		_moving = true;
 		_status = RUNNING;
 		_speed = _speedRunning;
@@ -67,10 +67,12 @@ void Lion::beginRunning() {
 }
 
 void Lion::beginWalking() {
-	_moving = true;
-	_status = WALKING;
-	_speed = _speedWalking;
-	launchAnimation(WALK);
+	if (_target != _pos) {
+		_moving = true;
+		_status = WALKING;
+		_speed = _speedWalking;
+		launchAnimation(WALK);
+	}
 }
 
 void Lion::beginAttacking() {

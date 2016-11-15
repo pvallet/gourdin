@@ -7,6 +7,7 @@
 class Controllable : public igMovingElement {
 public:
 	Controllable(sf::Vector2f position, AnimationManager _graphics);
+	virtual ~Controllable() {}
 
 	virtual void update(sf::Time elapsed, float theta);
 	virtual void setTarget(sf::Vector2f t);

@@ -105,6 +105,7 @@ struct CentersInChunk {
 class Map {
 public:
 	Map() {}
+	virtual ~Map() {}
 
 	void load(std::string path);
 
