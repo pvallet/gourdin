@@ -1,5 +1,6 @@
 #include "animationManager.h"
 
+#include <cmath>
 #include <iostream>
 
 AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :

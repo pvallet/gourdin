@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "utils.h"
+
 #include <cmath>
 
 #define RAD M_PI / 180.f

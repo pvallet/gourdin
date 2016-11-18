@@ -6,7 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-
 // The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.f
 

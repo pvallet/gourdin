@@ -2,6 +2,9 @@
 
 #include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
+
+#include "utils.h"
+
 #include <cmath>
 
 namespace vu {

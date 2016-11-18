@@ -6,14 +6,12 @@
 
 #include "controller.h"
 
-#define DEFAULT_SCREENWIDTH 800
-#define DEFAULT_SCREENHEIGHT 600
-
-
 int main() {
   sf::ContextSettings context(24, 8, 4, 3, 0);
 
   sf::RenderWindow window;
+
+  // Fix for SFML 2.3.2, where the viewport is sometimes translated downwards
   for (size_t i = 0; i < 20; i++) {
     window.create(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
     if (window.getSize().y == sf::VideoMode::getFullscreenModes().front().height)

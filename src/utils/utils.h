@@ -1,5 +1,7 @@
 #pragma once
 
+#define M_PI 3.14159265358979323846
+
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 #define CHUNK_SIZE 512.

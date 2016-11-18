@@ -27,12 +27,12 @@ void Controller::init() {
   _font.loadFromFile("res/Arial.ttf");
   _fpsCounter.setFont(_font);
   _fpsCounter.setCharacterSize(10);
-  _fpsCounter.setColor(sf::Color::White);
+  _fpsCounter.setFillColor(sf::Color::White);
 
   _posDisplay.setPosition(sf::Vector2f(0, 10));
   _posDisplay.setFont(_font);
   _posDisplay.setCharacterSize(10);
-  _posDisplay.setColor(sf::Color::White);
+  _posDisplay.setFillColor(sf::Color::White);
 
   // Mouse
   _rectSelect.setFillColor(sf::Color::Transparent);
