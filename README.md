@@ -23,7 +23,7 @@ Then build the project
 ```
 mkdir build && cd build
 cmake ..
-make
+make -j4
 ```
 
 To run gourdin, go the root of the project (with `cd ..`) and then run the executable:

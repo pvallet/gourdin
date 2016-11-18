@@ -22,7 +22,7 @@ find_package(SFML 2 REQUIRED system window graphics)
 find_package(OpenGL REQUIRED)
 find_package(FLANN REQUIRED)
 find_package(GLM REQUIRED)
-find_package(Glew REQUIRED)
+find_package(GLEW REQUIRED)
 
 set(INCLUDE_DIRS
   ${SFML_INCLUDE_DIR}
@@ -54,12 +54,19 @@ foreach (_headerFile ${EXTERNAL_SOURCE_FILES})
     list (APPEND INCLUDE_DIRS ${_dir})
 endforeach()
 
-include_directories(${INCLUDE_DIRS})
+if (SFML_FOUND AND OPENGL_FOUND AND FLANN_FOUND AND GLM_FOUND AND GLEW_FOUND)
+  include_directories(${INCLUDE_DIRS})
 
-add_executable(out ${SOURCE_FILES})
+  add_executable(out ${SOURCE_FILES})
 
-target_link_libraries(out
-  ${SFML_LIBRARIES}
-  ${OPENGL_LIBRARIES}
-  ${FLANN_LIBRARIES}
-  ${GLEW_LIBRARIES})
+  target_link_libraries(out
+    ${SFML_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${FLANN_LIBRARIES}
+    ${GLEW_LIBRARIES})
+
+else()
+
+  message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
+
+endif()
