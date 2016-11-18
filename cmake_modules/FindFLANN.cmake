@@ -7,21 +7,36 @@
 # FLANN_LIBRARIES - Libraries needed to use FLANN.
 # FLANN_DEFINITIONS - Compiler flags for FLANN.
 
-find_package(PkgConfig)
-pkg_check_modules(PC_FLANN flann)
-set(FLANN_DEFINITIONS ${PC_FLANN_CFLAGS_OTHER})
+if (WIN32)
+  # On windows, we need to use a version that was built locally
+  find_path(FLANN_INCLUDE_DIR flann/flann.hpp
+  PATH ${FLANN_GIT_LOC}/src/cpp)
 
-find_path(FLANN_INCLUDE_DIR flann/flann.hpp
+  find_library(FLANN_LIBRARY flann_cpp
+  PATH ${FLANN_GIT_LOC}/lib)
+endif()
+
+if (${CMAKE_HOST_UNIX})
+  find_package(PkgConfig)
+  pkg_check_modules(PC_FLANN flann)
+
+  set(FLANN_DEFINITIONS ${PC_FLANN_CFLAGS_OTHER})
+
+  find_path(FLANN_INCLUDE_DIR flann/flann.hpp
     HINTS ${PC_FLANN_INCLUDEDIR} ${PC_FLANN_INCLUDE_DIRS})
 
-find_library(FLANN_LIBRARY flann
+  find_library(FLANN_LIBRARY flann
     HINTS ${PC_FLANN_LIBDIR} ${PC_FLANN_LIBRARY_DIRS})
 
-set(FLANN_INCLUDE_DIRS ${FLANN_INCLUDE_DIR})
-set(FLANN_LIBRARIES ${FLANN_LIBRARY})
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Flann DEFAULT_MSG
     FLANN_LIBRARY FLANN_INCLUDE_DIR)
+
+if (FLANN_FOUND)
+  set(FLANN_INCLUDE_DIRS ${FLANN_INCLUDE_DIR})
+  set(FLANN_LIBRARIES ${FLANN_LIBRARY})
+endif()
 
 mark_as_advanced(FLANN_LIBRARY FLANN_INCLUDE_DIR)

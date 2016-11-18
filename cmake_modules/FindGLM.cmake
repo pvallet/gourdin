@@ -25,6 +25,7 @@ if (WIN32)
 		PATHS
 		$ENV{PROGRAMFILES}/include
 		${GLM_ROOT_DIR}/include
+		${GLM_ROOT_DIR}
 		DOC "The directory where glm/glm.hpp resides")
 else()
 	# Find include files
@@ -37,6 +38,7 @@ else()
 		/sw/include
 		/opt/local/include
 		${GLM_ROOT_DIR}/include
+		${GLM_ROOT_DIR}
 		DOC "The directory where glm/glm.hpp resides")
 endif()
 

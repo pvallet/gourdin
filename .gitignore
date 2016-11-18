@@ -3,6 +3,7 @@
 *.lo
 *.o
 *.obj
+*.dll
 
 *.layout
 
@@ -11,12 +12,10 @@
 *.odp
 *.pdf
 
-gamedesign/
-scientific_stuff
-
 out
 .tags
 build/
+external/
 CMakeFiles/
 cmake_install.cmake
 CMakeCache.txt
