@@ -14,7 +14,6 @@ int main() {
   // sf::RenderWindow window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, context);
 
   window.setVerticalSyncEnabled(true);
-  window.setActive(true);
 
   glewExperimental = true;
 

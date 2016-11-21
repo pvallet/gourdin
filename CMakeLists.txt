@@ -18,39 +18,16 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
 
+set(GLM_ROOT_DIR  external/glm)
+set(SFML_ROOT     external/SFML)
+set(GLEW_LOCATION external/glew)
+set(FLANN_GIT_LOC external/flann)
+
 find_package(OpenGL)
 find_package(GLM)
 find_package(SFML 2.4.1 COMPONENTS system window graphics)
 find_package(FLANN)
 find_package(GLEW)
-
-set( MSG_LOCAL_SEARCH "is not installed on this system, trying to find the lib locally")
-
-# If some dependencies are not satisfied, we look for them locally
-if (NOT GLM_FOUND)
-  message( STATUS "GLM ${MSG_LOCAL_SEARCH}")
-  set(GLM_ROOT_DIR  external/glm)
-  find_package(GLM REQUIRED)
-endif()
-
-if (NOT SFML_FOUND)
-  message( STATUS "SFML ${MSG_LOCAL_SEARCH}")
-  set(SFML_ROOT     external/SFML)
-  find_package(SFML 2.4.1 REQUIRED system window graphics)
-endif()
-
-if (NOT GLEW_FOUND)
-  message( STATUS "GLEW ${MSG_LOCAL_SEARCH}")
-  set(GLEW_LOCATION external/glew)
-  find_package(GLEW REQUIRED)
-endif()
-
-if (NOT FLANN_FOUND)
-  message( STATUS "FLANN ${MSG_LOCAL_SEARCH}")
-  set(FLANN_GIT_LOC external/flann)
-  find_package(FLANN REQUIRED)
-endif()
-
 
 # If they are still not found, abort
 if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SFML_FOUND AND FLANN_FOUND AND GLEW_FOUND))
@@ -104,28 +81,30 @@ target_link_libraries(out
 # If we compile the dependencies ourselves, we need to copy the dlls into the
 # target directory
 
-if (SFML_ROOT)
-add_custom_command(TARGET out POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-graphics-2.dll"
-  "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-system-2.dll"
-  "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-window-2.dll"
-  $<TARGET_FILE_DIR:out>
-)
-endif()
+if (WIN32)
+  if (SFML_ROOT)
+  add_custom_command(TARGET out POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-graphics-2.dll"
+    "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-system-2.dll"
+    "${CMAKE_SOURCE_DIR}/${SFML_ROOT}/lib/sfml-window-2.dll"
+    $<TARGET_FILE_DIR:out>
+  )
+  endif()
 
-if (GLEW_LOCATION)
-add_custom_command(TARGET out POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_SOURCE_DIR}/${GLEW_LOCATION}/bin/glew32.dll"
-  $<TARGET_FILE_DIR:out>
-)
-endif()
+  if (GLEW_LOCATION)
+  add_custom_command(TARGET out POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_SOURCE_DIR}/${GLEW_LOCATION}/bin/glew32.dll"
+    $<TARGET_FILE_DIR:out>
+  )
+  endif()
 
-if (FLANN_GIT_LOC)
-add_custom_command(TARGET out POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  "${CMAKE_SOURCE_DIR}/${FLANN_GIT_LOC}/lib/libflann_cpp.dll"
-  $<TARGET_FILE_DIR:out>
-)
+  if (FLANN_GIT_LOC)
+  add_custom_command(TARGET out POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${CMAKE_SOURCE_DIR}/${FLANN_GIT_LOC}/lib/libflann_cpp.dll"
+    $<TARGET_FILE_DIR:out>
+  )
+  endif()
 endif()
