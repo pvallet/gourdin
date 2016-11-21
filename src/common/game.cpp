@@ -323,7 +323,7 @@ void Game::render() const {
 
   glUseProgram(0);
 
-  _glCheckError();
+  GL_CHECK_ERROR();
 }
 
 void Game::select(sf::IntRect rect, bool add) {

@@ -437,7 +437,7 @@ void Heightmap::generateBuffersPlain() {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	_glCheckError();
+	GL_CHECK_ERROR();
 }
 
 void Heightmap::generateBuffersTransition() {
@@ -467,7 +467,7 @@ void Heightmap::generateBuffersTransition() {
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		_glCheckError();
+		GL_CHECK_ERROR();
 	}
 }
 

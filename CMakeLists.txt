@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.5)
 
 project(gourdin)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release
+      RelWithDebInfo MinSizeRel."
+      FORCE)
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
 # set (CMAKE_CXX_STANDARD 11)
@@ -17,11 +24,10 @@ endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
-
-set(GLM_ROOT_DIR  external/glm)
-set(SFML_ROOT     external/SFML)
-set(GLEW_LOCATION external/glew)
-set(FLANN_GIT_LOC external/flann)
+set(GLM_ROOT_DIR   external/glm)
+set(SFML_ROOT      external/SFML)
+set(GLEW_LOCATION  external/glew)
+set(FLANN_LOCATION external/flann)
 
 find_package(OpenGL)
 find_package(GLM)

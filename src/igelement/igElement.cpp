@@ -52,7 +52,7 @@ igElement::igElement(sf::Vector2f position) :
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	_glCheckError();
+	GL_CHECK_ERROR();
 }
 
 igElement::~igElement() {

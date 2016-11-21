@@ -11,15 +11,30 @@ The installation is done with CMake to be cross-platform.
 
 ### Linux
 
-Install dependencies
+#### 1. Dependencies
 
+Firstly, install the dependencies for the building environment.
 ```
-sudo apt-get install build-essential libgl1-mesa-dev libsfml-dev libglew-dev libgomp1 libflann-dev libglm-dev
+sudo apt-get install build-essential libgl1-mesa-dev libgomp1
+```
+Then you will need the dependencies of the project. Favor using the ones from the repositories as building them from the source takes a while (especially flann).
+```
+libsfml-dev libglew-dev libflann-dev libglm-dev
+```
+You might need to build these dependencies locally, for example if your repository does not have the right version (e.g. SFML < 2.4.1). In order to do that, run the script
+```
+./get_dependencies
+```
+to get all of them, or specify the libraries you want to build locally
+```
+./get_dependencies SFML
 ```
 
-If your repository has a version of SFML lower than 2.4.1, you should compile the library by yourself to avoid a bug of the mouse coordinates.
+The entries are `glm`, `SFML`, `glew`, and `flann`.
 
-Then build the project
+#### 2. Building the project
+
+To build the project, simply run
 ```
 mkdir build && cd build
 cmake ..

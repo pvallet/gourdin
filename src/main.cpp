@@ -2,8 +2,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-#include <cassert>
-
 #include "controller.h"
 
 int main() {
@@ -17,7 +15,8 @@ int main() {
 
   glewExperimental = true;
 
-  assert(glewInit() == GLEW_OK && "Failed to initialize GLEW");
+  if (glewInit() != GLEW_OK)
+    std::cerr << "Failed to initialize GLEW";
 
   glEnable(GL_DEPTH_TEST);
   glCullFace (GL_BACK);

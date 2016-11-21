@@ -7,15 +7,15 @@
 # FLANN_LIBRARIES - Libraries needed to use FLANN.
 # FLANN_DEFINITIONS - Compiler flags for FLANN.
 
-if (WIN32)
-  # On windows, we need to use a version that was built locally
-  find_path(FLANN_INCLUDE_DIR flann/flann.hpp
-  PATH ${FLANN_GIT_LOC}/src/cpp)
 
-  find_library(FLANN_LIBRARY flann_cpp
-  PATH ${FLANN_GIT_LOC}/lib)
-endif()
+# On windows, we need to use a version that was built locally
+find_path(FLANN_INCLUDE_DIR flann/flann.hpp
+PATH ${FLANN_LOCATION}/src/cpp)
 
+find_library(FLANN_LIBRARY flann_cpp
+PATH ${FLANN_LOCATION}/lib)
+
+# On linux, if we don't find the local version, look it on the system
 if (${CMAKE_HOST_UNIX})
   find_package(PkgConfig)
   pkg_check_modules(PC_FLANN flann)

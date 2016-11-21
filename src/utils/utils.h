@@ -22,6 +22,6 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			NO_DEFINED_BIOME
 		};
 
-bool _check_gl_error(const char *file, int line);
+bool Check_gl_error(const char *file, int line);
 
-#define _glCheckError() _check_gl_error(__FILE__,__LINE__)
+#define GL_CHECK_ERROR() Check_gl_error(__FILE__,__LINE__)

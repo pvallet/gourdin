@@ -40,7 +40,7 @@ Ocean::Ocean(size_t x, size_t y, GLuint tex) :
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	_glCheckError();
+	GL_CHECK_ERROR();
 }
 
 void Ocean::draw() const {
