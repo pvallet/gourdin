@@ -138,8 +138,9 @@ private:
 	std::vector<std::unique_ptr<Edge> >   _edges;
 	std::vector<std::unique_ptr<Corner> > _corners;
 
-	// Contains the centers that are near to a given chunk. The chunks are sorted
-	// as chunk.x * NB_CHUNKS + chunk.y with tolerance computed by computeCenterToleranceToChunk
+	// Contains the centers that are near a given chunk (with tolerance computed by
+	// computeCenterToleranceToChunk).
+	// The chunks are sorted as chunk.x * NB_CHUNKS + chunk.y
 	std::vector<CentersInChunk> _centersInChunks;
 	// Contains the edges that intersect the chunk with tolerance TERRAIN_TEX_TRANSITION_SIZE
 	std::vector<std::set<Edge*> > _edgesInChunks;

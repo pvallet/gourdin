@@ -14,7 +14,8 @@
 Game::Game() :
   _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _hmapTransitionShader("src/shaders/terrainTexTransitions.vert", "src/shaders/terrainTexTransitions.frag") {}
+  _hmapTransitionShader("src/shaders/terrainTexTransitions.vert", "src/shaders/terrainTexTransitions.frag"),
+  _contentGenerator(_map) {}
 
 void Game::init() {
   srand(time(NULL));
@@ -51,6 +52,7 @@ void Game::generateHeightmap(size_t x, size_t y) {
   newHeightmap->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newHeightmap);
   _chunkStatus[x][y] = EDGE;
+  appendNewElements(_contentGenerator.genForestsInChunk(x, y));
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {

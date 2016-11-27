@@ -66,9 +66,9 @@ private:
 	std::set<igElement*, compDepth> _visibleElmts; // Visible
   std::unordered_set<igMovingElement*> _igMovingElements;
 
+  Map _map;
   ContentGenerator _contentGenerator;
 
-	Map _map;
 	TexManager _terrainTexManager;
 	Shader _hmapShader;
   Shader _hmapTransitionShader;

@@ -8,6 +8,10 @@ public:
   Perlin(int seed, int size);
   virtual ~Perlin() {}
 
+  inline void setParams(float octaves, float frequency, float persistence) {
+    _octaves = octaves; _frequency = frequency; _persistence = persistence;
+  }
+
   float getValue(float x, float y) const;
 
   static float cubic_interpolate(float before_p0, float p0, float p1, float after_p1, float t);
