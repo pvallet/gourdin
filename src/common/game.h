@@ -3,18 +3,18 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
+#include <unordered_set>
 #include <vector>
-
-#include "heightmap.h"
-#include "ocean.h"
 
 #include "lion.h"
 #include "antilope.h"
 #include "tree.h"
 
-#include "animationManager.h"
-#include "animationManagerInitializer.h"
+#include "contentGenerator.h"
+#include "heightmap.h"
 #include "map.h"
+#include "ocean.h"
+
 #include "texManager.h"
 
 #include "shader.h"
@@ -53,9 +53,9 @@ private:
 	sf::Vector2i neighbour      (size_t x, size_t y, size_t index) const;
   void generateNeighbourChunks(size_t x, size_t y);
 	void generateHeightmap      (size_t x, size_t y);
-  void generateForests        (size_t x, size_t y);
-  void generateHerd(sf::Vector2f pos, size_t count);
-  void updateMovingElementsStates() ;
+  void appendNewElements(std::vector<igElement*> elems);
+  void updateMovingElementsStates();
+
 
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 
@@ -64,13 +64,12 @@ private:
   // Raw pointers because the ownership is in _igElements
 	std::set<Controllable*> _selectedElmts; // Selection
 	std::set<igElement*, compDepth> _visibleElmts; // Visible
-  std::set<igMovingElement*> _igMovingElements;
+  std::unordered_set<igMovingElement*> _igMovingElements;
+
+  ContentGenerator _contentGenerator;
 
 	Map _map;
-  AnimationManagerInitializer _antilopeTexManager;
-  AnimationManagerInitializer _lionTexManager;
 	TexManager _terrainTexManager;
-	TreeTexManager _treeTexManager;
 	Shader _hmapShader;
   Shader _hmapTransitionShader;
   Shader _igEShader;

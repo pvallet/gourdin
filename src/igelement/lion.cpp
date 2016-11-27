@@ -91,7 +91,7 @@ void Lion::setTarget(sf::Vector2f t) {
 	}
 }
 
-void Lion::kill(const std::set<igMovingElement*>& neighbors) {
+void Lion::kill(const std::unordered_set<igMovingElement*>& neighbors) {
 	float distance;
 	igMovingElement* closest = NULL;
 	float nearestDist = _range;

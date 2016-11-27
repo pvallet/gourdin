@@ -6,15 +6,10 @@
 
 #include "camera.h"
 
-#include <iostream>
-#include <cstdlib>
 #include <ctime>
 
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 16
-
-#define MIN_ANTILOPE_PROX 5.f
-#define HERD_RADIUS 10.f // for 10 antilopes
 
 Game::Game() :
   _hmapShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
@@ -29,9 +24,6 @@ void Game::init() {
   _hmapTransitionShader.load();
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
-  _treeTexManager.    load("res/trees/");
-  _antilopeTexManager.load("res/animals/antilope/");
-  _lionTexManager.    load("res/animals/lion/");
   _map.load("res/map/");
 
   std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
@@ -42,12 +34,16 @@ void Game::init() {
     _terrain.push_back(std::move(initializer2));
   }
 
+  _contentGenerator.init();
+  _contentGenerator.saveToImage("contents");
+
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
-  generateHerd(     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20);
+  appendNewElements(_contentGenerator.genHerd(
+                    sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
 }
 
 void Game::generateHeightmap(size_t x, size_t y) {
@@ -55,17 +51,6 @@ void Game::generateHeightmap(size_t x, size_t y) {
   newHeightmap->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newHeightmap);
   _chunkStatus[x][y] = EDGE;
-  generateForests(x,y);
-  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f(x * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager))));
-  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f(x * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager))));
-  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, y * CHUNK_SIZE), AnimationManager(_lionTexManager))));
-  // _igElements.push_back(std::unique_ptr<igElement>(new Lion(sf::Vector2f((x+1) * CHUNK_SIZE, (y+1) * CHUNK_SIZE), AnimationManager(_lionTexManager))));
-
-  // std::vector<Corner*> bite = _map.getCornersInChunk(x,y);
-  // for (auto it = bite.begin(); it != bite.end(); it++) {
-  //   _igElements.push_back(std::unique_ptr<igElement>(new Tree(
-  //     sf::Vector2f((*it)->x, (*it)->y), _treeTexManager, TEMPERATE_DESERT,0)));
-  // }
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
@@ -113,6 +98,17 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
   }
 
   _chunkStatus[x][y] = NOT_VISIBLE;
+}
+
+void Game::appendNewElements(std::vector<igElement*> elems) {
+  for (size_t i = 0; i < elems.size(); i++)
+    _igElements.push_back(std::unique_ptr<igElement>(elems[i]));
+
+  if (!elems.empty() && dynamic_cast<igMovingElement*>(elems.front())) {
+    for (size_t i = 0; i < elems.size(); i++) {
+      _igMovingElements.insert(dynamic_cast<igMovingElement*>(elems[i]));
+    }
+  }
 }
 
 void Game::updateMovingElementsStates() {
@@ -376,92 +372,7 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {
-  Lion *newLion = new Lion(get2DCoord(screenTarget), AnimationManager(_lionTexManager));
-  _igMovingElements.insert(newLion);
-  _igElements.push_back(std::unique_ptr<igElement>(newLion));
-}
-
-void Game::generateHerd(sf::Vector2f pos, size_t count) {
-  float r, theta;
-  sf::Vector2f p, diff;
-  bool add;
-
-  std::vector<Antilope*> tmp;
-
-  for (size_t i = 0 ; i < count ; i++) {
-    add = true;
-    r = sqrt(RANDOMF) * HERD_RADIUS * sqrt(count);
-    theta = RANDOMF * 2*M_PI;
-
-    p.x = pos.x + r*cos(theta);
-    p.y = pos.y + r*sin(theta);
-
-    for (unsigned int j = 0 ; j < tmp.size() ; j++) {
-      diff = tmp[j]->getPos() - p;
-
-      if (diff.x * diff.x + diff.y * diff.y < MIN_ANTILOPE_PROX) {
-        i--;
-        add = false;
-      }
-    }
-
-    if (add) {
-      tmp.push_back(new Antilope(p, AnimationManager(_antilopeTexManager)));
-    }
-  }
-
-  for (size_t i = 0 ; i < count ; i++) {
-    _igElements.push_back(std::unique_ptr<igElement>(tmp[i]));
-    _igMovingElements.insert(tmp[i]);
-  }
-}
-
-void Game::generateForests(size_t x, size_t y) {
-  float r, theta;
-  sf::Vector2f p, diff;
-  bool add;
-  size_t count, nbTrees;
-
-  std::vector<Tree*> tmp;
-
-  std::vector<Center*> centers = _map.getCentersInChunk(x,y);
-
-  for (unsigned int i = 0 ; i < centers.size() ; i++) {
-    if (centers[i]->biome >= 11) { // No forests in other biomes
-      count = 0;
-      tmp.clear();
-      nbTrees = _treeTexManager.getExtension(centers[i]->biome);
-      nbTrees *= 1.5;
-
-      for (size_t j = 0 ; j < nbTrees ; j++) {
-        add = true;
-        r = sqrt(RANDOMF) * _treeTexManager.getExtension(centers[i]->biome) * sqrt(nbTrees);
-        theta = RANDOMF * 2*M_PI;
-
-        p.x = centers[i]->x + r*cos(theta);
-        p.y = centers[i]->y + r*sin(theta);
-
-        for (unsigned int k = 0 ; k < tmp.size() ; k++) {
-          diff = tmp[k]->getPos() - p;
-
-          if (diff.x * diff.x + diff.y * diff.y < _treeTexManager.getDensity(centers[i]->biome) ||
-            _map.getClosestCenter(p)->biome != centers[i]->biome) {
-            add = false;
-          }
-        }
-
-        if (add) {
-          count++;
-          tmp.push_back(new Tree(p, _treeTexManager, centers[i]->biome,
-            (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(centers[i]->biome))));
-        }
-      }
-
-      for (size_t j = 0 ; j < count ; j++) {
-        _igElements.push_back(std::unique_ptr<igElement>(tmp[j]));
-      }
-    }
-  }
+  appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
 }
 
 sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {

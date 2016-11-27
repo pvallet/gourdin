@@ -60,7 +60,7 @@ sf::Time Antilope::generateTimePhase(sf::Time average) const {
 					- sf::seconds(average.asSeconds() * 0.4f);
 }
 
-BoidsInfo Antilope::getInfoFromNeighbors(const std::set<igMovingElement*>& neighbors) const {
+BoidsInfo Antilope::getInfoFromNeighbors(const std::unordered_set<igMovingElement*>& neighbors) const {
 	BoidsInfo res;
 	float distance;
 	res.minRepDst = _repulsionRadius;
@@ -223,7 +223,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	}
 }
 
-void Antilope::updateState(const std::set<igMovingElement*>& neighbors) {
+void Antilope::updateState(const std::unordered_set<igMovingElement*>& neighbors) {
 	BoidsInfo info = getInfoFromNeighbors(neighbors);
 
 	switch (_aStatus) {
