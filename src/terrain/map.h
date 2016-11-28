@@ -132,6 +132,7 @@ private:
 	void computeEdgeBoundingBoxes();
 	void sortEdges();
 	void sortCorners();
+	void fixLakes(); // Change biomes of lakes with non uniform elevation
 	bool boolAttrib(std::string str) const;
 	Biome biomeAttrib(std::string str) const;
 

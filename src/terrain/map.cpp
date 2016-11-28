@@ -321,6 +321,26 @@ void Map::sortCorners() {
 	}
 }
 
+void Map::fixLakes() {
+	for (size_t i = 0; i < _centers.size(); i++) {
+
+		if (_centers[i]->biome == LAKE || _centers[i]->biome == MARSH) {
+
+			// The lake is not flat (center elevation is the mean of its corners')
+			if (abs(_centers[i]->corners.front()->elevation - _centers[i]->elevation) > 7e-3) {
+
+				// Then simply change the biome to one of the neighbours'
+				for (size_t j = 0; j < _centers[i]->centers.size(); j++) {
+					if (_centers[i]->centers[j]->biome != _centers[i]->biome) {
+						_centers[i]->biome = _centers[i]->centers[j]->biome;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 void Map::load(std::string path) {
 	std::ostringstream xmlPath;
   xmlPath << path << "map.xml";
@@ -372,6 +392,8 @@ void Map::load(std::string path) {
 	}
 
 	setPointersInDataStructures();
+
+	fixLakes();
 
 	sortCenters(1.2*CHUNK_SIZE);
 	computeEdgeBoundingBoxes();
