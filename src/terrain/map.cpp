@@ -451,6 +451,40 @@ Center* Map::getClosestCenter(sf::Vector2f pos) const {
 	return _centersInChunks[index].centers[indices[0][0]];
 }
 
+Center* Map::getCenterOfCell(sf::Vector2f pos) const {
+
+	Center* closestCenter = getClosestCenter(pos);
+  Center* currentCenter = closestCenter;
+
+	for (size_t i = 0; i < closestCenter->centers.size() +1; i++) {
+		double x1 = currentCenter->x;
+    double y1 = currentCenter->y;
+
+    for (unsigned int k = 0 ; k < currentCenter->edges.size() ; k++) {
+      if (!currentCenter->edges[k]->mapEdge) {
+
+				double x2 = currentCenter->edges[k]->corner0->x;
+        double y2 = currentCenter->edges[k]->corner0->y;
+        double x3 = currentCenter->edges[k]->corner1->x;
+        double y3 = currentCenter->edges[k]->corner1->y;
+
+				// Linear interpolation to get the height
+        float s = ((y2-y3)*(pos.x-x3)+(x3-x2)*(pos.y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+        float t = ((y3-y1)*(pos.x-x3)+(x1-x3)*(pos.y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
+
+        if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
+					return currentCenter;
+        }
+      }
+		}
+
+		if (i < closestCenter->centers.size())
+			currentCenter = closestCenter->centers[i];
+	}
+
+	return closestCenter;
+}
+
 std::vector<Center*> Map::getCentersInChunk(size_t x, size_t y) const {
 
   std::vector<Center*> res;

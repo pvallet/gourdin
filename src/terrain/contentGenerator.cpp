@@ -91,7 +91,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
     sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
-    Biome biome = _map.getClosestCenter(pos)->biome;
+    Biome biome = _map.getCenterOfCell(pos)->biome;
 
     if (biome >= 11) { // No forests in other biomes
       if (isInForestMask(pos)) {

@@ -110,6 +110,7 @@ public:
 	void load(std::string path);
 
 	Center* getClosestCenter(sf::Vector2f pos) const;
+	Center* getCenterOfCell(sf::Vector2f pos) const;
 	std::vector<Center*>               getCentersInChunk(size_t x, size_t y) const;
 	inline const std::set<Edge*>&      getEdgesInChunk  (size_t x, size_t y) const {
 		return _edgesInChunks[x*NB_CHUNKS + y];
