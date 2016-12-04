@@ -1,3 +1,6 @@
+// Code inspired by tutorial:
+// http://cochoy-jeremy.developpez.com/tutoriels/2d/introduction-bruit-perlin/
+
 #pragma once
 
 #include <cstddef>

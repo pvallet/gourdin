@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "terrainGeometry.h"
+
 #include "utils.h"
 #include "vecUtils.h"
 
@@ -108,6 +110,7 @@ public:
 	virtual ~Map() {}
 
 	void load(std::string path);
+	void feedGeometryData(TerrainGeometry& terrainGeometry) const;
 
 	Center* getClosestCenter(sf::Vector2f pos) const;
 	Center* getCenterOfCell(sf::Vector2f pos) const;

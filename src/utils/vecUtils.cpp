@@ -55,15 +55,29 @@ glm::vec3 vu::convertGLM(sf::Vector3f u) {
 
 float vu::angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if one is the vector (0,0), else value in degrees
 	int sign = u.x * v.y - u.y * v.x >= 0.f ? 1 : -1; // Cross >= 0
-    float lengths = norm(u)*norm(v);
+  float lengths = norm(u)*norm(v);
 
-    if (lengths == 0.f) {
-        return -1.f;
-    }
+  if (lengths == 0.f) {
+    return -1.f;
+  }
 
-    else {
-    	float nDot = dot(u,v) / lengths;
+  else {
+  	float nDot = dot(u,v) / lengths;
 
-        return sign * acos(nDot) * 180.f / M_PI;
-    }
+    return sign * acos(nDot) * 180.f / M_PI;
+  }
+}
+
+float vu::absoluteAngle(const sf::Vector3f& u, const sf::Vector3f& v) {
+	float lengths = norm(u)*norm(v);
+
+  if (lengths == 0.f) {
+    return 0.f;
+  }
+
+	else {
+  	float nDot = dot(u,v) / lengths;
+
+    return acos(nDot) * 180.f / M_PI;
+  }
 }

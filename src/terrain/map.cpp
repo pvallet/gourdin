@@ -225,6 +225,26 @@ void Map::setPointersInDataStructures() {
 	}
 }
 
+void Map::fixLakes() {
+	for (size_t i = 0; i < _centers.size(); i++) {
+
+		if (_centers[i]->biome == LAKE || _centers[i]->biome == MARSH) {
+
+			// The lake is not flat (center elevation is the mean of its corners')
+			if (abs(_centers[i]->corners.front()->elevation - _centers[i]->elevation) > 7e-3) {
+
+				// Then simply change the biome to one of the neighbours'
+				for (size_t j = 0; j < _centers[i]->centers.size(); j++) {
+					if (_centers[i]->centers[j]->biome != _centers[i]->biome) {
+						_centers[i]->biome = _centers[i]->centers[j]->biome;
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 void Map::sortCenters(float tolerance) {
 	_centersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
 
@@ -306,6 +326,8 @@ void Map::sortEdges() {
 	}
 }
 
+#include <fstream>
+
 void Map::sortCorners() {
 	_cornersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
 
@@ -317,26 +339,6 @@ void Map::sortCorners() {
 
 			_cornersInChunks[j*NB_CHUNKS + k].push_back(_corners[i].get());
 		}
-		}
-	}
-}
-
-void Map::fixLakes() {
-	for (size_t i = 0; i < _centers.size(); i++) {
-
-		if (_centers[i]->biome == LAKE || _centers[i]->biome == MARSH) {
-
-			// The lake is not flat (center elevation is the mean of its corners')
-			if (abs(_centers[i]->corners.front()->elevation - _centers[i]->elevation) > 7e-3) {
-
-				// Then simply change the biome to one of the neighbours'
-				for (size_t j = 0; j < _centers[i]->centers.size(); j++) {
-					if (_centers[i]->centers[j]->biome != _centers[i]->biome) {
-						_centers[i]->biome = _centers[i]->centers[j]->biome;
-						break;
-					}
-				}
-			}
 		}
 	}
 }
@@ -399,6 +401,29 @@ void Map::load(std::string path) {
 	computeEdgeBoundingBoxes();
 	sortEdges();
 	sortCorners();
+}
+
+void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
+	for (auto ctr = _centers.begin(); ctr != _centers.end(); ctr++) {
+		if ((*ctr)->biome != OCEAN) {
+			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
+				std::array<sf::Vector3f, 3> points;
+				points[0].x = (*edge)->corner0->x;
+				points[0].y = (*edge)->corner0->y;
+				points[0].z = (*edge)->corner0->elevation;
+
+				points[1].x = (*edge)->corner1->x;
+				points[1].y = (*edge)->corner1->y;
+				points[1].z = (*edge)->corner1->elevation;
+
+				points[2].x = (*ctr)->x;
+				points[2].y = (*ctr)->y;
+				points[2].z = (*ctr)->elevation;
+
+				terrainGeometry.addTriangle(points, (*ctr)->biome);
+			}
+		}
+	}
 }
 
 bool Map::boolAttrib(std::string str) const {

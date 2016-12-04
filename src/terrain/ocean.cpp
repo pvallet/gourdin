@@ -3,25 +3,22 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-Ocean::Ocean(size_t x, size_t y, GLuint tex) :
-	Chunk(x,y),
-	_vertices{0, 0, 0,
-			 CHUNK_SIZE, 0, 0,
-			 0, CHUNK_SIZE, 0,
-			 CHUNK_SIZE, CHUNK_SIZE, 0},
+Ocean::Ocean(float oversizeFactor) :
+	_vertices{
+       -MAX_COORD*oversizeFactor,    -MAX_COORD*oversizeFactor,    0,
+			 MAX_COORD*(1+oversizeFactor), -MAX_COORD*oversizeFactor,    0,
+			 -MAX_COORD*oversizeFactor,    MAX_COORD*(1+oversizeFactor), 0,
+			 MAX_COORD*(1+oversizeFactor), MAX_COORD*(1+oversizeFactor), 0},
 
 	_normals {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1},
-	_coord {0, 0,  TEX_FACTOR, 0,  0, TEX_FACTOR,  TEX_FACTOR, TEX_FACTOR},
-	_indices {0, 1, 2, 3},
-	_tex(tex) {
+	_coord {0, 0,
+          TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), 0,
+          0, TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor),
+          TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor)},
+	_indices {0, 1, 2, 3} {
 
-	_corners[0] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE,0);
-  _corners[1] = sf::Vector3f(_chunkPos.x * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE,0);
-  _corners[2] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, (_chunkPos.y+1) * CHUNK_SIZE,0);
-  _corners[3] = sf::Vector3f((_chunkPos.x+1) * CHUNK_SIZE, _chunkPos.y * CHUNK_SIZE,0);
-
-    // vbo
-
+  // vbo
+  glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glBufferData(	GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord) + sizeof(_normals), NULL, GL_STATIC_DRAW);
@@ -34,6 +31,7 @@ Ocean::Ocean(size_t x, size_t y, GLuint tex) :
 
   // ibo
 
+  glGenBuffers(1, &_ibo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), NULL, GL_STATIC_DRAW);
@@ -41,6 +39,11 @@ Ocean::Ocean(size_t x, size_t y, GLuint tex) :
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	GL_CHECK_ERROR();
+}
+
+Ocean::~Ocean() {
+  glDeleteBuffers(1, &_vbo);
+  glDeleteBuffers(1, &_ibo);
 }
 
 void Ocean::draw() const {

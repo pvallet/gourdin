@@ -10,10 +10,11 @@
 #include "antilope.h"
 #include "tree.h"
 
+#include "chunk.h"
 #include "contentGenerator.h"
-#include "heightmap.h"
 #include "map.h"
 #include "ocean.h"
+#include "terrainGeometry.h"
 
 #include "texManager.h"
 
@@ -52,7 +53,7 @@ private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
 	sf::Vector2i neighbour      (size_t x, size_t y, size_t index) const;
   void generateNeighbourChunks(size_t x, size_t y);
-	void generateHeightmap      (size_t x, size_t y);
+	void generateChunk          (size_t x, size_t y);
   void appendNewElements(std::vector<igElement*> elems);
   void updateMovingElementsStates();
 
@@ -66,12 +67,14 @@ private:
 	std::set<igElement*, compDepth> _visibleElmts; // Visible
   std::unordered_set<igMovingElement*> _igMovingElements;
 
-  Map _map;
   ContentGenerator _contentGenerator;
+  Map _map;
+  Ocean _ocean;
+  TerrainGeometry _terrainGeometry;
 
 	TexManager _terrainTexManager;
-	Shader _hmapShader;
-  Shader _hmapTransitionShader;
+	Shader _terrainShader;
+  Shader _terrainTransitionShader;
   Shader _igEShader;
 
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;

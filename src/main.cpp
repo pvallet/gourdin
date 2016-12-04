@@ -18,6 +18,7 @@ int main() {
   if (glewInit() != GLEW_OK)
     std::cerr << "Failed to initialize GLEW";
 
+  glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
   glCullFace (GL_BACK);
   glEnable (GL_CULL_FACE);
