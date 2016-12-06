@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
+#include <set>
 #include <unordered_set>
 #include <vector>
 

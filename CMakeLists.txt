@@ -27,16 +27,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 set(GLM_ROOT_DIR   external/glm)
 set(SFML_ROOT      external/SFML)
 set(GLEW_LOCATION  external/glew)
-set(FLANN_LOCATION external/flann)
 
 find_package(OpenGL)
 find_package(GLM)
 find_package(SFML 2.4.1 COMPONENTS system window graphics)
-find_package(FLANN)
 find_package(GLEW)
 
 # If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SFML_FOUND AND FLANN_FOUND AND GLEW_FOUND))
+if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SFML_FOUND AND GLEW_FOUND))
 
   message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
 
@@ -46,7 +44,6 @@ set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
   ${SFML_INCLUDE_DIR}
-  ${FLANN_INCLUDE_DIRS}
   ${GLEW_INCLUDE_DIRS}
 )
 
@@ -80,7 +77,6 @@ add_executable(out ${SOURCE_FILES})
 target_link_libraries(out
   ${OPENGL_LIBRARIES}
   ${SFML_LIBRARIES}
-  ${FLANN_LIBRARIES}
   ${GLEW_LIBRARIES}
 )
 
@@ -102,14 +98,6 @@ if (WIN32)
   add_custom_command(TARGET out POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     "${CMAKE_SOURCE_DIR}/${GLEW_LOCATION}/bin/glew32.dll"
-    $<TARGET_FILE_DIR:out>
-  )
-  endif()
-
-  if (FLANN_GIT_LOC)
-  add_custom_command(TARGET out POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_SOURCE_DIR}/${FLANN_GIT_LOC}/lib/libflann_cpp.dll"
     $<TARGET_FILE_DIR:out>
   )
   endif()

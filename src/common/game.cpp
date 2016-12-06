@@ -15,7 +15,7 @@ Game::Game() :
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _terrainTransitionShader("src/shaders/terrainTexTransitions.vert", "src/shaders/terrainTexTransitions.frag"),
-  _contentGenerator(_map),
+  _contentGenerator(_terrainGeometry),
   _ocean(0.5) {}
 
 void Game::init() {
@@ -29,6 +29,7 @@ void Game::init() {
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
   _terrainGeometry.computeNormals();
+  // _terrainGeometry.computeDistancesToBiomeEdges();
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
 
@@ -41,7 +42,7 @@ void Game::init() {
   }
 
   _contentGenerator.init();
-  _contentGenerator.saveToImage("contents");
+  // _contentGenerator.saveToImage("contents");
 
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
@@ -53,7 +54,7 @@ void Game::init() {
 }
 
 void Game::generateChunk(size_t x, size_t y) {
-  Chunk* newChunk = new Chunk(x, y, _terrainTexManager, _map);
+  Chunk* newChunk = new Chunk(x, y, _terrainTexManager, _terrainGeometry);
   newChunk->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
   _chunkStatus[x][y] = EDGE;
@@ -92,7 +93,7 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
           if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
 
 
-          else if (_map.isOcean(tmp.x, tmp.y))
+          else if (_terrainGeometry.isOcean(tmp.x, tmp.y))
             _chunkStatus[tmp.x][tmp.y] = NOT_GENERATED;
 
           else
@@ -160,8 +161,7 @@ void Game::update(sf::Time elapsed) {
   }
 
   cam.setHeight( _terrain[camPosX][camPosY]
-    ->getHeight(cam.getPointedPos().x - CHUNK_SIZE * camPosX,
-                cam.getPointedPos().y - CHUNK_SIZE * camPosY));
+    ->getHeight(cam.getPointedPos()));
 
   // Update terrains
   for (size_t i = 0; i < NB_CHUNKS; i++) {
@@ -203,9 +203,7 @@ void Game::update(sf::Time elapsed) {
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
       // No test yet to see if the element can move to its new pos (no collision)
-      float newHeight =   _terrain[chunkPosX][chunkPosY]
-                           ->getHeight(_igElements[i]->getPos().x - (int) CHUNK_SIZE * chunkPosX,
-                                       _igElements[i]->getPos().y - (int) CHUNK_SIZE * chunkPosY);
+      float newHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
 
       // Calculate new corners
       glm::vec3 corners3[4];
@@ -260,61 +258,40 @@ void Game::update(sf::Time elapsed) {
 void Game::render() const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glDisable(GL_DEPTH_TEST);
+  Camera& cam = Camera::getInstance();
+  glm::mat4 MVP = cam.getViewProjectionMatrix();
+
   glUseProgram(_terrainShader.getProgramID());
-  _terrainShader.sendModelMatrix(glm::mat4(1.f));
+	glUniformMatrix4fv(glGetUniformLocation(_terrainShader.getProgramID(), "MVP"),
+    1, GL_FALSE, &MVP[0][0]);
+
+  // Background Ocean
+
+  glDisable(GL_DEPTH_TEST);
   _ocean.draw();
   glEnable(GL_DEPTH_TEST);
 
-  // Chunk transitions
-
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glUseProgram(_terrainTransitionShader.getProgramID());
-
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE) {
-        glm::mat4 modelview = glm::translate(glm::mat4(1.f),
-          glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
-        );
-
-        _terrainTransitionShader.sendModelMatrix(modelview);
-        _terrain[i][j]->drawTransitions();
-      }
-    }
-  }
-
-  glDisable(GL_BLEND);
-
   // Chunk
 
-  glUseProgram(_terrainShader.getProgramID());
-
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE) {
-
-        glm::mat4 modelview = glm::translate(glm::mat4(1.f),
-          glm::vec3(CHUNK_SIZE * i, CHUNK_SIZE * j, 0.f)
-        );
-
-        _terrainShader.sendModelMatrix(modelview);
-
+      if (_chunkStatus[i][j] == VISIBLE)
         _terrain[i][j]->draw();
-      }
     }
   }
+
+  glUseProgram(0);
 
   // igElements
 
   glUseProgram(_igEShader.getProgramID());
+  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MVP"),
+    1, GL_FALSE, &MVP[0][0]);
+
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   for (auto it = _visibleElmts.begin() ; it != _visibleElmts.end() ; ++it) {
-    _terrainShader.sendModelMatrix(glm::mat4(1.f));
     (*it)->draw();
   }
 

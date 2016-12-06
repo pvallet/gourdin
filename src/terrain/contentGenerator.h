@@ -4,7 +4,7 @@
 
 #include <list>
 
-#include "map.h"
+#include "terrainGeometry.h"
 
 #include "animationManagerInitializer.h"
 #include "treeTexManager.h"
@@ -16,23 +16,23 @@ class igElement;
 
 class ContentGenerator {
 public:
-  ContentGenerator(Map& map);
+  ContentGenerator(const TerrainGeometry& terrainGeometry);
 
   void init();
 
-  void saveToImage(std::string savename);
+  void saveToImage(std::string savename) const;
 
   std::vector<igElement*> genForestsInChunk(size_t x, size_t y);
   // std::vector<igElement*> genHerdsInChunk(size_t x, size_t y);
-  std::vector<igElement*> genHerd(sf::Vector2f pos, size_t count);
+  std::vector<igElement*> genHerd(sf::Vector2f pos, size_t count) const;
 
-  std::vector<igElement*> genLion(sf::Vector2f pos);
+  std::vector<igElement*> genLion(sf::Vector2f pos) const;
 
 private:
-  bool isInForestMask(sf::Vector2f pos);
-  bool notTooCloseToOtherTrees(sf::Vector2f pos, float distance);
+  bool isInForestMask(sf::Vector2f pos) const;
+  bool notTooCloseToOtherTrees(sf::Vector2f pos, float distance) const;
 
-  Map& _map;
+  const TerrainGeometry& _terrainGeometry;
   Perlin _perlinGenerator;
 
   std::vector<std::vector<bool> > _forestsMask;

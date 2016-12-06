@@ -74,8 +74,8 @@ bool Shader::load() {
   glAttachShader(_programID, _fragmentID);
 
   glBindAttribLocation(_programID, 0, "in_Vertex");
-  glBindAttribLocation(_programID, 1, "in_TexCoord0");
-	glBindAttribLocation(_programID, 2, "in_Normal");
+	glBindAttribLocation(_programID, 1, "in_Normal");
+	glBindAttribLocation(_programID, 2, "in_TexCoord0");
 	glBindAttribLocation(_programID, 3, "in_Alpha_value");
 
   glLinkProgram(_programID);
@@ -99,12 +99,6 @@ bool Shader::load() {
 
     return false;
   }
-
-  else {
-		_matrixID = glGetUniformLocation(_programID, "MVP");
-		assert(_matrixID != -1 && "Your vertex shader must contain a matrix uniform \"MVP\" to perform the projection");
-    return true;
-	}
 }
 
 
@@ -166,10 +160,4 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
 	else
     return true;
-}
-
-void Shader::sendModelMatrix(const glm::mat4& model) const {
-	Camera& cam = Camera::getInstance();
-	glm::mat4 MVP = cam.getViewProjectionMatrix() * model;
-	glUniformMatrix4fv(_matrixID, 1, GL_FALSE, &MVP[0][0]);
 }

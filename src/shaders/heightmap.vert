@@ -1,8 +1,8 @@
 #version 130
 
 in vec3 in_Vertex;
-in vec2 in_TexCoord0;
 in vec3 in_Normal;
+in vec2 in_TexCoord0;
 
 out vec2 uv;
 out vec3 normal;

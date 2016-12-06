@@ -23,15 +23,11 @@ public:
   bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
   inline GLuint getProgramID() const {return _programID;}
 
-  void sendModelMatrix(const glm::mat4& model) const;
-
 private:
 
   GLuint _vertexID;
   GLuint _fragmentID;
   GLuint _programID;
-
-  GLint _matrixID; // for the modelview and projection matrix multiplication
 
   std::string _vertexSource;
   std::string _fragmentSource;

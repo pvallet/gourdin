@@ -12,8 +12,8 @@
 #define MIN_ANTILOPE_PROX 5.f
 #define HERD_RADIUS 10.f // for 10 antilopes
 
-ContentGenerator::ContentGenerator(Map& map) :
-  _map(map),
+ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
+  _terrainGeometry(terrainGeometry),
   _perlinGenerator(0, CONTENT_RES),
   _treesInChunk(NB_CHUNKS * NB_CHUNKS) {
 
@@ -36,7 +36,7 @@ void ContentGenerator::init() {
 	}
 }
 
-void ContentGenerator::saveToImage(std::string savename) {
+void ContentGenerator::saveToImage(std::string savename) const {
   std::vector<sf::Uint8> pixels(CONTENT_RES * CONTENT_RES * 4, 255);
 
 	for (int i = 0 ; i < CONTENT_RES ; i++) { // Convert mask to array of pixels
@@ -58,12 +58,12 @@ void ContentGenerator::saveToImage(std::string savename) {
 	texture.copyToImage().saveToFile(convert.str());
 }
 
-bool ContentGenerator::isInForestMask(sf::Vector2f pos) {
+bool ContentGenerator::isInForestMask(sf::Vector2f pos) const {
   return _forestsMask[(int) (pos.x / MAX_COORD * CONTENT_RES)]
                      [(int) (pos.y / MAX_COORD * CONTENT_RES)];
 }
 
-bool ContentGenerator::notTooCloseToOtherTrees(sf::Vector2f pos, float distance) {
+bool ContentGenerator::notTooCloseToOtherTrees(sf::Vector2f pos, float distance) const {
   for (size_t i = std::max((int) ((pos.x - distance)/CHUNK_SIZE), 0);
               i < std::min((int) ((pos.x + distance)/CHUNK_SIZE), NB_CHUNKS); i++) {
   for (size_t j = std::max((int) ((pos.y - distance)/CHUNK_SIZE), 0);
@@ -91,15 +91,17 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
     sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
-    Biome biome = _map.getCenterOfCell(pos)->biome;
+    Triangle* triContaining = _terrainGeometry.getTriangleContaining(pos);
 
-    if (biome >= 11) { // No forests in other biomes
-      if (isInForestMask(pos)) {
-        if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biome))) {
-          _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
+    if (triContaining != nullptr) {
+      if (triContaining->biome >= 11) { // No forests in other biomes
+        if (isInForestMask(pos)) {
+          if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(triContaining->biome))) {
+            _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
 
-          res.push_back(new Tree(pos, _treeTexManager, biome,
-            (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(biome))));
+            res.push_back(new Tree(pos, _treeTexManager, triContaining->biome,
+              (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(triContaining->biome))));
+          }
         }
       }
     }
@@ -108,7 +110,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   return res;
 }
 
-std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) {
+std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
   float r, theta;
   sf::Vector2f p, diff;
   bool add;
@@ -140,7 +142,7 @@ std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count
   return res;
 }
 
-std::vector<igElement*> ContentGenerator::genLion(sf::Vector2f pos) {
+std::vector<igElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
   std::vector<igElement*> res;
   res.push_back(new Lion(pos, AnimationManager(_lionTexManager)));
   return res;

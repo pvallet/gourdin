@@ -17,9 +17,9 @@ Firstly, install the dependencies for the building environment.
 ```
 sudo apt-get install build-essential libgl1-mesa-dev libgomp1
 ```
-Then you will need the dependencies of the project. Favor using the ones from the repositories as building them from the source takes a while (especially flann).
+Then you will need the dependencies of the project. Favor using the ones from the repositories as building them from the source takes a while.
 ```
-libsfml-dev libglew-dev libflann-dev libglm-dev
+libsfml-dev libglew-dev libglm-dev
 ```
 You might need to build these dependencies locally, for example if your repository does not have the right version (e.g. SFML < 2.4.1). In order to do that, run the script
 ```
@@ -30,7 +30,7 @@ to get all of them, or specify the libraries you want to build locally
 ./get_dependencies SFML
 ```
 
-The entries are `glm`, `SFML`, `glew`, and `flann`.
+The entries are `glm`, `SFML` and `glew`.
 
 #### 2. Building the project
 
@@ -54,7 +54,7 @@ All the steps will be explained as if the user was using Code::Blocks. It is eas
 
 #### 1. OpenMP
 
-The first step is to use a compiler that supports OpenMP. It will also be used to compile FLANN.
+The first step is to use a compiler that supports OpenMP.
 
 TDM-GCC does it pretty well on windows. Here is a tutorial on how to install it on windows. During the installation of TDM-GCC, don't forget to check the OpenMP box in the gcc menu when choosing your components.
 
@@ -66,11 +66,9 @@ You have then to retrieve all the dependencies on github, and compile them with 
 
 ##### Dependencies
 
-SFML 2.4.1 or higher, FLANN, GLEW and GLM
+SFML 2.4.1 or higher, GLEW and GLM
 
 https://github.com/SFML/SFML
-
-https://github.com/mariusmuja/flann
 
 https://github.com/nigels-com/glew
 

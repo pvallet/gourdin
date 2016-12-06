@@ -8,28 +8,58 @@
 
 // The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.f
+#define HEIGHT_FACTOR 1000.f
 
-float Edge::getDistanceToEdge(sf::Vector2f pos) {
-	sf::Vector2f a(corner1->x - corner0->x, corner1->y - corner0->y);
-  sf::Vector2f b(pos.x      - corner0->x, pos.y      - corner0->y);
-
-  float ab = vu::dot(a,b);
-
-  if (ab <= 0)
-    return vu::norm(b);
-  else {
-    float aa = vu::dot(a,a);
-    if (ab < aa) {
-      sf::Vector2f g = b - ab/aa * a;
-      return vu::norm(g);
-    }
-    else
-      return vu::norm(sf::Vector2f(pos.x - corner1->x, pos.y - corner1->y));
-  }
+bool Map::boolAttrib(std::string str) const {
+	if (str == std::string("true"))
+		return true;
+	else
+		return false;
 }
 
-bool Edge::isOnSameSideAsCenter0(sf::Vector2f pos) const {
-	return (vu::dot(normalToCenter0, pos-sf::Vector2f(corner0->x, corner0->y)) >= 0);
+Biome Map::biomeAttrib(std::string str) const {
+	if (str == std::string("OCEAN"))
+		return OCEAN;
+	else if (str == std::string("WATER"))
+		return WATER;
+	else if (str == std::string("LAKE"))
+		return LAKE;
+	else if (str == std::string("ICE"))
+		return ICE;
+	else if (str == std::string("MARSH"))
+		return MARSH;
+	else if (str == std::string("BEACH"))
+		return BEACH;
+	else if (str == std::string("RIVER"))
+		return RIVER;
+	else if (str == std::string("SNOW"))
+		return SNOW;
+	else if (str == std::string("TUNDRA"))
+		return TUNDRA;
+	else if (str == std::string("BARE"))
+		return BARE;
+	else if (str == std::string("SCORCHED"))
+		return SCORCHED;
+	else if (str == std::string("TAIGA"))
+		return TAIGA;
+	else if (str == std::string("SHRUBLAND"))
+		return SHRUBLAND;
+	else if (str == std::string("TEMPERATE_DESERT"))
+		return TEMPERATE_DESERT;
+	else if (str == std::string("TEMPERATE_RAIN_FOREST"))
+		return TEMPERATE_RAIN_FOREST;
+	else if (str == std::string("TEMPERATE_DECIDUOUS_FOREST"))
+		return TEMPERATE_DECIDUOUS_FOREST;
+	else if (str == std::string("GRASSLAND"))
+		return GRASSLAND;
+	else if (str == std::string("TROPICAL_RAIN_FOREST"))
+		return TROPICAL_RAIN_FOREST;
+	else if (str == std::string("TROPICAL_SEASONAL_FOREST"))
+		return TROPICAL_SEASONAL_FOREST;
+	else if (str == std::string("SUBTROPICAL_DESERT"))
+		return SUBTROPICAL_DESERT;
+	else
+		return GRASSLAND;
 }
 
 void Map::loadCenters(const TiXmlHandle& hRoot) {
@@ -245,104 +275,6 @@ void Map::fixLakes() {
 	}
 }
 
-void Map::sortCenters(float tolerance) {
-	_centersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
-
-	for (auto it = _centersInChunks.begin(); it != _centersInChunks.end(); it++) {
-		it->isOcean = true;
-	}
-
-	for (size_t i = 0; i < _centers.size(); i++) {
-		for (size_t j = std::max(0,         (int) ((_centers[i]->x - tolerance) / CHUNK_SIZE));
-								j < std::min(NB_CHUNKS, (int) ((_centers[i]->x + tolerance) / CHUNK_SIZE) + 1); j++) {
-		for (size_t k = std::max(0,         (int) ((_centers[i]->y - tolerance) / CHUNK_SIZE));
-								k < std::min(NB_CHUNKS, (int) ((_centers[i]->y + tolerance) / CHUNK_SIZE) + 1); k++) {
-
-			_centersInChunks[j*NB_CHUNKS + k].centers.push_back(_centers[i].get());
-
-			if (_centers[i]->biome != OCEAN)
-				_centersInChunks[j*NB_CHUNKS + k].isOcean = false;
-		}
-		}
-	}
-
-	// Initialize the kdIndex to compute the nearest center for each chunk
-	for (auto it = _centersInChunks.begin(); it != _centersInChunks.end(); it++) {
-		it->data.resize(it->centers.size()*2);
-
-		#pragma omp parallel for
-		for (unsigned int i = 0 ; i < it->centers.size() ; i++) {
-			it->data[2*i]   = it->centers[i]->x;
-			it->data[2*i+1] = it->centers[i]->y;
-		}
-
-		it->dataset = flann::Matrix<float>(&(it->data[0]), it->centers.size(), 2);
-
-		it->kdIndex = std::unique_ptr<flann::Index<flann::L2<float> > >(
-			new flann::Index<flann::L2<float> >(it->dataset, flann::KDTreeIndexParams(1)));
-
-		it->kdIndex->buildIndex();
-	}
-}
-
-void Map::computeEdgeBoundingBoxes() {
-	for (size_t i = 0; i < _edges.size(); i++) {
-		if (!_edges[i]->mapEdge) {
-			_edges[i]->beginX = std::min(_edges[i]->corner0->x, _edges[i]->corner1->x) - TERRAIN_TEX_TRANSITION_SIZE;
-			_edges[i]->endX   = std::max(_edges[i]->corner0->x, _edges[i]->corner1->x) + TERRAIN_TEX_TRANSITION_SIZE;
-			_edges[i]->beginY = std::min(_edges[i]->corner0->y, _edges[i]->corner1->y) - TERRAIN_TEX_TRANSITION_SIZE;
-			_edges[i]->endY   = std::max(_edges[i]->corner0->y, _edges[i]->corner1->y) + TERRAIN_TEX_TRANSITION_SIZE;
-
-			sf::Vector2f edge(     _edges[i]->corner1->x - _edges[i]->corner0->x,
-				                     _edges[i]->corner1->y - _edges[i]->corner0->y);
-			sf::Vector2f toCenter0(_edges[i]->center0->x - _edges[i]->corner0->x,
-				                     _edges[i]->center0->y - _edges[i]->corner0->y);
-
-			sf::Vector2f project = (vu::dot(edge,toCenter0)/(float) pow(vu::norm(edge),2)) * edge;
-
-			_edges[i]->normalToCenter0 = toCenter0 - project;
-		}
-	}
-
-}
-
-void Map::sortEdges() {
-	_edgesInChunks.resize(NB_CHUNKS*NB_CHUNKS);
-
-	for (auto e = _edges.begin(); e != _edges.end(); e++) {
-		if (!(*e)->mapEdge) {
-			// We only need the edges that are a border between two different biomes
-			if ((*e)->center0->biome != (*e)->center1->biome) {
-				for (size_t i = std::max(0,         (int) ((*e)->beginX / CHUNK_SIZE));
-										i < std::min(NB_CHUNKS, (int) ((*e)->endX   / CHUNK_SIZE) + 1); i++) {
-				for (size_t j = std::max(0,         (int) ((*e)->beginY / CHUNK_SIZE));
-										j < std::min(NB_CHUNKS, (int) ((*e)->endY   / CHUNK_SIZE) + 1); j++) {
-
-					_edgesInChunks[i*NB_CHUNKS + j].insert(e->get());
-				}
-				}
-			}
-		}
-	}
-}
-
-#include <fstream>
-
-void Map::sortCorners() {
-	_cornersInChunks.resize(NB_CHUNKS*NB_CHUNKS);
-
-	for (size_t i = 0; i < _corners.size(); i++) {
-		for (size_t j = std::max(0,         (int) ((_corners[i]->x - TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE));
-								j < std::min(NB_CHUNKS, (int) ((_corners[i]->x + TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE) + 1); j++) {
-		for (size_t k = std::max(0,         (int) ((_corners[i]->y - TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE));
-								k < std::min(NB_CHUNKS, (int) ((_corners[i]->y + TERRAIN_TEX_TRANSITION_SIZE) / CHUNK_SIZE) + 1); k++) {
-
-			_cornersInChunks[j*NB_CHUNKS + k].push_back(_corners[i].get());
-		}
-		}
-	}
-}
-
 void Map::load(std::string path) {
 	std::ostringstream xmlPath;
   xmlPath << path << "map.xml";
@@ -396,156 +328,54 @@ void Map::load(std::string path) {
 	setPointersInDataStructures();
 
 	fixLakes();
-
-	sortCenters(1.2*CHUNK_SIZE);
-	computeEdgeBoundingBoxes();
-	sortEdges();
-	sortCorners();
 }
 
 void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
+	terrainGeometry.goingToAddNPoints(_corners.size()+_centers.size());
+
 	for (auto ctr = _centers.begin(); ctr != _centers.end(); ctr++) {
-		if ((*ctr)->biome != OCEAN) {
+		bool toDraw = true;
+
+		if ((*ctr)->biome == OCEAN) {
+			toDraw = false;
 			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
-				std::array<sf::Vector3f, 3> points;
-				points[0].x = (*edge)->corner0->x;
-				points[0].y = (*edge)->corner0->y;
-				points[0].z = (*edge)->corner0->elevation;
+				if (!(*edge)->mapEdge && (*edge)->center0->biome != (*edge)->center1->biome) {
+					toDraw = true;
+					break;
+				}
+			}
+		}
 
-				points[1].x = (*edge)->corner1->x;
-				points[1].y = (*edge)->corner1->y;
-				points[1].z = (*edge)->corner1->elevation;
+		if (toDraw) {
+			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
+				if (!(*edge)->mapEdge) {
+					std::array<sf::Vector3f, 3> points;
+					std::array<Biome, 4> biomes;
 
-				points[2].x = (*ctr)->x;
-				points[2].y = (*ctr)->y;
-				points[2].z = (*ctr)->elevation;
+					points[0].x = (*edge)->corner0->x;
+					points[0].y = (*edge)->corner0->y;
+					points[0].z = (*edge)->corner0->elevation * HEIGHT_FACTOR;
 
-				terrainGeometry.addTriangle(points, (*ctr)->biome);
+					points[1].x = (*edge)->corner1->x;
+					points[1].y = (*edge)->corner1->y;
+					points[1].z = (*edge)->corner1->elevation * HEIGHT_FACTOR;
+
+					points[2].x = (*ctr)->x;
+					points[2].y = (*ctr)->y;
+					points[2].z = (*ctr)->elevation * HEIGHT_FACTOR;
+
+					if ((*edge)->center0 == ctr->get())
+						biomes[0] = (*edge)->center1->biome;
+					else
+						biomes[0] = (*edge)->center0->biome;
+
+					for (size_t i = 0; i < 3; i++) {
+						biomes[i+1] = (*ctr)->biome;
+					}
+
+					terrainGeometry.addTriangle(points, biomes);
+				}
 			}
 		}
 	}
-}
-
-bool Map::boolAttrib(std::string str) const {
-	if (str == std::string("true"))
-		return true;
-	else
-		return false;
-}
-
-Biome Map::biomeAttrib(std::string str) const {
-	if (str == std::string("OCEAN"))
-		return OCEAN;
-	else if (str == std::string("WATER"))
-		return WATER;
-	else if (str == std::string("LAKE"))
-		return LAKE;
-	else if (str == std::string("ICE"))
-		return ICE;
-	else if (str == std::string("MARSH"))
-		return MARSH;
-	else if (str == std::string("BEACH"))
-		return BEACH;
-	else if (str == std::string("RIVER"))
-		return RIVER;
-	else if (str == std::string("SNOW"))
-		return SNOW;
-	else if (str == std::string("TUNDRA"))
-		return TUNDRA;
-	else if (str == std::string("BARE"))
-		return BARE;
-	else if (str == std::string("SCORCHED"))
-		return SCORCHED;
-	else if (str == std::string("TAIGA"))
-		return TAIGA;
-	else if (str == std::string("SHRUBLAND"))
-		return SHRUBLAND;
-	else if (str == std::string("TEMPERATE_DESERT"))
-		return TEMPERATE_DESERT;
-	else if (str == std::string("TEMPERATE_RAIN_FOREST"))
-		return TEMPERATE_RAIN_FOREST;
-	else if (str == std::string("TEMPERATE_DECIDUOUS_FOREST"))
-		return TEMPERATE_DECIDUOUS_FOREST;
-	else if (str == std::string("GRASSLAND"))
-		return GRASSLAND;
-	else if (str == std::string("TROPICAL_RAIN_FOREST"))
-		return TROPICAL_RAIN_FOREST;
-	else if (str == std::string("TROPICAL_SEASONAL_FOREST"))
-		return TROPICAL_SEASONAL_FOREST;
-	else if (str == std::string("SUBTROPICAL_DESERT"))
-		return SUBTROPICAL_DESERT;
-	else
-		return GRASSLAND;
-}
-
-Center* Map::getClosestCenter(sf::Vector2f pos) const {
-	float queryData[2];
-	queryData[0] = pos.x;
-	queryData[1] = pos.y;
-	int indicesData[1];
-	float distsData[1];
-
-	flann::Matrix<float> query(queryData,   1, 2);
-	flann::Matrix<int> indices(indicesData, 1, 1);
-  flann::Matrix<float> dists(distsData,   1, 1);
-
-	sf::Vector2i chunkPos(pos.x / CHUNK_SIZE, pos.y / CHUNK_SIZE);
-	size_t index = chunkPos.x * NB_CHUNKS + chunkPos.y;
-
-  _centersInChunks[index].kdIndex->knnSearch(
-		query, indices, dists, 1, flann::SearchParams(flann::FLANN_CHECKS_UNLIMITED));
-
-	return _centersInChunks[index].centers[indices[0][0]];
-}
-
-Center* Map::getCenterOfCell(sf::Vector2f pos) const {
-
-	Center* closestCenter = getClosestCenter(pos);
-  Center* currentCenter = closestCenter;
-
-	for (size_t i = 0; i < closestCenter->centers.size() +1; i++) {
-		double x1 = currentCenter->x;
-    double y1 = currentCenter->y;
-
-    for (unsigned int k = 0 ; k < currentCenter->edges.size() ; k++) {
-      if (!currentCenter->edges[k]->mapEdge) {
-
-				double x2 = currentCenter->edges[k]->corner0->x;
-        double y2 = currentCenter->edges[k]->corner0->y;
-        double x3 = currentCenter->edges[k]->corner1->x;
-        double y3 = currentCenter->edges[k]->corner1->y;
-
-				// Linear interpolation to get the height
-        float s = ((y2-y3)*(pos.x-x3)+(x3-x2)*(pos.y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-        float t = ((y3-y1)*(pos.x-x3)+(x1-x3)*(pos.y-y3)) / ((y2-y3)*(x1-x3)+(x3-x2)*(y1-y3));
-
-        if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
-					return currentCenter;
-        }
-      }
-		}
-
-		if (i < closestCenter->centers.size())
-			currentCenter = closestCenter->centers[i];
-	}
-
-	return closestCenter;
-}
-
-std::vector<Center*> Map::getCentersInChunk(size_t x, size_t y) const {
-
-  std::vector<Center*> res;
-  for (auto it  = _centersInChunks[x*NB_CHUNKS + y].centers.begin();
-						it != _centersInChunks[x*NB_CHUNKS + y].centers.end(); it++) {
-
-  	if ((*it)->x >=     x * CHUNK_SIZE &&
-	  		(*it)->x <= (x+1) * CHUNK_SIZE &&
-	  		(*it)->y >=     y * CHUNK_SIZE &&
-	  		(*it)->y <= (y+1) * CHUNK_SIZE) {
-
-  		res.push_back((*it));
-  	}
-  }
-
-	return res;
 }

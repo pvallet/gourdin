@@ -24,8 +24,8 @@ Ocean::Ocean(float oversizeFactor) :
   glBufferData(	GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord) + sizeof(_normals), NULL, GL_STATIC_DRAW);
 
   glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_vertices), &_vertices[0]);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord), &_coord[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord), sizeof(_normals), &_normals[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) , sizeof(_normals), &_normals[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_normals), sizeof(_coord), &_coord[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -52,8 +52,8 @@ void Ocean::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_normals)));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 

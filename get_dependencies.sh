@@ -41,28 +41,10 @@ function get_glew {
   cd ..
 }
 
-function get_flann {
-  wget https://github.com/mariusmuja/flann/archive/1.9.1.zip
-  unzip -q 1.9.1.zip
-  mv flann-1.9.1 flann
-  rm 1.9.1.zip
-
-  cd flann
-  mkdir build
-  cd build
-
-  cmake ..
-  make -j4
-  cp -r lib ..
-
-  cd ../..
-}
-
 if [ $# -eq 0 ]; then
   get_glm
   get_SFML
   get_glew
-  get_flann
 fi
 
 while [[ $# -gt 0 ]]
@@ -80,10 +62,6 @@ case $key in
 
     glew)
     get_glew
-    ;;
-
-    flann)
-    get_flann
     ;;
 
     *)
