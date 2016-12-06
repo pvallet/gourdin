@@ -11,7 +11,7 @@ public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
 	virtual ~igMovingElement() {}
 
-	void draw() const;
+	size_t draw() const;
 
 	void launchAnimation (ANM_TYPE type);
 	virtual void update(sf::Time elapsed, float theta);

@@ -20,7 +20,7 @@ public:
 	inline void setDepth(float nDepth) {_depth = nDepth;}
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
-	virtual void draw() const;
+	virtual size_t draw() const;
 
 	// Getters
 

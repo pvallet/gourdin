@@ -39,7 +39,7 @@ public:
   void init();
 
 	void update(sf::Time elapsed);
-	void render() const; // To be run on another thread
+	size_t render() const; // To be run on another thread
 	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);

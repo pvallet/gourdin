@@ -255,7 +255,9 @@ void Game::update(sf::Time elapsed) {
   }
 }
 
-void Game::render() const {
+size_t Game::render() const {
+  size_t nbTriangles = 0;
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Camera& cam = Camera::getInstance();
@@ -268,7 +270,7 @@ void Game::render() const {
   // Background Ocean
 
   glDisable(GL_DEPTH_TEST);
-  _ocean.draw();
+  nbTriangles += _ocean.draw();
   glEnable(GL_DEPTH_TEST);
 
   // Chunk
@@ -276,7 +278,7 @@ void Game::render() const {
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] == VISIBLE)
-        _terrain[i][j]->draw();
+        nbTriangles += _terrain[i][j]->draw();
     }
   }
 
@@ -292,7 +294,7 @@ void Game::render() const {
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   for (auto it = _visibleElmts.begin() ; it != _visibleElmts.end() ; ++it) {
-    (*it)->draw();
+    nbTriangles += (*it)->draw();
   }
 
   glDisable(GL_BLEND);
@@ -300,6 +302,8 @@ void Game::render() const {
   glUseProgram(0);
 
   GL_CHECK_ERROR();
+
+  return nbTriangles;
 }
 
 void Game::select(sf::IntRect rect, bool add) {

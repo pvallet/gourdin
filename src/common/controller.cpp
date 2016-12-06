@@ -29,7 +29,12 @@ void Controller::init() {
   _fpsCounter.setCharacterSize(10);
   _fpsCounter.setFillColor(sf::Color::White);
 
-  _posDisplay.setPosition(sf::Vector2f(0, 10));
+  _triCounter.setPosition(sf::Vector2f(0, 10));
+  _triCounter.setFont(_font);
+  _triCounter.setCharacterSize(10);
+  _triCounter.setFillColor(sf::Color::White);
+
+  _posDisplay.setPosition(sf::Vector2f(0, 20));
   _posDisplay.setFont(_font);
   _posDisplay.setCharacterSize(10);
   _posDisplay.setFillColor(sf::Color::White);
@@ -149,13 +154,18 @@ void Controller::renderMinimap() {
   }
 }
 
-void Controller::renderLog() {
+void Controller::renderLog(size_t nbTriangles) {
   Camera& cam = Camera::getInstance();
   int fps = 1.f / _elapsed.asSeconds();
   std::ostringstream convert;
   convert << fps;
   _fpsCounter.setString("FPS: " + convert.str());
   _window.draw(_fpsCounter);
+
+  convert.str(""); convert.clear();
+  convert << nbTriangles;
+  _triCounter.setString("NB Triangles: " + convert.str());
+  _window.draw(_triCounter);
 
   convert.str(""); convert.clear();
   convert << "X: " << cam.getPointedPos().x << "\n"
@@ -166,12 +176,12 @@ void Controller::renderLog() {
 
 void Controller::render() {
   if (_running) {
-    _game.render();
+    size_t nbTriangles = _game.render();
     _window.pushGLStates();
 
     renderLifeBars();
 
-    renderLog();
+    renderLog(nbTriangles);
     renderMinimap();
 
     _window.draw(_rectSelect);

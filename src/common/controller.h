@@ -19,7 +19,7 @@ public:
 private:
 	void renderLifeBars();
 	void renderMinimap();
-	void renderLog();
+	void renderLog(size_t nbTriangles);
 
 	void moveCamera();
 	void handleClick(sf::Event event);
@@ -30,6 +30,7 @@ private:
 	sf::RectangleShape _rectSelect;
 	sf::Font _font;
 	sf::Text _fpsCounter;
+	sf::Text _triCounter;
 	sf::Text _posDisplay;
 	sf::Sprite _minimapSprite;
 	sf::Texture _minimapTexture;

@@ -31,7 +31,7 @@ igElement::igElement(sf::Vector2f position) :
   _coord2D[5] = 1;
 	_coord2D[6] = 1;
 	_coord2D[7] = 1;
-	
+
 	glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
@@ -89,7 +89,7 @@ void igElement::setOrientation(float nOrientation) {
 		_orientation -= 360.f * (int) (_orientation / 360);
 }
 
-void igElement::draw() const {
+size_t igElement::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
@@ -107,4 +107,6 @@ void igElement::draw() const {
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	return 2;
 }

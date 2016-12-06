@@ -25,7 +25,7 @@ public:
 	virtual ~Chunk();
 
 	void generate();
-	void draw() const;
+	size_t draw() const;
 
 	// Set visible to false if there is no need to display the chunk
 	virtual void computeCulling();

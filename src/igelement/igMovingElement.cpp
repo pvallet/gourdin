@@ -14,12 +14,14 @@ igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphic
 	_size /= _size.y;
 }
 
-void igMovingElement::draw() const {
+size_t igMovingElement::draw() const {
 	_graphics.bindCurrentTexture();
 
 	igElement::draw();
 
   glBindTexture(GL_TEXTURE_2D, 0);
+
+	return 2;
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {

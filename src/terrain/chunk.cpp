@@ -130,7 +130,7 @@ void Chunk::generate() {
 	computeChunkBoundingBox();
 }
 
-void Chunk::draw() const {
+size_t Chunk::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
@@ -143,6 +143,8 @@ void Chunk::draw() const {
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
+	size_t nbTriangles = 0;
+
 	for (auto it = _textureData.begin(); it != _textureData.end(); it++) {
 		_terrainTexManager.bindTexture(it->first);
 
@@ -153,6 +155,8 @@ void Chunk::draw() const {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		nbTriangles += it->second.indices.size() / 3;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -162,6 +166,8 @@ void Chunk::draw() const {
 	glDisableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	return nbTriangles;
 }
 
 bool Chunk::theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const {
