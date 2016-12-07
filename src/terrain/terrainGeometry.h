@@ -34,6 +34,8 @@ struct compTri {
   for (size_t i = 0; i < 3; i++) {
     if (lhs->vertices[i] < rhs->vertices[i])
       return true;
+    else if (lhs->vertices[i] > rhs->vertices[i])
+      return false;
   }
 
   return false;
@@ -42,7 +44,7 @@ struct compTri {
 
 struct equalTri {
   bool operator()(const Triangle* lhs, const Triangle* rhs) {
-  return ( lhs->vertices == rhs->vertices );
+  return ( lhs->vertices == rhs->vertices);
   }
 };
 

@@ -1,5 +1,7 @@
 #include "chunk.h"
 
+#include <iostream>
+
 #include "camera.h"
 #include "vecUtils.h"
 
@@ -56,7 +58,6 @@ void Chunk::fillBufferData() {
 	std::list<Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y);
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
-
 		for (size_t i = 0; i < 3; i++) {
 			_textureData[(*tri)->biome].indices.push_back(addVertexInfo((*tri)->vertices[i]));
 		}
