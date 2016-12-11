@@ -39,7 +39,7 @@ public:
   void init();
 
 	void update(sf::Time elapsed);
-	size_t render() const; // To be run on another thread
+	std::pair<size_t,size_t> render() const; // Returns the number of triangles and number of elements
 	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);

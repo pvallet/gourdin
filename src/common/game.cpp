@@ -255,8 +255,9 @@ void Game::update(sf::Time elapsed) {
   }
 }
 
-size_t Game::render() const {
+std::pair<size_t,size_t> Game::render() const {
   size_t nbTriangles = 0;
+  size_t nbElements = 0;
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -294,7 +295,7 @@ size_t Game::render() const {
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   for (auto it = _visibleElmts.begin() ; it != _visibleElmts.end() ; ++it) {
-    nbTriangles += (*it)->draw();
+    nbElements += (*it)->draw();
   }
 
   glDisable(GL_BLEND);
@@ -303,7 +304,7 @@ size_t Game::render() const {
 
   GL_CHECK_ERROR();
 
-  return nbTriangles;
+  return std::pair<size_t,size_t>(nbTriangles, nbElements);
 }
 
 void Game::select(sf::IntRect rect, bool add) {

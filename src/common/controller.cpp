@@ -24,20 +24,10 @@ void Controller::init() {
   _game.init();
 
   // Log
-  _font.loadFromFile("res/Arial.ttf");
-  _fpsCounter.setFont(_font);
-  _fpsCounter.setCharacterSize(10);
-  _fpsCounter.setFillColor(sf::Color::White);
-
-  _triCounter.setPosition(sf::Vector2f(0, 10));
-  _triCounter.setFont(_font);
-  _triCounter.setCharacterSize(10);
-  _triCounter.setFillColor(sf::Color::White);
-
-  _posDisplay.setPosition(sf::Vector2f(0, 20));
-  _posDisplay.setFont(_font);
-  _posDisplay.setCharacterSize(10);
-  _posDisplay.setFillColor(sf::Color::White);
+  _logFont.loadFromFile("res/Arial.ttf");
+  _log.setFont(_logFont);
+  _log.setCharacterSize(10);
+  _log.setFillColor(sf::Color::White);
 
   // Mouse
   _rectSelect.setFillColor(sf::Color::Transparent);
@@ -154,34 +144,29 @@ void Controller::renderMinimap() {
   }
 }
 
-void Controller::renderLog(size_t nbTriangles) {
+void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
   Camera& cam = Camera::getInstance();
   int fps = 1.f / _elapsed.asSeconds();
+
   std::ostringstream convert;
-  convert << fps;
-  _fpsCounter.setString("FPS: " + convert.str());
-  _window.draw(_fpsCounter);
-
-  convert.str(""); convert.clear();
-  convert << nbTriangles;
-  _triCounter.setString("NB Triangles: " + convert.str());
-  _window.draw(_triCounter);
-
-  convert.str(""); convert.clear();
+  convert << "FPS: " << fps << std::endl;
+  convert << "NB Triangles: " << renderStats.first << std::endl;
+  convert << "NB Elements:  " << renderStats.second << std::endl;
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y;
-  _posDisplay.setString(convert.str());
-  _window.draw(_posDisplay);
+
+  _log.setString(convert.str());
+  _window.draw(_log);
 }
 
 void Controller::render() {
   if (_running) {
-    size_t nbTriangles = _game.render();
+    std::pair<size_t,size_t> renderStats = _game.render();
     _window.pushGLStates();
 
     renderLifeBars();
 
-    renderLog(nbTriangles);
+    renderLog(renderStats);
     renderMinimap();
 
     _window.draw(_rectSelect);
