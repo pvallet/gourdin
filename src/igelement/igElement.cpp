@@ -108,5 +108,5 @@ size_t igElement::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	return 2;
+	return 1;
 }

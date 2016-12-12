@@ -17,5 +17,5 @@ size_t Tree::draw() const {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return 2;
+	return 1;
 }

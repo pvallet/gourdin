@@ -48,7 +48,7 @@ protected:
 	GLuint _ibo;
 
 	std::array<float, 12> _vertices;
-	std::array<float, 8>  _coord2D;
+	std::array<float,  8> _coord2D;
 	std::array<GLuint, 4> _indices;
 
 private:

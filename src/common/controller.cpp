@@ -154,6 +154,9 @@ void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
   convert << "NB Elements:  " << renderStats.second << std::endl;
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y;
+  convert << "R:     " << cam.getZoomFactor() * INIT_R << "\n"
+          << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) << "\n"
+          << "Phi:   " << cam.getPhi();
 
   _log.setString(convert.str());
   _window.draw(_log);

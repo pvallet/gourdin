@@ -21,7 +21,7 @@ size_t igMovingElement::draw() const {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return 2;
+	return 1;
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {

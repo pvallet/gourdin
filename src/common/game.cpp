@@ -186,6 +186,11 @@ void Game::update(sf::Time elapsed) {
 
   updateMovingElementsStates();
 
+  glm::mat4 rotateCamera = glm::rotate(glm::mat4(1.f), (float) M_PI / 180.f * cam.getTheta(),
+                                       glm::vec3(0, 0, 1));
+  rotateCamera = glm::rotate(rotateCamera, ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
+                                       glm::vec3(0, 1, 0));
+
   _visibleElmts.clear();
 
   // Update in game elements characteristics
@@ -203,27 +208,29 @@ void Game::update(sf::Time elapsed) {
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
       // No test yet to see if the element can move to its new pos (no collision)
-      float newHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
+      float baseHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
 
       // Calculate new corners
       glm::vec3 corners3[4];
       float width = _igElements[i]->getSize().x;
+      float height = _igElements[i]->getSize().y;
 
-      corners3[0] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.f)*width/2,
-                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.f)*width/2,
-                                newHeight + _igElements[i]->getSize().y);
+      corners3[0] = glm::vec3( 0,  width/2, height);
+      corners3[1] = glm::vec3( 0, -width/2, height);
+      corners3[2] = glm::vec3( 0, -width/2, 0);
+      corners3[3] = glm::vec3( 0,  width/2, 0);
 
-      corners3[1] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.f)*width/2,
-                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.f)*width/2,
-                                newHeight + _igElements[i]->getSize().y);
+      glm::vec3 translationPos(_igElements[i]->getPos().x,
+                               _igElements[i]->getPos().y,
+                               baseHeight);
 
-      corners3[2] = glm::vec3(  _igElements[i]->getPos().x + sin(cam.getTheta()*M_PI/180.f)*width/2,
-                                _igElements[i]->getPos().y - cos(cam.getTheta()*M_PI/180.f)*width/2,
-                                newHeight);
+      glm::mat4 model = glm::translate(glm::mat4(1.f), translationPos) * rotateCamera;
 
-      corners3[3] = glm::vec3(  _igElements[i]->getPos().x - sin(cam.getTheta()*M_PI/180.f)*width/2,
-                                _igElements[i]->getPos().y + cos(cam.getTheta()*M_PI/180.f)*width/2,
-                                newHeight);
+      for (size_t i = 0; i < 4; i++) {
+        glm::vec4 tmp(corners3[i], 1);
+        tmp = model * tmp;
+        corners3[i] = glm::vec3(tmp);
+      }
 
       _igElements[i]->set3DCorners(corners3);
 
@@ -249,9 +256,9 @@ void Game::update(sf::Time elapsed) {
 
       _igElements[i]->set2DCorners(cornersRect);
       _igElements[i]->setDepth(depth);
-
-      _visibleElmts.insert(_igElements[i].get());
     }
+
+    _visibleElmts.insert(_igElements[i].get());
   }
 }
 

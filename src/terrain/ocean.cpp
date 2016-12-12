@@ -72,5 +72,5 @@ size_t Ocean::draw() const {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return 2;
+	return 0;
 }
