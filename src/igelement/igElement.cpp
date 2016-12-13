@@ -6,6 +6,7 @@
 #include <iostream>
 #include <ctime>
 
+#include "camera.h"
 #include "utils.h"
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
@@ -66,18 +67,14 @@ void igElement::update(sf::Time elapsed, float theta) {
 	_camOrientation = theta;
 }
 
-void igElement::set3DCorners(glm::vec3 nCorners[4]) {
-	for (size_t i = 0 ; i < 4 ; i++) {
-		_vertices[3*i]   = nCorners[i].x;
-		_vertices[3*i+1] = nCorners[i].y;
-		_vertices[3*i+2] = nCorners[i].z;
-	}
+void igElement::setVertices(std::array<float,12> nVertices) {
+	_vertices = nVertices;
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setOrientation(float nOrientation) {
@@ -109,4 +106,17 @@ size_t igElement::draw() const {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	return 1;
+}
+
+sf::IntRect igElement::getScreenCoord() const {
+	Camera& cam = Camera::getInstance();
+
+	sf::IntRect res;
+
+	res.left = (_vertices[3] + 1.f) / 2.f * cam.getW();
+	res.top = -(_vertices[1] + 1.f) / 2.f * cam.getH() + cam.getH();
+	res.width =  (_vertices[0] - _vertices[3]) / 2.f * cam.getW();
+	res.height = (_vertices[1] - _vertices[7]) / 2.f * cam.getH();
+
+	return res;
 }

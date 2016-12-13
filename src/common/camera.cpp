@@ -5,7 +5,7 @@ Camera::Camera() :
   _fovAngle(45),
 	_aspectRatio(1.f),
 	_nearPlane(0.1f),
-	_farPlane(100000.0),
+	_farPlane(100000.f),
 	_x(0.f), _y(0.f), _height(0.f),
 	_r(INIT_R),
 	_phi(60.f),

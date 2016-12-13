@@ -11,6 +11,12 @@
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 16
 
+struct compDepth {
+  bool operator()(const igElement* a, const igElement* b) const {
+    return a->getDepth() >= b->getDepth();
+  }
+} compDepthObj;
+
 Game::Game() :
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
@@ -103,7 +109,7 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
     }
   }
 
-  _chunkStatus[x][y] = NOT_VISIBLE;
+  _chunkStatus[x][y] = VISIBLE;
 }
 
 void Game::appendNewElements(std::vector<igElement*> elems) {
@@ -156,12 +162,11 @@ void Game::update(sf::Time elapsed) {
   int camPosY = cam.getPointedPos().y < 0 ? cam.getPointedPos().y / CHUNK_SIZE - 1 : cam.getPointedPos().y / CHUNK_SIZE;
 
   // Update camera
-  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED) {
+  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED)
     generateChunk(camPosX, camPosY);
-  }
 
-  cam.setHeight( _terrain[camPosX][camPosY]
-    ->getHeight(cam.getPointedPos()));
+  cam.setHeight( _terrain[camPosX][camPosY]->getHeight(cam.getPointedPos()));
+  cam.apply();
 
   // Update terrains
   for (size_t i = 0; i < NB_CHUNKS; i++) {
@@ -186,12 +191,13 @@ void Game::update(sf::Time elapsed) {
 
   updateMovingElementsStates();
 
-  glm::mat4 rotateCamera = glm::rotate(glm::mat4(1.f), (float) M_PI / 180.f * cam.getTheta(),
-                                       glm::vec3(0, 0, 1));
-  rotateCamera = glm::rotate(rotateCamera, ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
-                                       glm::vec3(0, 1, 0));
+  glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
+                                         (float) M_PI / 180.f * cam.getTheta(),
+                                         glm::vec3(0, 0, 1));
 
-  _visibleElmts.clear();
+  rotateElements =           glm::rotate(rotateElements,
+                                         ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
+                                         glm::vec3(0, 1, 0));
 
   // Update in game elements characteristics
   for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
@@ -220,46 +226,55 @@ void Game::update(sf::Time elapsed) {
       corners3[2] = glm::vec3( 0, -width/2, 0);
       corners3[3] = glm::vec3( 0,  width/2, 0);
 
-      glm::vec3 translationPos(_igElements[i]->getPos().x,
-                               _igElements[i]->getPos().y,
-                               baseHeight);
+      glm::vec3 translatePos(_igElements[i]->getPos().x,
+                             _igElements[i]->getPos().y,
+                             baseHeight);
 
-      glm::mat4 model = glm::translate(glm::mat4(1.f), translationPos) * rotateCamera;
+      glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
 
+      // Compute their projections
       for (size_t i = 0; i < 4; i++) {
-        glm::vec4 tmp(corners3[i], 1);
+        glm::vec4 tmp(corners3[i], 1.f);
         tmp = model * tmp;
-        corners3[i] = glm::vec3(tmp);
+        tmp = cam.getViewProjectionMatrix() * tmp;
+        corners3[i] = glm::vec3(tmp) / tmp.w;
       }
 
-      _igElements[i]->set3DCorners(corners3);
+      // Culling
+      if ((corners3[1].x > -1 && corners3[1].y > -1 &&
+           corners3[1].x <  1 && corners3[1].y <  1) ||
+          (corners3[3].x > -1 && corners3[3].y > -1 &&
+           corners3[3].x <  1 && corners3[3].y <  1)) {
 
-      // Calculate their projections
-      glm::mat4 viewProj = cam.getViewProjectionMatrix();
+        std::array<float,12> vertices;
 
-      glm::vec3 cornersProjNorm[4];
-      for (size_t i = 0; i < 4; i++) {
-        cornersProjNorm[i] = glm::project(corners3[i], glm::mat4(1.f), viewProj,
-          glm::vec4(0,0,cam.getW(),cam.getH()));
+        for (size_t i = 0; i < 4; i++) {
+          vertices[3*i]     = corners3[i].x;
+          vertices[3*i + 1] = corners3[i].y;
+          vertices[3*i + 2] = corners3[i].z;
+        }
+
+        _igElements[i]->setVertices(vertices);
+        _igElements[i]->setVisible(true);
       }
 
-      float left  = cornersProjNorm[0].x;
-      float top   = cornersProjNorm[0].y;
-      float right = cornersProjNorm[1].x;
-      float bot   = cornersProjNorm[3].y;
-      float depth = cornersProjNorm[3].z;
-
-      top = cam.getH()-top;
-      bot = cam.getH()-bot;
-
-      sf::IntRect cornersRect((int) left, (int) top, (int) right-left, (int) bot-top);
-
-      _igElements[i]->set2DCorners(cornersRect);
-      _igElements[i]->setDepth(depth);
+      else
+        _igElements[i]->setVisible(false);
     }
 
-    _visibleElmts.insert(_igElements[i].get());
+    else
+      _igElements[i]->setVisible(false);
   }
+
+  // Fill and sort the visible elements
+  _visibleElmts.clear();
+
+  for (size_t i = 0; i < _igElements.size(); i++) {
+    if (_igElements[i]->isVisible())
+      _visibleElmts.push_back(_igElements[i].get());
+  }
+
+  std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
 }
 
 std::pair<size_t,size_t> Game::render() const {
@@ -295,17 +310,19 @@ std::pair<size_t,size_t> Game::render() const {
   // igElements
 
   glUseProgram(_igEShader.getProgramID());
-  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MVP"),
-    1, GL_FALSE, &MVP[0][0]);
+
+  glDepthMask(false);
 
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  for (auto it = _visibleElmts.begin() ; it != _visibleElmts.end() ; ++it) {
-    nbElements += (*it)->draw();
+  for (size_t i = 0; i < _visibleElmts.size(); i++) {
+    nbElements += _visibleElmts[i]->draw();
   }
 
   glDisable(GL_BLEND);
+
+  glDepthMask(true);
 
   glUseProgram(0);
 
@@ -322,7 +339,7 @@ void Game::select(sf::IntRect rect, bool add) {
     Controllable *ctrl = dynamic_cast<Controllable*>(_igElements[i].get());
     if (ctrl) {
       if (_selectedElmts.find(ctrl) == _selectedElmts.end()) { // _igElements[i] is not selected yet, we can bother to calculate
-        sf::IntRect c = ctrl->get2DCorners();
+        sf::IntRect c = ctrl->getScreenCoord();
 
         int centerX, centerY;
 
@@ -345,7 +362,6 @@ void Game::select(sf::IntRect rect, bool add) {
     }
   }
 }
-
 void Game::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2f target = get2DCoord(screenTarget);
 

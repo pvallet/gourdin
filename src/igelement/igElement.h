@@ -15,33 +15,29 @@ public:
 	virtual ~igElement();
 
 	virtual void update(sf::Time elapsed, float theta);
-	void set3DCorners(glm::vec3 nCorners[4]);
-	void set2DCorners(const sf::IntRect& nCorners) {_corners2 = nCorners;}
-	inline void setDepth(float nDepth) {_depth = nDepth;}
+	void setVertices(std::array<float,12> nVertices);
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
 	virtual size_t draw() const;
 
 	// Getters
 
+	sf::IntRect getScreenCoord() const;
 	inline sf::Vector2f getPos() const {return _pos;}
 	inline float getOrientation() const {return _orientation;}
 	inline sf::Vector2f getSize() const {return _size;}
-	inline sf::IntRect get2DCorners() const {return _corners2;}
-	inline float getDepth() const {return _depth;}
-	inline bool getVisible() const {return _visible;}
+	inline std::array<float,12> getVertices() const {return _vertices;}
+	inline float getDepth() const {return _vertices[2];}
+	inline bool isVisible() const {return _visible;}
 
 protected:
 	sf::Vector2f _pos;
 	sf::Vector2f _size;
 
-	sf::IntRect _corners2;
-
 	float _camOrientation; // Angle between the camera and the vector (0,1)
 
 	void setOrientation(float nOrientation);
 
-	float _depth; // Distance to camera
 	bool _visible;
 
 	GLuint _vbo;

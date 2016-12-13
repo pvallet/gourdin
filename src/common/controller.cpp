@@ -65,7 +65,7 @@ void Controller::renderLifeBars() {
   float maxHeightFactor;
 
   for(auto it = sel.begin(); it != sel.end(); ++it) {
-    corners = (*it)->get2DCorners();
+    corners = (*it)->getScreenCoord();
     maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
     Lion* lion;
@@ -153,10 +153,11 @@ void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
   convert << "NB Triangles: " << renderStats.first << std::endl;
   convert << "NB Elements:  " << renderStats.second << std::endl;
   convert << "X: " << cam.getPointedPos().x << "\n"
-          << "Y: " << cam.getPointedPos().y;
-  convert << "R:     " << cam.getZoomFactor() * INIT_R << "\n"
-          << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) << "\n"
-          << "Phi:   " << cam.getPhi();
+          << "Y: " << cam.getPointedPos().y << std::endl;
+  convert << "R: " << cam.getZoomFactor() * INIT_R << "\n"
+          << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
+            (cam.getTheta() < 0 ? 360 : 0) << "\n"
+          << "Phi: " << cam.getPhi() << std::endl;
 
   _log.setString(convert.str());
   _window.draw(_log);
@@ -347,7 +348,6 @@ void Controller::run() {
     }
 
     moveCamera();
-    cam.apply();
     _game.update(_elapsed);
     render();
   }

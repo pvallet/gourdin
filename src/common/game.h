@@ -22,13 +22,6 @@
 #include "shader.h"
 #include "utils.h"
 
-struct compDepth {
-  bool operator()(const igElement* a, const igElement* b) const
-  {
-    return a->getDepth() >= b->getDepth();
-  }
-};
-
 enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 
 class Game {
@@ -65,7 +58,7 @@ private:
 
   // Raw pointers because the ownership is in _igElements
 	std::set<Controllable*> _selectedElmts; // Selection
-	std::set<igElement*, compDepth> _visibleElmts; // Visible
+	std::vector<igElement*> _visibleElmts; // Visible
   std::unordered_set<igMovingElement*> _igMovingElements;
 
   ContentGenerator _contentGenerator;
