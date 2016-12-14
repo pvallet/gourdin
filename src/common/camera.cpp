@@ -36,3 +36,17 @@ void Camera::apply() {
 
   _viewProjection = _projection * _view;
 }
+
+void Camera::translate(float dWinX, float dWinY) {
+  _x += dWinX*cos((_theta+90.f)*RAD)+dWinY*sin((_theta+90.f)*RAD);
+  _y +=	dWinX*sin((_theta+90.f)*RAD)-dWinY*cos((_theta+90.f)*RAD);
+
+  if (_x >= MAX_COORD)
+    _x = MAX_COORD-1;
+  if (_y >= MAX_COORD)
+    _y = MAX_COORD-1;
+  if (_x < 0)
+    _x = 0;
+  if (_y < 0)
+    _y = 0;
+}

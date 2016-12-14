@@ -21,7 +21,7 @@ Game::Game() :
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _contentGenerator(_terrainGeometry),
-  _ocean(0.5) {}
+  _ocean(2) {}
 
 void Game::init() {
   srand(time(NULL));
@@ -68,7 +68,7 @@ void Game::generateChunk(size_t x, size_t y) {
   newChunk->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
   _chunkStatus[x][y] = EDGE;
-  appendNewElements(_contentGenerator.genForestsInChunk(x, y));
+  // appendNewElements(_contentGenerator.genForestsInChunk(x, y));
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {

@@ -45,12 +45,12 @@ private:
 	Camera();
 
 	void resize(unsigned int W, unsigned int H);
+	void apply ();
 
-	inline void translate (float dWinX, float dWinY) {_x += dWinX*cos((_theta+90.f)*RAD)+dWinY*sin((_theta+90.f)*RAD);
-																										_y +=	dWinX*sin((_theta+90.f)*RAD)-dWinY*cos((_theta+90.f)*RAD);}
+	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
 	inline void zoom (float dr) {_r += dr;}
-	void apply ();
+
   inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}
   inline void setHeight(float nHeight) {_height = nHeight;}
 
