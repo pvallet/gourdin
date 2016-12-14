@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 
 <lstFlora>
-	<flora biome="11" nbTrees="9"  density="1"  extension="30"/>
-	<flora biome="12" nbTrees="9"  density="5"  extension="20"/>
-	<flora biome="13" nbTrees="6"  density="10" extension="30"/>
-	<flora biome="14" nbTrees="14" density="3"  extension="30"/>
-	<flora biome="15" nbTrees="14" density="3"  extension="30"/>
-	<flora biome="16" nbTrees="4"  density="4"  extension="20"/>
-	<flora biome="17" nbTrees="13" density="1"  extension="30"/>
-	<flora biome="18" nbTrees="5"  density="1"  extension="10"/>
-	<flora biome="19" nbTrees="13" density="7"  extension="30"/>
+	<flora biome="11" nbTrees="9"  density="1" />
+	<flora biome="12" nbTrees="9"  density="5" />
+	<flora biome="13" nbTrees="6"  density="10"/>
+	<flora biome="14" nbTrees="14" density="3" />
+	<flora biome="15" nbTrees="14" density="3" />
+	<flora biome="16" nbTrees="4"  density="4" />
+	<flora biome="17" nbTrees="13" density="1" />
+	<flora biome="18" nbTrees="5"  density="1" />
+	<flora biome="19" nbTrees="13" density="7" />
 </lstFlora>

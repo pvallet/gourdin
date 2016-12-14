@@ -1,10 +1,10 @@
-#include "texManager.h"
+#include "terrainTexManager.h"
 #include <iostream>
 #include <sstream>
 
 #include <SFML/Graphics.hpp>
 
-sf::Vector2u TexManager::loadTexture(std::string folder) {
+sf::Vector2u TerrainTexManager::loadTexture(std::string folder) {
 	sf::Image img;
 
   if (!img.loadFromFile(folder)) {
@@ -35,7 +35,7 @@ sf::Vector2u TexManager::loadTexture(std::string folder) {
 	return img.getSize();
 }
 
-void TexManager::loadFolder(size_t nbTextures, std::string folderPath) {
+void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {
   for (size_t i = 0 ; i < nbTextures ; i++) {
     std::ostringstream convert;
     convert << folderPath << i << ".png";

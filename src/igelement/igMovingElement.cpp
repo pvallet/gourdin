@@ -19,7 +19,7 @@ size_t igMovingElement::draw() const {
 
 	igElement::draw();
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+ glBindTexture(GL_TEXTURE_2D, 0);
 
 	return 1;
 }
@@ -52,21 +52,13 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 		}
 	}
 
-	sf::FloatRect rect = _graphics.getCurrentSprite();
-	_coord2D[0] = rect.left + rect.width;
-	_coord2D[1] = rect.top;
-	_coord2D[2] = rect.left;
-	_coord2D[3] = rect.top;
-	_coord2D[4] = rect.left;
-	_coord2D[5] = rect.top + rect.height;
-	_coord2D[6] = rect.left + rect.width;
-	_coord2D[7] = rect.top + rect.height;
+	setTexCoord(_graphics.getCurrentSprite());
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord2D), &_coord2D[0]);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+ glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igMovingElement::die() {

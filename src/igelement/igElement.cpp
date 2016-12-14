@@ -23,23 +23,19 @@ igElement::igElement(sf::Vector2f position) :
   for (size_t i = 0 ; i < 12 ; i++)
     _vertices[i] = 0.f;
 
-	// Default coordinates that pastes the whole texture to the rectangle
-	_coord2D[0] = 1;
-	_coord2D[1] = 0;
-  _coord2D[2] = 0;
-  _coord2D[3] = 0;
-  _coord2D[4] = 0;
-  _coord2D[5] = 1;
-	_coord2D[6] = 1;
-	_coord2D[7] = 1;
-
 	glGenBuffers(1, &_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+ 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferData(GL_ARRAY_BUFFER, (sizeof(_vertices)) + (sizeof(_coord2D)), NULL, GL_STREAM_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord2D), &_coord2D[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D) + sizeof(_layer),
+		NULL, GL_STREAM_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D),
+		sizeof(_layer), &_layer[0]);
+
+	// Default coordinates that pastes the whole texture to the rectangle
+	setTexCoord(sf::FloatRect(0,0,1,1));
+
+ 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   for (size_t i = 0 ; i < 4 ; i++) {
     _indices[i] = i;
@@ -52,8 +48,6 @@ igElement::igElement(sf::Vector2f position) :
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	GL_CHECK_ERROR();
 }
 
 igElement::~igElement() {
@@ -70,11 +64,24 @@ void igElement::update(sf::Time elapsed, float theta) {
 void igElement::setVertices(std::array<float,12> nVertices) {
 	_vertices = nVertices;
 
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
+	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
+	glBindBuffer   (GL_ARRAY_BUFFER, 0);
+}
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+void igElement::setTexCoord(sf::FloatRect rect) {
+	_coord2D[0] = rect.left + rect.width;
+	_coord2D[1] = rect.top;
+	_coord2D[2] = rect.left;
+	_coord2D[3] = rect.top;
+	_coord2D[4] = rect.left;
+	_coord2D[5] = rect.top  + rect.height;
+	_coord2D[6] = rect.left + rect.width;
+	_coord2D[7] = rect.top  + rect.height;
+
+	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) , sizeof(_coord2D), &_coord2D[0]);
+	glBindBuffer   (GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setOrientation(float nOrientation) {
@@ -90,16 +97,19 @@ size_t igElement::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord2D)));
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
 	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

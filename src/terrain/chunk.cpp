@@ -7,7 +7,8 @@
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
-Chunk::Chunk(size_t x, size_t y, const TexManager& terrainTexManager, const TerrainGeometry& terrainGeometry) :
+Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
+	                               const TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
 	_visible(false),
   _terrainTexManager(terrainTexManager),
@@ -74,7 +75,7 @@ void Chunk::generateBuffers() {
 	size_t bufferSizeNormals	= _normals. size()*sizeof _normals[0];
 	size_t bufferSizeCoords		= _coords.  size()*sizeof _coords[0];
 
-  glBufferData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeNormals + bufferSizeCoords, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeNormals + bufferSizeCoords, NULL, GL_STATIC_DRAW);
   glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices , &_vertices[0]);
   glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices , bufferSizeNormals, &_normals[0]);
 	glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices + bufferSizeNormals, bufferSizeCoords, &_coords[0]);
@@ -134,7 +135,7 @@ void Chunk::generate() {
 size_t Chunk::draw() const {
 	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
 		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0]));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0,

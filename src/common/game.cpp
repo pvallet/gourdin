@@ -20,7 +20,6 @@ struct compDepth {
 Game::Game() :
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _terrainTransitionShader("src/shaders/terrainTexTransitions.vert", "src/shaders/terrainTexTransitions.frag"),
   _contentGenerator(_terrainGeometry),
   _ocean(0.5) {}
 
@@ -28,8 +27,13 @@ void Game::init() {
   srand(time(NULL));
 
   _terrainShader.load();
+  glBindAttribLocation(_terrainShader.getProgramID(), 0, "in_Vertex");
+	glBindAttribLocation(_terrainShader.getProgramID(), 1, "in_TexCoord");
+  glBindAttribLocation(_terrainShader.getProgramID(), 2, "in_Layer");
   _igEShader.load();
-  _terrainTransitionShader.load();
+  glBindAttribLocation(_igEShader.getProgramID(), 0, "in_Vertex");
+  glBindAttribLocation(_igEShader.getProgramID(), 1, "in_Normal");
+  glBindAttribLocation(_igEShader.getProgramID(), 2, "in_TexCoord");
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _map.load("res/map/");
@@ -54,9 +58,9 @@ void Game::init() {
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
-  appendNewElements(_contentGenerator.genHerd(
-                    sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
+  // appendNewElements(_contentGenerator.genHerd(
+  //                   sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+  //                                CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
 }
 
 void Game::generateChunk(size_t x, size_t y) {
@@ -281,7 +285,7 @@ std::pair<size_t,size_t> Game::render() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Camera& cam = Camera::getInstance();
   glm::mat4 MVP = cam.getViewProjectionMatrix();
@@ -325,8 +329,6 @@ std::pair<size_t,size_t> Game::render() const {
   glDepthMask(true);
 
   glUseProgram(0);
-
-  GL_CHECK_ERROR();
 
   return std::pair<size_t,size_t>(nbTriangles, nbElements);
 }
@@ -388,7 +390,7 @@ sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
   GLfloat d;
-  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
+ glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
   glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),

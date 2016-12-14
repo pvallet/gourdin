@@ -17,7 +17,7 @@
 #include "ocean.h"
 #include "terrainGeometry.h"
 
-#include "texManager.h"
+#include "terrainTexManager.h"
 
 #include "shader.h"
 #include "utils.h"
@@ -66,9 +66,8 @@ private:
   Ocean _ocean;
   TerrainGeometry _terrainGeometry;
 
-	TexManager _terrainTexManager;
+	TerrainTexManager _terrainTexManager;
 	Shader _terrainShader;
-  Shader _terrainTransitionShader;
   Shader _igEShader;
 
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;

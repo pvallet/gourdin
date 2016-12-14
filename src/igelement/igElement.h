@@ -16,6 +16,7 @@ public:
 
 	virtual void update(sf::Time elapsed, float theta);
 	void setVertices(std::array<float,12> nVertices);
+	void setTexCoord(sf::FloatRect rect);
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
 	virtual size_t draw() const;
@@ -45,6 +46,7 @@ protected:
 
 	std::array<float, 12> _vertices;
 	std::array<float,  8> _coord2D;
+	std::array<float,  4> _layer;
 	std::array<GLuint, 4> _indices;
 
 private:

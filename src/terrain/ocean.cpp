@@ -18,7 +18,7 @@ Ocean::Ocean(float oversizeFactor) :
 	_indices {0, 1, 2, 3} {
 
   // vbo
-  glGenBuffers(1, &_vbo);
+	glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glBufferData(	GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord) + sizeof(_normals), NULL, GL_STATIC_DRAW);
@@ -38,16 +38,15 @@ Ocean::Ocean(float oversizeFactor) :
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	GL_CHECK_ERROR();
 }
 
 Ocean::~Ocean() {
-  glDeleteBuffers(1, &_vbo);
+	glDeleteBuffers(1, &_vbo);
   glDeleteBuffers(1, &_ibo);
 }
 
 size_t Ocean::draw() const {
-  glBindTexture(GL_TEXTURE_2D, _tex);
+	glBindTexture(GL_TEXTURE_2D, _tex);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 

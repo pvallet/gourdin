@@ -8,7 +8,7 @@
 
 #include "terrainGeometry.h"
 
-#include "texManager.h"
+#include "terrainTexManager.h"
 
 #include "utils.h"
 
@@ -21,7 +21,8 @@ struct TextureData {
 
 class Chunk {
 public:
-	Chunk(size_t x, size_t y, const TexManager& terrainTexManager, const TerrainGeometry& terrainGeometry);
+	Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
+		                        const TerrainGeometry& terrainGeometry);
 	virtual ~Chunk();
 
 	void generate();
@@ -54,6 +55,6 @@ protected:
 
 	std::map<Biome, TextureData> _textureData;
 
-	const TexManager& _terrainTexManager;
-	const TerrainGeometry& _terrainGeometry;
+	const TerrainTexManager& _terrainTexManager;
+	const TerrainGeometry&   _terrainGeometry;
 };

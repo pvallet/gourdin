@@ -1,9 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <vector>
 
-#include "texManager.h"
+#include "texArrayManager.h"
 #include "utils.h"
 
 typedef struct Flora Flora;
@@ -11,26 +12,33 @@ struct Flora {
 	Biome biome;
 	int nbTrees;
 	int density; // Proximity of trees
-	int extension; // Size of forests
-	std::vector<sf::Vector2f> size;
-	std::vector<size_t> texIndices;
+
+	const TextureArray* texArray;
 };
 
-class TreeTexManager : public TexManager {
+class TreeTexManager {
 public:
 	TreeTexManager();
 
 	void load(std::string path);
 
-	inline sf::Vector2f getSize(Biome biome, int index) const {return _flora[biome].size[index] * _heightFactor;}
-	inline void bind(Biome biome, int index) const {bindTexture(_flora[biome].texIndices[index]);}
+	inline sf::Vector2f getSize(Biome biome, int index) const {
+		return _flora[biome].texArray->texSizes[index] * _heightFactor;
+	}
+	inline sf::FloatRect getTexRectangle(Biome biome, int index) const {
+		return _flora[biome].texArray->getTexRectangle(index);
+	}
+	inline void bind(Biome biome) const {
+		glBindTexture(GL_TEXTURE_2D_ARRAY, _flora[biome].texArray->texID);
+	}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
-	inline float getExtension(Biome biome) const {return _flora[biome].extension;}
 	inline float getNBTrees(Biome biome) const {return _flora[biome].nbTrees;}
 
 private:
 	std::vector<Flora> _flora;
 
 	float _heightFactor;
+
+	TexArrayManager _aTexManager;
 };

@@ -36,7 +36,7 @@ Shader::Shader(std::string vertexSource, std::string fragmentSource) :
 
 Shader::~Shader() {
 	glDeleteShader(_vertexID);
-  glDeleteShader(_fragmentID);
+	glDeleteShader(_fragmentID);
   glDeleteProgram(_programID);
 }
 
@@ -53,7 +53,7 @@ Shader& Shader::operator=(Shader const &shader) {
 
 bool Shader::load() {
   if(glIsShader(_vertexID) == GL_TRUE)
-    glDeleteShader(_vertexID);
+  	glDeleteShader(_vertexID);
 
   if(glIsShader(_fragmentID) == GL_TRUE)
     glDeleteShader(_fragmentID);
@@ -73,11 +73,6 @@ bool Shader::load() {
   glAttachShader(_programID, _vertexID);
   glAttachShader(_programID, _fragmentID);
 
-  glBindAttribLocation(_programID, 0, "in_Vertex");
-	glBindAttribLocation(_programID, 1, "in_Normal");
-	glBindAttribLocation(_programID, 2, "in_TexCoord0");
-	glBindAttribLocation(_programID, 3, "in_Alpha_value");
-
   glLinkProgram(_programID);
 
   GLint errorLink(0);
@@ -92,10 +87,10 @@ bool Shader::load() {
     glGetShaderInfoLog(_programID, sizeError, &sizeError, error);
     error[sizeError] = '\0';
 
-    std::cerr << error << std::endl;
+    std::cerr << "Error in shader linking: " << error << std::endl;
 
     // delete[] error;
-    glDeleteProgram(_programID);
+   	glDeleteProgram(_programID);
 
     return false;
   }
@@ -115,7 +110,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
   if(!file) {
     std::cerr << "Error: File: " << source << " cannot be found" << std::endl;
-    glDeleteShader(shader);
+		glDeleteShader(shader);
 
     return false;
   }
@@ -130,7 +125,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
   const GLchar* str = sourceCode.c_str();
 
-  glShaderSource(shader, 1, &str, 0);
+	glShaderSource(shader, 1, &str, 0);
 
   glCompileShader(shader);
 
@@ -146,10 +141,10 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     glGetShaderInfoLog(shader, errorLength, &errorLength, error);
     error[errorLength] = '\0';
 
-    std::cerr << error << std::endl;
+    std::cerr << "Error in shader compilation: " << error << std::endl;
 
     // delete[] error;
-    glDeleteShader(shader);
+		glDeleteShader(shader);
 
 #ifdef __linux__
 		kill(getpid(),SIGINT);

@@ -33,25 +33,18 @@ void TreeTexManager::load(std::string path) {
     flr.biome = (Biome) biome;
 
     elem->QueryIntAttribute("density", &flr.density);
-    elem->QueryIntAttribute("extension", &flr.extension);
 
     _flora[flr.biome] = Flora(flr);
   }
 
- 	size_t currentIndex = 0;
-  for (unsigned int i = 0 ; i < NB_BIOMES ; i++) {
-    _flora[i].texIndices.clear();
+  size_t currentBiome = 0;
+  for (size_t i = 0; i < NB_BIOMES; i++) {
     if (_flora[i].biome != NO_DEFINED_BIOME) {
-      for (int j = 0 ; j < _flora[i].nbTrees ; j++) {
-       	std::ostringstream treePath;
-	      treePath << path << i << "_" << j << ".png";
+      std::ostringstream subPath;
+      subPath << path << currentBiome << '/';
 
-        sf::Vector2u sizeU = loadTexture(treePath.str());
-        _flora[i].size.push_back(sf::Vector2f(sizeU.x,sizeU.y));
-
-        _flora[i].texIndices.push_back(currentIndex);
-        currentIndex++;
-      }
+      _flora[i].texArray = _aTexManager.loadTextures(_flora[i].nbTrees, subPath.str());
+      currentBiome++;
     }
   }
 }
