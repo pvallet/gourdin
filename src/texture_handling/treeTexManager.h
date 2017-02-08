@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "texArrayManager.h"
+#include "texArray.h"
 #include "utils.h"
 
 typedef struct Flora Flora;
@@ -13,7 +13,7 @@ struct Flora {
 	int nbTrees;
 	int density; // Proximity of trees
 
-	const TextureArray* texArray;
+	TextureArray texArray;
 };
 
 class TreeTexManager {
@@ -23,13 +23,13 @@ public:
 	void load(std::string path);
 
 	inline sf::Vector2f getSize(Biome biome, int index) const {
-		return _flora[biome].texArray->texSizes[index] * _heightFactor;
+		return _flora[biome].texArray.texSizes[index] * _heightFactor;
 	}
 	inline sf::FloatRect getTexRectangle(Biome biome, int index) const {
-		return _flora[biome].texArray->getTexRectangle(index);
+		return _flora[biome].texArray.getTexRectangle(index);
 	}
 	inline void bind(Biome biome) const {
-		glBindTexture(GL_TEXTURE_2D_ARRAY, _flora[biome].texArray->texID);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, _flora[biome].texArray.texID);
 	}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
@@ -39,6 +39,4 @@ private:
 	std::vector<Flora> _flora;
 
 	float _heightFactor;
-
-	TexArrayManager _aTexManager;
 };

@@ -44,18 +44,29 @@ void AnimationManagerInitializer::load(std::string folderPath) {
       anm.pause = sf::milliseconds(pausems);
     }
 
-    anm.sprite = sf::FloatRect(0, 0, 1.f / anm.steps, 1.f / anm.orientations);
+    anm.texLayer = i;
+
+    _animInfo.insert(std::pair<ANM_TYPE, AnimInfo>((ANM_TYPE) type, anm));
+    elem = elem->NextSiblingElement();
+  }
+
+  _texArray.loadTextures(_animInfo.size(), folderPath);
+
+  int i = 0;
+  for (auto it = _animInfo.begin(); it != _animInfo.end(); it++) {
+    sf::FloatRect texRect = _texArray.getTexRectangle(i);
+    it->second.sprite = sf::FloatRect(0, 0, 1.f / it->second.steps        * texRect.width,
+                                            1.f / it->second.orientations * texRect.height);
 
     std::ostringstream convert;
     convert << folderPath << i << ".png";
-    sf::Vector2u texSize = loadTexture(convert.str());
-    anm.spriteSize = sf::Vector2f(texSize.x / anm.steps, texSize.y / anm.orientations);
+    sf::Vector2f texSize = _texArray.texSizes[i];
+    it->second.spriteSize = sf::Vector2f(texSize.x / it->second.steps,
+                                         texSize.y / it->second.orientations);
 
-    if (anm.spriteSize.y > _maxHeight)
-      _maxHeight = anm.spriteSize.y;
+    if (it->second.spriteSize.y > _maxHeight)
+      _maxHeight = it->second.spriteSize.y;
 
-    _animInfo.insert(std::pair<ANM_TYPE, AnimInfo>((ANM_TYPE) type, anm));
-    _texIndexInTexManager.insert(std::pair<ANM_TYPE, size_t>((ANM_TYPE) type, i));
-    elem = elem->NextSiblingElement();
+    i++;
   }
 }

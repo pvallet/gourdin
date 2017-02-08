@@ -43,7 +43,7 @@ void TreeTexManager::load(std::string path) {
       std::ostringstream subPath;
       subPath << path << currentBiome << '/';
 
-      _flora[i].texArray = _aTexManager.loadTextures(_flora[i].nbTrees, subPath.str());
+      _flora[i].texArray.loadTextures(_flora[i].nbTrees, subPath.str());
       currentBiome++;
     }
   }

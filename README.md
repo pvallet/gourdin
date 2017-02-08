@@ -17,7 +17,7 @@ Firstly, install the dependencies for the building environment.
 ```
 sudo apt-get install build-essential libgl1-mesa-dev libgomp1
 ```
-Then you will need the dependencies of the project. Favor using the ones from the repositories as building them from the source takes a while.
+Then you will need the dependencies of the project. Prefer using the ones from the repositories as building them from the source takes a while.
 ```
 libsfml-dev libglew-dev libglm-dev
 ```

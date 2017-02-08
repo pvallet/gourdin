@@ -24,9 +24,15 @@ ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
 }
 
 void ContentGenerator::init() {
-  _antilopeTexManager.load("res/animals/antilope/");
-  _lionTexManager.    load("res/animals/lion/");
-  _treeTexManager.    load("res/trees/");
+  _animManagerInits.resize(NB_ANIMALS);
+
+  for (size_t i = 0; i < NB_ANIMALS; i++) {
+    std::ostringstream path;
+    path << "res/animals/" << i << '/';
+    _animManagerInits[i].load(path.str());
+  }
+
+  _treeTexManager.load("res/trees/");
 
   for (int i = 0 ; i < CONTENT_RES ; i++) {
 		for (int j = 0 ; j < CONTENT_RES ; j++) {
@@ -135,7 +141,7 @@ std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count
     }
 
     if (add) {
-      res.push_back(new Antilope(p, AnimationManager(_antilopeTexManager)));
+      res.push_back(new Antilope(p, AnimationManager(_animManagerInits[ANTILOPE])));
     }
   }
 
@@ -144,6 +150,6 @@ std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count
 
 std::vector<igElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
   std::vector<igElement*> res;
-  res.push_back(new Lion(pos, AnimationManager(_lionTexManager)));
+  res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION])));
   return res;
 }

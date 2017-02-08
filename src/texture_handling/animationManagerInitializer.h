@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "texManager.h"
+#include "texArray.h"
 
 enum ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
 
@@ -18,19 +18,23 @@ struct AnimInfo {
 
 	sf::Vector2f spriteSize;
 	sf::FloatRect sprite; // Relative to the size of the texture
+
+	size_t texLayer;
 };
 
 
 /** One instance that will load the textures and metadata used commonly by
   * AnimationManager instances.
   */
-class AnimationManagerInitializer : public TexManager {
+class AnimationManagerInitializer {
 public:
   AnimationManagerInitializer () {}
 
   void load(std::string folderPath);
 
-  inline void bindTexture(ANM_TYPE type) const {TexManager::bindTexture(_texIndexInTexManager.at(type));}
+  inline void bind() const {
+		glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
+	}
 
   inline int getMaxHeight() const {return _maxHeight;}
   inline std::map<ANM_TYPE, AnimInfo> const & getAnimInfo() const {return _animInfo;}
@@ -39,5 +43,6 @@ private:
   int _maxHeight;
 
   std::map<ANM_TYPE, AnimInfo>  _animInfo;
-  std::map<ANM_TYPE, size_t>    _texIndexInTexManager;
+
+	TextureArray _texArray;
 };

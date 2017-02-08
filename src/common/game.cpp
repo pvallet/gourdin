@@ -58,9 +58,9 @@ void Game::init() {
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
-  // appendNewElements(_contentGenerator.genHerd(
-  //                   sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-  //                                CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
+  appendNewElements(_contentGenerator.genHerd(
+                    sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
 }
 
 void Game::generateChunk(size_t x, size_t y) {
@@ -68,7 +68,7 @@ void Game::generateChunk(size_t x, size_t y) {
   newChunk->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
   _chunkStatus[x][y] = EDGE;
-  // appendNewElements(_contentGenerator.genForestsInChunk(x, y));
+  appendNewElements(_contentGenerator.genForestsInChunk(x, y));
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {

@@ -13,7 +13,7 @@ AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
 	_animInfo = _texManager.getAnimInfo();
 }
 
-void AnimationManager::launchAnimation(ANM_TYPE type) {
+size_t AnimationManager::launchAnimation(ANM_TYPE type) {
   if (!_dead) {
     if (_currentAnim != type) {
       _currentAnim = type;
@@ -21,6 +21,8 @@ void AnimationManager::launchAnimation(ANM_TYPE type) {
       _currentSprite = 0;
     }
   }
+
+	return _animInfo[type].texLayer;
 }
 
 void AnimationManager::update(sf::Time elapsed, float nOrientation) {

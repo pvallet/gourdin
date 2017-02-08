@@ -84,6 +84,17 @@ void igElement::setTexCoord(sf::FloatRect rect) {
 	glBindBuffer   (GL_ARRAY_BUFFER, 0);
 }
 
+void igElement::setLayer(size_t layer) {
+	for (size_t i = 0; i < 4; i++) {
+		_layer[i] = layer;
+	}
+
+	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D),
+		sizeof(_layer), &_layer[0]);
+	glBindBuffer   (GL_ARRAY_BUFFER, 0);
+}
+
 void igElement::setOrientation(float nOrientation) {
 	_orientation = nOrientation;
 

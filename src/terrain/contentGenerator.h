@@ -12,6 +12,9 @@
 #include "perlin.h"
 #include "utils.h"
 
+#define NB_ANIMALS 2
+enum Animals {ANTILOPE, LION};
+
 class igElement;
 
 class ContentGenerator {
@@ -41,7 +44,6 @@ private:
 	// The chunks are sorted as chunk.x * NB_CHUNKS + chunk.y
   std::vector<std::list<sf::Vector2f> > _treesInChunk;
 
-  AnimationManagerInitializer _antilopeTexManager;
-  AnimationManagerInitializer _lionTexManager;
+  std::vector<AnimationManagerInitializer> _animManagerInits;
   TreeTexManager _treeTexManager;
 };

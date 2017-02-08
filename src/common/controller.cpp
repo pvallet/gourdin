@@ -150,8 +150,8 @@ void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
 
   std::ostringstream convert;
   convert << "FPS: " << fps << std::endl;
-  convert << "NB Triangles: " << renderStats.first << std::endl;
-  convert << "NB Elements:  " << renderStats.second << std::endl;
+  convert << "Triangles: " << renderStats.first << std::endl;
+  convert << "Elements:  " << renderStats.second << std::endl;
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y << std::endl;
   convert << "R: " << cam.getZoomFactor() * INIT_R << "\n"

@@ -16,7 +16,6 @@ public:
 
 	virtual void update(sf::Time elapsed, float theta);
 	void setVertices(std::array<float,12> nVertices);
-	void setTexCoord(sf::FloatRect rect);
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
 	virtual size_t draw() const;
@@ -32,12 +31,14 @@ public:
 	inline bool isVisible() const {return _visible;}
 
 protected:
+	void setTexCoord(sf::FloatRect rect);
+	void setLayer(size_t layer);
+	void setOrientation(float nOrientation);
+
 	sf::Vector2f _pos;
 	sf::Vector2f _size;
 
 	float _camOrientation; // Angle between the camera and the vector (0,1)
-
-	void setOrientation(float nOrientation);
 
 	bool _visible;
 

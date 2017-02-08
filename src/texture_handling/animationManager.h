@@ -12,10 +12,10 @@ class AnimationManager {
 public:
 	AnimationManager(const AnimationManagerInitializer& init);
 
-	void launchAnimation(ANM_TYPE type);
+	size_t launchAnimation(ANM_TYPE type); // returns the layer index
 	void update(sf::Time elapsed, float nOrientation);
 
-	inline void bindCurrentTexture() const {_texManager.bindTexture(_currentAnim);}
+	inline void bindTexture() const {_texManager.bind();}
 
 	sf::FloatRect getCurrentSprite() const;
 	inline float getMaxHeightFactor() const {

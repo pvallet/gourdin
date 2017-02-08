@@ -9,25 +9,20 @@
 
 class TextureArray {
 public:
-	GLuint texID;
-	sf::Vector2f maxTexSize;
-	std::vector<sf::Vector2f> texSizes;
+	TextureArray() : texID(0) {}
+	~TextureArray() {glDeleteTextures(1, &texID);}
 
+	void loadTextures(size_t count, std::string folderPath);
+
+	// Returns the size of the current texture relative to the size of the array texture
 	inline sf::FloatRect getTexRectangle(size_t index) const {
 		return sf::FloatRect(0,
 			                   0,
 			                   texSizes[index].x / maxTexSize.x,
 			                   texSizes[index].y / maxTexSize.y);
 	}
-};
 
-class TexArrayManager {
-public:
-	TexArrayManager() {}
-	~TexArrayManager();
-
-  const TextureArray* loadTextures(size_t count, std::string folderPath);
-
-private:
-	std::vector<std::unique_ptr<TextureArray> > _texArrays;
+	GLuint texID;
+	sf::Vector2f maxTexSize;
+	std::vector<sf::Vector2f> texSizes;
 };
