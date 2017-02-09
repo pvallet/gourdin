@@ -45,7 +45,7 @@ Ocean::~Ocean() {
   glDeleteBuffers(1, &_ibo);
 }
 
-size_t Ocean::draw() const {
+void Ocean::draw() const {
 	glBindTexture(GL_TEXTURE_2D, _tex);
 
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -70,6 +70,4 @@ size_t Ocean::draw() const {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   glBindTexture(GL_TEXTURE_2D, 0);
-
-	return 0;
 }

@@ -19,7 +19,7 @@ public:
 private:
 	void renderLifeBars();
 	void renderMinimap();
-	void renderLog(std::pair<size_t,size_t> renderStats);
+	void renderLog();
 
 	void moveCamera();
 	void handleClick(sf::Event event);

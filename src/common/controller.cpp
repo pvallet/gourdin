@@ -24,7 +24,7 @@ void Controller::init() {
   _game.init();
 
   // Log
-  _logFont.loadFromFile("res/Arial.ttf");
+  _logFont.loadFromFile("res/FiraMono-Regular.otf");
   _log.setFont(_logFont);
   _log.setCharacterSize(10);
   _log.setFillColor(sf::Color::White);
@@ -144,20 +144,22 @@ void Controller::renderMinimap() {
   }
 }
 
-void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
+void Controller::renderLog() {
   Camera& cam = Camera::getInstance();
   int fps = 1.f / _elapsed.asSeconds();
 
   std::ostringstream convert;
-  convert << "FPS: " << fps << std::endl;
-  convert << "Triangles: " << renderStats.first << std::endl;
-  convert << "Elements:  " << renderStats.second << std::endl;
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y << std::endl;
   convert << "R: " << cam.getZoomFactor() * INIT_R << "\n"
           << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
             (cam.getTheta() < 0 ? 360 : 0) << "\n"
           << "Phi: " << cam.getPhi() << std::endl;
+  convert << "FPS: " << fps << std::endl;
+
+  LogText& logText = LogText::getInstance();
+  convert << logText.getText();
+  logText.clear();
 
   _log.setString(convert.str());
   _window.draw(_log);
@@ -165,12 +167,12 @@ void Controller::renderLog(std::pair<size_t,size_t> renderStats) {
 
 void Controller::render() {
   if (_running) {
-    std::pair<size_t,size_t> renderStats = _game.render();
+    _game.render();
     _window.pushGLStates();
 
     renderLifeBars();
 
-    renderLog(renderStats);
+    renderLog();
     renderMinimap();
 
     _window.draw(_rectSelect);

@@ -281,9 +281,8 @@ void Game::update(sf::Time elapsed) {
   std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
 }
 
-std::pair<size_t,size_t> Game::render() const {
+void Game::render() const {
   size_t nbTriangles = 0;
-  size_t nbElements = 0;
 
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -297,7 +296,8 @@ std::pair<size_t,size_t> Game::render() const {
   // Background Ocean
 
   glDisable(GL_DEPTH_TEST);
-  nbTriangles += _ocean.draw();
+  _ocean.draw();
+  nbTriangles += 2;
   glEnable(GL_DEPTH_TEST);
 
   // Chunk
@@ -320,9 +320,8 @@ std::pair<size_t,size_t> Game::render() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  for (size_t i = 0; i < _visibleElmts.size(); i++) {
-    nbElements += _visibleElmts[i]->draw();
-  }
+  for (size_t i = 0; i < _visibleElmts.size(); i++)
+    _visibleElmts[i]->draw();
 
   glDisable(GL_BLEND);
 
@@ -330,7 +329,12 @@ std::pair<size_t,size_t> Game::render() const {
 
   glUseProgram(0);
 
-  return std::pair<size_t,size_t>(nbTriangles, nbElements);
+  std::ostringstream renderStats;
+  renderStats << "Triangles: " << nbTriangles << std::endl
+              << "Elements:  " << _visibleElmts.size();
+
+  LogText& logText = LogText::getInstance();
+  logText.addLine(renderStats.str());
 }
 
 void Game::select(sf::IntRect rect, bool add) {

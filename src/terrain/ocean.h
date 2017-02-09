@@ -11,7 +11,7 @@ public:
 	Ocean(float oversizeFactor);
 	~Ocean();
 
-	size_t draw() const;
+	void draw() const;
 
 	void setTexIndex(GLuint tex) {_tex = tex;}
 
