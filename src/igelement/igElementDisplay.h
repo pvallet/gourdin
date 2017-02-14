@@ -20,6 +20,7 @@ private:
   void processSpree(const std::vector<igElement*>& visibleElmts,
     size_t& currentSpreeLength, size_t& firstIndexSpree);
 
+  GLuint _vao;
   GLuint _vbo;
   std::vector<GLuint> _texIDs;
   std::vector<GLuint> _nbElemsInSpree;

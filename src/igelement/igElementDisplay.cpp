@@ -9,16 +9,35 @@
 #define IGE_BUFFER_SIZE 20000
 
 igElementDisplay::igElementDisplay() :
+  _vao(0),
   _vbo(0) {
 
   glGenBuffers(1, &_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   // 24 is 12 for vertices, 8 for texture coordinates and 4 for texture layer
   glBufferData(GL_ARRAY_BUFFER, IGE_BUFFER_SIZE * 24 * sizeof(float),
     NULL, GL_STREAM_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glGenVertexArrays(1, &_vao);
+  glBindVertexArray(_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+  size_t sizeVertices = IGE_BUFFER_SIZE * 12 * sizeof(float);
+  size_t sizeCoord2D  = IGE_BUFFER_SIZE *  8 * sizeof(float);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
+  glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices + sizeCoord2D));
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  glBindVertexArray(0);
 }
 
 void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDisplay,
@@ -111,20 +130,9 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 }
 
 void igElementDisplay::drawElements() const {
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-  size_t sizeVertices = IGE_BUFFER_SIZE * 12 * sizeof(float);
-  size_t sizeCoord2D  = IGE_BUFFER_SIZE *  8 * sizeof(float);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
-  glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices + sizeCoord2D));
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
-
   size_t cursor = 0;
+
+  glBindVertexArray(_vao);
 
   for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texIDs[i]);
@@ -136,9 +144,5 @@ void igElementDisplay::drawElements() const {
     cursor += 4 * _nbElemsInSpree[i];
   }
 
-  glDisableVertexAttribArray(0);
-  glDisableVertexAttribArray(1);
-  glDisableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }

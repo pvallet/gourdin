@@ -10,6 +10,8 @@
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                               const TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
+	_vao(0),
+	_geometryVBO(0),
 	_visible(false),
   _terrainTexManager(terrainTexManager),
   _terrainGeometry(terrainGeometry) {
@@ -82,6 +84,25 @@ void Chunk::generateBuffers() {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	// VAO
+
+	glGenVertexArrays(1, &_vao);
+  glBindVertexArray(_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0]));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0,
+		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0] + _normals.size()*sizeof _normals[0]));
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
 
 	// IBO for each biome
 
@@ -133,17 +154,7 @@ void Chunk::generate() {
 }
 
 size_t Chunk::draw() const {
-	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0]));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0,
-		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0] + _normals.size()*sizeof _normals[0]));
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+	glBindVertexArray(_vao);
 
 	size_t nbTriangles = 0;
 
@@ -163,11 +174,7 @@ size_t Chunk::draw() const {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	return nbTriangles;
 }

@@ -27,13 +27,7 @@ void Game::init() {
   srand(time(NULL));
 
   _terrainShader.load();
-  glBindAttribLocation(_terrainShader.getProgramID(), 0, "in_Vertex");
-	glBindAttribLocation(_terrainShader.getProgramID(), 1, "in_TexCoord");
-  glBindAttribLocation(_terrainShader.getProgramID(), 2, "in_Layer");
   _igEShader.load();
-  glBindAttribLocation(_igEShader.getProgramID(), 0, "in_Vertex");
-  glBindAttribLocation(_igEShader.getProgramID(), 1, "in_Normal");
-  glBindAttribLocation(_igEShader.getProgramID(), 2, "in_TexCoord");
 
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _map.load("res/map/");

@@ -41,6 +41,7 @@ protected:
 	void computeChunkBoundingBox();
 	bool theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const;
 
+	GLuint _vao;
 	GLuint _geometryVBO;
 
 	sf::Vector2i _chunkPos;
