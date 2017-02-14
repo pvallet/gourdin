@@ -1,7 +1,6 @@
 #include "igElement.h"
 
 #include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
 #include <cmath>
 #include <iostream>
 #include <ctime>
@@ -14,59 +13,19 @@
 igElement::igElement(sf::Vector2f position) :
 	_pos(position),
 	_camOrientation(0.f),
-	_visible(false),
-	_vbo(0),
-	_ibo(0) {
+	_visible(false) {
 
 	_orientation = RANDOMF * 360.f;
 
   for (size_t i = 0 ; i < 12 ; i++)
     _vertices[i] = 0.f;
-
-	glGenBuffers(1, &_vbo);
- 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D) + sizeof(_layer),
-		NULL, GL_STREAM_DRAW);
-
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D),
-		sizeof(_layer), &_layer[0]);
-
-	// Default coordinates that pastes the whole texture to the rectangle
-	setTexCoord(sf::FloatRect(0,0,1,1));
-
- 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  for (size_t i = 0 ; i < 4 ; i++) {
-    _indices[i] = i;
-  }
-
-  glGenBuffers(1, &_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices), NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-igElement::~igElement() {
-	glDeleteBuffers(1, &_vbo);
-	glDeleteBuffers(1, &_ibo);
-}
 
 void igElement::update(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
-}
-
-void igElement::setVertices(std::array<float,12> nVertices) {
-	_vertices = nVertices;
-
-	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, (sizeof(_vertices)), &_vertices[0]);
-	glBindBuffer   (GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setTexCoord(sf::FloatRect rect) {
@@ -78,21 +37,12 @@ void igElement::setTexCoord(sf::FloatRect rect) {
 	_coord2D[5] = rect.top  + rect.height;
 	_coord2D[6] = rect.left + rect.width;
 	_coord2D[7] = rect.top  + rect.height;
-
-	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) , sizeof(_coord2D), &_coord2D[0]);
-	glBindBuffer   (GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setLayer(size_t layer) {
 	for (size_t i = 0; i < 4; i++) {
 		_layer[i] = layer;
 	}
-
-	glBindBuffer   (GL_ARRAY_BUFFER, _vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord2D),
-		sizeof(_layer), &_layer[0]);
-	glBindBuffer   (GL_ARRAY_BUFFER, 0);
 }
 
 void igElement::setOrientation(float nOrientation) {
@@ -102,31 +52,6 @@ void igElement::setOrientation(float nOrientation) {
 		_orientation += 360.f + 360 * (int) (-_orientation / 360);
 	else
 		_orientation -= 360.f * (int) (_orientation / 360);
-}
-
-size_t igElement::draw() const {
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord2D)));
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	return 1;
 }
 
 sf::IntRect igElement::getScreenCoord() const {

@@ -13,7 +13,7 @@
 
 struct compDepth {
   bool operator()(const igElement* a, const igElement* b) const {
-    return a->getDepth() >= b->getDepth();
+    return a->getDepth() > b->getDepth();
   }
 } compDepthObj;
 
@@ -279,12 +279,13 @@ void Game::update(sf::Time elapsed) {
   }
 
   std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
+  _igElementDisplay.loadElements(_visibleElmts);
 }
 
 void Game::render() const {
   size_t nbTriangles = 0;
 
- glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Camera& cam = Camera::getInstance();
   glm::mat4 MVP = cam.getViewProjectionMatrix();
@@ -320,8 +321,7 @@ void Game::render() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  for (size_t i = 0; i < _visibleElmts.size(); i++)
-    _visibleElmts[i]->draw();
+  _igElementDisplay.drawElements();
 
   glDisable(GL_BLEND);
 
@@ -331,7 +331,7 @@ void Game::render() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << _visibleElmts.size();
+              << "Elements:  " << _visibleElmts.size() << std::endl;
 
   LogText& logText = LogText::getInstance();
   logText.addLine(renderStats.str());

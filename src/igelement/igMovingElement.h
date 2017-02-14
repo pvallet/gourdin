@@ -3,20 +3,23 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
-#include "igElement.h"
 #include "animationManager.h"
+#include "igElement.h"
+#include "utils.h"
 
 class igMovingElement : public igElement {
 public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
 	virtual ~igMovingElement() {}
 
-	size_t draw() const;
+	virtual Animals getAnimalType() const = 0;
 
 	void launchAnimation (ANM_TYPE type);
 	virtual void update(sf::Time elapsed, float theta);
 	virtual void stop();
 	virtual void die();
+
+	inline size_t getTexID() const {return _graphics.getTexID();}
 
 	inline virtual float getMaxHeightFactor() const {return _graphics.getMaxHeightFactor();}
 	inline sf::Vector2f getDirection() const {return _direction;}

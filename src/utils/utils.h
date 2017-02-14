@@ -17,6 +17,9 @@
 
 #define RANDOMF (rand() / (float) RAND_MAX)
 
+#define NB_ANIMALS 2
+enum Animals {ANTILOPE, LION};
+
 enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			SNOW, TUNDRA, BARE, SCORCHED,
 			TAIGA, SHRUBLAND, TEMPERATE_DESERT,
@@ -48,7 +51,7 @@ public:
 	void operator=(LogText const&)  = delete;
 
 	inline void clear() {_text.str("");}
-	inline void addLine(std::string newLine) { _text << newLine << std::endl;}
+	inline void addLine(std::string newLine) { _text << newLine;}
 	inline std::string getText() const {return _text.str();}
 
 private:

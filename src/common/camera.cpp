@@ -9,7 +9,7 @@ Camera::Camera() :
 	_x(0.f), _y(0.f), _height(0.f),
 	_r(INIT_R),
 	_phi(60.f),
-	_theta(0.f),
+	_theta(180.f),
   _projection(1.f),
   _view(1.f) {}
 

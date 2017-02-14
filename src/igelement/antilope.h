@@ -23,6 +23,8 @@ public:
 	Antilope(sf::Vector2f position, AnimationManager graphics);
 	virtual ~Antilope() {}
 
+	inline Animals getAnimalType() const {return ANTILOPE;}
+
 	// React to the environment
 	void updateState(const std::unordered_set<igMovingElement*>& neighbors);
 

@@ -16,6 +16,7 @@ public:
 	void update(sf::Time elapsed, float nOrientation);
 
 	inline void bindTexture() const {_texManager.bind();}
+	inline GLuint getTexID() const {return _texManager.getTexID();}
 
 	sf::FloatRect getCurrentSprite() const;
 	inline float getMaxHeightFactor() const {

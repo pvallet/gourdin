@@ -12,13 +12,3 @@ Tree::Tree(sf::Vector2f position, const TreeTexManager& manager, Biome biome, in
 	setTexCoord(_manager.getTexRectangle(_biome, _index));
 	setLayer(_index);
 }
-
-size_t Tree::draw() const {
-	_manager.bind(_biome);
-
-	igElement::draw();
-
- glBindTexture(GL_TEXTURE_2D, 0);
-
-	return 1;
-}

@@ -32,6 +32,8 @@ public:
 		glBindTexture(GL_TEXTURE_2D_ARRAY, _flora[biome].texArray.texID);
 	}
 
+	inline GLuint getTexID(Biome biome) const {return _flora[biome].texArray.texID;}
+
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
 	inline float getNBTrees(Biome biome) const {return _flora[biome].nbTrees;}
 

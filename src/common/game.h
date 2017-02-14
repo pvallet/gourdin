@@ -10,6 +10,7 @@
 #include "lion.h"
 #include "antilope.h"
 #include "tree.h"
+#include "igElementDisplay.h"
 
 #include "chunk.h"
 #include "contentGenerator.h"
@@ -61,7 +62,9 @@ private:
 	std::vector<igElement*> _visibleElmts; // Visible
   std::unordered_set<igMovingElement*> _igMovingElements;
 
+	igElementDisplay _igElementDisplay;
   ContentGenerator _contentGenerator;
+
   Map _map;
   Ocean _ocean;
   TerrainGeometry _terrainGeometry;

@@ -35,6 +35,7 @@ public:
   inline void bind() const {
 		glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
 	}
+	inline GLuint getTexID() const {return _texArray.texID;}
 
   inline int getMaxHeight() const {return _maxHeight;}
   inline std::map<ANM_TYPE, AnimInfo> const & getAnimInfo() const {return _animInfo;}

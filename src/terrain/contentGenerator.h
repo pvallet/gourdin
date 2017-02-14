@@ -12,9 +12,6 @@
 #include "perlin.h"
 #include "utils.h"
 
-#define NB_ANIMALS 2
-enum Animals {ANTILOPE, LION};
-
 class igElement;
 
 class ContentGenerator {

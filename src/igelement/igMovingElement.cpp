@@ -1,6 +1,7 @@
 #include "igMovingElement.h"
 #include "vecUtils.h"
 #include "utils.h"
+
 #include <cmath>
 #include <iostream>
 
@@ -13,16 +14,6 @@ igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphic
 	_size = _graphics.getRawSize();
 	_size /= _size.y;
 	launchAnimation(WAIT);
-}
-
-size_t igMovingElement::draw() const {
-	_graphics.bindTexture();
-
-	igElement::draw();
-
- 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	return 1;
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
@@ -54,12 +45,6 @@ void igMovingElement::update(sf::Time elapsed, float theta) {
 	}
 
 	setTexCoord(_graphics.getCurrentSprite());
-
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices), sizeof(_coord2D), &_coord2D[0]);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void igMovingElement::die() {
