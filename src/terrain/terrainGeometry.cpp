@@ -4,18 +4,17 @@
 #include <unordered_set>
 #include <utility>
 
-TerrainGeometry::TerrainGeometry() {
-  std::vector<std::list<Triangle*> > initializer(SUBDIV_LVL*SUBDIV_LVL);
+TerrainGeometry::SubdivisionLevel::SubdivisionLevel() {
+  std::vector<std::list<Triangle*> > initializer(GRID_SUBDIV*GRID_SUBDIV);
   _trianglesInSubChunk.resize(NB_CHUNKS*NB_CHUNKS, initializer);
 }
 
-void TerrainGeometry::addTriangle(std::array<sf::Vector3f,3> p, std::array<Biome,4> biomes) {
+void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<sf::Vector3f,3> p, Biome biome) {
 
   // Add the triangle to the list of all triangles
 
   Triangle newTriangle;
-  newTriangle.biome = biomes[3];
-  std::copy(biomes.begin(), biomes.begin()+3, newTriangle.neighbourBiomes.begin());
+  newTriangle.biome = biome;
   sf::Vector3f normal = vu::cross(p[1]-p[0],p[2]-p[0]);
   newTriangle.normal = normal /= vu::norm(normal);
 
@@ -32,7 +31,6 @@ void TerrainGeometry::addTriangle(std::array<sf::Vector3f,3> p, std::array<Biome
     if (_vertices.find(p[i]) == _vertices.end()) {
       Vertex vertex;
       vertex.pos = p[i];
-      vertex.distToBiomeEdge = -1;
       vertex.belongsToTris.push_back(&_triangles.back());
 
       _vertices.insert(std::pair<sf::Vector3f, Vertex>(p[i], vertex));
@@ -58,19 +56,19 @@ void TerrainGeometry::addTriangle(std::array<sf::Vector3f,3> p, std::array<Biome
   for (size_t i = minChunkCoords[0].x; i < maxChunkCoords[0].x+1; i++) {
   for (size_t j = minChunkCoords[0].y; j < maxChunkCoords[0].y+1; j++) {
     for (size_t k = (i == minChunkCoords[0].x ? minChunkCoords[1].x : 0);
-                k < (i == maxChunkCoords[0].x ? maxChunkCoords[1].x + 1 : SUBDIV_LVL); k++) {
+                k < (i == maxChunkCoords[0].x ? maxChunkCoords[1].x + 1 : GRID_SUBDIV); k++) {
     for (size_t l = (j == minChunkCoords[0].y ? minChunkCoords[1].y : 0);
-                l < (j == maxChunkCoords[0].y ? maxChunkCoords[1].y + 1 : SUBDIV_LVL); l++) {
+                l < (j == maxChunkCoords[0].y ? maxChunkCoords[1].y + 1 : GRID_SUBDIV); l++) {
 
 
-      _trianglesInSubChunk[i*NB_CHUNKS + j][k*SUBDIV_LVL + l].push_back(&_triangles.back());
+      _trianglesInSubChunk[i*NB_CHUNKS + j][k*GRID_SUBDIV + l].push_back(&_triangles.back());
     }
     }
   }
   }
 }
 
-std::array<size_t,3> TerrainGeometry::sortIndices(sf::Vector3f refPoint, const Triangle& tri) const {
+std::array<size_t,3> TerrainGeometry::SubdivisionLevel::sortIndices(sf::Vector3f refPoint, const Triangle& tri) const {
   std::array<size_t,3> res;
 
   if (refPoint == tri.vertices[0]->pos) {
@@ -92,12 +90,12 @@ std::array<size_t,3> TerrainGeometry::sortIndices(sf::Vector3f refPoint, const T
   }
 
   else
-    std::cerr << "Error in TerrainGeometry::sortIndices, no match for refPoint in triangle" << std::endl;
+    std::cerr << "Error in TerrainGeometry::SubdivisionLevel::sortIndices, no match for refPoint in triangle" << std::endl;
 
   return res;
 }
 
-void TerrainGeometry::computeNormals() {
+void TerrainGeometry::SubdivisionLevel::computeNormals() {
   for (auto p = _vertices.begin(); p != _vertices.end(); p++) {
     sf::Vector3f normal(0.f,0.f,0.f);
 
@@ -121,91 +119,7 @@ void TerrainGeometry::computeNormals() {
   }
 }
 
-void TerrainGeometry::computeDistancesToBiomeEdges() {
-  std::unordered_set<sf::Vector3f, vertHashFunc> leftToProcess;
-
-  // Compute borders
-
-  for (auto tri = _triangles.begin(); tri != _triangles.end(); tri++) {
-    std::vector<bool> addToList(3,true);
-
-    for (size_t i = 0; i < 3; i++) {
-      if (tri->neighbourBiomes[i] != tri->biome) {
-        addToList[i] = false;
-        addToList[(i+1)%3] = false;
-        tri->vertices[i]->distToBiomeEdge = 0;
-        tri->vertices[(i+1)%3]->distToBiomeEdge = 0;
-      }
-    }
-
-    for (size_t i = 0; i < 3; i++) {
-      if (addToList[i])
-        leftToProcess.insert(tri->vertices[i]->pos);
-    }
-  }
-
-  // Compute distances iteratively
-
-  while (leftToProcess.size() != 0) {
-    std::unordered_set<sf::Vector3f, vertHashFunc> leftToProcessNxt;
-
-    for (auto pt = leftToProcess.begin(); pt != leftToProcess.end(); pt++) {
-
-      float minDist = MAX_COORD;
-
-      for (auto tri = _vertices.at(*pt).belongsToTris.begin();
-               tri != _vertices.at(*pt).belongsToTris.end(); tri++) {
-
-        std::array<size_t, 3> srt = sortIndices(*pt, **tri);
-        if ((*tri)->vertices[srt[1]]->distToBiomeEdge != -1 &&
-            (*tri)->vertices[srt[2]]->distToBiomeEdge != -1) {
-
-          // A bit of magic, see the report
-          sf::Vector2f a,b;
-          float d, baseD;
-
-          if ((*tri)->vertices[srt[1]]->distToBiomeEdge >
-              (*tri)->vertices[srt[2]]->distToBiomeEdge) {
-
-            b.x = (*tri)->vertices[srt[0]]->pos.x-(*tri)->vertices[srt[1]]->pos.x;
-            b.y = (*tri)->vertices[srt[0]]->pos.y-(*tri)->vertices[srt[1]]->pos.y;
-            d = (*tri)->vertices[srt[1]]->distToBiomeEdge -
-                (*tri)->vertices[srt[2]]->distToBiomeEdge;
-
-            baseD = (*tri)->vertices[srt[2]]->distToBiomeEdge;
-          }
-
-          else {
-            b.x = (*tri)->vertices[srt[0]]->pos.x-(*tri)->vertices[srt[2]]->pos.x;
-            b.y = (*tri)->vertices[srt[0]]->pos.y-(*tri)->vertices[srt[2]]->pos.y;
-            d = (*tri)->vertices[srt[2]]->distToBiomeEdge -
-                (*tri)->vertices[srt[1]]->distToBiomeEdge;
-
-            baseD = (*tri)->vertices[srt[1]]->distToBiomeEdge;
-          }
-
-          a.x = (*tri)->vertices[srt[2]]->pos.x-(*tri)->vertices[srt[1]]->pos.x;
-          a.y = (*tri)->vertices[srt[2]]->pos.y-(*tri)->vertices[srt[1]]->pos.y;
-
-          float alpha = abs(vu::angle(a,b)) * M_PI / 180;
-
-          minDist = std::min(minDist,
-           vu::norm(b) * (float) cos(M_PI-alpha-acos(d/vu::norm(a))) + d + baseD);
-        }
-      }
-
-      if (minDist < MAX_COORD)
-        _vertices.at(*pt).distToBiomeEdge = minDist;
-
-      else
-        leftToProcessNxt.insert(*pt);
-    }
-
-    leftToProcess = leftToProcessNxt;
-  }
-}
-
-bool TerrainGeometry::isOcean(size_t x, size_t y) const {
+bool TerrainGeometry::SubdivisionLevel::isOcean(size_t x, size_t y) const {
   for (size_t i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
     if (_trianglesInSubChunk[x*NB_CHUNKS + y][i].size() == 0)
       return true;
@@ -214,18 +128,18 @@ bool TerrainGeometry::isOcean(size_t x, size_t y) const {
   return false;
 }
 
-std::array<sf::Vector2u, 2> TerrainGeometry::getSubChunkInfo(sf::Vector2f pos) const {
+std::array<sf::Vector2u, 2> TerrainGeometry::SubdivisionLevel::getSubChunkInfo(sf::Vector2f pos) const {
   std::array<sf::Vector2u, 2> res;
 
   res[0].x = pos.x / CHUNK_SIZE;
   res[0].y = pos.y / CHUNK_SIZE;
-  res[1].x = (pos.x - res[0].x * CHUNK_SIZE) / (CHUNK_SIZE / SUBDIV_LVL);
-  res[1].y = (pos.y - res[0].y * CHUNK_SIZE) / (CHUNK_SIZE / SUBDIV_LVL);
+  res[1].x = (pos.x - res[0].x * CHUNK_SIZE) / (CHUNK_SIZE / GRID_SUBDIV);
+  res[1].y = (pos.y - res[0].y * CHUNK_SIZE) / (CHUNK_SIZE / GRID_SUBDIV);
 
   return res;
 }
 
-std::list<Triangle*> TerrainGeometry::getTrianglesInChunk(size_t x, size_t y) const {
+std::list<Triangle*> TerrainGeometry::SubdivisionLevel::getTrianglesInChunk(size_t x, size_t y) const {
   std::list<Triangle*> res;
 
   for (size_t i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
@@ -239,17 +153,17 @@ std::list<Triangle*> TerrainGeometry::getTrianglesInChunk(size_t x, size_t y) co
   return res;
 }
 
-std::list<Triangle*> TerrainGeometry::getTrianglesNearPos(sf::Vector2f pos) const {
+std::list<Triangle*> TerrainGeometry::SubdivisionLevel::getTrianglesNearPos(sf::Vector2f pos) const {
   std::array<sf::Vector2u, 2> intCoord = getSubChunkInfo(pos);
   return _trianglesInSubChunk[intCoord[0].x*NB_CHUNKS  + intCoord[0].y]
-                             [intCoord[1].x*SUBDIV_LVL + intCoord[1].y];
+                             [intCoord[1].x*GRID_SUBDIV + intCoord[1].y];
 }
 
-Triangle* TerrainGeometry::getTriangleContaining(sf::Vector2f pos) const {
+Triangle* TerrainGeometry::SubdivisionLevel::getTriangleContaining(sf::Vector2f pos) const {
   std::array<sf::Vector2u, 2> intCoord = getSubChunkInfo(pos);
   std::list<Triangle*> toTest =
     _trianglesInSubChunk[intCoord[0].x*NB_CHUNKS  + intCoord[0].y]
-                        [intCoord[1].x*SUBDIV_LVL + intCoord[1].y];
+                        [intCoord[1].x*GRID_SUBDIV + intCoord[1].y];
 
   for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
     float x[3]; float y[3];
@@ -271,4 +185,32 @@ Triangle* TerrainGeometry::getTriangleContaining(sf::Vector2f pos) const {
   }
 
   return nullptr;
+}
+
+TerrainGeometry::TerrainGeometry() :
+  _subdivisionLevels(1) {}
+
+void TerrainGeometry::generateNewSubdivisionLevel() {
+
+}
+
+std::list<Triangle*> TerrainGeometry::getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl) const {
+  if (subdivLvl > _subdivisionLevels.size() - 1)
+    subdivLvl = _subdivisionLevels.size() - 1;
+
+  return _subdivisionLevels[subdivLvl].getTrianglesInChunk(x,y);
+}
+
+std::list<Triangle*> TerrainGeometry::getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const {
+  if (subdivLvl > _subdivisionLevels.size() - 1)
+    subdivLvl = _subdivisionLevels.size() - 1;
+
+  return _subdivisionLevels[subdivLvl].getTrianglesNearPos(pos);
+}
+
+Triangle*            TerrainGeometry::getTriangleContaining(sf::Vector2f pos, size_t subdivLvl) const {
+  if (subdivLvl > _subdivisionLevels.size() - 1)
+    subdivLvl = _subdivisionLevels.size() - 1;
+
+  return _subdivisionLevels[subdivLvl].getTriangleContaining(pos);
 }

@@ -291,6 +291,14 @@ void Controller::handleKeyPressed(sf::Event event) {
       }
       break;
     }
+
+    case sf::Keyboard::Add:
+      _game.changeSubdivisionLevel(1);
+      break;
+
+    case sf::Keyboard::Subtract:
+      _game.changeSubdivisionLevel(-1);
+      break;
   }
 }
 

@@ -10,6 +10,7 @@
 class igElementDisplay {
 public:
   igElementDisplay();
+  ~igElementDisplay();
 
   void loadElements(const std::vector<igElement*>& visibleElmts);
   void drawElements() const;

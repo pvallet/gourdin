@@ -97,7 +97,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
     sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
-    Triangle* triContaining = _terrainGeometry.getTriangleContaining(pos);
+    Triangle* triContaining = _terrainGeometry.getTriangleContaining(pos,0);
 
     if (triContaining != nullptr) {
       if (triContaining->biome >= 11) { // No forests in other biomes

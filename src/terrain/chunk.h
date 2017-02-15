@@ -12,10 +12,8 @@
 
 #include "utils.h"
 
-struct TextureData {
-	std::vector<float> distances;
+struct Indices {
 	std::vector<GLuint> indices;
-
 	GLuint ibo;
 };
 
@@ -31,15 +29,21 @@ public:
 	// Set visible to false if there is no need to display the chunk
 	virtual void computeCulling();
 
+	void setSubdivisionLevel(size_t newSubdLvl);
+
 	float getHeight(sf::Vector2f pos) const;
 	inline bool isVisible() const {return _visible;}
+	size_t getSubdivisionLevel() const {return _subdiv_lvl;}
 
-protected:
+private:
+	void reset();
 	GLuint addVertexInfo(Vertex* vertex);
 	void fillBufferData();
 	void generateBuffers();
 	void computeChunkBoundingBox();
 	bool theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const;
+
+	size_t _subdiv_lvl;
 
 	GLuint _vao;
 	GLuint _geometryVBO;
@@ -54,7 +58,7 @@ protected:
 	std::vector<float> _normals;
 	std::vector<float> _coords;
 
-	std::map<Biome, TextureData> _textureData;
+	std::map<Biome, Indices> _indices;
 
 	const TerrainTexManager& _terrainTexManager;
 	const TerrainGeometry&   _terrainGeometry;

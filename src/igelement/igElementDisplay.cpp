@@ -40,6 +40,11 @@ igElementDisplay::igElementDisplay() :
   glBindVertexArray(0);
 }
 
+igElementDisplay::~igElementDisplay() {
+  glDeleteBuffers(1, &_vbo);
+  glDeleteVertexArrays(1, &_vao);
+}
+
 void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDisplay,
   size_t& currentSpreeLength, size_t& firstIndexSpree) {
 

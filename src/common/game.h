@@ -38,6 +38,7 @@ public:
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
+	void changeSubdivisionLevel(int increment);
 
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
 	inline const std::vector<std::unique_ptr<igElement> >& getElements() const {return _igElements;}

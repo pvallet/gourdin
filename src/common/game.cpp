@@ -32,8 +32,6 @@ void Game::init() {
   _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
-  _terrainGeometry.computeNormals();
-  // _terrainGeometry.computeDistancesToBiomeEdges();
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
 
@@ -167,7 +165,7 @@ void Game::update(sf::Time elapsed) {
   cam.apply();
 
   // Update terrains
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
+  for (size_t i = 0; i < NB_CHUNKS; i++) {void setSubdivisionLevel(size_t newSubdLvl);
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] != NOT_GENERATED) {
         _terrain[i][j]->computeCulling();
@@ -297,10 +295,14 @@ void Game::render() const {
 
   // Chunk
 
+  size_t subdivLvl = 0;
+
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE)
+      if (_chunkStatus[i][j] == VISIBLE) {
         nbTriangles += _terrain[i][j]->draw();
+        subdivLvl = _terrain[i][j]->getSubdivisionLevel();
+      }
     }
   }
 
@@ -323,11 +325,13 @@ void Game::render() const {
 
   glUseProgram(0);
 
+  LogText& logText = LogText::getInstance();
+
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << _visibleElmts.size() << std::endl;
+              << "Elements:  " << _visibleElmts.size() << std::endl
+              << "Subdivision level: " << subdivLvl << std::endl;
 
-  LogText& logText = LogText::getInstance();
   logText.addLine(renderStats.str());
 }
 
@@ -381,6 +385,20 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
 
 void Game::addLion(sf::Vector2i screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
+}
+
+void Game::changeSubdivisionLevel(int increment) {
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] != NOT_GENERATED) {
+        int newLevel = _terrain[i][j]->getSubdivisionLevel() + increment;
+        if (newLevel < 0)
+          newLevel = 0;
+
+        _terrain[i][j]->setSubdivisionLevel(newLevel);
+      }
+    }
+  }
 }
 
 sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {

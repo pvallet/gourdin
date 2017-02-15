@@ -10,6 +10,7 @@
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                               const TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
+	_subdiv_lvl(0),
 	_vao(0),
 	_geometryVBO(0),
 	_visible(false),
@@ -17,12 +18,26 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
   _terrainGeometry(terrainGeometry) {
 }
 
-Chunk::~Chunk() {
+void Chunk::reset() {
 	glDeleteBuffers(1, &_geometryVBO);
+	_geometryVBO = 0;
 
-	for (auto it = _textureData.begin(); it != _textureData.end(); it++) {
+	for (auto it = _indices.begin(); it != _indices.end(); it++) {
 		glDeleteBuffers(1,&(it->second.ibo));
 	}
+
+	_indices.clear();
+
+	glDeleteVertexArrays(1, &_vao);
+	_vao = 0;
+
+	_vertices.clear();
+	_normals.clear();
+	_coords.clear();
+}
+
+Chunk::~Chunk() {
+	reset();
 }
 
 GLuint Chunk::addVertexInfo(Vertex* vertex) {
@@ -58,11 +73,11 @@ GLuint Chunk::addVertexInfo(Vertex* vertex) {
 }
 
 void Chunk::fillBufferData() {
-	std::list<Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y);
+	std::list<Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _subdiv_lvl);
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
 		for (size_t i = 0; i < 3; i++) {
-			_textureData[(*tri)->biome].indices.push_back(addVertexInfo((*tri)->vertices[i]));
+			_indices[(*tri)->biome].indices.push_back(addVertexInfo((*tri)->vertices[i]));
 		}
 	}
 }
@@ -106,7 +121,7 @@ void Chunk::generateBuffers() {
 
 	// IBO for each biome
 
-	for (auto it = _textureData.begin(); it != _textureData.end(); it++) {
+	for (auto it = _indices.begin(); it != _indices.end(); it++) {
 		size_t bufferSizeIndices = it->second.indices.size()*sizeof it->second.indices[0];
 
 		glGenBuffers(1, &(it->second.ibo));
@@ -158,7 +173,7 @@ size_t Chunk::draw() const {
 
 	size_t nbTriangles = 0;
 
-	for (auto it = _textureData.begin(); it != _textureData.end(); it++) {
+	for (auto it = _indices.begin(); it != _indices.end(); it++) {
 		_terrainTexManager.bindTexture(it->first);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
@@ -241,8 +256,14 @@ void Chunk::computeCulling() {
   _visible = true;
 }
 
+void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
+	_subdiv_lvl = newSubdLvl;
+	reset();
+	generate();
+}
+
 float Chunk::getHeight(sf::Vector2f pos) const {
-  std::list<Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos);
+  std::list<Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_subdiv_lvl);
 
   for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
     float x[3]; float y[3]; float z[3];

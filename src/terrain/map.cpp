@@ -331,13 +331,16 @@ void Map::load(std::string path) {
 }
 
 void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
-	terrainGeometry.goingToAddNPoints(_corners.size()+_centers.size());
+	TerrainGeometry::SubdivisionLevel& initTerrainGeometry = terrainGeometry.getFirstSubdivLevel();
+
+	initTerrainGeometry.goingToAddNPoints(_corners.size()+_centers.size());
 
 	for (auto ctr = _centers.begin(); ctr != _centers.end(); ctr++) {
 		bool toDraw = true;
 
 		if ((*ctr)->biome == OCEAN) {
 			toDraw = false;
+			// We still draw an OCEAN biome if one of its neigbours is not an OCEAN
 			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
 				if (!(*edge)->mapEdge && (*edge)->center0->biome != (*edge)->center1->biome) {
 					toDraw = true;
@@ -350,7 +353,6 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
 				if (!(*edge)->mapEdge) {
 					std::array<sf::Vector3f, 3> points;
-					std::array<Biome, 4> biomes;
 
 					points[0].x = (*edge)->corner0->x;
 					points[0].y = (*edge)->corner0->y;
@@ -364,18 +366,11 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 					points[2].y = (*ctr)->y;
 					points[2].z = (*ctr)->elevation * HEIGHT_FACTOR;
 
-					if ((*edge)->center0 == ctr->get())
-						biomes[0] = (*edge)->center1->biome;
-					else
-						biomes[0] = (*edge)->center0->biome;
-
-					for (size_t i = 0; i < 3; i++) {
-						biomes[i+1] = (*ctr)->biome;
-					}
-
-					terrainGeometry.addTriangle(points, biomes);
+					initTerrainGeometry.addTriangle(points, (*ctr)->biome);
 				}
 			}
 		}
 	}
+
+	initTerrainGeometry.computeNormals();
 }
