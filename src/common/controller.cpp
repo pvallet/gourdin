@@ -10,7 +10,7 @@
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define TRANSLATION_VALUE_PS 70.f
-#define ZOOM_FACTOR 10.f
+#define ZOOM_FACTOR 50.f
 
 Controller::Controller(sf::RenderWindow& window) :
  	_addSelect(false),
@@ -300,7 +300,7 @@ void Controller::handleKeyPressed(sf::Event event) {
       _game.changeSubdivisionLevel(-1);
       break;
 
-    case sf::Keyboard::Return:
+    case sf::Keyboard::W:
       _game.switchWireframe();
       break;
   }

@@ -10,7 +10,7 @@
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                               const TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
-	_subdiv_lvl(0),
+	_subdiv_lvl(1),
 	_vao(0),
 	_geometryVBO(0),
 	_visible(false),

@@ -11,9 +11,12 @@ class igElementDisplay {
 public:
   igElementDisplay();
   ~igElementDisplay();
+  igElementDisplay(igElementDisplay const&) = delete;
+  void operator=  (igElementDisplay const&) = delete;
 
   void loadElements(const std::vector<igElement*>& visibleElmts);
   void drawElements() const;
+
 
 private:
   void allocateNewBuffers(size_t nbNewBuffers);

@@ -9,8 +9,11 @@
 
 class TextureArray {
 public:
-	TextureArray() : texID(0) {}
+	TextureArray() : texID(0), _count(0) {}
+	TextureArray(TextureArray const &textureArray);
 	~TextureArray() {glDeleteTextures(1, &texID);}
+
+	TextureArray& operator=(TextureArray const &textureArray);
 
 	void loadTextures(size_t count, std::string folderPath);
 
@@ -25,4 +28,8 @@ public:
 	GLuint texID;
 	sf::Vector2f maxTexSize;
 	std::vector<sf::Vector2f> texSizes;
+
+private:
+	size_t _count;
+	std::string _folderPath;
 };

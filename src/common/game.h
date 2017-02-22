@@ -28,7 +28,6 @@ enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 class Game {
 public:
 	Game();
-  virtual ~Game() {}
 
   void init();
 

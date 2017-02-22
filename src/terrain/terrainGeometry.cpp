@@ -18,15 +18,15 @@ struct compTriClockwiseOrder {
     sf::Vector2f refVector(0,1);
     // Angle between first edge of the triangle and vec(0,1)
     float lhsAngle = vu::angle(
+      refVector,
       sf::Vector2f(lhs->vertices[srtL[1]]->pos.x - lhs->vertices[srtL[0]]->pos.x,
-                   lhs->vertices[srtL[1]]->pos.y - lhs->vertices[srtL[0]]->pos.y),
-      refVector
+        lhs->vertices[srtL[1]]->pos.y - lhs->vertices[srtL[0]]->pos.y)
     );
 
     float rhsAngle = vu::angle(
+      refVector,
       sf::Vector2f(rhs->vertices[srtR[1]]->pos.x - rhs->vertices[srtR[0]]->pos.x,
-                   rhs->vertices[srtR[1]]->pos.y - rhs->vertices[srtR[0]]->pos.y),
-      refVector
+        rhs->vertices[srtR[1]]->pos.y - rhs->vertices[srtR[0]]->pos.y)
     );
 
     if (lhsAngle < 0)
@@ -34,7 +34,7 @@ struct compTriClockwiseOrder {
     if (rhsAngle < 0)
       rhsAngle += 360;
 
-    return lhsAngle > rhsAngle;
+    return lhsAngle < rhsAngle;
   }
 
   sf::Vector3f _basePoint;
@@ -234,7 +234,7 @@ std::list<Triangle*> TerrainGeometry::SubdivisionLevel::getTrianglesNearPos(sf::
                              [intCoord[1].x*GRID_SUBDIV + intCoord[1].y];
 }
 
-Triangle* TerrainGeometry::SubdivisionLevel::getTriangleContaining(sf::Vector2f pos) const {
+Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
   std::array<sf::Vector2u, 2> intCoord = getSubChunkInfo(pos);
   std::list<Triangle*> toTest =
     _trianglesInSubChunk[intCoord[0].x*NB_CHUNKS  + intCoord[0].y]
@@ -255,11 +255,11 @@ Triangle* TerrainGeometry::SubdivisionLevel::getTriangleContaining(sf::Vector2f 
               ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
 
     if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
-      return *tri;
+      return (*tri)->biome;
     }
   }
 
-  return nullptr;
+  return NO_DEFINED_BIOME;
 }
 
 TerrainGeometry::TerrainGeometry() :
@@ -321,10 +321,15 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
 
         // The average for the new vertices on the edges is however done on all coordinates
 
-        std::array<size_t,3> srt = nextTri->sortIndices(t->vertices[i]->pos);
+        if (nextTri->biome == t->biome) {
+          std::array<size_t,3> srt = nextTri->sortIndices(t->vertices[i]->pos);
 
-        newMidPoints[i] = 3.f/8.f * (t->vertices[i]->pos + t->vertices[(i+2)%3]->pos) +
-                          1.f/8.f * (t->vertices[(i+1)%3]->pos + nextTri->vertices[srt[2]]->pos);
+          newMidPoints[i] = 3.f/8.f * (t->vertices[i]->pos + t->vertices[(i+2)%3]->pos) +
+                            1.f/8.f * (t->vertices[(i+1)%3]->pos + nextTri->vertices[srt[2]]->pos);
+        }
+
+        else
+          newMidPoints[i] = 1.f/2.f * (t->vertices[i]->pos + t->vertices[(i+2)%3]->pos);
       }
 
       for (size_t i = 0; i < 3; i++) {
@@ -355,9 +360,9 @@ std::list<Triangle*> TerrainGeometry::getTrianglesNearPos  (sf::Vector2f pos, si
   return _subdivisionLevels[subdivLvl].getTrianglesNearPos(pos);
 }
 
-Triangle*            TerrainGeometry::getTriangleContaining(sf::Vector2f pos, size_t subdivLvl) const {
+Biome TerrainGeometry::getBiome (sf::Vector2f pos, size_t subdivLvl) const {
   if (subdivLvl > _subdivisionLevels.size() - 1)
     subdivLvl = _subdivisionLevels.size() - 1;
 
-  return _subdivisionLevels[subdivLvl].getTriangleContaining(pos);
+  return _subdivisionLevels[subdivLvl].getBiome(pos);
 }

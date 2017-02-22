@@ -21,7 +21,9 @@ class Chunk {
 public:
 	Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 		                        const TerrainGeometry& terrainGeometry);
-	virtual ~Chunk();
+	~Chunk();
+	Chunk(Chunk const&)          = delete;
+	void operator=(Chunk const&) = delete;
 
 	void generate();
 	size_t draw() const;

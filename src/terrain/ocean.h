@@ -10,6 +10,8 @@ class Ocean {
 public:
 	Ocean(float oversizeFactor);
 	~Ocean();
+	Ocean(Ocean const&)          = delete;
+	void operator=(Ocean const&) = delete;
 
 	void draw() const;
 

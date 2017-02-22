@@ -68,7 +68,7 @@ public:
 
     std::list<Triangle*> getTrianglesInChunk(size_t x, size_t y) const;
     std::list<Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
-    Triangle*            getTriangleContaining(sf::Vector2f pos) const;
+    Biome getBiome(sf::Vector2f pos) const;
 
 
 
@@ -100,7 +100,7 @@ public:
   inline size_t getNbSubdivLevels() const {return _subdivisionLevels.size();}
   std::list<Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl) const;
   std::list<Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
-  Triangle*            getTriangleContaining(sf::Vector2f pos, size_t subdivLvl) const;
+  Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const;
 
 private:
   std::vector<SubdivisionLevel> _subdivisionLevels;

@@ -9,7 +9,6 @@
 class Perlin {
 public:
   Perlin(int seed, int size);
-  virtual ~Perlin() {}
 
   inline void setParams(float octaves, float frequency, float persistence) {
     _octaves = octaves; _frequency = frequency; _persistence = persistence;

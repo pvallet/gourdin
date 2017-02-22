@@ -11,6 +11,8 @@ class TerrainTexManager {
 public:
 	TerrainTexManager() {}
   ~TerrainTexManager() {glDeleteTextures(_texIDs.size(), &_texIDs[0]);}
+	TerrainTexManager(TerrainTexManager const&) = delete;
+	void operator=   (TerrainTexManager const&) = delete;
 
 	sf::Vector2u loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);

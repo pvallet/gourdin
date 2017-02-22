@@ -97,16 +97,16 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
     sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
-    Triangle* triContaining = _terrainGeometry.getTriangleContaining(pos,0);
+    Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
-    if (triContaining != nullptr) {
-      if (triContaining->biome >= 11) { // No forests in other biomes
+    if (biomeInPos != NO_DEFINED_BIOME) {
+      if (biomeInPos >= 11) { // No forests in other biomes
         if (isInForestMask(pos)) {
-          if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(triContaining->biome))) {
+          if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biomeInPos))) {
             _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
 
-            res.push_back(new Tree(pos, _treeTexManager, triContaining->biome,
-              (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(triContaining->biome))));
+            res.push_back(new Tree(pos, _treeTexManager, biomeInPos,
+              (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(biomeInPos))));
           }
         }
       }

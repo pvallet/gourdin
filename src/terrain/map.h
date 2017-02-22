@@ -97,7 +97,6 @@ struct Corner {
 class Map {
 public:
 	Map() {}
-	virtual ~Map() {}
 
 	void load(std::string path);
 	void feedGeometryData(TerrainGeometry& terrainGeometry) const;

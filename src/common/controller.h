@@ -9,7 +9,6 @@
 class Controller {
 public:
 	Controller(sf::RenderWindow& window);
-	virtual ~Controller() {}
 
 	void init();
 	void run();
