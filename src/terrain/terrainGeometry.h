@@ -16,35 +16,30 @@
 
 struct Vertex;
 
-struct Triangle {
+class Triangle {
+public:
   std::array<Vertex*,3> vertices;
   Biome biome;
   sf::Vector3f normal;
+
+  // indice 0 corresponds to the point refPoint in tri, and the other indices are
+  // the other vertices in clockwise order
+  std::array<size_t,3> sortIndices(sf::Vector3f refPoint) const;
 };
 
-struct Vertex {
+class Vertex {
+public:
+  Vertex(): _sorted(false) {}
+
   sf::Vector3f pos;
   sf::Vector3f normal;
   std::list<Triangle*> belongsToTris;
-};
 
-struct compTri {
-  bool operator()(const Triangle* lhs, const Triangle* rhs) const {
-  for (size_t i = 0; i < 3; i++) {
-    if (lhs->vertices[i] < rhs->vertices[i])
-      return true;
-    else if (lhs->vertices[i] > rhs->vertices[i])
-      return false;
-  }
+  // If the triangles are not sorted yet, sorts them in clockwise order
+  Triangle* getNextTri(Triangle* tri);
 
-  return false;
-  }
-};
-
-struct equalTri {
-  bool operator()(const Triangle* lhs, const Triangle* rhs) {
-  return ( lhs->vertices == rhs->vertices);
-  }
+private:
+  bool _sorted;
 };
 
 struct vertHashFunc{
@@ -78,9 +73,6 @@ public:
 
 
   private:
-    // indice 0 corresponds to the point refPoint in tri, and the other indices are
-    // the other vertices in clockwise order
-    std::array<size_t,3> sortIndices(sf::Vector3f refPoint, const Triangle& tri) const;
     std::array<sf::Vector2u, 2> getSubChunkInfo(sf::Vector2f pos) const;
 
     std::unordered_map<sf::Vector3f, Vertex, vertHashFunc> _vertices;
@@ -92,6 +84,7 @@ public:
     // Each triangle can belong to several subchunks
     std::vector<std::vector<std::list<Triangle*> > > _trianglesInSubChunk;
 
+    friend class TerrainGeometry;
   };
 
   TerrainGeometry ();
@@ -104,6 +97,7 @@ public:
   inline bool isOcean(size_t x, size_t y) const {
     return _subdivisionLevels[0].isOcean(x,y);}
 
+  inline size_t getNbSubdivLevels() const {return _subdivisionLevels.size();}
   std::list<Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl) const;
   std::list<Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
   Triangle*            getTriangleContaining(sf::Vector2f pos, size_t subdivLvl) const;

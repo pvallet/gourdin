@@ -18,6 +18,7 @@ struct compDepth {
 } compDepthObj;
 
 Game::Game() :
+  _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _contentGenerator(_terrainGeometry),
@@ -297,6 +298,9 @@ void Game::render() const {
 
   size_t subdivLvl = 0;
 
+  if (_wireframe)
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] == VISIBLE) {
@@ -305,6 +309,9 @@ void Game::render() const {
       }
     }
   }
+
+  if (_wireframe)
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
   glUseProgram(0);
 
@@ -366,6 +373,7 @@ void Game::select(sf::IntRect rect, bool add) {
     }
   }
 }
+
 void Game::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2f target = get2DCoord(screenTarget);
 
@@ -394,6 +402,9 @@ void Game::changeSubdivisionLevel(int increment) {
         int newLevel = _terrain[i][j]->getSubdivisionLevel() + increment;
         if (newLevel < 0)
           newLevel = 0;
+
+        if (newLevel > _terrainGeometry.getNbSubdivLevels() - 1)
+          _terrainGeometry.generateNewSubdivisionLevel();
 
         _terrain[i][j]->setSubdivisionLevel(newLevel);
       }

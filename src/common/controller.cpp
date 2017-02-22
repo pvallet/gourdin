@@ -299,6 +299,10 @@ void Controller::handleKeyPressed(sf::Event event) {
     case sf::Keyboard::Subtract:
       _game.changeSubdivisionLevel(-1);
       break;
+
+    case sf::Keyboard::Return:
+      _game.switchWireframe();
+      break;
   }
 }
 
