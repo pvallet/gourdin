@@ -19,6 +19,7 @@ struct compDepth {
 
 Game::Game() :
   _wireframe(false),
+  _sortElements(true),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _contentGenerator(_terrainGeometry),
@@ -166,7 +167,7 @@ void Game::update(sf::Time elapsed) {
   cam.apply();
 
   // Update terrains
-  for (size_t i = 0; i < NB_CHUNKS; i++) {void setSubdivisionLevel(size_t newSubdLvl);
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] != NOT_GENERATED) {
         _terrain[i][j]->computeCulling();
@@ -183,8 +184,16 @@ void Game::update(sf::Time elapsed) {
             _chunkStatus[i][j] = NOT_VISIBLE;
         }
       }
+
+      if (_chunkStatus[i][j] == VISIBLE)
+        _terrain[i][j]->computeSubdivisionLevel();
     }
   }
+
+  LogText& logText = LogText::getInstance();
+  std::ostringstream subdivLvl;
+  subdivLvl << "Current subdivision level: " << _terrain[camPosX][camPosY]->getSubdivisionLevel() << std::endl;
+  logText.addLine(subdivLvl.str());
 
   updateMovingElementsStates();
 
@@ -271,7 +280,8 @@ void Game::update(sf::Time elapsed) {
       _visibleElmts.push_back(_igElements[i].get());
   }
 
-  std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
+  if (_sortElements)
+    std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
   _igElementDisplay.loadElements(_visibleElmts);
 }
 
@@ -296,17 +306,13 @@ void Game::render() const {
 
   // Chunk
 
-  size_t subdivLvl = 0;
-
   if (_wireframe)
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE) {
+      if (_chunkStatus[i][j] == VISIBLE)
         nbTriangles += _terrain[i][j]->draw();
-        subdivLvl = _terrain[i][j]->getSubdivisionLevel();
-      }
     }
   }
 
@@ -336,8 +342,7 @@ void Game::render() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << _visibleElmts.size() << std::endl
-              << "Subdivision level: " << subdivLvl << std::endl;
+              << "Elements:  " << _visibleElmts.size() << std::endl;
 
   logText.addLine(renderStats.str());
 }
@@ -403,7 +408,7 @@ void Game::changeSubdivisionLevel(int increment) {
         if (newLevel < 0)
           newLevel = 0;
 
-        if (newLevel > _terrainGeometry.getNbSubdivLevels() - 1)
+        if (newLevel > _terrainGeometry.getCurrentGlobalSubdivLvl())
           _terrainGeometry.generateNewSubdivisionLevel();
 
         _terrain[i][j]->setSubdivisionLevel(newLevel);

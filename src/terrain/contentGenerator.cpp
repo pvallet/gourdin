@@ -93,25 +93,25 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 
   // _treesInChunk[x*CHUNK_SIZE + y].reserve(100);
 
-  for (size_t i = 0; i < 400; i++) {
-    sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
-    pos += chunkPos;
-
-    Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
-
-    if (biomeInPos != NO_DEFINED_BIOME) {
-      if (biomeInPos >= 11) { // No forests in other biomes
-        if (isInForestMask(pos)) {
-          if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biomeInPos))) {
-            _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
-
-            res.push_back(new Tree(pos, _treeTexManager, biomeInPos,
-              (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(biomeInPos))));
-          }
-        }
-      }
-    }
-  }
+  // for (size_t i = 0; i < 400; i++) {
+  //   sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
+  //   pos += chunkPos;
+  //
+  //   Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
+  //
+  //   if (biomeInPos != NO_DEFINED_BIOME) {
+  //     if (biomeInPos >= 11) { // No forests in other biomes
+  //       if (isInForestMask(pos)) {
+  //         if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biomeInPos))) {
+  //           _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
+  //
+  //           res.push_back(new Tree(pos, _treeTexManager, biomeInPos,
+  //             (int) ((RANDOMF - 0.01f) * _treeTexManager.getNBTrees(biomeInPos))));
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   return res;
 }

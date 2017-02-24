@@ -39,7 +39,8 @@ public:
 	void addLion(sf::Vector2i screenTarget);
 	void changeSubdivisionLevel(int increment);
 
-	inline void switchWireframe() {_wireframe = _wireframe ? false : true;}
+	inline void switchWireframe() {_wireframe = !_wireframe;}
+	inline void switchSortElements() {_sortElements = !_sortElements;}
 
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
 	inline const std::vector<std::unique_ptr<igElement> >& getElements() const {return _igElements;}
@@ -57,6 +58,7 @@ private:
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 
 	bool _wireframe;
+	bool _sortElements;
 
   std::vector<std::unique_ptr<igElement> > _igElements; // Elements
 

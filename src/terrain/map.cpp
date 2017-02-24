@@ -331,9 +331,9 @@ void Map::load(std::string path) {
 }
 
 void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
-	TerrainGeometry::SubdivisionLevel& initTerrainGeometry = terrainGeometry.getFirstSubdivLevel();
+	TerrainGeometry::SubdivisionLevel* initTerrainGeometry = terrainGeometry.getFirstSubdivLevel();
 
-	initTerrainGeometry.goingToAddNPoints(_corners.size()+_centers.size());
+	initTerrainGeometry->goingToAddNPoints(_corners.size()+_centers.size());
 
 	for (auto ctr = _centers.begin(); ctr != _centers.end(); ctr++) {
 		bool toDraw = true;
@@ -366,12 +366,12 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 					points[2].y = (*ctr)->y;
 					points[2].z = (*ctr)->elevation * HEIGHT_FACTOR;
 
-					initTerrainGeometry.addTriangle(points, (*ctr)->biome);
+					initTerrainGeometry->addTriangle(points, (*ctr)->biome);
 				}
 			}
 		}
 	}
 
-	// initTerrainGeometry.computeNormals();
+	initTerrainGeometry->computeNormals();
 	terrainGeometry.generateNewSubdivisionLevel();
 }

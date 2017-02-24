@@ -300,6 +300,10 @@ void Controller::handleKeyPressed(sf::Event event) {
       _game.changeSubdivisionLevel(-1);
       break;
 
+    case sf::Keyboard::S:
+      _game.switchSortElements();
+      break;
+
     case sf::Keyboard::W:
       _game.switchWireframe();
       break;
