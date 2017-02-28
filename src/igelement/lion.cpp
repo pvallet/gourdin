@@ -20,7 +20,7 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	_animAttack = graphics.getAnimationTime(ATTACK);
 }
 
-void Lion::update(sf::Time elapsed, float theta) {
+void Lion::update(sf::Time elapsed) {
 	switch(_status) {
 		case RUNNING:
 			_stamina -= elapsed.asSeconds() * _loseBreathSpeed;
@@ -49,7 +49,7 @@ void Lion::update(sf::Time elapsed, float theta) {
 			break;
 	}
 
-	Controllable::update(elapsed, theta);
+	Controllable::update(elapsed);
 }
 
 void Lion::stop() {

@@ -10,7 +10,7 @@ class igElement {
 public:
 	igElement(sf::Vector2f position);
 
-	virtual void update(sf::Time elapsed, float theta);
+	virtual void updateDisplay(sf::Time elapsed, float theta);
 	inline void setVertices(std::array<float,12> nVertices) {_vertices = nVertices;}
 	inline void setVisible(bool nVisible) {_visible = nVisible;}
 

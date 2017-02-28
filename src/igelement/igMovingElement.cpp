@@ -30,21 +30,27 @@ void igMovingElement::stop() {
 	_speed = 0.f;
 }
 
-void igMovingElement::update(sf::Time elapsed, float theta) {
+void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
 	_graphics.update(elapsed, getOrientation());
-	igElement::update(elapsed, theta);
+	igElement::updateDisplay(elapsed, theta);
 
 	if (!_dead) {
 		if (_direction.x != 0.f || _direction.y != 0.f) {
 			float ori = vu::angle(sf::Vector2f(1.0f,0.0f), _direction);
 			setOrientation(ori - _camOrientation);
-
-			_pos.x += _direction.x * _speed * elapsed.asSeconds();
-			_pos.y += _direction.y * _speed * elapsed.asSeconds();
 		}
 	}
 
 	setTexCoord(_graphics.getCurrentSprite());
+}
+
+void igMovingElement::update(sf::Time elapsed) {
+	if (!_dead) {
+		if (_direction.x != 0.f || _direction.y != 0.f) {
+			_pos.x += _direction.x * _speed * elapsed.asSeconds();
+			_pos.y += _direction.y * _speed * elapsed.asSeconds();
+		}
+	}
 }
 
 void igMovingElement::die() {

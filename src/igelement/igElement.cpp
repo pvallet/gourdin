@@ -22,7 +22,7 @@ igElement::igElement(sf::Vector2f position) :
 }
 
 
-void igElement::update(sf::Time elapsed, float theta) {
+void igElement::updateDisplay(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;

@@ -13,7 +13,7 @@ public:
 
 	inline Animals getAnimalType() const {return LION;}
 
-	virtual void update(sf::Time elapsed, float theta);
+	virtual void update(sf::Time elapsed);
 
 	virtual void stop();
 	void beginRunning();

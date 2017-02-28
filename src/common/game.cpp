@@ -187,6 +187,10 @@ void Game::update(sf::Time elapsed) {
   }
 
   updateMovingElementsStates();
+  // Update positions of igMovingElement regardless of them being visible
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    (*it)->update(elapsed);
+  }
 
   glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
                                          (float) M_PI / 180.f * cam.getTheta(),
@@ -198,8 +202,6 @@ void Game::update(sf::Time elapsed) {
 
   // Update in game elements characteristics
   for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
-    _igElements[i]->update(elapsed, cam.getTheta()); // Choose the right sprite and update pos
-
     int chunkPosX = _igElements[i]->getPos().x / CHUNK_SIZE;
     int chunkPosY = _igElements[i]->getPos().y / CHUNK_SIZE;
 
@@ -209,6 +211,8 @@ void Game::update(sf::Time elapsed) {
       chunkPosY--;
 
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
+
+      _igElements[i]->updateDisplay(elapsed, cam.getTheta());
 
       // No test yet to see if the element can move to its new pos (no collision)
       float baseHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
