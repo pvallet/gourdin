@@ -12,7 +12,12 @@ public:
 	virtual void update(sf::Time elapsed);
 	virtual void setTarget(sf::Vector2f t);
 
+	inline void setProjectedVertices(std::array<float,12> nVertices) {_projectedVertices = nVertices;}
+
+	sf::IntRect getScreenCoord() const;
+
 protected:
 	sf::Vector2f _target;
 
+	std::array<float, 12> _projectedVertices;
 };

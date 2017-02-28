@@ -52,6 +52,7 @@ private:
 	void generateChunk          (size_t x, size_t y);
   void appendNewElements(std::vector<igElement*> elems);
   void updateMovingElementsStates();
+	void compute2DCorners();
 
 
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;

@@ -153,6 +153,56 @@ void Game::updateMovingElementsStates() {
   }
 }
 
+void Game::compute2DCorners() {
+  Camera& cam = Camera::getInstance();
+  glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
+                                         (float) M_PI / 180.f * cam.getTheta(),
+                                         glm::vec3(0, 0, 1));
+
+  rotateElements =           glm::rotate(rotateElements,
+                                         ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
+                                         glm::vec3(0, 1, 0));
+
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    Controllable* ctrl;
+    if (ctrl = dynamic_cast<Controllable*>(*it)) {
+      // Calculate new corners
+      glm::vec3 corners3[4];
+      float width = ctrl->getSize().x;
+      float height = ctrl->getSize().y;
+
+      corners3[0] = glm::vec3( 0,  width/2, height);
+      corners3[1] = glm::vec3( 0, -width/2, height);
+      corners3[2] = glm::vec3( 0, -width/2, 0);
+      corners3[3] = glm::vec3( 0,  width/2, 0);
+
+      glm::vec3 translatePos(ctrl->getPos().x,
+                             ctrl->getPos().y,
+                             ctrl->getHeight());
+
+      glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
+
+      // Compute their projections
+      for (size_t i = 0; i < 4; i++) {
+        glm::vec4 tmp(corners3[i], 1.f);
+        tmp = model * tmp;
+        tmp = cam.getViewProjectionMatrix() * tmp;
+        corners3[i] = glm::vec3(tmp) / tmp.w;
+      }
+
+      std::array<float,12> vertices;
+
+      for (size_t i = 0; i < 4; i++) {
+        vertices[3*i]     = corners3[i].x;
+        vertices[3*i + 1] = corners3[i].y;
+        vertices[3*i + 2] = corners3[i].z;
+      }
+
+      ctrl->setProjectedVertices(vertices);
+    }
+  }
+}
+
 void Game::update(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
   int camPosX = cam.getPointedPos().x < 0 ? cam.getPointedPos().x / CHUNK_SIZE - 1 : cam.getPointedPos().x / CHUNK_SIZE;
@@ -192,14 +242,6 @@ void Game::update(sf::Time elapsed) {
     (*it)->update(elapsed);
   }
 
-  glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
-                                         (float) M_PI / 180.f * cam.getTheta(),
-                                         glm::vec3(0, 0, 1));
-
-  rotateElements =           glm::rotate(rotateElements,
-                                         ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
-                                         glm::vec3(0, 1, 0));
-
    // Fill and sort the visible elements
    _visibleElmts.clear();
 
@@ -214,57 +256,19 @@ void Game::update(sf::Time elapsed) {
 
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
 
-      _igElements[i]->updateDisplay(elapsed, cam.getTheta());
-
       // No test yet to see if the element can move to its new pos (no collision)
       float baseHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
 
-      // Calculate new corners
-      glm::vec3 corners3[4];
-      float width = _igElements[i]->getSize().x;
-      float height = _igElements[i]->getSize().y;
+      _igElements[i]->updateDisplay(elapsed, cam.getTheta(), baseHeight);
 
-      corners3[0] = glm::vec3( 0,  width/2, height);
-      corners3[1] = glm::vec3( 0, -width/2, height);
-      corners3[2] = glm::vec3( 0, -width/2, 0);
-      corners3[3] = glm::vec3( 0,  width/2, 0);
-
-      glm::vec3 translatePos(_igElements[i]->getPos().x,
-                             _igElements[i]->getPos().y,
-                             baseHeight);
-
-      glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
-
-      // Compute their projections
-      for (size_t i = 0; i < 4; i++) {
-        glm::vec4 tmp(corners3[i], 1.f);
-        tmp = model * tmp;
-        tmp = cam.getViewProjectionMatrix() * tmp;
-        corners3[i] = glm::vec3(tmp) / tmp.w;
-      }
-
-      // Culling
-      if ((corners3[1].x > -1 && corners3[1].y > -1 &&
-           corners3[1].x <  1 && corners3[1].y <  1) ||
-          (corners3[3].x > -1 && corners3[3].y > -1 &&
-           corners3[3].x <  1 && corners3[3].y <  1)) {
-
-        std::array<float,12> vertices;
-
-        for (size_t i = 0; i < 4; i++) {
-          vertices[3*i]     = corners3[i].x;
-          vertices[3*i + 1] = corners3[i].y;
-          vertices[3*i + 2] = corners3[i].z;
-        }
-
-        _igElements[i]->setVertices(vertices);
-        _visibleElmts.push_back(_igElements[i].get());
-      }
+      _visibleElmts.push_back(_igElements[i].get());
     }
   }
 
-  std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
+  // std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
   _igElementDisplay.loadElements(_visibleElmts);
+
+  compute2DCorners();
 }
 
 void Game::render() const {
@@ -309,9 +313,21 @@ void Game::render() const {
 
   // igElements
 
-  glUseProgram(_igEShader.getProgramID());
+  glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
+                                         (float) M_PI / 180.f * cam.getTheta(),
+                                         glm::vec3(0, 0, 1));
 
-  glDepthMask(false);
+  rotateElements =           glm::rotate(rotateElements,
+                                         ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
+                                         glm::vec3(0, 1, 0));
+
+  glUseProgram(_igEShader.getProgramID());
+  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "VP"),
+    1, GL_FALSE, &MVP[0][0]);
+  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MODEL"),
+    1, GL_FALSE, &rotateElements[0][0]);
+
+  // glDepthMask(false);
 
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -320,7 +336,7 @@ void Game::render() const {
 
   glDisable(GL_BLEND);
 
-  glDepthMask(true);
+  // glDepthMask(true);
 
   glUseProgram(0);
 

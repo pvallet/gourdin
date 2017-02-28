@@ -15,7 +15,7 @@ public:
 	virtual Animals getAnimalType() const = 0;
 
 	void launchAnimation (ANM_TYPE type);
-	virtual void updateDisplay(sf::Time elapsed, float theta);
+	virtual void updateDisplay(sf::Time elapsed, float theta, float baseHeight);
 	virtual void update(sf::Time elapsed);
 	virtual void stop();
 	virtual void die();

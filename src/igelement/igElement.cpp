@@ -21,10 +21,23 @@ igElement::igElement(sf::Vector2f position) :
 }
 
 
-void igElement::updateDisplay(sf::Time elapsed, float theta) {
+void igElement::updateDisplay(sf::Time elapsed, float theta, float baseHeight) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
+
+	_height = baseHeight;
+
+	_vertices[0] = 0; _vertices[1]  =  _size.x/2; _vertices[2]  = _size.y;
+	_vertices[3] = 0; _vertices[4]  = -_size.x/2; _vertices[5]  = _size.y;
+	_vertices[6] = 0; _vertices[7]  = -_size.x/2; _vertices[8]  = 0;
+	_vertices[9] = 0; _vertices[10] =  _size.x/2; _vertices[11] = 0;
+
+	for (size_t i = 0; i < 4; i++) {
+		_posArray[3*i]     = _pos.x;
+		_posArray[3*i + 1] = _pos.y;
+		_posArray[3*i + 2] = _height;
+	}
 }
 
 void igElement::setTexCoord(sf::FloatRect rect) {
@@ -51,17 +64,4 @@ void igElement::setOrientation(float nOrientation) {
 		_orientation += 360.f + 360 * (int) (-_orientation / 360);
 	else
 		_orientation -= 360.f * (int) (_orientation / 360);
-}
-
-sf::IntRect igElement::getScreenCoord() const {
-	Camera& cam = Camera::getInstance();
-
-	sf::IntRect res;
-
-	res.left = (_vertices[3] + 1.f) / 2.f * cam.getW();
-	res.top = -(_vertices[1] + 1.f) / 2.f * cam.getH() + cam.getH();
-	res.width =  (_vertices[0] - _vertices[3]) / 2.f * cam.getW();
-	res.height = (_vertices[1] - _vertices[7]) / 2.f * cam.getH();
-
-	return res;
 }

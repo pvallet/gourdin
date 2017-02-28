@@ -15,8 +15,8 @@ igElementDisplay::igElementDisplay() :
   glGenBuffers(1, &_vbo);
 
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-  // 24 is 12 for vertices, 8 for texture coordinates and 4 for texture layer
-  glBufferData(GL_ARRAY_BUFFER, IGE_BUFFER_SIZE * 24 * sizeof(float),
+  // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
+  glBufferData(GL_ARRAY_BUFFER, IGE_BUFFER_SIZE * 36 * sizeof(float),
     NULL, GL_STREAM_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -28,12 +28,14 @@ igElementDisplay::igElementDisplay() :
   size_t sizeCoord2D  = IGE_BUFFER_SIZE *  8 * sizeof(float);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
-  glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices + sizeCoord2D));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices));
+  glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices + sizeCoord2D));
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -55,11 +57,13 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
 
     for (size_t i = firstIndexSpree; i < firstIndexSpree + currentSpreeLength; i++) {
       std::array<float, 12> vertices;
+      std::array<float, 12> posArray;
       std::array<float,  8> coord2D;
       std::array<float,  4> layer;
 
       if (i < elemsToDisplay.size()) {
         vertices = elemsToDisplay[i]->getVertices();
+        posArray = elemsToDisplay[i]->getPosArray();
         coord2D  = elemsToDisplay[i]->getCoord2D();
         layer    = elemsToDisplay[i]->getLayer();
       }
@@ -69,11 +73,15 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
     		sizeof(vertices), &vertices[0]);
 
       glBufferSubData(GL_ARRAY_BUFFER,
-        IGE_BUFFER_SIZE*sizeof(vertices) + i*sizeof(coord2D),
+        IGE_BUFFER_SIZE*sizeof(vertices) + i*sizeof(posArray),
+        sizeof(posArray), &posArray[0]);
+
+      glBufferSubData(GL_ARRAY_BUFFER,
+        IGE_BUFFER_SIZE*2*sizeof(vertices) + i*sizeof(coord2D),
         sizeof(coord2D), &coord2D[0]);
 
       glBufferSubData(GL_ARRAY_BUFFER,
-        IGE_BUFFER_SIZE*(sizeof(vertices) + sizeof(coord2D)) + i*sizeof(layer),
+        IGE_BUFFER_SIZE*(2*sizeof(vertices) + sizeof(coord2D)) + i*sizeof(layer),
     		sizeof(layer), &layer[0]);
     }
 
