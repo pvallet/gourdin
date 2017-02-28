@@ -13,6 +13,8 @@
 #define RAD M_PI / 180.f
 
 #define INIT_R 150.f
+#define INIT_PHI 60.f
+#define INIT_THETA 180.f
 
 class Controller;
 class Game;
@@ -50,6 +52,7 @@ private:
 	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
 	inline void zoom (float dr) {_r += dr;}
+	inline void setValues (float r, float phi, float theta) {_r = r; _phi = phi; _theta = theta;}
 
   inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}
   inline void setHeight(float nHeight) {_height = nHeight;}

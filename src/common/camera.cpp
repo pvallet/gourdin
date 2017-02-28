@@ -8,8 +8,8 @@ Camera::Camera() :
 	_farPlane(100000.f),
 	_x(0.f), _y(0.f), _height(0.f),
 	_r(INIT_R),
-	_phi(60.f),
-	_theta(180.f),
+	_phi(INIT_PHI),
+  _theta(INIT_THETA),
   _projection(1.f),
   _view(1.f) {}
 

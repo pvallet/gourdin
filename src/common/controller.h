@@ -12,15 +12,16 @@ public:
 
 	void init();
 	void run();
+	void benchmark(size_t range);
 
-	void render();
+	void render() const;
 
 private:
-	void renderLifeBars();
-	void renderMinimap();
-	void renderLog();
+	void renderLifeBars() const;
+	void renderMinimap() const;
+	void renderLog() const;
 
-	void moveCamera();
+	void moveCamera() const;
 	void handleClick(sf::Event event);
 	void handleKeyPressed(sf::Event event);
 
@@ -33,7 +34,6 @@ private:
 	sf::Texture _minimapTexture;
 
 	bool _running;
-	sf::Clock _frameClock;
 	sf::Time _elapsed;
 	sf::RenderWindow& _window;
 

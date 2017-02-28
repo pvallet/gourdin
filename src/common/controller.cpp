@@ -51,7 +51,7 @@ void Controller::init() {
 	cam.resize(_window.getSize().x, _window.getSize().y );
 }
 
-void Controller::renderLifeBars() {
+void Controller::renderLifeBars() const {
   sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
   lifeBar.setFillColor(sf::Color::Green);
 
@@ -83,7 +83,7 @@ void Controller::renderLifeBars() {
   }
 }
 
-void Controller::renderMinimap() {
+void Controller::renderMinimap() const {
   Camera& cam = Camera::getInstance();
 
   // Background image
@@ -144,7 +144,7 @@ void Controller::renderMinimap() {
   }
 }
 
-void Controller::renderLog() {
+void Controller::renderLog() const {
   Camera& cam = Camera::getInstance();
   int fps = 1.f / _elapsed.asSeconds();
 
@@ -161,11 +161,12 @@ void Controller::renderLog() {
   convert << logText.getText();
   logText.clear();
 
-  _log.setString(convert.str());
-  _window.draw(_log);
+  sf::Text log(_log);
+  log.setString(convert.str());
+  _window.draw(log);
 }
 
-void Controller::render() {
+void Controller::render() const {
   if (_running) {
     _game.render();
     _window.pushGLStates();
@@ -183,7 +184,7 @@ void Controller::render() {
   }
 }
 
-void Controller::moveCamera() {
+void Controller::moveCamera() const {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
@@ -300,6 +301,10 @@ void Controller::handleKeyPressed(sf::Event event) {
       _game.changeSubdivisionLevel(-1);
       break;
 
+    case sf::Keyboard::B:
+      benchmark(100);
+      break;
+
     case sf::Keyboard::W:
       _game.switchWireframe();
       break;
@@ -309,9 +314,11 @@ void Controller::handleKeyPressed(sf::Event event) {
 void Controller::run() {
   Camera& cam = Camera::getInstance();
 
+  sf::Clock frameClock;
+
   while (_running) {
     sf::Event event;
-    _elapsed = _frameClock.restart();
+    _elapsed = frameClock.restart();
 
     while (_window.pollEvent(event)) {
       if (event.type == sf::Event::Closed)
@@ -365,4 +372,26 @@ void Controller::run() {
     _game.update(_elapsed);
     render();
   }
+}
+
+void Controller::benchmark(size_t range) {
+  Camera& cam = Camera::getInstance();
+
+  sf::Time totalElapsed, elapsed;
+  sf::Clock frameClock;
+
+  _game.resetCamera();
+
+  for (size_t i = 0; i < range; i++) {
+    elapsed = frameClock.restart();
+    totalElapsed += elapsed;
+    cam.zoom(ZOOM_FACTOR * 0.1 * i);
+    _game.update(elapsed);
+    render();
+  }
+
+  std::cout << "Rendered " << range << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
+  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * range << std::endl;
+
+  _game.resetCamera();
 }

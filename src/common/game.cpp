@@ -24,6 +24,14 @@ Game::Game() :
   _contentGenerator(_terrainGeometry),
   _ocean(2) {}
 
+void Game::resetCamera() {
+  Camera& cam = Camera::getInstance();
+  cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+
+  cam.setValues(INIT_R, INIT_PHI, INIT_THETA);
+}
+
 void Game::init() {
   srand(time(NULL));
 
@@ -47,9 +55,7 @@ void Game::init() {
   _contentGenerator.init();
   // _contentGenerator.saveToImage("contents");
 
-  Camera& cam = Camera::getInstance();
-  cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+  resetCamera();
 
   appendNewElements(_contentGenerator.genHerd(
                     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,

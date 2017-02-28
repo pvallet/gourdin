@@ -29,6 +29,7 @@ class Game {
 public:
 	Game();
 
+	void resetCamera();
   void init();
 
 	void update(sf::Time elapsed);
