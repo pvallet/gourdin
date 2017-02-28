@@ -21,12 +21,10 @@ igElement::igElement(sf::Vector2f position) :
 }
 
 
-void igElement::updateDisplay(sf::Time elapsed, float theta, float baseHeight) {
+void igElement::updateDisplay(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
-
-	_height = baseHeight;
 
 	_vertices[0] = 0; _vertices[1]  =  _size.x/2; _vertices[2]  = _size.y;
 	_vertices[3] = 0; _vertices[4]  = -_size.x/2; _vertices[5]  = _size.y;

@@ -12,10 +12,12 @@ public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
 	virtual ~igMovingElement() {}
 
+	virtual bool needsToUpdateHeight() const {return true;}
+
 	virtual Animals getAnimalType() const = 0;
 
 	void launchAnimation (ANM_TYPE type);
-	virtual void updateDisplay(sf::Time elapsed, float theta, float baseHeight);
+	virtual void updateDisplay(sf::Time elapsed, float theta);
 	virtual void update(sf::Time elapsed);
 	virtual void stop();
 	virtual void die();

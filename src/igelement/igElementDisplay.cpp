@@ -6,7 +6,7 @@
 #include "tree.h"
 #include "utils.h"
 
-#define IGE_BUFFER_SIZE 20000
+#define IGE_BUFFER_SIZE 130000
 
 igElementDisplay::igElementDisplay() :
   _vao(0),

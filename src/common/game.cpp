@@ -261,11 +261,14 @@ void Game::update(sf::Time elapsed) {
       chunkPosY--;
 
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
+      if (_igElements[i]->needsToUpdateHeight()) {
+        // No test yet to see if the element can move to its new pos (no collision)
+        float height = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
 
-      // No test yet to see if the element can move to its new pos (no collision)
-      float baseHeight = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
+        _igElements[i]->setHeight(height);
+      }
 
-      _igElements[i]->updateDisplay(elapsed, cam.getTheta(), baseHeight);
+      _igElements[i]->updateDisplay(elapsed, cam.getTheta());
 
       _visibleElmts.push_back(_igElements[i].get());
     }

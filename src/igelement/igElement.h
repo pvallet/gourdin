@@ -10,7 +10,10 @@ class igElement {
 public:
 	igElement(sf::Vector2f position);
 
-	virtual void updateDisplay(sf::Time elapsed, float theta, float baseHeight);
+	virtual void updateDisplay(sf::Time elapsed, float theta);
+	virtual void setHeight(float height) {_height = height;}
+
+	virtual bool needsToUpdateHeight() const = 0;
 
 	// Getters
 

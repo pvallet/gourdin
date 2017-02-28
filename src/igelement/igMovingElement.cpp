@@ -30,8 +30,8 @@ void igMovingElement::stop() {
 	_speed = 0.f;
 }
 
-void igMovingElement::updateDisplay(sf::Time elapsed, float theta, float baseHeight) {
-	igElement::updateDisplay(elapsed, theta, baseHeight);
+void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
+	igElement::updateDisplay(elapsed, theta);
 	_graphics.update(elapsed, getOrientation());
 
 	if (!_dead) {
