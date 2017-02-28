@@ -12,8 +12,7 @@
 
 igElement::igElement(sf::Vector2f position) :
 	_pos(position),
-	_camOrientation(0.f),
-	_visible(false) {
+	_camOrientation(0.f) {
 
 	_orientation = RANDOMF * 360.f;
 

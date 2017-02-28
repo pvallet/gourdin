@@ -39,7 +39,7 @@ public:
 	void addLion(sf::Vector2i screenTarget);
 	void changeSubdivisionLevel(int increment);
 
-	inline void switchWireframe() {_wireframe = _wireframe ? false : true;}
+	inline void switchWireframe() {_wireframe = !_wireframe;}
 
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
 	inline const std::vector<std::unique_ptr<igElement> >& getElements() const {return _igElements;}

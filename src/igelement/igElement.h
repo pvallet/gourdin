@@ -12,7 +12,6 @@ public:
 
 	virtual void updateDisplay(sf::Time elapsed, float theta);
 	inline void setVertices(std::array<float,12> nVertices) {_vertices = nVertices;}
-	inline void setVisible(bool nVisible) {_visible = nVisible;}
 
 	// Getters
 
@@ -23,7 +22,6 @@ public:
 	inline float getOrientation() const {return _orientation;}
 	inline sf::Vector2f getSize() const {return _size;}
 	inline float getDepth() const {return _vertices[2];}
-	inline bool isVisible() const {return _visible;}
 
 	inline std::array<float, 12> getVertices() const {return _vertices;}
 	inline std::array<float,  8> getCoord2D()  const {return _coord2D;}
@@ -38,8 +36,6 @@ protected:
 	sf::Vector2f _size;
 
 	float _camOrientation; // Angle between the camera and the vector (0,1)
-
-	bool _visible;
 
 	std::array<float, 12> _vertices;
 	std::array<float,  8> _coord2D;

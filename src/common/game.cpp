@@ -200,7 +200,9 @@ void Game::update(sf::Time elapsed) {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
-  // Update in game elements characteristics
+   // Fill and sort the visible elements
+   _visibleElmts.clear();
+
   for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
     int chunkPosX = _igElements[i]->getPos().x / CHUNK_SIZE;
     int chunkPosY = _igElements[i]->getPos().y / CHUNK_SIZE;
@@ -256,23 +258,9 @@ void Game::update(sf::Time elapsed) {
         }
 
         _igElements[i]->setVertices(vertices);
-        _igElements[i]->setVisible(true);
+        _visibleElmts.push_back(_igElements[i].get());
       }
-
-      else
-        _igElements[i]->setVisible(false);
     }
-
-    else
-      _igElements[i]->setVisible(false);
-  }
-
-  // Fill and sort the visible elements
-  _visibleElmts.clear();
-
-  for (size_t i = 0; i < _igElements.size(); i++) {
-    if (_igElements[i]->isVisible())
-      _visibleElmts.push_back(_igElements[i].get());
   }
 
   std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
