@@ -6,26 +6,40 @@
 #include "tree.h"
 #include "utils.h"
 
-#define IGE_BUFFER_SIZE 130000
-
 igElementDisplay::igElementDisplay() :
   _vao(0),
-  _vbo(0) {
+  _vbo(0) {}
+
+void igElementDisplay::reset() {
+  glDeleteBuffers(1, &_vbo);
+  glDeleteVertexArrays(1, &_vao);
+}
+
+void igElementDisplay::init(DrawType drawType, size_t capacity) {
+
+  reset();
+
+  _capacity = capacity;
 
   glGenBuffers(1, &_vbo);
 
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
-  glBufferData(GL_ARRAY_BUFFER, IGE_BUFFER_SIZE * 36 * sizeof(float),
-    NULL, GL_STREAM_DRAW);
+  if (drawType == STREAM_DRAW)
+    glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
+      NULL, GL_STREAM_DRAW);
+  else
+    glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
+      NULL, GL_STATIC_DRAW);
+
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glGenVertexArrays(1, &_vao);
   glBindVertexArray(_vao);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  size_t sizeVertices = IGE_BUFFER_SIZE * 12 * sizeof(float);
-  size_t sizeCoord2D  = IGE_BUFFER_SIZE *  8 * sizeof(float);
+  size_t sizeVertices = _capacity * 12 * sizeof(float);
+  size_t sizeCoord2D  = _capacity *  8 * sizeof(float);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
@@ -43,8 +57,7 @@ igElementDisplay::igElementDisplay() :
 }
 
 igElementDisplay::~igElementDisplay() {
-  glDeleteBuffers(1, &_vbo);
-  glDeleteVertexArrays(1, &_vao);
+  reset();
 }
 
 void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDisplay,
@@ -73,15 +86,15 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
     		sizeof(vertices), &vertices[0]);
 
       glBufferSubData(GL_ARRAY_BUFFER,
-        IGE_BUFFER_SIZE*sizeof(vertices) + i*sizeof(posArray),
+        _capacity*sizeof(vertices) + i*sizeof(posArray),
         sizeof(posArray), &posArray[0]);
 
       glBufferSubData(GL_ARRAY_BUFFER,
-        IGE_BUFFER_SIZE*2*sizeof(vertices) + i*sizeof(coord2D),
+        _capacity*2*sizeof(vertices) + i*sizeof(coord2D),
         sizeof(coord2D), &coord2D[0]);
 
       glBufferSubData(GL_ARRAY_BUFFER,
-        IGE_BUFFER_SIZE*(2*sizeof(vertices) + sizeof(coord2D)) + i*sizeof(layer),
+        _capacity*(2*sizeof(vertices) + sizeof(coord2D)) + i*sizeof(layer),
     		sizeof(layer), &layer[0]);
     }
 
@@ -100,8 +113,8 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 
   std::vector<igElement*> elemsToDisplay;
 
-  if (visibleElmts.size() > IGE_BUFFER_SIZE)
-    elemsToDisplay = std::vector<igElement*>(visibleElmts.end() - IGE_BUFFER_SIZE, visibleElmts.end());
+  if (visibleElmts.size() > _capacity)
+    elemsToDisplay = std::vector<igElement*>(visibleElmts.end() - _capacity, visibleElmts.end());
 
   else
     elemsToDisplay = visibleElmts;

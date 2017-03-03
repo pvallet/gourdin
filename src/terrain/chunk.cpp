@@ -262,11 +262,18 @@ void Chunk::setTreesHeights() {
 	}
 }
 
+void Chunk::setTrees(std::vector<igElement*> trees) {
+	_trees = trees;
+	setTreesHeights();
+	_treeDrawer.init(STATIC_DRAW, trees.size());
+	_treeDrawer.loadElements(trees);
+}
+
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	_subdiv_lvl = newSubdLvl;
 	reset();
 	generate();
-	setTreesHeights();
+	setTrees(_trees);
 }
 
 float Chunk::getHeight(sf::Vector2f pos) const {

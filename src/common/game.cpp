@@ -53,6 +53,7 @@ void Game::init() {
     _terrain.push_back(std::move(initializer2));
   }
 
+  _igElementDisplay.init();
   _contentGenerator.init();
   // _contentGenerator.saveToImage("contents");
 
@@ -275,15 +276,6 @@ void Game::update(sf::Time elapsed) {
     }
   }
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE) {
-        std::vector<igElement*> trees = _terrain[i][j]->getTrees();
-        _visibleElmts.insert(_visibleElmts.end(), trees.begin(), trees.end());
-      }
-    }
-  }
-
   _igElementDisplay.loadElements(_visibleElmts);
 
   compute2DCorners();
@@ -291,6 +283,7 @@ void Game::update(sf::Time elapsed) {
 
 void Game::render() const {
   size_t nbTriangles = 0;
+  size_t nbElements = 0;
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -348,7 +341,15 @@ void Game::render() const {
   // Two passes to avoid artifacts due to alpha blending
 
   glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), true);
+  nbElements += _visibleElmts.size();
   _igElementDisplay.drawElements();
+
+  // for (size_t i = 0; i < NB_CHUNKS; i++) {
+  //   for (size_t j = 0; j < NB_CHUNKS; j++) {
+  //     if (_chunkStatus[i][j] == VISIBLE)
+  //       _terrain[i][j]->drawTrees();
+  //   }
+  // }
 
   glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), false);
 
@@ -356,6 +357,13 @@ void Game::render() const {
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   _igElementDisplay.drawElements();
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] == VISIBLE)
+        nbElements += _terrain[i][j]->drawTrees();
+    }
+  }
 
   glDisable(GL_BLEND);
 
@@ -365,7 +373,7 @@ void Game::render() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << _visibleElmts.size() << std::endl
+              << "Elements:  " << nbElements << std::endl
               << "Subdivision level: " << subdivLvl << std::endl;
 
   logText.addLine(renderStats.str());

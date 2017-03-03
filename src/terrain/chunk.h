@@ -8,7 +8,7 @@
 
 #include "terrainGeometry.h"
 #include "terrainTexManager.h"
-#include "igElement.h"
+#include "igElementDisplay.h"
 #include "utils.h"
 
 struct Indices {
@@ -36,8 +36,8 @@ public:
 	inline bool isVisible() const {return _visible;}
 	size_t getSubdivisionLevel() const {return _subdiv_lvl;}
 
-	void setTrees(std::vector<igElement*> trees) {_trees = trees; setTreesHeights();}
-	inline std::vector<igElement*> getTrees() const {return _trees;}
+	void setTrees(std::vector<igElement*> trees);
+	inline size_t drawTrees() const {_treeDrawer.drawElements(); return _trees.size();}
 
 private:
 	void reset();
@@ -69,4 +69,5 @@ private:
 	const TerrainGeometry&   _terrainGeometry;
 
 	std::vector<igElement*> _trees;
+	igElementDisplay _treeDrawer;
 };
