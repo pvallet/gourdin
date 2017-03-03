@@ -11,14 +11,7 @@
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 16
 
-struct compDepth {
-  bool operator()(const igElement* a, const igElement* b) const {
-    return a->getDepth() > b->getDepth();
-  }
-} compDepthObj;
-
 Game::Game() :
-  _sorting(true),
   _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),

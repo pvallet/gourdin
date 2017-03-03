@@ -22,8 +22,6 @@ public:
 	inline float getOrientation() const {return _orientation;}
 	inline sf::Vector2f getSize() const {return _size;}
 
-	virtual float getDepth() const;
-
 	inline std::array<float, 12> getVertices() const {return _vertices;}
 	inline std::array<float, 12> getPosArray() const {return _posArray;}
 	inline std::array<float,  8> getCoord2D()  const {return _coord2D;}

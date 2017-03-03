@@ -65,14 +65,3 @@ void igElement::setOrientation(float nOrientation) {
 	else
 		_orientation -= 360.f * (int) (_orientation / 360);
 }
-
-float igElement::getDepth() const {
-	Camera& cam = Camera::getInstance();
-	sf::Vector2f flatPointedPos = cam.getPointedPos();
-	sf::Vector3f pointedPos = sf::Vector3f(flatPointedPos.x, flatPointedPos.y, cam.getHeight());
-
-	sf::Vector3f camVector = cam.getPos() - pointedPos;
-	sf::Vector3f elemPos = sf::Vector3f(_pos.x, _pos.y, _height);
-
-	return vu::dot(camVector, elemPos) / vu::norm(camVector);
-}
