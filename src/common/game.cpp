@@ -18,6 +18,7 @@ struct compDepth {
 } compDepthObj;
 
 Game::Game() :
+  _sorting(true),
   _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
@@ -344,7 +345,12 @@ void Game::render() const {
   glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MODEL"),
     1, GL_FALSE, &rotateElements[0][0]);
 
-  // glDepthMask(false);
+  // Two passes to avoid artifacts due to alpha blending
+
+  glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), true);
+  _igElementDisplay.drawElements();
+
+  glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), false);
 
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -352,8 +358,6 @@ void Game::render() const {
   _igElementDisplay.drawElements();
 
   glDisable(GL_BLEND);
-
-  // glDepthMask(true);
 
   glUseProgram(0);
 
