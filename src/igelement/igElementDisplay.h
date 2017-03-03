@@ -19,8 +19,6 @@ public:
 
 
 private:
-  void allocateNewBuffers(size_t nbNewBuffers);
-  void fillBufferData(std::vector<igElement*> elements);
   void processSpree(const std::vector<igElement*>& visibleElmts,
     size_t& currentSpreeLength, size_t& firstIndexSpree);
 

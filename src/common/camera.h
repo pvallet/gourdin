@@ -12,6 +12,7 @@
 
 #define RAD M_PI / 180.f
 
+#define MIN_R 50.f
 #define INIT_R 150.f
 #define INIT_PHI 60.f
 #define INIT_THETA 180.f
@@ -37,6 +38,7 @@ public:
   inline float getFov() const {return _fovAngle;}
   inline float getRatio() const {return _aspectRatio;}
   inline sf::Vector2f getPointedPos() const {return sf::Vector2f(_x, _y);}
+	inline float getHeight() const {return _height;}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 	inline float getZoomFactor() const {return _r / INIT_R;}
 
@@ -51,7 +53,7 @@ private:
 
 	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
-	inline void zoom (float dr) {_r += dr;}
+	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r;}
 	inline void setValues (float r, float phi, float theta) {_r = r; _phi = phi; _theta = theta;}
 
   inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}

@@ -67,7 +67,10 @@ void Game::generateChunk(size_t x, size_t y) {
   newChunk->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
   _chunkStatus[x][y] = EDGE;
-  appendNewElements(_contentGenerator.genForestsInChunk(x, y));
+
+  std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x, y);
+  appendNewElements(newTrees);
+  _terrain[x][y]->setTrees(newTrees);
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
@@ -222,7 +225,7 @@ void Game::update(sf::Time elapsed) {
   cam.apply();
 
   // Update terrains
-  for (size_t i = 0; i < NB_CHUNKS; i++) {void setSubdivisionLevel(size_t newSubdLvl);
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] != NOT_GENERATED) {
         _terrain[i][j]->computeCulling();
@@ -251,9 +254,9 @@ void Game::update(sf::Time elapsed) {
    // Fill and sort the visible elements
    _visibleElmts.clear();
 
-  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
-    int chunkPosX = _igElements[i]->getPos().x / CHUNK_SIZE;
-    int chunkPosY = _igElements[i]->getPos().y / CHUNK_SIZE;
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    int chunkPosX = (*it)->getPos().x / CHUNK_SIZE;
+    int chunkPosY = (*it)->getPos().y / CHUNK_SIZE;
 
     if (chunkPosX == NB_CHUNKS)
       chunkPosX--;
@@ -261,20 +264,25 @@ void Game::update(sf::Time elapsed) {
       chunkPosY--;
 
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
-      if (_igElements[i]->needsToUpdateHeight()) {
-        // No test yet to see if the element can move to its new pos (no collision)
-        float height = _terrain[chunkPosX][chunkPosY]->getHeight(_igElements[i]->getPos());
+      // No test yet to see if the element can move to its new pos (no collision)
+      float height = _terrain[chunkPosX][chunkPosY]->getHeight((*it)->getPos());
 
-        _igElements[i]->setHeight(height);
-      }
+      (*it)->setHeight(height);
+      (*it)->updateDisplay(elapsed, cam.getTheta());
 
-      _igElements[i]->updateDisplay(elapsed, cam.getTheta());
-
-      _visibleElmts.push_back(_igElements[i].get());
+      _visibleElmts.push_back(*it);
     }
   }
 
-  // std::sort(_visibleElmts.begin(), _visibleElmts.end(), compDepthObj);
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] == VISIBLE) {
+        std::vector<igElement*> trees = _terrain[i][j]->getTrees();
+        _visibleElmts.insert(_visibleElmts.end(), trees.begin(), trees.end());
+      }
+    }
+  }
+
   _igElementDisplay.loadElements(_visibleElmts);
 
   compute2DCorners();

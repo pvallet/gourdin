@@ -18,6 +18,8 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	_size *= 7.f;
 	_speed = _speedWalking;
 	_animAttack = graphics.getAnimationTime(ATTACK);
+
+	launchAnimation(WAIT);
 }
 
 void Lion::update(sf::Time elapsed) {

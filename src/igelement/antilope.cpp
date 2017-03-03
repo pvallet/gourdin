@@ -27,6 +27,8 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 
 	_timePhase = generateTimePhase(_averageEating);
 	_beginPhase.restart();
+
+	launchAnimation(WAIT);
 }
 
 

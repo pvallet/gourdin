@@ -11,9 +11,7 @@ public:
 	igElement(sf::Vector2f position);
 
 	virtual void updateDisplay(sf::Time elapsed, float theta);
-	virtual void setHeight(float height) {_height = height;}
-
-	virtual bool needsToUpdateHeight() const = 0;
+	inline void setHeight(float height) {_height = height; setPosArray();}
 
 	// Getters
 
@@ -23,7 +21,8 @@ public:
 	inline float getHeight() const {return _height;}
 	inline float getOrientation() const {return _orientation;}
 	inline sf::Vector2f getSize() const {return _size;}
-	inline float getDepth() const {return _vertices[2];}
+
+	virtual float getDepth() const;
 
 	inline std::array<float, 12> getVertices() const {return _vertices;}
 	inline std::array<float, 12> getPosArray() const {return _posArray;}
@@ -31,6 +30,8 @@ public:
 	inline std::array<float,  4> getLayer()    const {return _layer;}
 
 protected:
+	void setVertices(); // Uses the _size attribute
+	void setPosArray();
 	void setTexCoord(sf::FloatRect rect);
 	void setLayer(size_t layer);
 	void setOrientation(float nOrientation);

@@ -256,10 +256,17 @@ void Chunk::computeCulling() {
   _visible = true;
 }
 
+void Chunk::setTreesHeights() {
+	for (size_t i = 0; i < _trees.size(); i++) {
+		_trees[i]->setHeight(getHeight(_trees[i]->getPos()));
+	}
+}
+
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	_subdiv_lvl = newSubdLvl;
 	reset();
 	generate();
+	setTreesHeights();
 }
 
 float Chunk::getHeight(sf::Vector2f pos) const {

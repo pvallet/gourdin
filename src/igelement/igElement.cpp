@@ -7,6 +7,7 @@
 
 #include "camera.h"
 #include "utils.h"
+#include "vecUtils.h"
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
@@ -15,9 +16,6 @@ igElement::igElement(sf::Vector2f position) :
 	_camOrientation(0.f) {
 
 	_orientation = RANDOMF * 360.f;
-
-  for (size_t i = 0 ; i < 12 ; i++)
-    _vertices[i] = 0.f;
 }
 
 
@@ -25,12 +23,16 @@ void igElement::updateDisplay(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
+}
 
+void igElement::setVertices() {
 	_vertices[0] = 0; _vertices[1]  =  _size.x/2; _vertices[2]  = _size.y;
 	_vertices[3] = 0; _vertices[4]  = -_size.x/2; _vertices[5]  = _size.y;
 	_vertices[6] = 0; _vertices[7]  = -_size.x/2; _vertices[8]  = 0;
 	_vertices[9] = 0; _vertices[10] =  _size.x/2; _vertices[11] = 0;
+}
 
+void igElement::setPosArray() {
 	for (size_t i = 0; i < 4; i++) {
 		_posArray[3*i]     = _pos.x;
 		_posArray[3*i + 1] = _pos.y;
@@ -62,4 +64,15 @@ void igElement::setOrientation(float nOrientation) {
 		_orientation += 360.f + 360 * (int) (-_orientation / 360);
 	else
 		_orientation -= 360.f * (int) (_orientation / 360);
+}
+
+float igElement::getDepth() const {
+	Camera& cam = Camera::getInstance();
+	sf::Vector2f flatPointedPos = cam.getPointedPos();
+	sf::Vector3f pointedPos = sf::Vector3f(flatPointedPos.x, flatPointedPos.y, cam.getHeight());
+
+	sf::Vector3f camVector = cam.getPos() - pointedPos;
+	sf::Vector3f elemPos = sf::Vector3f(_pos.x, _pos.y, _height);
+
+	return vu::dot(camVector, elemPos) / vu::norm(camVector);
 }

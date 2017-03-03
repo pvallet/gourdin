@@ -7,9 +7,8 @@
 #include <vector>
 
 #include "terrainGeometry.h"
-
 #include "terrainTexManager.h"
-
+#include "igElement.h"
 #include "utils.h"
 
 struct Indices {
@@ -37,6 +36,9 @@ public:
 	inline bool isVisible() const {return _visible;}
 	size_t getSubdivisionLevel() const {return _subdiv_lvl;}
 
+	void setTrees(std::vector<igElement*> trees) {_trees = trees; setTreesHeights();}
+	inline std::vector<igElement*> getTrees() const {return _trees;}
+
 private:
 	void reset();
 	GLuint addVertexInfo(Vertex* vertex);
@@ -44,6 +46,7 @@ private:
 	void generateBuffers();
 	void computeChunkBoundingBox();
 	bool theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const;
+	void setTreesHeights();
 
 	size_t _subdiv_lvl;
 
@@ -64,4 +67,6 @@ private:
 
 	const TerrainTexManager& _terrainTexManager;
 	const TerrainGeometry&   _terrainGeometry;
+
+	std::vector<igElement*> _trees;
 };

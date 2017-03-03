@@ -13,7 +13,6 @@ igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphic
 	_graphics(graphics) {
 	_size = _graphics.getRawSize();
 	_size /= _size.y;
-	launchAnimation(WAIT);
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
@@ -22,6 +21,7 @@ void igMovingElement::launchAnimation(ANM_TYPE type) {
 	setLayer(_graphics.launchAnimation(type));
 	_size.x *= _graphics.getRawSize().x;
 	_size.y *= _graphics.getRawSize().y;
+	setVertices();
 }
 
 void igMovingElement::stop() {
