@@ -13,6 +13,8 @@ igElementDisplay::igElementDisplay() :
 void igElementDisplay::reset() {
   glDeleteBuffers(1, &_vbo);
   glDeleteVertexArrays(1, &_vao);
+  _vbo = 0;
+  _vao = 0;
 }
 
 void igElementDisplay::init(DrawType drawType, size_t capacity) {

@@ -337,12 +337,12 @@ void Game::render() const {
   nbElements += _visibleElmts.size();
   _igElementDisplay.drawElements();
 
-  // for (size_t i = 0; i < NB_CHUNKS; i++) {
-  //   for (size_t j = 0; j < NB_CHUNKS; j++) {
-  //     if (_chunkStatus[i][j] == VISIBLE)
-  //       _terrain[i][j]->drawTrees();
-  //   }
-  // }
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      if (_chunkStatus[i][j] == VISIBLE)
+        _terrain[i][j]->drawTrees();
+    }
+  }
 
   glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), false);
 

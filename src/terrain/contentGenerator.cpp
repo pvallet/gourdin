@@ -87,6 +87,14 @@ bool ContentGenerator::notTooCloseToOtherTrees(sf::Vector2f pos, float distance)
   return true;
 }
 
+struct compTrees {
+  bool operator()(const igElement* lhs, const igElement* rhs) const {
+    const Tree* tLHS = dynamic_cast<const Tree*>(lhs);
+    const Tree* tRHS = dynamic_cast<const Tree*>(rhs);
+    return tLHS->getBiome() < tRHS->getBiome();
+  }
+};
+
 std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) {
   sf::Vector2f chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
   std::vector<igElement*> res;
@@ -112,6 +120,9 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
       }
     }
   }
+
+  // Sorting reduces the number of glCalls to display all the trees
+  std::sort(res.begin(), res.end(), compTrees());
 
   return res;
 }
