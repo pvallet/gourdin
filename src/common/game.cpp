@@ -237,8 +237,16 @@ void Game::update(sf::Time elapsed) {
             _chunkStatus[i][j] = NOT_VISIBLE;
         }
       }
+
+      if (_chunkStatus[i][j] == VISIBLE)
+        _terrain[i][j]->computeSubdivisionLevel();
     }
   }
+
+  LogText& logText = LogText::getInstance();
+  std::ostringstream subdivLvl;
+  subdivLvl << "Current subdivision level: " << _terrain[camPosX][camPosY]->getSubdivisionLevel() << std::endl;
+  logText.addLine(subdivLvl.str());
 
   updateMovingElementsStates();
   // Update positions of igMovingElement regardless of them being visible
@@ -246,7 +254,7 @@ void Game::update(sf::Time elapsed) {
     (*it)->update(elapsed);
   }
 
-   // Fill and sort the visible elements
+   // Fill the visible elements
    _visibleElmts.clear();
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
@@ -296,17 +304,13 @@ void Game::render() const {
 
   // Chunk
 
-  size_t subdivLvl = 0;
-
   if (_wireframe)
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE) {
+      if (_chunkStatus[i][j] == VISIBLE)
         nbTriangles += _terrain[i][j]->draw();
-        subdivLvl = _terrain[i][j]->getSubdivisionLevel();
-      }
     }
   }
 
@@ -366,8 +370,7 @@ void Game::render() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << nbElements << std::endl
-              << "Subdivision level: " << subdivLvl << std::endl;
+              << "Elements:  " << nbElements << std::endl;
 
   logText.addLine(renderStats.str());
 }
@@ -433,7 +436,7 @@ void Game::changeSubdivisionLevel(int increment) {
         if (newLevel < 0)
           newLevel = 0;
 
-        if (newLevel > _terrainGeometry.getNbSubdivLevels() - 1)
+        if (newLevel > _terrainGeometry.getCurrentGlobalSubdivLvl())
           _terrainGeometry.generateNewSubdivisionLevel();
 
         _terrain[i][j]->setSubdivisionLevel(newLevel);

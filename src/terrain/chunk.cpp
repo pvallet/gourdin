@@ -8,108 +8,119 @@
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
-	                               const TerrainGeometry&   terrainGeometry) :
+	                                     TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
-	_subdiv_lvl(1),
-	_vao(0),
-	_geometryVBO(0),
+	_currentSubdivLvl(1),
 	_visible(false),
   _terrainTexManager(terrainTexManager),
   _terrainGeometry(terrainGeometry) {
+
+	for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
+    _subdivisionLevels.push_back(std::unique_ptr<Buffers>(new Buffers()));
+  }
 }
 
-void Chunk::reset() {
-	glDeleteBuffers(1, &_geometryVBO);
-	_geometryVBO = 0;
+void Chunk::cleanSubdivLvl(size_t subdivLvl) {
 
-	for (auto it = _indices.begin(); it != _indices.end(); it++) {
+	glDeleteBuffers(1, &_subdivisionLevels[subdivLvl]->vbo);
+	_subdivisionLevels[subdivLvl]->vbo = 0;
+
+	for (auto it  = _subdivisionLevels[subdivLvl]->indicesInfo.begin();
+	          it != _subdivisionLevels[subdivLvl]->indicesInfo.end(); it++) {
 		glDeleteBuffers(1,&(it->second.ibo));
+		it->second.ibo = 0;
+		it->second.indices.clear();
 	}
 
-	_indices.clear();
 
-	glDeleteVertexArrays(1, &_vao);
-	_vao = 0;
-
-	_vertices.clear();
-	_normals.clear();
-	_coords.clear();
+	glDeleteVertexArrays(1, &_subdivisionLevels[subdivLvl]->vao);
+	_subdivisionLevels[subdivLvl]->vao = 0;
 }
 
 Chunk::~Chunk() {
-	reset();
+	for (size_t i = 0; i < _subdivisionLevels.size(); i++) {
+		cleanSubdivLvl(i);
+	}
 }
 
 GLuint Chunk::addVertexInfo(Vertex* vertex) {
-	GLuint vertexIndex = _vertices.size()/3;
+	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
 
-	for (size_t i = 0; i < _vertices.size(); i+=3) {
-		if (_vertices[i] == vertex->pos.x &&
-		    _vertices[i+1] == vertex->pos.y &&
-				_vertices[i+2] == vertex->pos.z) {
+	GLuint vertexIndex = currentBuffers->vertices.size()/3;
+
+	for (size_t i = 0; i < currentBuffers->vertices.size(); i+=3) {
+		if (currentBuffers->vertices[i] == vertex->pos.x &&
+		    currentBuffers->vertices[i+1] == vertex->pos.y &&
+				currentBuffers->vertices[i+2] == vertex->pos.z) {
 
 			vertexIndex = i/3;
 			break;
 		}
 	}
 
-	if (vertexIndex == _vertices.size()/3) {
-		_vertices.resize(_vertices.size() + 3);
-		_normals.resize(_normals.size() + 3);
-		_coords.resize(_coords.size() + 2);
+	if (vertexIndex == currentBuffers->vertices.size()/3) {
+		currentBuffers->vertices.resize(currentBuffers->vertices.size() + 3);
+		currentBuffers->normals.resize(currentBuffers->normals.size() + 3);
+		currentBuffers->coords.resize(currentBuffers->coords.size() + 2);
 
-		_vertices[_vertices.size()-3] = vertex->pos.x;
-		_vertices[_vertices.size()-2] = vertex->pos.y;
-		_vertices[_vertices.size()-1] = vertex->pos.z;
-		_normals[_normals.size()-3] = vertex->normal.x;
-		_normals[_normals.size()-2] = vertex->normal.y;
-		_normals[_normals.size()-1] = vertex->normal.z;
+		currentBuffers->vertices[currentBuffers->vertices.size()-3] = vertex->pos.x;
+		currentBuffers->vertices[currentBuffers->vertices.size()-2] = vertex->pos.y;
+		currentBuffers->vertices[currentBuffers->vertices.size()-1] = vertex->pos.z;
+		currentBuffers->normals [currentBuffers->normals.size()-3] = vertex->normal.x;
+		currentBuffers->normals [currentBuffers->normals.size()-2] = vertex->normal.y;
+		currentBuffers->normals [currentBuffers->normals.size()-1] = vertex->normal.z;
 
-		_coords[_coords.size()-2] = (vertex->pos.x - CHUNK_SIZE*_chunkPos.x)/CHUNK_SIZE*TEX_FACTOR;
-		_coords[_coords.size()-1] = (vertex->pos.y - CHUNK_SIZE*_chunkPos.y)/CHUNK_SIZE*TEX_FACTOR;
+		currentBuffers->coords[currentBuffers->coords.size()-2] =
+		(vertex->pos.x - CHUNK_SIZE*_chunkPos.x)/CHUNK_SIZE*TEX_FACTOR;
+		currentBuffers->coords[currentBuffers->coords.size()-1] =
+		(vertex->pos.y - CHUNK_SIZE*_chunkPos.y)/CHUNK_SIZE*TEX_FACTOR;
 	}
 
 	return vertexIndex;
 }
 
 void Chunk::fillBufferData() {
-	std::list<Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _subdiv_lvl);
+	std::list<const Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _currentSubdivLvl);
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
 		for (size_t i = 0; i < 3; i++) {
-			_indices[(*tri)->biome].indices.push_back(addVertexInfo((*tri)->vertices[i]));
+			_subdivisionLevels[_currentSubdivLvl]->indicesInfo[(*tri)->biome]
+				.indices.push_back(addVertexInfo((*tri)->vertices[i]));
 		}
 	}
 }
 
 void Chunk::generateBuffers() {
+	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+
 	// geometry VBO
 
-	glGenBuffers(1, &_geometryVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
+	glGenBuffers(1, &currentBuffers->vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, currentBuffers->vbo);
 
-	size_t bufferSizeVertices = _vertices.size()*sizeof _vertices[0];
-	size_t bufferSizeNormals	= _normals. size()*sizeof _normals[0];
-	size_t bufferSizeCoords		= _coords.  size()*sizeof _coords[0];
+	size_t bufferSizeVertices = currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0];
+	size_t bufferSizeNormals	= currentBuffers->normals. size()*sizeof currentBuffers->normals[0];
+	size_t bufferSizeCoords		= currentBuffers->coords.  size()*sizeof currentBuffers->coords[0];
 
 	glBufferData(GL_ARRAY_BUFFER, bufferSizeVertices + bufferSizeNormals + bufferSizeCoords, NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices , &_vertices[0]);
-  glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices , bufferSizeNormals, &_normals[0]);
-	glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices + bufferSizeNormals, bufferSizeCoords, &_coords[0]);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSizeVertices , &currentBuffers->vertices[0]);
+  glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices , bufferSizeNormals, &currentBuffers->normals[0]);
+	glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices + bufferSizeNormals, bufferSizeCoords, &currentBuffers->coords[0]);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// VAO
 
-	glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _geometryVBO);
+	glGenVertexArrays(1, &currentBuffers->vao);
+	glBindVertexArray(currentBuffers->vao);
+	glBindBuffer(GL_ARRAY_BUFFER, currentBuffers->vbo);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0]));
+		BUFFER_OFFSET(currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0]));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0,
-		BUFFER_OFFSET(_vertices.size()*sizeof _vertices[0] + _normals.size()*sizeof _normals[0]));
+		BUFFER_OFFSET(currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0] +
+		              currentBuffers->normals. size()*sizeof currentBuffers->normals[0]));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -121,7 +132,7 @@ void Chunk::generateBuffers() {
 
 	// IBO for each biome
 
-	for (auto it = _indices.begin(); it != _indices.end(); it++) {
+	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		size_t bufferSizeIndices = it->second.indices.size()*sizeof it->second.indices[0];
 
 		glGenBuffers(1, &(it->second.ibo));
@@ -135,6 +146,8 @@ void Chunk::generateBuffers() {
 }
 
 void Chunk::computeChunkBoundingBox() {
+	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+
 	float minCoord[3];
 	float maxCoord[3];
 
@@ -143,37 +156,42 @@ void Chunk::computeChunkBoundingBox() {
 		maxCoord[i] = - std::numeric_limits<float>::max();
 	}
 
-	for (size_t i = 0; i < _vertices.size(); i+=3) {
+	for (size_t i = 0; i < currentBuffers->vertices.size(); i+=3) {
 		for (size_t j = 0; j < 3; j++) {
-			if (_vertices[i+j] < minCoord[j])
-				minCoord[j] = _vertices[i+j];
-			if (_vertices[i+j] > maxCoord[j])
-				maxCoord[j] = _vertices[i+j];
+			if (currentBuffers->vertices[i+j] < minCoord[j])
+				minCoord[j] = currentBuffers->vertices[i+j];
+			if (currentBuffers->vertices[i+j] > maxCoord[j])
+				maxCoord[j] = currentBuffers->vertices[i+j];
 		}
 	}
 
-	_corners[0] = sf::Vector3f(minCoord[0], minCoord[1], minCoord[2]);
-	_corners[1] = sf::Vector3f(minCoord[0], minCoord[1], maxCoord[2]);
-	_corners[2] = sf::Vector3f(minCoord[0], maxCoord[1], minCoord[2]);
-	_corners[3] = sf::Vector3f(minCoord[0], maxCoord[1], maxCoord[2]);
-	_corners[4] = sf::Vector3f(maxCoord[0], minCoord[1], minCoord[2]);
-	_corners[5] = sf::Vector3f(maxCoord[0], minCoord[1], maxCoord[2]);
-	_corners[6] = sf::Vector3f(maxCoord[0], maxCoord[1], minCoord[2]);
-	_corners[7] = sf::Vector3f(maxCoord[0], maxCoord[1], maxCoord[2]);
+	currentBuffers->corners[0] = sf::Vector3f(minCoord[0], minCoord[1], minCoord[2]);
+	currentBuffers->corners[1] = sf::Vector3f(minCoord[0], minCoord[1], maxCoord[2]);
+	currentBuffers->corners[2] = sf::Vector3f(minCoord[0], maxCoord[1], minCoord[2]);
+	currentBuffers->corners[3] = sf::Vector3f(minCoord[0], maxCoord[1], maxCoord[2]);
+	currentBuffers->corners[4] = sf::Vector3f(maxCoord[0], minCoord[1], minCoord[2]);
+	currentBuffers->corners[5] = sf::Vector3f(maxCoord[0], minCoord[1], maxCoord[2]);
+	currentBuffers->corners[6] = sf::Vector3f(maxCoord[0], maxCoord[1], minCoord[2]);
+	currentBuffers->corners[7] = sf::Vector3f(maxCoord[0], maxCoord[1], maxCoord[2]);
 }
 
 void Chunk::generate() {
-	fillBufferData();
-	generateBuffers();
+	if (_subdivisionLevels[_currentSubdivLvl]->vao == 0) {
+		fillBufferData();
+		generateBuffers();
+	}
+
 	computeChunkBoundingBox();
 }
 
 size_t Chunk::draw() const {
-	glBindVertexArray(_vao);
+	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+
+	glBindVertexArray(currentBuffers->vao);
 
 	size_t nbTriangles = 0;
 
-	for (auto it = _indices.begin(); it != _indices.end(); it++) {
+	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		_terrainTexManager.bindTexture(it->first);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
@@ -196,7 +214,7 @@ bool Chunk::theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const {
   float dots[8];
 
   for (size_t i = 0 ; i < 8 ; i++) {
-    dots[i] = vu::dot(_corners[i]-cam, vec);
+    dots[i] = vu::dot(_subdivisionLevels[_currentSubdivLvl]->corners[i]-cam, vec);
 
 		if (dots[i] < 0.f)
 			return false;
@@ -253,7 +271,6 @@ void Chunk::computeCulling() {
 
   _visible = true;
 }
-
 void Chunk::setTreesHeights() {
 	for (size_t i = 0; i < _trees.size(); i++) {
 		_trees[i]->setHeight(getHeight(_trees[i]->getPos()));
@@ -267,15 +284,33 @@ void Chunk::setTrees(std::vector<igElement*> trees) {
 	_treeDrawer.loadElements(trees);
 }
 
+void Chunk::computeSubdivisionLevel() {
+	Camera& camera = Camera::getInstance();
+	sf::Vector3f centerOfChunk((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
+	    getHeight(sf::Vector2f((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
+
+	float distanceToChunk = vu::norm(camera.getPos()-centerOfChunk);
+
+	if (distanceToChunk > 10000)
+		setSubdivisionLevel(1);
+	else if (distanceToChunk > 2500)
+		setSubdivisionLevel(2);
+	else if (distanceToChunk > 500)
+		setSubdivisionLevel(3);
+	else
+		setSubdivisionLevel(4);
+}
+
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
-	_subdiv_lvl = newSubdLvl;
-	reset();
-	generate();
-	setTrees(_trees);
+	if (newSubdLvl != _currentSubdivLvl) {
+		_currentSubdivLvl = newSubdLvl;
+		generate();
+		setTrees(_trees);
+	}
 }
 
 float Chunk::getHeight(sf::Vector2f pos) const {
-  std::list<Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_subdiv_lvl);
+  std::list<const Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_currentSubdivLvl);
 
   for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
     float x[3]; float y[3]; float z[3];

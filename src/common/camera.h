@@ -40,7 +40,7 @@ public:
   inline sf::Vector2f getPointedPos() const {return sf::Vector2f(_x, _y);}
 	inline float getHeight() const {return _height;}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
-	inline float getZoomFactor() const {return _r / INIT_R;}
+	inline float getZoom() const {return _r;}
 
 	friend Controller;
 	friend Game;
