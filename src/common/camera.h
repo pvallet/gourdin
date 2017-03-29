@@ -36,7 +36,7 @@ public:
   inline float getRatio() const {return _aspectRatio;}
   inline sf::Vector2f getPointedPos() const {return sf::Vector2f(_x, _y);}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
-	inline float getZoomFactor() const {return _r / INIT_R;}
+	inline float getZoom() const {return _r;}
 
 	friend Controller;
 	friend Game;

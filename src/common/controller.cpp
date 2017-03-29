@@ -9,7 +9,7 @@
 #include "utils.h"
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
-#define TRANSLATION_VALUE_PS 70.f
+#define TRANSLATION_VALUE_PS 0.7f
 #define ZOOM_FACTOR 50.f
 
 Controller::Controller(sf::RenderWindow& window) :
@@ -151,7 +151,7 @@ void Controller::renderLog() {
   std::ostringstream convert;
   convert << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y << std::endl;
-  convert << "R: " << cam.getZoomFactor() * INIT_R << "\n"
+  convert << "R: " << cam.getZoom() << "\n"
           << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
             (cam.getTheta() < 0 ? 360 : 0) << "\n"
           << "Phi: " << cam.getPhi() << std::endl;
@@ -187,7 +187,7 @@ void Controller::moveCamera() {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
-    cam.getZoomFactor();
+    cam.getZoom();
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
