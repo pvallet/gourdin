@@ -36,7 +36,7 @@ void AnimationManagerInitializer::load(std::string folderPath) {
 
     if (pausems == -1) {
       anm.loop = false;
-      anm.pause = sf::milliseconds(1);
+      anm.pause = sf::Time::Zero;
     }
 
     else {

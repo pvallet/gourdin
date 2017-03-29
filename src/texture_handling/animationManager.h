@@ -25,14 +25,16 @@ public:
 
 	inline sf::Vector2f getRawSize() const {return _animInfo.at(_currentAnim).spriteSize;}
 
-	sf::Time getAnimationTime(ANM_TYPE type);
+	sf::Time getAnimationTime(ANM_TYPE type) const;
 
 private:
-	int getClosestOrient(float orientation);
+	size_t getClosestOrient(float orientation) const;
+	inline size_t getNextSprite(size_t currentSprite, sf::Time elapsed) const {
+		return currentSprite + elapsed.asMilliseconds() / _animInfo.at(_currentAnim).duration.asMilliseconds();}
 
 	ANM_TYPE _currentAnim;
-	int _currentOrient;
-	int _currentSprite;
+	size_t _currentOrient;
+	size_t _currentSprite;
 
 	sf::Time _alreadyElapsed;
 	std::map<ANM_TYPE, AnimInfo> _animInfo;

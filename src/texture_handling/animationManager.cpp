@@ -23,24 +23,41 @@ size_t AnimationManager::launchAnimation(ANM_TYPE type) {
 }
 
 void AnimationManager::update(sf::Time elapsed, float nOrientation) {
+	AnimInfo curAnm = _animInfo.at(_currentAnim);
   _alreadyElapsed += elapsed;
 
-  if (_currentSprite == _animInfo[_currentAnim].steps - 1 && _animInfo[_currentAnim].pause != sf::Time::Zero) {
-    if (_animInfo[_currentAnim].loop) {
-      if (_alreadyElapsed.asMilliseconds() / _animInfo[_currentAnim].pause.asMilliseconds() != 0) {
-        _currentSprite = 0;
-        _alreadyElapsed = sf::milliseconds(_alreadyElapsed.asMilliseconds() - _animInfo[_currentAnim].pause.asMilliseconds());
-      }
-    }
-  }
+	// We make sure that the elapsed time does not extend one loop
+	sf::Time totalAnimDuration = getAnimationTime(_currentAnim);
+	_alreadyElapsed = sf::milliseconds(_alreadyElapsed.asMilliseconds() % totalAnimDuration.asMilliseconds());
 
-  else {
-    if (_alreadyElapsed.asMilliseconds() / _animInfo[_currentAnim].duration.asMilliseconds() != 0) {
-      _currentSprite++;
-      _currentSprite %= _animInfo[_currentAnim].steps;
-      _alreadyElapsed = sf::milliseconds(_alreadyElapsed.asMilliseconds() - _animInfo[_currentAnim].duration.asMilliseconds());
-    }
-  }
+	size_t nextSprite = getNextSprite(_currentSprite, _alreadyElapsed);
+
+	// Simple case, no loop to handle
+	if (nextSprite < curAnm.steps) {
+		_alreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.duration;
+		_currentSprite = nextSprite;
+	}
+
+	else {
+		if (!curAnm.loop)
+			_currentSprite = curAnm.steps-1;
+
+		else {
+			_alreadyElapsed -= (float) (curAnm.steps-1 - _currentSprite) * curAnm.duration;
+
+			// The sprite is in the pause
+			if (_alreadyElapsed < curAnm.pause)
+				_currentSprite = curAnm.steps-1;
+
+			// The sprite has started a new loop
+			else {
+				_alreadyElapsed -= curAnm.pause;
+				nextSprite = getNextSprite(0, _alreadyElapsed);
+				_alreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.duration;
+				_currentSprite = nextSprite;
+			}
+		}
+	}
 
   _currentOrient = getClosestOrient(nOrientation);
 }
@@ -54,13 +71,15 @@ sf::FloatRect AnimationManager::getCurrentSprite() const {
   return sprite;
 }
 
-sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) {
-  return sf::milliseconds((_animInfo[type].steps-1) * _animInfo[type].duration.asMilliseconds());
+sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) const {
+  return (float) _animInfo.at(_currentAnim).steps * _animInfo.at(_currentAnim).duration
+			         + _animInfo.at(_currentAnim).pause;
 }
 
-int AnimationManager::getClosestOrient(float orientation) {
+size_t AnimationManager::getClosestOrient(float orientation) const {
 
-  float oriStep = 360.f / (float) _animInfo[_currentAnim].orientations;
+  float oriStep = 360.f / (float) _animInfo.at(_currentAnim).orientations;
 
-  return (_animInfo[_currentAnim].orientations - (int) std::round(orientation / oriStep)) % _animInfo[_currentAnim].orientations;
+  return (_animInfo.at(_currentAnim).orientations - (size_t) std::round(orientation / oriStep))
+	      % _animInfo.at(_currentAnim).orientations;
 }
