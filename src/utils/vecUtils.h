@@ -7,7 +7,28 @@
 
 #include <cmath>
 
+inline bool operator < (const sf::Vector3f& lhs, const sf::Vector3f& rhs) {
+  if (lhs.x < rhs.x)
+    return true;
+  else if (lhs.x > rhs.x)
+    return false;
+  else if (lhs.y < rhs.y)
+    return true;
+  else if (lhs.y > rhs.y)
+    return false;
+  else if (lhs.z < rhs.z)
+    return true;
+  else
+    return false;
+}
+
 namespace vu {
+
+struct compVec3f {
+  bool operator()(const sf::Vector3f& lhs, const sf::Vector3f& rhs) const {
+    return lhs < rhs;
+  }
+};
 
 float norm(const sf::Vector2f& v);
 float norm(const sf::Vector3f& v);

@@ -80,7 +80,7 @@ GLuint Chunk::addVertexInfo(Vertex* vertex) {
 }
 
 void Chunk::fillBufferData() {
-	std::list<Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _currentSubdivLvl);
+	std::list<const Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _currentSubdivLvl);
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
 		for (size_t i = 0; i < 3; i++) {
@@ -299,7 +299,7 @@ void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 }
 
 float Chunk::getHeight(sf::Vector2f pos) const {
-  std::list<Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_currentSubdivLvl);
+  std::list<const Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_currentSubdivLvl);
 
   for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
     float x[3]; float y[3]; float z[3];

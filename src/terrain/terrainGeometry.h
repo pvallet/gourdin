@@ -7,8 +7,8 @@
 
 #include <array>
 #include <list>
-#include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #define MAX_SUBDIV_LVL 4
@@ -32,13 +32,17 @@ public:
 
   sf::Vector3f pos;
   sf::Vector3f normal;
-  std::list<Triangle*> belongsToTris;
 
   // If the triangles are not sorted yet, sorts them in clockwise order
-  Triangle* getNextTri(Triangle* tri);
+  void sortTriangles();
+  const Triangle* getNextTri(const Triangle* tri) const;
+
+  void addAdjacentTriangle(const Triangle* tri);
+  inline const std::list<const Triangle*>& getAdjacentTriangles() const {return _adjacentTriangles;}
 
 private:
   bool _sorted;
+  std::list<const Triangle*> _adjacentTriangles;
 };
 
 struct vertHashFunc{
@@ -49,6 +53,19 @@ struct vertHashFunc{
   return (h1 ^ (h2 << 1)) ^ h3;
   }
 };
+
+struct triHashFunc{
+  size_t operator()(const Triangle& t) const {
+  size_t h1 = vertHashFunc()(t.vertices[0]->pos);
+  size_t h2 = vertHashFunc()(t.vertices[1]->pos);
+  size_t h3 = vertHashFunc()(t.vertices[2]->pos);
+  return (h1 ^ (h2 << 1)) ^ h3;
+  }
+};
+
+inline bool operator == (const Triangle& lhs, const Triangle& rhs) {
+  return lhs.vertices == rhs.vertices;
+}
 
 // Handles the different levels of subdivision of the geometry of the terrain
 class TerrainGeometry {
@@ -61,16 +78,16 @@ public:
     // Init methods
     inline void goingToAddNPoints(size_t n) {_vertices.reserve(n);}
     void addTriangle(std::array<sf::Vector3f,3> p, Biome biome);
-    void subdivideTriangles(std::list<Triangle*>& triangles);
+    void subdivideTriangles(std::list<const Triangle*>& triangles);
     void computeNormals    (std::list<Vertex*>&   vertices);
     void computeNormals();
 
     bool isOcean(size_t x, size_t y) const;
 
-    static std::list<Vertex*> getVertices(const std::list<Triangle*> triangles);
+    static std::list<Vertex*> getVertices(const std::list<const Triangle*> triangles);
 
-    std::list<Triangle*> getTrianglesInChunk(size_t x, size_t y) const;
-    std::list<Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
+    std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y) const;
+    std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
     Biome getBiome(sf::Vector2f pos) const;
 
 
@@ -79,13 +96,13 @@ public:
     static std::array<sf::Vector2u, 2> getSubChunkInfo(sf::Vector2f pos);
 
     std::unordered_map<sf::Vector3f, Vertex, vertHashFunc> _vertices;
-    std::list<Triangle> _triangles;
+    std::unordered_set<Triangle, triHashFunc> _triangles;
 
     // The triangles are sorted on a two level grid:
     // - The first level corresponds to the chunk containing the triangle (x_chunk*NB_CHUNKS + y_chunk)
     // - The second level corresponds to the subchunk (x_subchunk * GRID_SUBDIV + y_subchunk) (GRID_SUBDIV in cpp)
     // Each triangle can belong to several subchunks
-    std::vector<std::vector<std::list<Triangle*> > > _trianglesInSubChunk;
+    std::vector<std::vector<std::list<const Triangle*> > > _trianglesInSubChunk;
 
     friend class TerrainGeometry;
   };
@@ -101,11 +118,13 @@ public:
     return _subdivisionLevels[0]->isOcean(x,y);}
 
   inline size_t getCurrentGlobalSubdivLvl() const {return _currentGlobalSubdivLvl;}
-  std::list<Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
-  std::list<Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
+  std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
+  std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
   Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const;
 
 private:
+  void subdivideChunk(size_t x, size_t y, size_t subdivLvl);
+
   std::vector<std::unique_ptr<SubdivisionLevel> > _subdivisionLevels;
 
   // Deepest available subdivision level for every chunk (x_chunk*NB_CHUNKS + y_chunk)
