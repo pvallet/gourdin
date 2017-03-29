@@ -23,12 +23,16 @@ void Controllable::update(sf::Time elapsed) {
 
 void Controllable::setTarget(sf::Vector2f t) {
 	if (!_dead) {
-		_moving = true;
 		_target = t;
 
 		_direction = (t-_pos);
 		_direction /= vu::norm(_direction);
 	}
+}
+
+void Controllable::stop() {
+	launchAnimation(WAIT);
+	_speed = 0.f;
 }
 
 sf::IntRect Controllable::getScreenCoord() const {

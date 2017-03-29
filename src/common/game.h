@@ -43,7 +43,6 @@ public:
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
-	inline const std::vector<std::unique_ptr<igElement> >& getElements() const {return _igElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 
 private:
@@ -51,7 +50,7 @@ private:
 	sf::Vector2i neighbour      (size_t x, size_t y, size_t index) const;
   void generateNeighbourChunks(size_t x, size_t y);
 	void generateChunk          (size_t x, size_t y);
-  void appendNewElements(std::vector<igElement*> elems);
+  void appendNewElements(std::vector<igMovingElement*> elems);
   void updateMovingElementsStates();
 	void compute2DCorners();
 
@@ -60,12 +59,12 @@ private:
 
 	bool _wireframe;
 
-  std::vector<std::unique_ptr<igElement> > _igElements; // Elements
+  std::vector<std::unique_ptr<igMovingElement> > _igMovingElements; // Elements stored in game
 
-  // Raw pointers because the ownership is in _igElements
-	std::set<Controllable*> _selectedElmts; // Selection
-	std::vector<igElement*> _visibleElmts; // Visible
-  std::unordered_set<igMovingElement*> _igMovingElements;
+  // Raw pointers because the ownership is in _igMovingElements
+	// Static elements are stored in chunks
+	std::set<Controllable*> _selectedElmts;
+  std::unordered_set<igMovingElement*> _activeElements;
 
 	igElementDisplay _igElementDisplay;
   ContentGenerator _contentGenerator;

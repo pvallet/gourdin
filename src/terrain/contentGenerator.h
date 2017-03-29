@@ -13,6 +13,7 @@
 #include "utils.h"
 
 class igElement;
+class igMovingElement;
 
 class ContentGenerator {
 public:
@@ -24,9 +25,9 @@ public:
 
   std::vector<igElement*> genForestsInChunk(size_t x, size_t y);
   // std::vector<igElement*> genHerdsInChunk(size_t x, size_t y);
-  std::vector<igElement*> genHerd(sf::Vector2f pos, size_t count) const;
+  std::vector<igMovingElement*> genHerd(sf::Vector2f pos, size_t count) const;
 
-  std::vector<igElement*> genLion(sf::Vector2f pos) const;
+  std::vector<igMovingElement*> genLion(sf::Vector2f pos) const;
 
 private:
   bool isInForestMask(sf::Vector2f pos) const;

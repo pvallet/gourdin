@@ -55,13 +55,12 @@ void Lion::update(sf::Time elapsed) {
 }
 
 void Lion::stop() {
-	igMovingElement::stop();
+	Controllable::stop();
 	_status = WAITING;
 }
 
 void Lion::beginRunning() {
 	if (_target != _pos && _stamina > 0.f) {
-		_moving = true;
 		_status = RUNNING;
 		_speed = _speedRunning;
 		launchAnimation(RUN);
@@ -70,7 +69,6 @@ void Lion::beginRunning() {
 
 void Lion::beginWalking() {
 	if (_target != _pos) {
-		_moving = true;
 		_status = WALKING;
 		_speed = _speedWalking;
 		launchAnimation(WALK);

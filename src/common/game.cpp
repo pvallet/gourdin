@@ -64,7 +64,6 @@ void Game::generateChunk(size_t x, size_t y) {
   _chunkStatus[x][y] = EDGE;
 
   std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x, y);
-  appendNewElements(newTrees);
   _terrain[x][y]->setTrees(newTrees);
 }
 
@@ -113,14 +112,13 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
   _chunkStatus[x][y] = VISIBLE;
 }
 
-void Game::appendNewElements(std::vector<igElement*> elems) {
+void Game::appendNewElements(std::vector<igMovingElement*> elems) {
   for (size_t i = 0; i < elems.size(); i++)
-    _igElements.push_back(std::unique_ptr<igElement>(elems[i]));
+    _igMovingElements.push_back(std::unique_ptr<igMovingElement>(elems[i]));
 
-  if (!elems.empty() && dynamic_cast<igMovingElement*>(elems.front())) {
-    for (size_t i = 0; i < elems.size(); i++) {
-      _igMovingElements.insert(dynamic_cast<igMovingElement*>(elems[i]));
-    }
+  for (size_t i = 0; i < elems.size(); i++) {
+    if (!elems[i]->isDead())
+      _activeElements.insert(elems[i]);
   }
 }
 
@@ -136,24 +134,24 @@ void Game::updateMovingElementsStates() {
   }
   toDelete.clear();
 
-  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
     if ((*it)->isDead())
       toDelete.push_back(*it);
   }
   for (size_t i = 0; i < toDelete.size(); i++) {
-    _igMovingElements.erase(toDelete[i]);
+    _activeElements.erase(toDelete[i]);
   }
 
   // Compute moving elements interactions
-  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
     Antilope* atlp;
     Lion* lion;
 
     if (atlp = dynamic_cast<Antilope*>(*it))
-      atlp->updateState(_igMovingElements);
+      atlp->updateState(_activeElements);
 
     else if (lion = dynamic_cast<Lion*>(*it))
-      lion->kill(_igMovingElements);
+      lion->kill(_activeElements);
   }
 }
 
@@ -167,7 +165,7 @@ void Game::compute2DCorners() {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
-  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
     Controllable* ctrl;
     if (ctrl = dynamic_cast<Controllable*>(*it)) {
       // Calculate new corners
@@ -255,7 +253,7 @@ void Game::update(sf::Time elapsed) {
   }
 
    // Fill the visible elements
-   _visibleElmts.clear();
+   std::vector<igElement*> visibleElmts;
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     int chunkPosX = (*it)->getPos().x / CHUNK_SIZE;
@@ -273,11 +271,11 @@ void Game::update(sf::Time elapsed) {
       (*it)->setHeight(height);
       (*it)->updateDisplay(elapsed, cam.getTheta());
 
-      _visibleElmts.push_back(*it);
+      visibleElmts.push_back(it->get());
     }
   }
 
-  _igElementDisplay.loadElements(_visibleElmts);
+  _igElementDisplay.loadElements(visibleElmts);
 
   compute2DCorners();
 }
@@ -338,8 +336,7 @@ void Game::render() const {
   // Two passes to avoid artifacts due to alpha blending
 
   glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), true);
-  nbElements += _visibleElmts.size();
-  _igElementDisplay.drawElements();
+  nbElements += _igElementDisplay.drawElements();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -379,10 +376,11 @@ void Game::select(sf::IntRect rect, bool add) {
   if (!add)
     _selectedElmts.clear();
 
-  for (unsigned int i = 0 ; i < _igElements.size() ; i++) {
-    Controllable *ctrl = dynamic_cast<Controllable*>(_igElements[i].get());
-    if (ctrl) {
-      if (_selectedElmts.find(ctrl) == _selectedElmts.end()) { // _igElements[i] is not selected yet, we can bother to calculate
+  for (unsigned int i = 0 ; i < _igMovingElements.size() ; i++) {
+    Controllable *ctrl = dynamic_cast<Controllable*>(_igMovingElements[i].get());
+    if (ctrl && !ctrl->isDead()) {
+      // _igMovingElements[i] is not selected yet, we can bother to calculate
+      if (_selectedElmts.find(ctrl) == _selectedElmts.end()) {
         sf::IntRect c = ctrl->getScreenCoord();
 
         int centerX, centerY;

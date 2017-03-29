@@ -17,9 +17,8 @@ public:
 	virtual Animals getAnimalType() const = 0;
 
 	void launchAnimation (ANM_TYPE type);
-	virtual void updateDisplay(sf::Time elapsed, float theta);
-	virtual void update(sf::Time elapsed);
-	virtual void stop();
+	virtual void updateDisplay(sf::Time elapsed, float theta); // Update sprite
+	virtual void update(sf::Time elapsed); // Update pos and inner statuses
 	virtual void die();
 
 	inline size_t getTexID() const {return _graphics.getTexID();}
@@ -31,7 +30,6 @@ public:
 
 protected:
 	float _speed; // Distance per second
-	bool _moving;
 	bool _dead;
 
 	AnimationManager _graphics;

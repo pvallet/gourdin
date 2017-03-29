@@ -6,7 +6,6 @@
 AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
 	_currentAnim(WAIT),
   _currentSprite(0),
-  _dead(false),
   _alreadyElapsed(sf::Time::Zero),
 	_texManager(init) {
 
@@ -14,12 +13,10 @@ AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
 }
 
 size_t AnimationManager::launchAnimation(ANM_TYPE type) {
-  if (!_dead) {
-    if (_currentAnim != type) {
-      _currentAnim = type;
+  if (_currentAnim != type) {
+    _currentAnim = type;
 
-      _currentSprite = 0;
-    }
+    _currentSprite = 0;
   }
 
 	return _animInfo[type].texLayer;
@@ -65,5 +62,5 @@ int AnimationManager::getClosestOrient(float orientation) {
 
   float oriStep = 360.f / (float) _animInfo[_currentAnim].orientations;
 
-  return (_animInfo[_currentAnim].orientations - (int) std::round(orientation / oriStep)) % 8;
+  return (_animInfo[_currentAnim].orientations - (int) std::round(orientation / oriStep)) % _animInfo[_currentAnim].orientations;
 }

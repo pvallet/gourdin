@@ -16,7 +16,8 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	_speedWalking(7.f),
 	_speedRunning(15.f),
 	_aStatus(IDLE),
-	_bStatus(ORIENTATION) {
+	_bStatus(ORIENTATION),
+	_moving(false) {
 
 	_size *= 7.f;
 	_lineOfSight = _lineOfSightStandard;

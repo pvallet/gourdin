@@ -27,15 +27,12 @@ public:
 
 	sf::Time getAnimationTime(ANM_TYPE type);
 
-	inline void die() {_dead = true;}
-
 private:
 	int getClosestOrient(float orientation);
 
 	ANM_TYPE _currentAnim;
 	int _currentOrient;
 	int _currentSprite;
-	bool _dead;
 
 	sf::Time _alreadyElapsed;
 	std::map<ANM_TYPE, AnimInfo> _animInfo;

@@ -157,7 +157,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void igElementDisplay::drawElements() const {
+size_t igElementDisplay::drawElements() const {
   size_t cursor = 0;
 
   glBindVertexArray(_vao);
@@ -173,4 +173,6 @@ void igElementDisplay::drawElements() const {
   }
 
   glBindVertexArray(0);
+
+  return cursor / 4;
 }

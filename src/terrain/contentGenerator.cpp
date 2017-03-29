@@ -127,12 +127,12 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   return res;
 }
 
-std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
+std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
   float r, theta;
   sf::Vector2f p, diff;
   bool add;
 
-  std::vector<igElement*> res;
+  std::vector<igMovingElement*> res;
 
   for (size_t i = 0 ; i < count ; i++) {
     add = true;
@@ -159,8 +159,8 @@ std::vector<igElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count
   return res;
 }
 
-std::vector<igElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
-  std::vector<igElement*> res;
+std::vector<igMovingElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
+  std::vector<igMovingElement*> res;
   res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION])));
   return res;
 }

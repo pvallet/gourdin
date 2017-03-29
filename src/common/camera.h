@@ -12,7 +12,7 @@
 
 #define RAD M_PI / 180.f
 
-#define MIN_R 50.f
+#define MIN_R 100.f
 #define INIT_R 150.f
 #define INIT_PHI 60.f
 #define INIT_THETA 180.f

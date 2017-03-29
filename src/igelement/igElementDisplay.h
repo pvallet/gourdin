@@ -21,14 +21,14 @@ public:
   void init(DrawType drawType = STREAM_DRAW, size_t capacity = IGE_BUFFER_SIZE);
 
   void loadElements(const std::vector<igElement*>& visibleElmts);
-  void drawElements() const;
+  size_t drawElements() const;
 
 protected:
   void processSpree(const std::vector<igElement*>& visibleElmts,
     size_t& currentSpreeLength, size_t& firstIndexSpree);
 
   void reset();
-  
+
   size_t _capacity;
 
   GLuint _vao;

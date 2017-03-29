@@ -53,6 +53,7 @@ private:
 
 	AntilopeStatus _aStatus;
 	BoidStatus _bStatus; // To control hysteresis
+	bool _moving;
 
 	sf::Time _averageRecovering;
 	sf::Time _averageEating;
