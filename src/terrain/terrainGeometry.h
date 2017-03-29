@@ -36,6 +36,7 @@ public:
   // If the triangles are not sorted yet, sorts them in clockwise order
   void sortTriangles();
   const Triangle* getNextTri(const Triangle* tri) const;
+  std::pair<sf::Vector3f,sf::Vector3f> getBorder() const;
 
   void addAdjacentTriangle(const Triangle* tri);
   inline const std::list<const Triangle*>& getAdjacentTriangles() const {return _adjacentTriangles;}

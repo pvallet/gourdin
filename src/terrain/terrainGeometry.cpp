@@ -83,11 +83,56 @@ const Triangle* Vertex::getNextTri(const Triangle* tri) const {
     return nullptr;
   }
 
-  else if (std::next(res) == _adjacentTriangles.end())
-    return _adjacentTriangles.front();
+  else if (std::next(res) == _adjacentTriangles.end()) {
+    std::array<size_t,3> srtCur = (*res)->sortIndices(pos);
+    std::array<size_t,3> srtNxt = _adjacentTriangles.front()->sortIndices(pos);
+
+    if ((*res)->vertices[srtCur[2]] != _adjacentTriangles.front()->vertices[srtNxt[1]])
+      return nullptr;
+
+    else
+      return _adjacentTriangles.front();
+  }
+
+  else {
+    std::array<size_t,3> srtCur = (*res)->sortIndices(pos);
+    std::array<size_t,3> srtNxt = (*std::next(res))->sortIndices(pos);
+
+    if ((*res)->vertices[srtCur[2]] != (*std::next(res))->vertices[srtNxt[1]])
+      return nullptr;
+
+    else
+      return *std::next(res);
+  }
+}
+
+std::pair<sf::Vector3f,sf::Vector3f> Vertex::getBorder() const {
+
+  std::list<const Triangle*>::const_iterator t = _adjacentTriangles.begin();
+  for (; std::next(t) != _adjacentTriangles.end(); t++) {
+    std::array<size_t,3> srtCur = (*t)->sortIndices(pos);
+    std::array<size_t,3> srtNxt = (*std::next(t))->sortIndices(pos);
+
+    if ((*t)->vertices[srtCur[2]] != (*std::next(t))->vertices[srtNxt[1]]) {
+      return std::pair<sf::Vector3f,sf::Vector3f>(
+        (*t)->vertices[srtCur[2]]->pos,
+        (*std::next(t))->vertices[srtNxt[1]]->pos
+      );
+    }
+  }
+
+  std::array<size_t,3> srtCur = (*t)->sortIndices(pos);
+  std::array<size_t,3> srtNxt = _adjacentTriangles.front()->sortIndices(pos);
+
+  if ((*t)->vertices[srtCur[2]] != _adjacentTriangles.front()->vertices[srtNxt[1]]) {
+    return std::pair<sf::Vector3f,sf::Vector3f>(
+      (*t)->vertices[srtCur[2]]->pos,
+      _adjacentTriangles.front()->vertices[srtNxt[1]]->pos
+    );
+  }
 
   else
-    return *(std::next(res));
+    return std::pair<sf::Vector3f,sf::Vector3f>();
 }
 
 void Vertex::addAdjacentTriangle(const Triangle* tri) {
@@ -173,26 +218,34 @@ void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Trian
     for (size_t i = 0; i < 3; i++) {
       if (tmpProcessedVertices.find((*t)->vertices[i]->pos) == tmpProcessedVertices.end()) {
         (*t)->vertices[i]->sortTriangles();
-        float beta;
-        int n = (*t)->vertices[i]->getAdjacentTriangles().size();
-
-        if (n == 3)
-          beta = 3.f/16.f;
-        else
-          beta = 3.f/(n*8.f);
-
         sf::Vector3f newPos = (*t)->vertices[i]->pos;
 
-        // The average is only done on the height z to preserve the summits
-        newPos *= 1 - n*beta;
+        std::pair<sf::Vector3f,sf::Vector3f> border = (*t)->vertices[i]->getBorder();
 
-        // Average over the surrounding points
-        for (auto neighbT  = (*t)->vertices[i]->getAdjacentTriangles().begin();
-                  neighbT != (*t)->vertices[i]->getAdjacentTriangles().end(); neighbT++) {
+        if (border.first != sf::Vector3f(0,0,0)) {
+          newPos = 3.f/4.f * newPos + 1.f/8.f * border.first + 1.f/8.f * border.second;
+        }
 
-          std::array<size_t,3> srt = (*neighbT)->sortIndices((*t)->vertices[i]->pos);
+        else {
+          float beta;
+          int n = (*t)->vertices[i]->getAdjacentTriangles().size();
 
-          newPos += beta * (*neighbT)->vertices[srt[1]]->pos;
+          if (n == 3)
+          beta = 3.f/16.f;
+          else
+          beta = 3.f/(n*8.f);
+
+          // The average is only done on the height z to preserve the summits
+          newPos *= 1 - n*beta;
+
+          // Average over the surrounding points
+          for (auto neighbT  = (*t)->vertices[i]->getAdjacentTriangles().begin();
+          neighbT != (*t)->vertices[i]->getAdjacentTriangles().end(); neighbT++) {
+
+            std::array<size_t,3> srt = (*neighbT)->sortIndices((*t)->vertices[i]->pos);
+
+            newPos += beta * (*neighbT)->vertices[srt[1]]->pos;
+          }
         }
 
         tmpProcessedVertices.insert(std::pair<sf::Vector3f, sf::Vector3f>((*t)->vertices[i]->pos, newPos));
@@ -212,9 +265,7 @@ void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Trian
        *   i --------
        */
 
-      // The average for the new vertices on the edges is however done on all coordinates
-
-      if (nextTri->biome == (*t)->biome) {
+      if (nextTri != nullptr && nextTri->biome == (*t)->biome) {
         std::array<size_t,3> srt = nextTri->sortIndices((*t)->vertices[i]->pos);
 
         newMidPoints[i] = 3.f/8.f * ((*t)->vertices[i]->pos + (*t)->vertices[(i+2)%3]->pos) +
