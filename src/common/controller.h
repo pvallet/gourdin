@@ -20,10 +20,16 @@ private:
 	void renderLifeBars() const;
 	void renderMinimap() const;
 	void renderLog() const;
+	void renderInfo() const;
 
-	void moveCamera() const;
-	void handleClick(sf::Event event);
-	void handleKeyPressed(sf::Event event);
+
+	void handleClickSandbox(sf::Event event);
+	void handleKeyPressedSandbox(sf::Event event);
+	void handleEventSandbox(sf::Event event);
+	void moveCameraSandbox() const;
+
+	void handleEventGame(sf::Event event);
+	void moveCameraGame() const;
 
 	bool _addSelect;
 	bool _selecting;
@@ -34,6 +40,7 @@ private:
 	sf::Texture _minimapTexture;
 
 	bool _running;
+	bool _inGameMode;
 	sf::Time _elapsed;
 	sf::RenderWindow& _window;
 

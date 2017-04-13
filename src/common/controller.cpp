@@ -8,14 +8,11 @@
 #include "lion.h"
 #include "utils.h"
 
-#define ROTATION_ANGLE_PS 60.f // PS = per second
-#define TRANSLATION_VALUE_PS 0.7f
-#define ZOOM_FACTOR 50.f
-
 Controller::Controller(sf::RenderWindow& window) :
  	_addSelect(false),
   _selecting(false),
   _rectSelect(sf::Vector2f(0.f, 0.f)),
+  _inGameMode(false),
   _running(true),
 	_window(window),
   _game() {}
@@ -163,7 +160,37 @@ void Controller::renderLog() const {
 
   sf::Text log(_log);
   log.setString(convert.str());
+  log.setPosition(_window.getSize().x - log.getLocalBounds().width, 0);
   _window.draw(log);
+}
+
+void Controller::renderInfo() const {
+  std::ostringstream text;
+
+  if (_inGameMode) {
+    text << "M: " << "Switch to Sandbox mode" << std::endl
+         << "Left-Right: " << "Rotate camera" << std::endl;
+  }
+
+  else {
+    text << "M: " << "Switch to Game mode" << std::endl
+         << "Left-Right: " << "Rotate camera" << std::endl
+         << "Up-Down:    " << "Go forwards/backwards" << std::endl
+         << "B: " << "Launch benchmark" << std::endl
+         << "W: " << "Switch to wireframe display" << std::endl
+         << std::endl
+         << "Click on the minimap to jump there" << std::endl
+         << "Right-click to make a lion appear" << std::endl
+         << "Select it with the left mouse button" << std::endl
+         << "Move it around with the right button" << std::endl
+         << "Lshift: " << "Make it run" << std::endl
+         << std::endl
+         << "Go hunt them juicy antilopes!" << std::endl;
+  }
+
+  sf::Text info(_log);
+  info.setString(text.str());
+  _window.draw(info);
 }
 
 void Controller::render() const {
@@ -171,143 +198,18 @@ void Controller::render() const {
     _game.render();
     _window.pushGLStates();
 
-    renderLifeBars();
+    if (!_inGameMode) {
+      renderLifeBars();
+      renderLog();
+      renderMinimap();
+    }
 
-    renderLog();
-    renderMinimap();
+    renderInfo();
 
     _window.draw(_rectSelect);
 
-
     _window.display();
     _window.popGLStates();
-  }
-}
-
-void Controller::moveCamera() const {
-  Camera& cam = Camera::getInstance();
-
-  float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
-    cam.getZoom();
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-    cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-    cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-    cam.translate(0.f, - realTranslationValue);
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-    cam.translate(0.f, realTranslationValue);
-
-  if (sf::Mouse::getPosition().x == 0)
-    cam.translate(- realTranslationValue, 0.f);
-
-  if (sf::Mouse::getPosition().y == 0)
-    cam.translate(0.f, - realTranslationValue);
-
-  if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
-    cam.translate(realTranslationValue, 0.f);
-
-  if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
-    cam.translate(0.f, realTranslationValue);
-}
-
-void Controller::handleClick(sf::Event event) {
-  if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window.getSize().y - event.mouseButton.y))) {
-    _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
-                                   (float) _minimapSprite.getTextureRect().height * MAX_COORD,
-                                   (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /
-                                   (float) _minimapSprite.getTextureRect().width * MAX_COORD));
-  }
-
-  else {
-    // Begin selection
-    if (event.mouseButton.button == sf::Mouse::Left) {
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-          _addSelect = true;
-      else
-          _addSelect = false;
-
-      _selecting = true;
-      _rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
-    }
-
-    // Move selection
-    if (event.mouseButton.button == sf::Mouse::Right) {
-      if (_game.getSelection().empty())
-        _game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-      else
-        _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-    }
-  }
-}
-
-void Controller::handleKeyPressed(sf::Event event) {
-  switch(event.key.code) {
-    case sf::Keyboard::Escape:
-      _running = false;
-      break;
-
-    // Go back to selection
-    case sf::Keyboard::Space: {
-      std::set<Controllable*> sel = _game.getSelection();
-      sf::Vector2f barycenter;
-      float nbSelected = 0;
-
-      for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion;
-        if (lion = dynamic_cast<Lion*>(*it)) {
-          barycenter += lion->getPos();
-          nbSelected++;
-        }
-      }
-      Camera& cam = Camera::getInstance();
-      cam.setPointedPos(barycenter / nbSelected);
-      break;
-    }
-
-    // Make the lions run
-    case sf::Keyboard::LShift: {
-      std::set<Controllable*> sel = _game.getSelection();
-
-      bool makeThemAllRun = false;
-      bool generalStrategyChosen = false;
-      for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion;
-        if (lion = dynamic_cast<Lion*>(*it)) {
-          if (!generalStrategyChosen) {
-            generalStrategyChosen = true;
-            makeThemAllRun = !lion->isRunning();
-          }
-          if (generalStrategyChosen) {
-            if (makeThemAllRun)
-              lion->beginRunning();
-            else
-              lion->beginWalking();
-          }
-        }
-      }
-      break;
-    }
-
-    case sf::Keyboard::Add:
-      _game.changeSubdivisionLevel(1);
-      break;
-
-    case sf::Keyboard::Subtract:
-      _game.changeSubdivisionLevel(-1);
-      break;
-
-    case sf::Keyboard::B:
-      benchmark(100);
-      break;
-
-    case sf::Keyboard::W:
-      _game.switchWireframe();
-      break;
   }
 }
 
@@ -327,71 +229,30 @@ void Controller::run() {
       else if (event.type == sf::Event::Resized)
         cam.resize(event.size.width, event.size.height);
 
-      else if (event.type == sf::Event::MouseWheelMoved)
-        cam.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
-
-      else if (event.type == sf::Event::MouseButtonPressed) {
-        handleClick(event);
-      }
-
-      else if (event.type == sf::Event::MouseButtonReleased) {
-        if (event.mouseButton.button == sf::Mouse::Left) {
-          _game.select(sf::IntRect( _rectSelect.getPosition().x, _rectSelect.getPosition().y,
-                                    _rectSelect.getSize().x, _rectSelect.getSize().y), _addSelect);
-          _selecting = false;
-          _rectSelect.setSize(sf::Vector2f(0,0));
-        }
-      }
-
-      else if (event.type == sf::Event::MouseMoved) {
-        if (_selecting) {
-          _rectSelect.setSize(sf::Vector2f(event.mouseMove.x - _rectSelect.getPosition().x,
-                                           event.mouseMove.y - _rectSelect.getPosition().y));
-        }
-      }
-
       else if (event.type == sf::Event::KeyPressed) {
-        handleKeyPressed(event);
-      }
-
-      else if (event.type == sf::Event::KeyReleased) {
         switch(event.key.code) {
-          case sf::Keyboard::Delete:
-            std::set<Controllable*> sel = _game.getSelection();
+          case sf::Keyboard::Escape:
+            _running = false;
+            break;
 
-            for (auto it = sel.begin(); it != sel.end(); it++) {
-              (*it)->die();
-              break;
-            }
+          case sf::Keyboard::M:
+            _inGameMode = !_inGameMode;
+            break;
         }
       }
 
+      if (_inGameMode)
+        handleEventGame(event);
+
+      else
+        handleEventSandbox(event);
     }
 
-    moveCamera();
+    if (_inGameMode)
+      moveCameraGame();
+    else
+      moveCameraSandbox();
     _game.update(_elapsed);
     render();
   }
-}
-
-void Controller::benchmark(size_t range) {
-  Camera& cam = Camera::getInstance();
-
-  sf::Time totalElapsed, elapsed;
-  sf::Clock frameClock;
-
-  _game.resetCamera();
-
-  for (size_t i = 0; i < range; i++) {
-    elapsed = frameClock.restart();
-    totalElapsed += elapsed;
-    cam.zoom(ZOOM_FACTOR * 0.1 * i);
-    _game.update(elapsed);
-    render();
-  }
-
-  std::cout << "Rendered " << range << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * range << std::endl;
-
-  _game.resetCamera();
 }

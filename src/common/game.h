@@ -38,7 +38,6 @@ public:
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
-	void changeSubdivisionLevel(int increment);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 

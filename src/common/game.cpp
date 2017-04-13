@@ -426,23 +426,6 @@ void Game::addLion(sf::Vector2i screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
 }
 
-void Game::changeSubdivisionLevel(int increment) {
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] != NOT_GENERATED) {
-        int newLevel = _terrain[i][j]->getSubdivisionLevel() + increment;
-        if (newLevel < 0)
-          newLevel = 0;
-
-        if (newLevel > _terrainGeometry.getCurrentGlobalSubdivLvl())
-          _terrainGeometry.generateNewSubdivisionLevel();
-
-        _terrain[i][j]->setSubdivisionLevel(newLevel);
-      }
-    }
-  }
-}
-
 sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
