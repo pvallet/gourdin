@@ -93,6 +93,10 @@ void Controller::handleKeyPressedSandbox(sf::Event event) {
       benchmark(100);
       break;
 
+    case sf::Keyboard::L:
+      _displayLog = !_displayLog;
+      break;
+
     case sf::Keyboard::W:
       _game.switchWireframe();
       break;

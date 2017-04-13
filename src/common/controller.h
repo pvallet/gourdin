@@ -33,6 +33,7 @@ private:
 
 	bool _addSelect;
 	bool _selecting;
+	bool _displayLog;
 	sf::RectangleShape _rectSelect;
 	sf::Font _logFont;
 	sf::Text _log;

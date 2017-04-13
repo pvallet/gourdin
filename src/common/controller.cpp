@@ -11,6 +11,7 @@
 Controller::Controller(sf::RenderWindow& window) :
  	_addSelect(false),
   _selecting(false),
+  _displayLog(true),
   _rectSelect(sf::Vector2f(0.f, 0.f)),
   _inGameMode(false),
   _running(true),
@@ -177,6 +178,7 @@ void Controller::renderInfo() const {
          << "Left-Right: " << "Rotate camera" << std::endl
          << "Up-Down:    " << "Go forwards/backwards" << std::endl
          << "B: " << "Launch benchmark" << std::endl
+         << "L: " << "Hide/Display log" << std::endl
          << "W: " << "Switch to wireframe display" << std::endl
          << std::endl
          << "Click on the minimap to jump there" << std::endl
@@ -200,7 +202,8 @@ void Controller::render() const {
 
     if (!_inGameMode) {
       renderLifeBars();
-      renderLog();
+      if (_displayLog)
+        renderLog();
       renderMinimap();
     }
 
