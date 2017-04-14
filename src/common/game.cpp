@@ -280,6 +280,37 @@ void Game::update(sf::Time elapsed) {
   compute2DCorners();
 }
 
+void Game::renderLifeBars(sf::RenderWindow& window) const {
+  sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
+  lifeBar.setFillColor(sf::Color::Green);
+
+  sf::RectangleShape fullLifeBar(sf::Vector2f(20.f, 2.f));
+  fullLifeBar.setFillColor(sf::Color::Transparent);
+  fullLifeBar.setOutlineColor(sf::Color::Black);
+  fullLifeBar.setOutlineThickness(1);
+
+  sf::IntRect corners;
+  float maxHeightFactor;
+
+  for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
+    corners = (*it)->getScreenCoord();
+    maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+
+    Lion* lion;
+    if (lion = dynamic_cast<Lion*>(*it))
+      lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
+
+    lifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+    fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+
+    window.draw(lifeBar);
+    window.draw(fullLifeBar);
+    lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+  }
+}
+
 void Game::render() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;

@@ -4,46 +4,34 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include "event_handler_game.h"
+#include "event_handler_sandbox.h"
 #include "game.h"
+#include "interface.h"
 
+/* Controls the main loop of the program
+ */
 class Controller {
 public:
 	Controller(sf::RenderWindow& window);
 
 	void init();
 	void run();
-	void benchmark(size_t range);
-
-	void render() const;
 
 private:
-	void renderLifeBars() const;
-	void renderMinimap() const;
-	void renderLog() const;
-	void renderInfo() const;
+	void render() const;
 
-
-	void handleClickSandbox(sf::Event event);
-	void handleKeyPressedSandbox(sf::Event event);
-	void handleEventSandbox(sf::Event event);
-	void moveCameraSandbox() const;
-
-	void handleEventGame(sf::Event event);
-	void moveCameraGame() const;
-
-	bool _addSelect;
-	bool _selecting;
-	bool _displayLog;
-	sf::RectangleShape _rectSelect;
-	sf::Font _logFont;
-	sf::Text _log;
-	sf::Sprite _minimapSprite;
-	sf::Texture _minimapTexture;
+	void benchmark(size_t range);
 
 	bool _running;
-	bool _inGameMode;
 	sf::Time _elapsed;
-	sf::RenderWindow& _window;
 
+	Interface _interface;
 	Game _game;
+
+	EventHandlerGame    _eHandlerGame;
+	EventHandlerSandbox _eHandlerSandbox;
+	EventHandlerType    _currentHandlerType;
+
+	sf::RenderWindow& _window;
 };

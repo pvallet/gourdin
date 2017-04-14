@@ -18,6 +18,9 @@
 #define INIT_THETA 180.f
 
 class Controller;
+class EventHandler;
+class EventHandlerGame;
+class EventHandlerSandbox;
 class Game;
 
 class Camera {
@@ -42,14 +45,19 @@ public:
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 	inline float getZoom() const {return _r;}
 
+	// To resize the camera
 	friend Controller;
+	friend EventHandler;
+
+	friend EventHandlerGame;
+	friend EventHandlerSandbox;
 	friend Game;
 
 private:
 	Camera();
 
 	void resize(unsigned int W, unsigned int H);
-	void apply ();
+	void apply();
 
 	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}

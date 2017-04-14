@@ -1,28 +1,34 @@
-#include "controller.h"
+#include "event_handler_sandbox.h"
 #include "camera.h"
+
+#include <iostream>
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define TRANSLATION_VALUE_PS 0.7f
 #define ZOOM_FACTOR 50.f
 
-void Controller::handleClickSandbox(sf::Event event) {
-  if (_minimapSprite.getTextureRect().contains(sf::Vector2i(event.mouseButton.x, _window.getSize().y - event.mouseButton.y))) {
-    _game.moveCamera(sf::Vector2f( (float) (event.mouseButton.y - _minimapSprite.getPosition().y) /
-                                   (float) _minimapSprite.getTextureRect().height * MAX_COORD,
-                                   (float) (event.mouseButton.x - _minimapSprite.getPosition().x) /
-                                   (float) _minimapSprite.getTextureRect().width * MAX_COORD));
+EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
+  EventHandler::EventHandler(game, interface) {}
+
+void EventHandlerSandbox::handleClick(sf::Event event) {
+  sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
+  
+  if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
+    _game.moveCamera(MAX_COORD * minimapCoord);
   }
 
   else {
     // Begin selection
     if (event.mouseButton.button == sf::Mouse::Left) {
+      _selecting = true;
+
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
           _addSelect = true;
       else
           _addSelect = false;
 
-      _selecting = true;
-      _rectSelect.setPosition(event.mouseButton.x, event.mouseButton.y);
+      _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
+      _interface.setRectSelect(_rectSelect);
     }
 
     // Move selection
@@ -35,7 +41,7 @@ void Controller::handleClickSandbox(sf::Event event) {
   }
 }
 
-void Controller::handleKeyPressedSandbox(sf::Event event) {
+void EventHandlerSandbox::handleKeyPressed(sf::Event event) {
   switch(event.key.code) {
     // Go back to selection
     case sf::Keyboard::Space: {
@@ -89,12 +95,8 @@ void Controller::handleKeyPressedSandbox(sf::Event event) {
       }
     }
 
-    case sf::Keyboard::B:
-      benchmark(100);
-      break;
-
     case sf::Keyboard::L:
-      _displayLog = !_displayLog;
+      _interface.switchLog();
       break;
 
     case sf::Keyboard::W:
@@ -103,46 +105,49 @@ void Controller::handleKeyPressedSandbox(sf::Event event) {
   }
 }
 
-void Controller::handleEventSandbox(sf::Event event) {
+bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
   if (event.type == sf::Event::MouseWheelMoved)
     cam.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
 
   else if (event.type == sf::Event::MouseButtonPressed)
-    handleClickSandbox(event);
+    handleClick(event);
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left) {
-      _game.select(sf::IntRect( _rectSelect.getPosition().x, _rectSelect.getPosition().y,
-                                _rectSelect.getSize().x, _rectSelect.getSize().y), _addSelect);
       _selecting = false;
-      _rectSelect.setSize(sf::Vector2f(0,0));
+      _game.select(_rectSelect, _addSelect);
+      _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
+      _interface.setRectSelect(_rectSelect);
     }
   }
 
   else if (event.type == sf::Event::MouseMoved) {
     if (_selecting) {
-      _rectSelect.setSize(sf::Vector2f(event.mouseMove.x - _rectSelect.getPosition().x,
-                                       event.mouseMove.y - _rectSelect.getPosition().y));
+      _rectSelect.width  = event.mouseMove.x - _rectSelect.left;
+      _rectSelect.height = event.mouseMove.y - _rectSelect.top;
+      _interface.setRectSelect(_rectSelect);
     }
   }
 
   else if (event.type == sf::Event::KeyPressed)
-    handleKeyPressedSandbox(event);
+    handleKeyPressed(event);
+
+  return EventHandler::handleEvent(event, currentHandler);
 }
 
-void Controller::moveCameraSandbox() const {
+void EventHandlerSandbox::moveCamera(sf::Time elapsed) const {
   Camera& cam = Camera::getInstance();
 
-  float realTranslationValue = TRANSLATION_VALUE_PS * _elapsed.asSeconds() *
+  float realTranslationValue = TRANSLATION_VALUE_PS * elapsed.asSeconds() *
     cam.getZoom();
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-    cam.rotate(ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
+    cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-    cam.rotate(- ROTATION_ANGLE_PS * _elapsed.asSeconds(), 0.f);
+    cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     cam.translate(0.f, - realTranslationValue);
@@ -161,26 +166,4 @@ void Controller::moveCameraSandbox() const {
 
   if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
     cam.translate(0.f, realTranslationValue);
-}
-
-void Controller::benchmark(size_t range) {
-  Camera& cam = Camera::getInstance();
-
-  sf::Time totalElapsed, elapsed;
-  sf::Clock frameClock;
-
-  _game.resetCamera();
-
-  for (size_t i = 0; i < range; i++) {
-    elapsed = frameClock.restart();
-    totalElapsed += elapsed;
-    cam.zoom(ZOOM_FACTOR * 0.1 * i);
-    _game.update(elapsed);
-    render();
-  }
-
-  std::cout << "Rendered " << range << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * range << std::endl;
-
-  _game.resetCamera();
 }

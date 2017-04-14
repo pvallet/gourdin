@@ -33,7 +33,8 @@ public:
   void init();
 
 	void update(sf::Time elapsed);
-	void render() const; // Returns the number of triangles and number of elements
+	void render() const;
+	void renderLifeBars(sf::RenderWindow& window) const;
 	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
@@ -52,7 +53,6 @@ private:
   void appendNewElements(std::vector<igMovingElement*> elems);
   void updateMovingElementsStates();
 	void compute2DCorners();
-
 
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
 
