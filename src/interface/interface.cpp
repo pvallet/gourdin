@@ -63,7 +63,7 @@ void Interface::renderMinimap(const Game& game) const {
   _window.draw(miniCamDir);
 
   // Highlight generated chunks
-  float miniChunkSize = _minimapSprite.getTextureRect().height / NB_CHUNKS;
+  float miniChunkSize = _minimapSprite.getTextureRect().height / (float) NB_CHUNKS;
 
   sf::RectangleShape miniChunk(sf::Vector2f(miniChunkSize, miniChunkSize));
   miniChunk.setFillColor(sf::Color::Black);

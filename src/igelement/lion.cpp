@@ -15,7 +15,7 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	_range(5.f),
 	_status(WAITING) {
 
-	_size *= 7.f;
+	_size *= 6.f;
 	_speed = _speedWalking;
 	_animAttack = graphics.getAnimationTime(ATTACK);
 
