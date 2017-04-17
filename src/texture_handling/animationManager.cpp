@@ -32,7 +32,7 @@ void AnimationManager::update(sf::Time elapsed, float nOrientation) {
 
 	size_t nextSprite = getNextSprite(_currentSprite, _alreadyElapsed);
 
-	// Simple case, no loop to handle
+	// Simple case, no restart to handle
 	if (nextSprite < curAnm.steps) {
 		_alreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.duration;
 		_currentSprite = nextSprite;
@@ -53,7 +53,7 @@ void AnimationManager::update(sf::Time elapsed, float nOrientation) {
 			else {
 				_alreadyElapsed -= curAnm.pause;
 				nextSprite = getNextSprite(0, _alreadyElapsed);
-				_alreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.duration;
+				_alreadyElapsed -= (float) nextSprite * curAnm.duration;
 				_currentSprite = nextSprite;
 			}
 		}
