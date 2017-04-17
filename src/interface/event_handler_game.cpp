@@ -19,4 +19,7 @@ void EventHandlerGame::moveCamera(sf::Time elapsed) const {
 void EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setZoom(MIN_R);
+
+  if (_game.getTribe().size() == 0)
+    _game.genTribe(cam.getPointedPos());
 }

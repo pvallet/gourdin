@@ -2,6 +2,8 @@
 
 #include "event_handler.h"
 
+class Controllable;
+
 class EventHandlerGame : public EventHandler {
 public:
   EventHandlerGame(Game& game, Interface& interface);
@@ -11,4 +13,5 @@ public:
   void gainFocus();
 
 private:
+  Controllable* _focusedCharacter;
 };

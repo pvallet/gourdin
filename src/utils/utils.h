@@ -17,8 +17,8 @@
 
 #define RANDOMF (rand() / (float) RAND_MAX)
 
-#define NB_ANIMALS 2
-enum Animals {ANTILOPE, LION};
+#define NB_ANIMALS 5
+enum Animals {ANTILOPE, LION, AOE1_MAN, AOE2_MAN, WOMAN};
 
 enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			SNOW, TUNDRA, BARE, SCORCHED,

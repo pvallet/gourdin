@@ -113,6 +113,7 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
 }
 
 void Game::appendNewElements(std::vector<igMovingElement*> elems) {
+
   for (size_t i = 0; i < elems.size(); i++)
     _igMovingElements.push_back(std::unique_ptr<igMovingElement>(elems[i]));
 
@@ -293,21 +294,22 @@ void Game::renderLifeBars(sf::RenderWindow& window) const {
   float maxHeightFactor;
 
   for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    corners = (*it)->getScreenCoord();
-    maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
-
     Lion* lion;
-    if (lion = dynamic_cast<Lion*>(*it))
-      lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
+    if (lion = dynamic_cast<Lion*>(*it)) {
+      corners = (*it)->getScreenCoord();
+      maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-    lifeBar.setPosition(corners.left + corners.width/2 - 10,
-      corners.top - corners.height*maxHeightFactor + corners.height - 5);
-    fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
-      corners.top - corners.height*maxHeightFactor + corners.height - 5);
+        lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
 
-    window.draw(lifeBar);
-    window.draw(fullLifeBar);
-    lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+      lifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+      fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+
+      window.draw(lifeBar);
+      window.draw(fullLifeBar);
+      lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+    }
   }
 }
 
@@ -407,8 +409,8 @@ void Game::select(sf::IntRect rect, bool add) {
   if (!add)
     _selectedElmts.clear();
 
-  for (unsigned int i = 0 ; i < _igMovingElements.size() ; i++) {
-    Controllable *ctrl = dynamic_cast<Controllable*>(_igMovingElements[i].get());
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    Controllable *ctrl = dynamic_cast<Controllable*>(it->get());
     if (ctrl && !ctrl->isDead()) {
       // _igMovingElements[i] is not selected yet, we can bother to calculate
       if (_selectedElmts.find(ctrl) == _selectedElmts.end()) {
@@ -419,17 +421,14 @@ void Game::select(sf::IntRect rect, bool add) {
         centerX = c.left + c.width / 2;
         centerY = c.top + c.height / 2;
 
-        if (rect.contains(centerX, centerY)) {
-          if (dynamic_cast<Lion*>(ctrl))
-            _selectedElmts.insert(ctrl);
-        }
+        if (rect.contains(centerX, centerY))
+          _selectedElmts.insert(ctrl);
 
         else if (   c.contains(rect.left, rect.top) ||
                     c.contains(rect.left + rect.width, rect.top) ||
                     c.contains(rect.left + rect.width, rect.top + rect.height) ||
                     c.contains(rect.left, rect.top + rect.height)  ) {
-          if (dynamic_cast<Lion*>(ctrl))
-            _selectedElmts.insert(ctrl);
+          _selectedElmts.insert(ctrl);
         }
       }
     }
@@ -455,6 +454,14 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
 
 void Game::addLion(sf::Vector2i screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
+}
+
+void Game::genTribe(sf::Vector2f pos) {
+  std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
+  appendNewElements(tribe);
+  for (size_t i = 0; i < tribe.size(); i++) {
+    _tribe.push_back(dynamic_cast<Human*>(tribe[i]));
+  }
 }
 
 sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {

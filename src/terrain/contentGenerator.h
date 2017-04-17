@@ -26,12 +26,15 @@ public:
   std::vector<igElement*> genForestsInChunk(size_t x, size_t y);
   // std::vector<igElement*> genHerdsInChunk(size_t x, size_t y);
   std::vector<igMovingElement*> genHerd(sf::Vector2f pos, size_t count) const;
-
+  std::vector<igMovingElement*> genTribe(sf::Vector2f pos) const;
   std::vector<igMovingElement*> genLion(sf::Vector2f pos) const;
+
 
 private:
   bool isInForestMask(sf::Vector2f pos) const;
   bool notTooCloseToOtherTrees(sf::Vector2f pos, float distance) const;
+  std::vector<sf::Vector2f> scatteredPositions(sf::Vector2f center,
+    size_t count, float radius, float minProximity) const;
 
   const TerrainGeometry& _terrainGeometry;
   Perlin _perlinGenerator;

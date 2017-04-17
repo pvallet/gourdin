@@ -125,7 +125,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   size_t firstIndexSpree = 0;
 
   CurrentType currentType = NO_TYPE;
-  Animals     currentAnimal;
+  GLuint      currentTexture;
   Biome       currentBiome;
 
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -142,10 +142,10 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
     }
 
     else if (animal = dynamic_cast<igMovingElement*>(elemsToDisplay[i])) {
-      if (currentType != ANIMAL || currentAnimal != animal->getAnimalType()) {
+      if (currentType != ANIMAL || currentTexture != animal->getTexID()) {
         processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
         currentType   = ANIMAL;
-        currentAnimal = animal->getAnimalType();
+        currentTexture = animal->getTexID();
       }
     }
 

@@ -7,8 +7,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "lion.h"
 #include "antilope.h"
+#include "human.h"
+#include "lion.h"
 #include "tree.h"
 #include "igElementDisplay.h"
 
@@ -39,11 +40,13 @@ public:
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	void addLion(sf::Vector2i screenTarget);
+	void genTribe(sf::Vector2f pos);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
+	inline const std::vector<Human*>& getTribe() const {return _tribe;}
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
@@ -64,6 +67,8 @@ private:
 	// Static elements are stored in chunks
 	std::set<Controllable*> _selectedElmts;
   std::unordered_set<igMovingElement*> _activeElements;
+
+	std::vector<Human*> _tribe;
 
 	igElementDisplay _igElementDisplay;
   ContentGenerator _contentGenerator;

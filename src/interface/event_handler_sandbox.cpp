@@ -8,7 +8,9 @@
 #define ZOOM_FACTOR 50.f
 
 EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
-  EventHandler::EventHandler(game, interface) {}
+  EventHandler::EventHandler(game, interface),
+  _addSelect(false),
+  _selecting(false) {}
 
 void EventHandlerSandbox::handleClick(sf::Event event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);

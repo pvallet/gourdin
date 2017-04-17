@@ -4,13 +4,11 @@
 #include <sstream>
 
 #include "antilope.h"
+#include "human.h"
 #include "lion.h"
 #include "tree.h"
 
 #define CONTENT_RES 512
-
-#define MIN_ANTILOPE_PROX 5.f
-#define HERD_RADIUS 10.f // for 10 antilopes
 
 ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
   _terrainGeometry(terrainGeometry),
@@ -127,33 +125,68 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   return res;
 }
 
-std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
+std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f center,
+  size_t count, float radius, float minProximity) const {
+
   float r, theta;
   sf::Vector2f p, diff;
   bool add;
 
-  std::vector<igMovingElement*> res;
+  std::vector<sf::Vector2f> res;
 
-  for (size_t i = 0 ; i < count ; i++) {
+  for (size_t i = 0 ; i < 2*count ; i++) {
     add = true;
-    r = sqrt(RANDOMF) * HERD_RADIUS * sqrt(count);
+    r = sqrt(RANDOMF) * radius * sqrt(count);
     theta = RANDOMF * 2*M_PI;
 
-    p.x = pos.x + r*cos(theta);
-    p.y = pos.y + r*sin(theta);
+    p.x = center.x + r*cos(theta);
+    p.y = center.y + r*sin(theta);
 
     for (unsigned int j = 0 ; j < res.size() ; j++) {
-      diff = res[j]->getPos() - p;
+      diff = res[j] - p;
 
-      if (diff.x * diff.x + diff.y * diff.y < MIN_ANTILOPE_PROX) {
-        i--;
+      if (diff.x * diff.x + diff.y * diff.y < minProximity)
         add = false;
-      }
     }
 
     if (add) {
-      res.push_back(new Antilope(p, AnimationManager(_animManagerInits[ANTILOPE])));
+      res.push_back(p);
+
+      if (res.size() == count)
+        break;
     }
+  }
+
+  return res;
+}
+
+std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
+  std::vector<igMovingElement*> res;
+
+  std::vector<sf::Vector2f> positions = scatteredPositions(pos, count, 10, 5);
+
+  for (size_t i = 0; i < positions.size(); i++) {
+    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[ANTILOPE])));
+  }
+
+  return res;
+}
+
+std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const {
+  std::vector<igMovingElement*> res;
+
+  std::vector<sf::Vector2f> positions = scatteredPositions(pos, RANDOMF * 5 + 5, 10, 5);
+
+  for (size_t i = 0; i < positions.size(); i++) {
+    float randNumber = RANDOMF;
+    Animals animal;
+    if (randNumber < 0.3)
+      animal = AOE1_MAN;
+    else if (randNumber < 0.5)
+      animal = AOE2_MAN;
+    else
+      animal = WOMAN;
+    res.push_back(new Human(positions[i], AnimationManager(_animManagerInits[animal])));
   }
 
   return res;

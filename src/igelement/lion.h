@@ -11,8 +11,6 @@ public:
 	Lion(sf::Vector2f position, AnimationManager _graphics);
 	virtual ~Lion() {}
 
-	inline Animals getAnimalType() const {return LION;}
-
 	virtual void update(sf::Time elapsed);
 
 	virtual void stop();

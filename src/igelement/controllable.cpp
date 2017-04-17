@@ -23,6 +23,7 @@ void Controllable::update(sf::Time elapsed) {
 
 void Controllable::setTarget(sf::Vector2f t) {
 	if (!_dead) {
+    launchAnimation(WALK);
 		_target = t;
 
 		_direction = (t-_pos);
@@ -32,7 +33,7 @@ void Controllable::setTarget(sf::Vector2f t) {
 
 void Controllable::stop() {
 	launchAnimation(WAIT);
-	_speed = 0.f;
+  _target = _pos;
 }
 
 sf::IntRect Controllable::getScreenCoord() const {
