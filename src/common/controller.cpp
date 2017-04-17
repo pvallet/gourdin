@@ -55,12 +55,21 @@ void Controller::run() {
     _elapsed = frameClock.restart();
 
     while (_window.pollEvent(event)) {
+      EventHandlerType lastHandlerType = _currentHandlerType;
+
       if (_currentHandlerType == HDLR_GAME)
         _running = _eHandlerGame.handleEvent(event,_currentHandlerType);
       else {
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::B)
           benchmark(100);
         _running = _eHandlerSandbox.handleEvent(event,_currentHandlerType);
+      }
+
+      if (_currentHandlerType != lastHandlerType) {
+        if (_currentHandlerType == HDLR_GAME)
+          _eHandlerGame.gainFocus();
+        else
+          _eHandlerSandbox.gainFocus();
       }
     }
 

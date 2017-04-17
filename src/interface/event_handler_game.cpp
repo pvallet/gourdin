@@ -9,11 +9,14 @@ EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
 void EventHandlerGame::moveCamera(sf::Time elapsed) const {
   Camera& cam = Camera::getInstance();
 
-  cam.zoom(-cam.getZoom());
-
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
     cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+}
+
+void EventHandlerGame::gainFocus() {
+  Camera& cam = Camera::getInstance();
+  cam.setZoom(MIN_R);
 }

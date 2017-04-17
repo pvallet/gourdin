@@ -61,7 +61,8 @@ private:
 
 	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
-	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r;}
+	inline void zoom (float dr) {setZoom(_r + dr);}
+	inline void setZoom (float r) {_r = r < MIN_R ? MIN_R : r;}
 	inline void setValues (float r, float phi, float theta) {_r = r; _phi = phi; _theta = theta;}
 
   inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}

@@ -15,6 +15,8 @@ public:
   virtual bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
   virtual void moveCamera(sf::Time elapsed) const = 0;
 
+  virtual void gainFocus() = 0;
+
 protected:
   Game& _game;
   Interface& _interface;

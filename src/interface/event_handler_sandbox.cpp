@@ -12,7 +12,7 @@ EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
 
 void EventHandlerSandbox::handleClick(sf::Event event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
-  
+
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
     _game.moveCamera(MAX_COORD * minimapCoord);
   }
@@ -166,4 +166,12 @@ void EventHandlerSandbox::moveCamera(sf::Time elapsed) const {
 
   if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
     cam.translate(0.f, realTranslationValue);
+}
+
+void EventHandlerSandbox::gainFocus() {
+  Camera& cam = Camera::getInstance();
+  cam.setZoom(INIT_R);
+
+  LogText& logText = LogText::getInstance();
+  logText.clear();
 }

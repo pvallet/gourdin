@@ -9,6 +9,8 @@ public:
   bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
   void moveCamera(sf::Time elapsed) const;
 
+  void gainFocus();
+
 private:
   void handleClick(sf::Event event);
   void handleKeyPressed(sf::Event event);

@@ -8,5 +8,7 @@ public:
 
   void moveCamera(sf::Time elapsed) const;
 
+  void gainFocus();
+
 private:
 };
