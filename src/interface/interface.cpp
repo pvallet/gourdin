@@ -128,7 +128,11 @@ void Interface::renderInfo(bool inGameMode) const {
 
   if (inGameMode) {
     text << "M: " << "Switch to Sandbox mode" << std::endl
-         << "Left-Right: " << "Rotate camera" << std::endl;
+         << "1: " << "God camera" << std::endl
+         << "2: " << "POV camera" << std::endl
+         << "Left-Right: " << "Rotate camera" << std::endl
+         << "Click to move the character in the center" << std::endl
+         << "Click on another character to change the focus" << std::endl;
   }
 
   else {

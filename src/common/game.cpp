@@ -23,7 +23,7 @@ void Game::resetCamera() {
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
-  cam.setValues(INIT_R, INIT_PHI, INIT_THETA);
+  cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 }
 
 void Game::init() {
@@ -414,20 +414,20 @@ void Game::select(sf::IntRect rect, bool add) {
     if (ctrl && !ctrl->isDead()) {
       // _igMovingElements[i] is not selected yet, we can bother to calculate
       if (_selectedElmts.find(ctrl) == _selectedElmts.end()) {
-        sf::IntRect c = ctrl->getScreenCoord();
+        sf::IntRect SpriteRect = ctrl->getScreenCoord();
 
         int centerX, centerY;
 
-        centerX = c.left + c.width / 2;
-        centerY = c.top + c.height / 2;
+        centerX = SpriteRect.left + SpriteRect.width / 2;
+        centerY = SpriteRect.top + SpriteRect.height / 2;
 
         if (rect.contains(centerX, centerY))
           _selectedElmts.insert(ctrl);
 
-        else if (   c.contains(rect.left, rect.top) ||
-                    c.contains(rect.left + rect.width, rect.top) ||
-                    c.contains(rect.left + rect.width, rect.top + rect.height) ||
-                    c.contains(rect.left, rect.top + rect.height)  ) {
+        else if (   SpriteRect.contains(rect.left, rect.top) ||
+                    SpriteRect.contains(rect.left + rect.width, rect.top) ||
+                    SpriteRect.contains(rect.left + rect.width, rect.top + rect.height) ||
+                    SpriteRect.contains(rect.left, rect.top + rect.height)  ) {
           _selectedElmts.insert(ctrl);
         }
       }
@@ -450,6 +450,18 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
   generateChunk(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(newAimedPos);
+}
+
+Human* Game::moveCharacter(sf::Vector2i screenTarget, Human* focusedCharacter) {
+  for (size_t i = 0; i < _tribe.size(); i++) {
+    sf::IntRect spriteRect = _tribe[i]->getScreenCoord();
+
+    if (spriteRect.contains(screenTarget))
+      return _tribe[i];
+  }
+
+  focusedCharacter->setTarget(get2DCoord(screenTarget));
+  return focusedCharacter;
 }
 
 void Game::addLion(sf::Vector2i screenTarget) {

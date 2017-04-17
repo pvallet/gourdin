@@ -39,6 +39,8 @@ public:
 	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
+	// Returns the character on which the player has clicked if so, otherwise returns focusedCharacter
+	Human* moveCharacter(sf::Vector2i screenTarget, Human* focusedCharacter);
 	void addLion(sf::Vector2i screenTarget);
 	void genTribe(sf::Vector2f pos);
 
