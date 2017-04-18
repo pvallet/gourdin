@@ -7,7 +7,7 @@ public:
   EventHandlerSandbox(Game& game, Interface& interface);
 
   bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
-  void moveCamera(sf::Time elapsed) const;
+  void onGoingEvents(sf::Time elapsed) const;
 
   void gainFocus();
 

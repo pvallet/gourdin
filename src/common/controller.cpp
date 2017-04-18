@@ -74,9 +74,9 @@ void Controller::run() {
     }
 
     if (_currentHandlerType == HDLR_GAME)
-      _eHandlerGame.moveCamera(_elapsed);
+      _eHandlerGame.onGoingEvents(_elapsed);
     else
-      _eHandlerSandbox.moveCamera(_elapsed);
+      _eHandlerSandbox.onGoingEvents(_elapsed);
 
     _game.update(_elapsed);
     render();

@@ -130,7 +130,10 @@ void Interface::renderInfo(bool inGameMode) const {
     text << "M: " << "Switch to Sandbox mode" << std::endl
          << "1: " << "God camera" << std::endl
          << "2: " << "POV camera" << std::endl
-         << "Left-Right: " << "Rotate camera" << std::endl
+         << "A-E:     " << "Rotate camera" << std::endl
+         << "Z-Q-S-D: " << "Move focused character" << std::endl
+         << "(The game is optimised for AZERTY keyboards)" << std::endl
+         << std::endl
          << "Click to move the character in the center" << std::endl
          << "Click on another character to change the focus" << std::endl;
   }

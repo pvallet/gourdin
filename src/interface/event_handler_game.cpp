@@ -29,6 +29,22 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
   }
 }
 
+void EventHandlerGame::handleKeyReleased(sf::Event event) {
+  switch(event.key.code) {
+    case sf::Keyboard::Z:
+    case sf::Keyboard::Q:
+    case sf::Keyboard::S:
+    case sf::Keyboard::D:
+    // The user is not moving the character any more
+      if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Z) &&
+          !sf::Keyboard::isKeyPressed(sf::Keyboard::Q) &&
+          !sf::Keyboard::isKeyPressed(sf::Keyboard::S) &&
+          !sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        _focusedCharacter->stop();
+      break;
+  }
+}
+
 bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
   if (event.type == sf::Event::MouseButtonPressed)
     _focusedCharacter = _game.moveCharacter(
@@ -37,19 +53,37 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
   else if (event.type == sf::Event::KeyPressed)
     handleKeyPressed(event);
 
+  else if (event.type == sf::Event::KeyReleased)
+    handleKeyReleased(event);
+
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerGame::moveCamera(sf::Time elapsed) const {
+void EventHandlerGame::onGoingEvents(sf::Time elapsed) const {
   Camera& cam = Camera::getInstance();
 
   cam.setPointedPos(_focusedCharacter->getPos());
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
     cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+
+  sf::Vector2f moveFocused = _focusedCharacter->getPos();
+  float theta = cam.getTheta()*M_PI/180.f;
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    moveFocused += sf::Vector2f(cos(theta), sin(theta));
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    moveFocused += sf::Vector2f(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+    moveFocused += sf::Vector2f(cos(theta+M_PI), sin(theta+M_PI));
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    moveFocused += sf::Vector2f(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+
+  if (moveFocused != _focusedCharacter->getPos())
+    _focusedCharacter->setTarget(moveFocused);
 }
 
 void EventHandlerGame::gainFocus() {
