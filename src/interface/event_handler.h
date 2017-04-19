@@ -13,7 +13,7 @@ public:
 
   // Returns whether the game will stop or not
   virtual bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
-  virtual void onGoingEvents(sf::Time elapsed) const = 0;
+  virtual void onGoingEvents(sf::Time elapsed) = 0;
 
   virtual void gainFocus() = 0;
 

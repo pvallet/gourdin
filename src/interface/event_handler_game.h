@@ -9,7 +9,7 @@ public:
   EventHandlerGame(Game& game, Interface& interface);
 
   bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
-  void onGoingEvents(sf::Time elapsed) const;
+  void onGoingEvents(sf::Time elapsed);
 
   void gainFocus();
 

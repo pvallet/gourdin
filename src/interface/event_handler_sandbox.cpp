@@ -139,7 +139,7 @@ bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& current
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerSandbox::onGoingEvents(sf::Time elapsed) const {
+void EventHandlerSandbox::onGoingEvents(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PS * elapsed.asSeconds() *
