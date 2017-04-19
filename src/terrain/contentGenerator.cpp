@@ -22,9 +22,9 @@ ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
 }
 
 void ContentGenerator::init() {
-  _animManagerInits.resize(NB_ANIMALS);
+  _animManagerInits.resize(ANIMALS_NB_ITEMS);
 
-  for (size_t i = 0; i < NB_ANIMALS; i++) {
+  for (size_t i = 0; i < ANIMALS_NB_ITEMS; i++) {
     std::ostringstream path;
     path << "res/animals/" << i << '/';
     _animManagerInits[i].load(path.str());
@@ -105,7 +105,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
-    if (biomeInPos != NO_DEFINED_BIOME) {
+    if (biomeInPos != BIOME_NB_ITEMS) {
       if (biomeInPos >= 11) { // No forests in other biomes
         if (isInForestMask(pos)) {
           if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biomeInPos))) {

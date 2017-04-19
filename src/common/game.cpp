@@ -32,7 +32,7 @@ void Game::init() {
   _terrainShader.load();
   _igEShader.load();
 
-  _terrainTexManager.loadFolder(NB_BIOMES, "res/terrain/");
+  _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 

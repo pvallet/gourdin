@@ -419,7 +419,7 @@ Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
     }
   }
 
-  return NO_DEFINED_BIOME;
+  return BIOME_NB_ITEMS;
 }
 
 TerrainGeometry::TerrainGeometry() :

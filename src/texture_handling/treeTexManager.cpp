@@ -9,8 +9,8 @@ TreeTexManager::TreeTexManager() :
 
 void TreeTexManager::load(std::string path) {
   Flora defaultF;
-  defaultF.biome = NO_DEFINED_BIOME;
-  _flora.assign(NB_BIOMES, defaultF);
+  defaultF.biome = BIOME_NB_ITEMS;
+  _flora.assign(BIOME_NB_ITEMS, defaultF);
 
 	std::ostringstream xmlPath;
     xmlPath << path << "trees.xml";
@@ -38,8 +38,8 @@ void TreeTexManager::load(std::string path) {
   }
 
   size_t currentBiome = 0;
-  for (size_t i = 0; i < NB_BIOMES; i++) {
-    if (_flora[i].biome != NO_DEFINED_BIOME) {
+  for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+    if (_flora[i].biome != BIOME_NB_ITEMS) {
       std::ostringstream subPath;
       subPath << path << currentBiome << '/';
 
