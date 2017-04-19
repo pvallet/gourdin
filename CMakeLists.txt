@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
+# Debug command
+# cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
+
 project(gourdin)
 
 if(NOT CMAKE_BUILD_TYPE)

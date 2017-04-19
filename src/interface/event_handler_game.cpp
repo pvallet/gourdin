@@ -50,6 +50,7 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
 
   }
 
+  // Switch selection to closest character in the direction given by moveFocused
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) &&
       moveFocused != _focusedCharacter->getPos()) {
 
@@ -64,7 +65,21 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
       sf::Vector2f toChar = tribe[i]->getPos() - _focusedCharacter->getPos();
       float distance = vu::norm(toChar);
 
+      // Character is in the right direction, with +- M_PI/4 margin
       if (vu::dot(toChar, direction)/distance > threshold) {
+
+        // Checks whether the character is visible on the screen
+        sf::IntRect screenCoord = tribe[i]->getScreenCoord();
+        if (screenCoord.top > (int) cam.getH())
+          continue;
+        if (screenCoord.left > (int) cam.getW())
+          continue;
+        if (screenCoord.top + screenCoord.height < 0)
+          continue;
+        if (screenCoord.left + screenCoord.width < 0)
+          continue;
+
+
         if (distance < closestDist) {
           closestDist = distance;
           closestHuman = tribe[i];
