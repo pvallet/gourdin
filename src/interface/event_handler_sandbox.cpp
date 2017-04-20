@@ -172,7 +172,7 @@ void EventHandlerSandbox::onGoingEvents(sf::Time elapsed) {
 
 void EventHandlerSandbox::gainFocus() {
   Camera& cam = Camera::getInstance();
-  cam.setZoom(INIT_R);
+  cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 
   LogText& logText = LogText::getInstance();
   logText.clear();
