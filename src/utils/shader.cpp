@@ -89,7 +89,7 @@ bool Shader::load() {
 
     std::cerr << "Error in shader linking: " << error << std::endl;
 
-    // delete[] error;
+    delete[] error;
    	glDeleteProgram(_programID);
 
     return false;
@@ -143,7 +143,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
     std::cerr << "Error in shader compilation: " << error << std::endl;
 
-    // delete[] error;
+    delete[] error;
 		glDeleteShader(shader);
 
 #ifdef __linux__

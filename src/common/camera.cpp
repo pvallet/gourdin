@@ -24,6 +24,7 @@ void Camera::resize(unsigned int W, unsigned int H) {
   _projection = glm::perspective(fovAngleRadians, _aspectRatio, _nearPlane, _farPlane);
 
   _viewProjection = _projection * _view;
+  _skyboxViewProjection = _projection * _skyboxView;
 }
 
 void Camera::apply() {
@@ -36,6 +37,16 @@ void Camera::apply() {
   );
 
   _viewProjection = _projection * _view;
+
+  sf::Vector3f camDirection = vu::carthesian(1.f, _theta, _phi);
+
+  _skyboxView = glm::lookAt (
+	  vu::convertGLM(camDirection),
+    glm::vec3(0, 0, 0),
+    vu::convertGLM(vu::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f))
+  );
+
+  _skyboxViewProjection = _projection * _skyboxView;
 }
 
 void Camera::translate(float dWinX, float dWinY) {

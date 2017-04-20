@@ -15,6 +15,7 @@ Game::Game() :
   _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
+  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
   _contentGenerator(_terrainGeometry),
   _ocean(2) {}
 
@@ -31,12 +32,14 @@ void Game::init() {
 
   _terrainShader.load();
   _igEShader.load();
+  _skyboxShader.load();
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
+  _skybox.load("res/skybox/");
 
   std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
   _chunkStatus.resize(NB_CHUNKS, initializer);
@@ -320,7 +323,24 @@ void Game::render() const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Camera& cam = Camera::getInstance();
-  glm::mat4 MVP = cam.getViewProjectionMatrix();
+  glm::mat4 MVP = cam.getSkyboxViewProjectionMatrix();
+
+  // Skybox
+
+  glUseProgram(_skyboxShader.getProgramID());
+	glUniformMatrix4fv(glGetUniformLocation(_skyboxShader.getProgramID(), "MVP"),
+    1, GL_FALSE, &MVP[0][0]);
+
+  glDisable(GL_DEPTH_TEST);
+  _skybox.draw();
+  nbTriangles += 12;
+  glEnable(GL_DEPTH_TEST);
+
+  glUseProgram(0);
+
+  // Terrain draws
+
+  MVP = cam.getViewProjectionMatrix();
 
   glUseProgram(_terrainShader.getProgramID());
 	glUniformMatrix4fv(glGetUniformLocation(_terrainShader.getProgramID(), "MVP"),

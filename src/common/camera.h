@@ -43,6 +43,7 @@ public:
   inline sf::Vector2f getPointedPos() const {return sf::Vector2f(_x, _y);}
 	inline float getHeight() const {return _height;}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
+	inline glm::mat4 getSkyboxViewProjectionMatrix() const {return _skyboxViewProjection;}
 	inline float getZoom() const {return _r;}
 
 	// To resize the camera
@@ -61,8 +62,8 @@ private:
 
 	void translate (float dWinX, float dWinY);
 	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
-	inline void zoom (float dr) {setZoom(_r + dr);}
-	inline void setZoom (float r) {_r = r < MIN_R ? MIN_R : r;}
+	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r;}
+	inline void setZoom (float r) {_r = r;}
 	inline void setValues (float r, float theta, float phi) {_r = r; _theta = theta; _phi = phi;}
 
   inline void setPointedPos(sf::Vector2f newPos) {_x = newPos.x; _y = newPos.y;}
@@ -84,4 +85,6 @@ private:
   glm::mat4 _projection;
   glm::mat4 _view;
   glm::mat4 _viewProjection;
+	glm::mat4 _skyboxView;
+	glm::mat4 _skyboxViewProjection;
 };

@@ -17,6 +17,7 @@
 #include "contentGenerator.h"
 #include "map.h"
 #include "ocean.h"
+#include "skybox.h"
 #include "terrainGeometry.h"
 
 #include "terrainTexManager.h"
@@ -77,11 +78,13 @@ private:
 
   Map _map;
   Ocean _ocean;
+	Skybox _skybox;
   TerrainGeometry _terrainGeometry;
 
 	TerrainTexManager _terrainTexManager;
 	Shader _terrainShader;
   Shader _igEShader;
+	Shader _skyboxShader;
 
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;
 
