@@ -155,6 +155,8 @@ void EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setZoom(MIN_R);
 
+  _povCamera = false;
+
   if (_game.getTribe().size() == 0) {
     _game.genTribe(cam.getPointedPos());
     _focusedCharacter = _game.getTribe().front();

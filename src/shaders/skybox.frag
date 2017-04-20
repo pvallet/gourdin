@@ -8,5 +8,5 @@ out vec3 color;
 uniform sampler2DArray myTextureSampler;
 
 void main() {
-	vec3 color = texture( myTextureSampler, vec3(texCoord, layer)).rgb;
+	color = texture( myTextureSampler, vec3(texCoord, layer)).rgb;
 }
