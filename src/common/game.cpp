@@ -34,6 +34,10 @@ void Game::init() {
   _igEShader.load();
   _skyboxShader.load();
 
+  glUseProgram(_igEShader.getProgramID());
+  glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
+  glUseProgram(0);
+
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
@@ -188,20 +192,33 @@ void Game::compute2DCorners() {
 
       glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
 
+      // We keep track of the normalization factor to get the absolute z screen value,
+      // in order to remove nearest igElements
+      float w3;
+
       // Compute their projections
       for (size_t i = 0; i < 4; i++) {
         glm::vec4 tmp(corners3[i], 1.f);
         tmp = model * tmp;
         tmp = cam.getViewProjectionMatrix() * tmp;
         corners3[i] = glm::vec3(tmp) / tmp.w;
+        w3 = tmp.w;
       }
 
       std::array<float,12> vertices;
 
-      for (size_t i = 0; i < 4; i++) {
-        vertices[3*i]     = corners3[i].x;
-        vertices[3*i + 1] = corners3[i].y;
-        vertices[3*i + 2] = corners3[i].z;
+      if (corners3[3].z * w3 > ELEMENT_NEAR_PLANE) {
+        for (size_t i = 0; i < 4; i++) {
+          vertices[3*i]     = corners3[i].x;
+          vertices[3*i + 1] = corners3[i].y;
+          vertices[3*i + 2] = corners3[i].z;
+        }
+      }
+
+      else {
+        for (size_t i = 0; i < 12; i++) {
+          vertices[i] = 0;
+        }
       }
 
       ctrl->setProjectedVertices(vertices);
