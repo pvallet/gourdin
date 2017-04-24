@@ -20,16 +20,18 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
       if (_povCamera) {
         cam.setValues(MIN_R, cam.getTheta() + 180, INIT_PHI);
         cam.setAdditionalHeight(0);
+        _interface.setPovCamera(false);
+        _povCamera = false;
       }
-      _povCamera = false;
       break;
 
     case sf::Keyboard::Num2:
       if (!_povCamera) {
         cam.setValues(0.1, cam.getTheta() + 180, 90.f);
         cam.setAdditionalHeight(_focusedCharacter->getSize().y);
+        _interface.setPovCamera(true);
+        _povCamera = true;
       }
-      _povCamera = true;
       break;
 
     case sf::Keyboard::S:
@@ -127,11 +129,27 @@ void EventHandlerGame::onGoingEvents(sf::Time elapsed) {
 
   cam.setPointedPos(_focusedCharacter->getPos());
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-    cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+  if (_povCamera) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+      cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+      cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+      cam.rotate(0.f, ROTATION_ANGLE_PS * elapsed.asSeconds());
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+      cam.rotate(0.f, - ROTATION_ANGLE_PS * elapsed.asSeconds());
+  }
+
+  else {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+      cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+      cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+  }
 
   if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
     sf::Vector2f moveFocused = _focusedCharacter->getPos();
@@ -156,6 +174,7 @@ void EventHandlerGame::gainFocus() {
   cam.setZoom(MIN_R);
 
   _povCamera = false;
+  _interface.setPovCamera(false);
 
   if (_game.getTribe().size() == 0) {
     _game.genTribe(cam.getPointedPos());

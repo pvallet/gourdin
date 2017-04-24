@@ -4,7 +4,7 @@
 Camera::Camera() :
   _fovAngle(45),
 	_aspectRatio(1.f),
-	_nearPlane(30.f),
+	_nearPlane(5.f),
 	_farPlane(100000.f),
   _additionalHeight(0.f),
 	_x(0.f), _y(0.f), _height(0.f),
@@ -61,4 +61,14 @@ void Camera::translate(float dWinX, float dWinY) {
     _x = 0;
   if (_y < 0)
     _y = 0;
+}
+
+void Camera::rotate (float dtheta, float dphi) {
+  _theta += dtheta;
+  _phi += dphi;
+
+  if (_phi < 0)
+    _phi = 0;
+  else if (_phi > 180.f)
+    _phi = 180.f;
 }

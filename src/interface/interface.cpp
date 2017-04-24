@@ -7,6 +7,7 @@
 
 Interface::Interface(sf::RenderWindow& window):
   _displayLog(true),
+  _povCamera(false),
   _rectSelect(sf::Vector2f(0.f, 0.f)),
   _window(window) {}
 
@@ -129,9 +130,12 @@ void Interface::renderInfo(bool inGameMode) const {
   if (inGameMode) {
     text << "M: " << "Switch to Sandbox mode" << std::endl
          << "1: " << "God camera" << std::endl
-         << "2: " << "POV camera" << std::endl
-         << "A-E:  " << "Rotate camera" << std::endl
-         << "ZQSD: " << "Move focused character" << std::endl
+         << "2: " << "POV camera" << std::endl;
+    if (_povCamera)
+    text << "Arrows: " << "Move camera around" << std::endl;
+    else
+    text << "A-E:  " << "Rotate camera" << std::endl;
+    text << "ZQSD: " << "Move focused character" << std::endl
          << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
          << "(The game is optimised for AZERTY keyboards)" << std::endl
          << std::endl

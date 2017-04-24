@@ -61,7 +61,7 @@ private:
 	void apply();
 
 	void translate (float dWinX, float dWinY);
-	inline void rotate (float dtheta, float dphi) {_theta += dtheta; _phi += dphi;}
+	void rotate (float dtheta, float dphi);
 	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r;}
 	inline void setZoom (float r) {_r = r;}
 	inline void setValues (float r, float theta, float phi) {_r = r; _theta = theta; _phi = phi;}

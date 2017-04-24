@@ -11,8 +11,8 @@ Skybox::Skybox() :
       t, t,-t,   t,-t,-t,   t, t, t,   t,-t, t, // XP
       t,-t,-t,  -t,-t,-t,   t,-t, t,  -t,-t, t, // YN
      -t, t,-t,   t, t,-t,  -t, t, t,   t, t, t, // YP
-      t,-t,-t,   t, t,-t,  -t,-t,-t,  -t, t,-t, // ZN
-      t,-t, t,  -t,-t, t,   t, t, t,  -t, t, t  // ZP
+      t,-t,-t,  -t,-t,-t,   t, t,-t,  -t, t,-t, // ZN
+     -t, t, t,   t, t, t,  -t,-t, t,   t,-t, t  // ZP
 	},
   _indices {
      0,  1,  2,  2,  1,  3, // XN

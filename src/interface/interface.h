@@ -20,10 +20,12 @@ public:
   void setRectSelect(sf::IntRect rect);
 
   inline void switchLog() {_displayLog = !_displayLog;}
+  inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
 
 private:
 
   bool _displayLog;
+  bool _povCamera;
   sf::RectangleShape _rectSelect;
   sf::Font _logFont;
   sf::Text _log;
