@@ -122,7 +122,7 @@ bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& current
   }
 
   else if (event.type == sf::Event::MouseMoved) {
-    if (EventHandler::getBeginDragLeft() != sf::Vector2i(0,0)) {
+    if (_beginDragLeft != sf::Vector2i(0,0)) {
       _rectSelect.width  = event.mouseMove.x - _rectSelect.left;
       _rectSelect.height = event.mouseMove.y - _rectSelect.top;
       _interface.setRectSelect(_rectSelect);

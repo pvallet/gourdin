@@ -4,6 +4,10 @@ float vu::norm(const sf::Vector2f& v) {
 	return sqrt(v.x*v.x + v.y*v.y);
 }
 
+float vu::norm(const sf::Vector2i& v) {
+	return sqrt(v.x*v.x + v.y*v.y);
+}
+
 float vu::norm(const sf::Vector3f& v) {
   return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }

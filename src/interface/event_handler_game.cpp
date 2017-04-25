@@ -6,10 +6,12 @@
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define ROTATION_ANGLE_MOUSE 0.1f
 #define TIME_TRANSFER_MS 100
+#define MIN_DIST_TO_DEFINE_DRAG 40
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
-  _povCamera(false) {}
+  _povCamera(false),
+  _draggingCamera(false) {}
 
 void EventHandlerGame::handleKeyPressed(sf::Event event) {
   Camera& cam = Camera::getInstance();
@@ -121,7 +123,7 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
   }
 
   else if (event.type == sf::Event::MouseButtonReleased) {
-    if (EventHandler::getBeginDragLeft() == sf::Vector2i(event.mouseButton.x, event.mouseButton.y)) {
+    if (!_draggingCamera) {
       Human* previous = _focusedCharacter;
       _focusedCharacter = _game.moveCharacter(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
@@ -131,30 +133,41 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
         _previousFocusedPos = previous->getPos();
       }
     }
+
+    _draggingCamera = false;
   }
 
   else if (event.type == sf::Event::MouseMoved) {
-    sf::Vector2i beginDragLeft = EventHandler::getBeginDragLeft();
-
-    if (beginDragLeft != sf::Vector2i(0,0)) {
+    if (_beginDragLeft != sf::Vector2i(0,0)) {
       if (_povCamera) {
-        cam.setTheta(_oldTheta + (event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
-        cam.setPhi(_oldPhi + (event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+        cam.setTheta(_oldTheta + (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
+        cam.setPhi(_oldPhi + (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
       }
 
       else {
-        cam.setTheta(_oldTheta);
+        sf::Vector2i newMousePos = sf::Vector2i(event.mouseMove.x,event.mouseMove.y);
+        if (vu::norm(_beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
+          _draggingCamera = true;
 
-        if (beginDragLeft.x > cam.getW() / 2.f)
-          cam.rotate( (event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
-        else
-          cam.rotate(-(event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+        if (_draggingCamera) {
+          cam.setTheta(_oldTheta);
 
-        if (beginDragLeft.y < cam.getH() / 2.f)
-          cam.rotate( (event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
-        else
-          cam.rotate(-(event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+          // Dragging the camera must be coherent when the mouse goes around the central character
+          // The sense of rotation depends inwhich quarter of the screen the cursor is
+          // If the quarter changes, we reset the origin of the dragging
+          if (_beginDragLeft.x > cam.getW() / 2.f)
+              cam.rotate( (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+          else
+              cam.rotate(-(event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
 
+          if (_beginDragLeft.y < cam.getH() / 2.f)
+              cam.rotate( (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+          else
+              cam.rotate(-(event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+
+          _beginDragLeft = newMousePos;
+          _oldTheta = cam.getTheta();
+        }
       }
     }
   }

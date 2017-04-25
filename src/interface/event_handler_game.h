@@ -22,6 +22,8 @@ private:
   float _oldTheta;
   float _oldPhi;
 
+  bool _draggingCamera;
+
   sf::Clock _transferStart;
   sf::Vector2f _previousFocusedPos;
 

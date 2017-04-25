@@ -10,7 +10,7 @@
 
 #include <cmath>
 
-#define ELEMENT_NEAR_PLANE 10.f
+#define ELEMENT_NEAR_PLANE 20.f
 
 #define RAD M_PI / 180.f
 

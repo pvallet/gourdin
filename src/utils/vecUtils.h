@@ -31,6 +31,7 @@ struct compVec3f {
 };
 
 float norm(const sf::Vector2f& v);
+float norm(const sf::Vector2i& v);
 float norm(const sf::Vector3f& v);
 
 float dot(const sf::Vector2f& u, const sf::Vector2f& v);
