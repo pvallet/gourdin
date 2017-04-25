@@ -9,8 +9,7 @@
 
 EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
-  _addSelect(false),
-  _selecting(false) {}
+  _addSelect(false) {}
 
 void EventHandlerSandbox::handleClick(sf::Event event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
@@ -22,8 +21,6 @@ void EventHandlerSandbox::handleClick(sf::Event event) {
   else {
     // Begin selection
     if (event.mouseButton.button == sf::Mouse::Left) {
-      _selecting = true;
-
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
           _addSelect = true;
       else
@@ -118,7 +115,6 @@ bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& current
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left) {
-      _selecting = false;
       _game.select(_rectSelect, _addSelect);
       _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
       _interface.setRectSelect(_rectSelect);
@@ -126,7 +122,7 @@ bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& current
   }
 
   else if (event.type == sf::Event::MouseMoved) {
-    if (_selecting) {
+    if (EventHandler::getBeginDragLeft() != sf::Vector2i(0,0)) {
       _rectSelect.width  = event.mouseMove.x - _rectSelect.left;
       _rectSelect.height = event.mouseMove.y - _rectSelect.top;
       _interface.setRectSelect(_rectSelect);

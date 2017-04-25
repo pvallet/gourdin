@@ -4,6 +4,7 @@
 #include "vecUtils.h"
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
+#define ROTATION_ANGLE_MOUSE 0.1f
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
@@ -111,9 +112,45 @@ void EventHandlerGame::handleKeyReleased(sf::Event event) {
 }
 
 bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
-  if (event.type == sf::Event::MouseButtonPressed)
-    _focusedCharacter = _game.moveCharacter(
-      sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
+  Camera& cam = Camera::getInstance();
+
+  if (event.type == sf::Event::MouseButtonPressed) {
+    _oldPhi = cam.getPhi();
+    _oldTheta = cam.getTheta();
+  }
+
+  else if (event.type == sf::Event::MouseButtonReleased) {
+    if (EventHandler::getBeginDragLeft() == sf::Vector2i(event.mouseButton.x, event.mouseButton.y)) {
+      _focusedCharacter = _game.moveCharacter(
+        sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
+    }
+  }
+
+  else if (event.type == sf::Event::MouseMoved) {
+    sf::Vector2i beginDragLeft = EventHandler::getBeginDragLeft();
+
+    if (beginDragLeft != sf::Vector2i(0,0)) {
+      if (_povCamera) {
+        cam.setTheta(_oldTheta + (event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
+        cam.setPhi(_oldPhi + (event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+      }
+
+      else {
+        cam.setTheta(_oldTheta);
+
+        if (beginDragLeft.x > cam.getW() / 2.f)
+          cam.rotate( (event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+        else
+          cam.rotate(-(event.mouseMove.y - beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+
+        if (beginDragLeft.y < cam.getH() / 2.f)
+          cam.rotate( (event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+        else
+          cam.rotate(-(event.mouseMove.x - beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+
+      }
+    }
+  }
 
   else if (event.type == sf::Event::KeyPressed)
     handleKeyPressed(event);

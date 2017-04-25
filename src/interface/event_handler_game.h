@@ -19,5 +19,8 @@ private:
 
   bool _povCamera;
 
+  float _oldTheta;
+  float _oldPhi;
+
   Human* _focusedCharacter;
 };

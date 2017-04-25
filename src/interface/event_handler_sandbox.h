@@ -16,7 +16,6 @@ private:
   void handleKeyPressed(sf::Event event);
 
   bool _addSelect;
-  bool _selecting;
 
   sf::IntRect _rectSelect;
 };

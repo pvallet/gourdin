@@ -31,5 +31,15 @@ bool EventHandler::handleEvent(sf::Event event, EventHandlerType& currentHandler
     }
   }
 
+  else if (event.type == sf::Event::MouseButtonPressed) {
+    if (event.mouseButton.button == sf::Mouse::Left)
+      _beginDragLeft = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+  }
+
+  else if (event.type == sf::Event::MouseButtonReleased) {
+    if (event.mouseButton.button == sf::Mouse::Left)
+      _beginDragLeft = sf::Vector2i(0,0);
+  }
+
   return running;
 }

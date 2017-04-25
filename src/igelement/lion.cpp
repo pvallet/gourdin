@@ -88,6 +88,8 @@ void Lion::setTarget(sf::Vector2f t) {
 	Controllable::setTarget(t);
 	if (_status == WAITING) {
 		beginWalking();
+	} else if (_status = RUNNING) {
+		launchAnimation(RUN);
 	}
 }
 

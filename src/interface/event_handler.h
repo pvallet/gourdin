@@ -17,7 +17,12 @@ public:
 
   virtual void gainFocus() = 0;
 
+  inline sf::Vector2i getBeginDragLeft() const {return _beginDragLeft;}
+
 protected:
   Game& _game;
   Interface& _interface;
+
+private:
+  sf::Vector2i _beginDragLeft;
 };
