@@ -140,7 +140,8 @@ void Interface::renderInfo(bool inGameMode) const {
          << "(The game is optimised for AZERTY keyboards)" << std::endl
          << std::endl
          << "Click to move the character in the center" << std::endl
-         << "Click on another character to change the focus" << std::endl;
+         << "Click on another character to change the focus" << std::endl
+         << "Click and drag to rotate the camera" << std::endl;
   }
 
   else {

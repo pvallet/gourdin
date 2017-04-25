@@ -22,5 +22,8 @@ private:
   float _oldTheta;
   float _oldPhi;
 
+  sf::Clock _transferStart;
+  sf::Vector2f _previousFocusedPos;
+
   Human* _focusedCharacter;
 };

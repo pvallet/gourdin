@@ -5,6 +5,7 @@
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define ROTATION_ANGLE_MOUSE 0.1f
+#define TIME_TRANSFER_MS 100
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
@@ -121,8 +122,14 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (EventHandler::getBeginDragLeft() == sf::Vector2i(event.mouseButton.x, event.mouseButton.y)) {
+      Human* previous = _focusedCharacter;
       _focusedCharacter = _game.moveCharacter(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
+
+      if (previous != _focusedCharacter) {
+        _transferStart.restart();
+        _previousFocusedPos = previous->getPos();
+      }
     }
   }
 
@@ -164,7 +171,13 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
 void EventHandlerGame::onGoingEvents(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
 
-  cam.setPointedPos(_focusedCharacter->getPos());
+  float transferProgress = _transferStart.getElapsedTime().asMilliseconds() / (float) TIME_TRANSFER_MS;
+
+  if (transferProgress > 1)
+    cam.setPointedPos(_focusedCharacter->getPos());
+  else
+    cam.setPointedPos(_previousFocusedPos + transferProgress *
+      (_focusedCharacter->getPos() - _previousFocusedPos));
 
   if (_povCamera) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
