@@ -8,7 +8,7 @@
 
 // The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.f
-#define HEIGHT_FACTOR 1000.f
+#define HEIGHT_FACTOR 0.f
 
 bool Map::boolAttrib(std::string str) const {
 	if (str == std::string("true"))

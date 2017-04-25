@@ -22,6 +22,7 @@
 
 #include "terrainTexManager.h"
 
+#include "perlin.h"
 #include "shader.h"
 #include "utils.h"
 
@@ -80,6 +81,7 @@ private:
   Ocean _ocean;
 	Skybox _skybox;
   TerrainGeometry _terrainGeometry;
+	Perlin _reliefGenerator;
 
 	TerrainTexManager _terrainTexManager;
 	Shader _terrainShader;

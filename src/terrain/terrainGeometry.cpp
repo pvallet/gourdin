@@ -9,6 +9,9 @@
 // Subdivision of the chunks to store the triangles
 #define GRID_SUBDIV 8
 
+#define PERLIN_OVER_GLOBAL_RATIO 0.5f
+#define PERLIN_HEIGHT_FACTOR 100.f
+
 struct compTriClockwiseOrder {
   compTriClockwiseOrder(sf::Vector3f basePoint) {_basePoint = basePoint;}
 
@@ -140,12 +143,17 @@ void Vertex::addAdjacentTriangle(const Triangle* tri) {
   _sorted = false;
 }
 
-TerrainGeometry::SubdivisionLevel::SubdivisionLevel() {
+TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const Perlin& reliefGenerator) :
+  _reliefGenerator(reliefGenerator) {
   std::vector<std::list<const Triangle*> > initializer(GRID_SUBDIV*GRID_SUBDIV);
   _trianglesInSubChunk.resize(NB_CHUNKS*NB_CHUNKS, initializer);
 }
 
 void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<sf::Vector3f,3> p, Biome biome) {
+  for (size_t i = 0; i < 3; i++) {
+    p[i].z += (1-PERLIN_OVER_GLOBAL_RATIO) * p[i].z + PERLIN_OVER_GLOBAL_RATIO *
+     PERLIN_HEIGHT_FACTOR * _reliefGenerator.getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
+  }
 
   // Add the triangle to the list of all triangles
   Triangle newTriangle;
@@ -422,12 +430,22 @@ Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
   return BIOME_NB_ITEMS;
 }
 
-TerrainGeometry::TerrainGeometry() :
+std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() const {
+  std::list<const Triangle*> triangles;
+  for (auto t = _triangles.begin(); t != _triangles.end(); t++) {
+    triangles.push_back(&(*t));
+  }
+
+  return triangles;
+}
+
+TerrainGeometry::TerrainGeometry(const Perlin& reliefGenerator) :
   _chunkSubdivLvl(NB_CHUNKS*NB_CHUNKS, 0),
-  _currentGlobalSubdivLvl(0) {
+  _currentGlobalSubdivLvl(0),
+  _reliefGenerator(reliefGenerator) {
 
   for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
-    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel()));
+    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(_reliefGenerator)));
   }
 }
 
@@ -436,12 +454,9 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
     SubdivisionLevel* currentLvl = _subdivisionLevels[_currentGlobalSubdivLvl].get();
     SubdivisionLevel* nextLvl    = _subdivisionLevels[_currentGlobalSubdivLvl+1].get();
 
-    std::list<const Triangle*> currentTriangles;
-    for (auto t = currentLvl->_triangles.begin(); t != currentLvl->_triangles.end(); t++) {
-      currentTriangles.push_back(&(*t));
-    }
+    std::list<const Triangle*> currentTriangles = currentLvl->getTriangles();
 
-    nextLvl->goingToAddNPoints(currentLvl->_vertices.size() * 2);
+    nextLvl->goingToAddNPoints(currentTriangles.size() * 2);
     nextLvl->subdivideTriangles(currentTriangles);
     nextLvl->computeNormals();
 

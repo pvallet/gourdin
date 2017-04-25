@@ -11,13 +11,17 @@
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 16
 
+#define RELIEF_RES 512
+
 Game::Game() :
   _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
   _contentGenerator(_terrainGeometry),
-  _ocean(2) {}
+  _ocean(2),
+  _terrainGeometry(_reliefGenerator),
+  _reliefGenerator(0, RELIEF_RES) {}
 
 void Game::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -37,6 +41,8 @@ void Game::init() {
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
   glUseProgram(0);
+
+  _reliefGenerator.setParams(3, 0.06, 0.75);
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");

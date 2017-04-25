@@ -14,7 +14,12 @@ public:
     _octaves = octaves; _frequency = frequency; _persistence = persistence;
   }
 
+  // x and y are between 0 and _size-1
   float getValue(float x, float y) const;
+
+  // x and y are between 0 and 1
+  inline float getValueNormalizedCoord(float x, float y) const {
+    return getValue(x >= 1 ? _size-1 : x*_size, y >= 1 ? _size-1 : y*_size);}
 
   static float cubic_interpolate(float before_p0, float p0, float p1, float after_p1, float t);
 
