@@ -9,8 +9,8 @@
 // Subdivision of the chunks to store the triangles
 #define GRID_SUBDIV 8
 
-#define PERLIN_OVER_GLOBAL_RATIO 0.5f
-#define PERLIN_HEIGHT_FACTOR 100.f
+#define PERLIN_OVER_GLOBAL_RATIO 1.f
+#define PERLIN_HEIGHT_FACTOR 3000.f
 
 struct compTriClockwiseOrder {
   compTriClockwiseOrder(sf::Vector3f basePoint) {_basePoint = basePoint;}
@@ -151,7 +151,7 @@ TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const Perlin& reliefGenerato
 
 void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<sf::Vector3f,3> p, Biome biome) {
   for (size_t i = 0; i < 3; i++) {
-    p[i].z += (1-PERLIN_OVER_GLOBAL_RATIO) * p[i].z + PERLIN_OVER_GLOBAL_RATIO *
+    p[i].z = (1-PERLIN_OVER_GLOBAL_RATIO) * p[i].z + PERLIN_OVER_GLOBAL_RATIO *
      PERLIN_HEIGHT_FACTOR * _reliefGenerator.getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
   }
 
