@@ -93,6 +93,8 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
       }
     }
 
+    _previousFocusedPos = _focusedCharacter->getPos();
+    _transferStart.restart();
     _focusedCharacter = closestHuman;
   }
 }
@@ -142,6 +144,7 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
       if (_povCamera) {
         cam.setTheta(_oldTheta + (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
         cam.setPhi(_oldPhi + (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+        _draggingCamera = true;
       }
 
       else {
