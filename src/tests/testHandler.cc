@@ -1,13 +1,19 @@
 #include "testHandler.hpp"
 
-TestHandler::TestHandler(const Controller& controller) :
-  _controller(controller),
-  _game(controller.getGame()) {}
+#include <cstdio>
 
-void TestHandler::runTests() {
-  _game._reliefGenerator.saveToImage("256.png", 256);
-  _game._reliefGenerator.saveToImage("512.png", 512);
-  _game._reliefGenerator.saveToImage("1024.png", 1024);
+void TestHandler::runTests(const Controller& controller) {
+  const Game& game = controller.getGame();
+  game._reliefGenerator.saveToImage("256.png", 256);
+  game._reliefGenerator.saveToImage("512.png", 512);
+  game._reliefGenerator.saveToImage("1024.png", 1024);
 
-  _game._contentGenerator.saveToImage("contents.png");
+  game._contentGenerator.saveToImage("contents.png");
+}
+
+void TestHandler::clean() {
+  remove("256.png");
+  remove("512.png");
+  remove("1024.png");
+  remove("contents.png");
 }

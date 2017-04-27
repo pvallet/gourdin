@@ -4,11 +4,10 @@
 
 class TestHandler {
 public:
-  TestHandler (const Controller& controller);
+  TestHandler () {}
 
-  void runTests();
+  void runTests(const Controller& controller);
+  void clean();
 
 private:
-  const Controller& _controller;
-  const Game& _game;
 };

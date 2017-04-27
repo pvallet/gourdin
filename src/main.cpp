@@ -2,13 +2,34 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include <cstring>
+
 #include "controller.h"
 
 #ifndef NDEBUG
   #include "testHandler.hpp"
 #endif
 
-int main() {
+int main(int argc, char* argv[]) {
+
+#ifndef NDEBUG
+  bool onlyTests = false;
+  TestHandler testHandler;
+
+  if (argc > 1) {
+    if (strcmp(argv[1],"clean") == 0) {
+      testHandler.clean();
+      return 0;
+    }
+    else if (strcmp(argv[1],"tests_only") == 0)
+      onlyTests = true;
+    else {
+      std::cout << "Unkown option, try 'clean' or 'tests_only'" << '\n';
+      return 0;
+    }
+  }
+#endif
+
   sf::ContextSettings context(24, 8, 4, 3, 0);
 
 #ifndef NDEBUG
@@ -35,8 +56,10 @@ int main() {
   controller.init();
 
 #ifndef NDEBUG
-  TestHandler testHandler(controller);
-  testHandler.runTests();
+  testHandler.runTests(controller);
+
+  if (onlyTests)
+    return 0;
 #endif
 
   controller.run();
