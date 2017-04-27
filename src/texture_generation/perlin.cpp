@@ -1,7 +1,5 @@
 #include "perlin.h"
 
-#include <SFML/Graphics.hpp>
-
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
@@ -85,24 +83,4 @@ float Perlin::getValue(float x, float y) const {
   float geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.f
 
   return r * geo_lim;
-}
-
-void Perlin::saveToImage(std::string savename, size_t size) const {
-  std::vector<sf::Uint8> pixels(size * size * 4, 255);
-
-	for (int i = 0 ; i < size ; i++) { // Convert mask to array of pixels
-		for (int j = 0 ; j < size ; j++) {
-      // float value = getValueNormalizedCoord(i/(float)size, j/(float)size);
-      float value = getValue(i, j);
-      pixels[i*4*size + j*4] = value*255;
-      pixels[i*4*size + j*4 + 1] = value*255;
-      pixels[i*4*size + j*4 + 2] = value*255;
-		}
-	}
-
-	sf::Texture texture;
-	texture.create(size, size);
-	texture.update(&pixels[0]);
-
-	texture.copyToImage().saveToFile(savename);
 }

@@ -39,25 +39,6 @@ void ContentGenerator::init() {
 	}
 }
 
-void ContentGenerator::saveToImage(std::string savename) const {
-  std::vector<sf::Uint8> pixels(CONTENT_RES * CONTENT_RES * 4, 255);
-
-	for (int i = 0 ; i < CONTENT_RES ; i++) { // Convert mask to array of pixels
-		for (int j = 0 ; j < CONTENT_RES ; j++) {
-      if (_forestsMask[i][j]) {
-        pixels[i*4*CONTENT_RES + j*4] = 0;
-        pixels[i*4*CONTENT_RES + j*4 + 2] = 0;
-      }
-		}
-	}
-
-	sf::Texture texture;
-	texture.create(CONTENT_RES, CONTENT_RES);
-	texture.update(&pixels[0]);
-
-	texture.copyToImage().saveToFile(savename);
-}
-
 bool ContentGenerator::isInForestMask(sf::Vector2f pos) const {
   return _forestsMask[(int) (pos.x / MAX_COORD * CONTENT_RES)]
                      [(int) (pos.y / MAX_COORD * CONTENT_RES)];

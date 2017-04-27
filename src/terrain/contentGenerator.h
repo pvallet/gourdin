@@ -29,6 +29,7 @@ public:
   std::vector<igMovingElement*> genTribe(sf::Vector2f pos) const;
   std::vector<igMovingElement*> genLion(sf::Vector2f pos) const;
 
+  const std::vector<std::vector<bool> >& getForestsMask() const {return _forestsMask;}
 
 private:
   bool isInForestMask(sf::Vector2f pos) const;

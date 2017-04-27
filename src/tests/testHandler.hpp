@@ -10,4 +10,9 @@ public:
   void clean();
 
 private:
+  // The texture must be square of size x, pixels must be of size 4*x*x (rgba)
+  void saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename);
+
+  void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename);
+  void PerlinSaveToImage(const Perlin& perlin, std::string savename, size_t size);
 };
