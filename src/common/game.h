@@ -28,7 +28,12 @@
 
 enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 
+class TestHandler;
+
 class Game {
+
+	friend TestHandler;
+
 public:
 	Game();
 

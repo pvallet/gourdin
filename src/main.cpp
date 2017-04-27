@@ -4,11 +4,18 @@
 
 #include "controller.h"
 
+#ifndef NDEBUG
+  #include "testHandler.hpp"
+#endif
+
 int main() {
   sf::ContextSettings context(24, 8, 4, 3, 0);
 
-  // sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+#ifndef NDEBUG
   sf::RenderWindow window(sf::VideoMode(1366, 768), "OpenGL", sf::Style::Default, context);
+#else
+  sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+#endif
 
   window.setVerticalSyncEnabled(true);
   window.setKeyRepeatEnabled(false);
@@ -26,6 +33,11 @@ int main() {
   Controller controller(window);
 
   controller.init();
+
+#ifndef NDEBUG
+  TestHandler testHandler(controller);
+  testHandler.runTests();
+#endif
 
   controller.run();
 

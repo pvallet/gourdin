@@ -1,7 +1,6 @@
 #include "contentGenerator.h"
 
 #include <cstdlib>
-#include <sstream>
 
 #include "antilope.h"
 #include "human.h"
@@ -12,7 +11,7 @@
 
 ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
   _terrainGeometry(terrainGeometry),
-  _perlinGenerator(0, CONTENT_RES),
+  _perlinGenerator(0),
   _treesInChunk(NB_CHUNKS * NB_CHUNKS) {
 
   _perlinGenerator.setParams(3, 0.06, 0.75);
@@ -56,10 +55,7 @@ void ContentGenerator::saveToImage(std::string savename) const {
 	texture.create(CONTENT_RES, CONTENT_RES);
 	texture.update(&pixels[0]);
 
-  std::ostringstream convert;
-  convert << savename << ".png";
-
-	texture.copyToImage().saveToFile(convert.str());
+	texture.copyToImage().saveToFile(savename);
 }
 
 bool ContentGenerator::isInForestMask(sf::Vector2f pos) const {

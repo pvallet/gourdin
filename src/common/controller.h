@@ -18,6 +18,8 @@ public:
 	void init();
 	void run();
 
+	const Game& getGame() const {return _game;}
+
 private:
 	void render() const;
 

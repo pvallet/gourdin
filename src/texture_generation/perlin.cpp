@@ -1,11 +1,15 @@
 #include "perlin.h"
 
+#include <SFML/Graphics.hpp>
+
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
 
-Perlin::Perlin(int seed, int size) :
-  _size(size),
+#define DEFAULT_SIZE 256
+
+Perlin::Perlin(int seed) :
+  _size(DEFAULT_SIZE),
   _octaves(5),
   _frequency(0.01),
   _persistence(0.5) {
@@ -51,7 +55,7 @@ float Perlin::smooth_noise_firstdim(int integer_x, int integer_y, float fraction
   return cubic_interpolate(v0, v1, v2, v3, fractional_x);
 }
 
-// Interpolation of the y
+// Interpolation of y
 float Perlin::smooth_noise(float x, float y, int octave) const {
   int integer_x = (int)x;
   float fractional_x = x - integer_x;
@@ -81,4 +85,24 @@ float Perlin::getValue(float x, float y) const {
   float geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.f
 
   return r * geo_lim;
+}
+
+void Perlin::saveToImage(std::string savename, size_t size) const {
+  std::vector<sf::Uint8> pixels(size * size * 4, 255);
+
+	for (int i = 0 ; i < size ; i++) { // Convert mask to array of pixels
+		for (int j = 0 ; j < size ; j++) {
+      // float value = getValueNormalizedCoord(i/(float)size, j/(float)size);
+      float value = getValue(i, j);
+      pixels[i*4*size + j*4] = value*255;
+      pixels[i*4*size + j*4 + 1] = value*255;
+      pixels[i*4*size + j*4 + 2] = value*255;
+		}
+	}
+
+	sf::Texture texture;
+	texture.create(size, size);
+	texture.update(&pixels[0]);
+
+	texture.copyToImage().saveToFile(savename);
 }

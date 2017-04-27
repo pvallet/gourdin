@@ -11,8 +11,6 @@
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 16
 
-#define RELIEF_RES 512
-
 Game::Game() :
   _wireframe(false),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
@@ -21,7 +19,7 @@ Game::Game() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _terrainGeometry(_reliefGenerator),
-  _reliefGenerator(0, RELIEF_RES) {}
+  _reliefGenerator(0) {}
 
 void Game::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -61,7 +59,6 @@ void Game::init() {
 
   _igElementDisplay.init();
   _contentGenerator.init();
-  // _contentGenerator.saveToImage("contents");
 
   resetCamera();
 
