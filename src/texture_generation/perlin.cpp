@@ -4,31 +4,21 @@
 #include <cmath>
 #include <iostream>
 
-#define DEFAULT_SIZE 256
-
-Perlin::Perlin(int seed) :
-  _size(DEFAULT_SIZE),
-  _octaves(5),
-  _frequency(0.01),
-  _persistence(0.5) {
-
-  _frequency *= (float) 256 / (float) (_size - 1);
+Perlin::Perlin(size_t octaves, float frequency, float persistence, size_t size, int seed) :
+  _size(size),
+  _octaves(octaves),
+  _frequency(frequency),
+  _persistence(persistence) {
 
   srand(seed);
 
-  _size = _size * _frequency * pow(2, _octaves) + 3; // Add an extra border for interpolation
+  _sizeRandArray = _size * _frequency * pow(2, _octaves-1) + 4; // Add an extra border for interpolation
 
   // We create a different array of random values, thus a different space for each octave
-  std::vector<float> init(_size*_size);
+  std::vector<float> init(_sizeRandArray*_sizeRandArray);
   _randValues.resize(_octaves,init);
 
-  for (size_t i = 0 ; i < _size ; i++) {
-    for (size_t j = 0 ; j < _size ; j++) {
-      for (size_t k = 0 ; k < _octaves ; k++) {
-        _randValues[k][_size*i + j] = (float) rand() / (float) RAND_MAX;
-      }
-    }
-  }
+  shuffle();
 }
 
 float Perlin::cubic_interpolate(float before_p0, float p0, float p1, float after_p1, float t) {
@@ -45,10 +35,10 @@ float Perlin::smooth_noise_firstdim(int integer_x, int integer_y, float fraction
   integer_x++; // Avoid requests for negative x & y
   integer_y++;
 
-  float v0 = _randValues[octave][(integer_x - 1)*_size + integer_y];
-  float v1 = _randValues[octave][(integer_x    )*_size + integer_y];
-  float v2 = _randValues[octave][(integer_x + 1)*_size + integer_y];
-  float v3 = _randValues[octave][(integer_x + 2)*_size + integer_y];
+  float v0 = _randValues[octave][(integer_x - 1)*_sizeRandArray + integer_y];
+  float v1 = _randValues[octave][(integer_x    )*_sizeRandArray + integer_y];
+  float v2 = _randValues[octave][(integer_x + 1)*_sizeRandArray + integer_y];
+  float v3 = _randValues[octave][(integer_x + 2)*_sizeRandArray + integer_y];
 
   return cubic_interpolate(v0, v1, v2, v3, fractional_x);
 }
@@ -80,7 +70,24 @@ float Perlin::getValue(float x, float y) const {
     f *= 2;
   }
 
-  float geo_lim = (1 - _persistence) / (1 - amplitude); // To keep the result < 1.f
+  // normalization by the sum of max amplitudes (geometric sum)
+  float geo_lim = (1 - _persistence) / (1 - amplitude*_persistence);
 
-  return r * geo_lim;
+  float res = r*geo_lim;
+
+  // Cubic interpolation can cause results to be out of range
+  if (res > 1)
+    res = 1;
+  else if (res < 0)
+    res = 0;
+
+  return res;
+}
+
+void Perlin::shuffle() {
+  for (size_t i = 0; i < _octaves; i++) {
+    for (size_t j = 0; j < _sizeRandArray*_sizeRandArray; j++) {
+      _randValues[i][j] = (float) rand() / (float) RAND_MAX;
+    }
+  }
 }

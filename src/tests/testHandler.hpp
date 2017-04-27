@@ -14,5 +14,5 @@ private:
   void saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename);
 
   void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename);
-  void PerlinSaveToImage(const Perlin& perlin, std::string savename, size_t size);
+  void PerlinSaveToImage(const Perlin& perlin, std::string savename);
 };

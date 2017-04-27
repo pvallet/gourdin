@@ -40,7 +40,8 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
   saveToImage(pixels, savename);
 }
 
-void TestHandler::PerlinSaveToImage(const Perlin& perlin, std::string savename, size_t size) {
+void TestHandler::PerlinSaveToImage(const Perlin& perlin, std::string savename) {
+  size_t size = perlin.getSize();
   std::vector<sf::Uint8> pixels(size * size * 4, 255);
 
 	for (int i = 0 ; i < size ; i++) { // Convert mask to array of pixels
@@ -57,9 +58,17 @@ void TestHandler::PerlinSaveToImage(const Perlin& perlin, std::string savename, 
 
 void TestHandler::runTests(const Controller& controller) {
   const Game& game = controller.getGame();
-  PerlinSaveToImage(game._reliefGenerator, "256.png", 256);
-  PerlinSaveToImage(game._reliefGenerator, "512.png", 512);
-  PerlinSaveToImage(game._reliefGenerator, "1024.png", 1024);
+
+  PerlinSaveToImage(game._reliefGenerator, "relief.png");
+
+  Perlin perlin(3, 0.06, 0.1, 512);
+
+  for (size_t i = 0; i < 1; i++) {
+    std::ostringstream convert;
+    convert << i << ".png";
+    perlin.shuffle();
+    PerlinSaveToImage(perlin, convert.str());
+  }
 
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 }

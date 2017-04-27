@@ -19,7 +19,7 @@ Game::Game() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _terrainGeometry(_reliefGenerator),
-  _reliefGenerator(0) {}
+  _reliefGenerator(3, 0.06, 0.75) {}
 
 void Game::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -39,8 +39,6 @@ void Game::init() {
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
   glUseProgram(0);
-
-  _reliefGenerator.setParams(3, 0.06, 0.75);
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");

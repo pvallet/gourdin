@@ -11,10 +11,8 @@
 
 ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
   _terrainGeometry(terrainGeometry),
-  _perlinGenerator(0),
+  _perlinGenerator(3, 0.06, 0.75, CONTENT_RES),
   _treesInChunk(NB_CHUNKS * NB_CHUNKS) {
-
-  _perlinGenerator.setParams(3, 0.06, 0.75);
 
   std::vector<bool> initForestsMask(CONTENT_RES,false);
   _forestsMask = std::vector<std::vector<bool> >(CONTENT_RES, initForestsMask);
