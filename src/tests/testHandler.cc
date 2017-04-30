@@ -75,7 +75,9 @@ void TestHandler::runTests(const Controller& controller) {
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
   ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
-  saveToImage(reliefMaskGenerator.generateMask(512).getPixels(), "Relief_mask.png");
+  reliefMaskGenerator.generateMask(512);
+  reliefMaskGenerator.smoothDilatation(50);
+  saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
 }
 
 void TestHandler::clean() {

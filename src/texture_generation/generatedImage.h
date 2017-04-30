@@ -8,6 +8,8 @@ class GeneratedImage {
 public:
   GeneratedImage(std::vector<float> blackNwhitePixels);
 
+  void invert();
+
   inline std::vector<sf::Uint8> getPixels() const {return _pixels;}
 
 private:

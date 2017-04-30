@@ -14,3 +14,11 @@ GeneratedImage::GeneratedImage(std::vector<float> blackNwhitePixels) {
     _pixels[4*i+3] = 255;
   }
 }
+
+void GeneratedImage::invert() {
+  for (size_t i = 0; i < _size*_size; i++) {
+    for (size_t j = 0; j < 3; j++) {
+      _pixels[4*i+j] = 255 - _pixels[4*i+j];
+    }
+  }
+}
