@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <fstream>
 
+#include "reliefMaskGenerator.h"
+
 #define DELETE_LIST_NAME "to_delete"
 
 void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) {
@@ -71,6 +73,9 @@ void TestHandler::runTests(const Controller& controller) {
   }
 
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
+
+  ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
+  saveToImage(reliefMaskGenerator.generateMask(512).getPixels(), "Relief_mask.png");
 }
 
 void TestHandler::clean() {

@@ -427,7 +427,7 @@ Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
     }
   }
 
-  return BIOME_NB_ITEMS;
+  return OCEAN;
 }
 
 std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() const {
