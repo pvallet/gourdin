@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "perlin.h"
+#include "generatedImage.h"
 
 #define MAX_SUBDIV_LVL 4
 
@@ -76,7 +76,7 @@ public:
   // Class to handle a single subdivision level
   class SubdivisionLevel {
   public:
-    SubdivisionLevel (const Perlin& reliefGenerator);
+    SubdivisionLevel (const GeneratedImage& reliefGenerator);
 
     // Init methods
     inline void goingToAddNPoints(size_t n) {_vertices.reserve(n);}
@@ -111,15 +111,18 @@ public:
     // Each triangle can belong to several subchunks
     std::vector<std::vector<std::list<const Triangle*> > > _trianglesInSubChunk;
 
-    const Perlin& _reliefGenerator;
+    const GeneratedImage& _reliefGenerator;
   };
 
-  TerrainGeometry (const Perlin& reliefGenerator);
+  TerrainGeometry ();
+  inline void setReliefGenerator(GeneratedImage reliefGenerator) {_reliefGenerator = reliefGenerator;}
+
+  void generateNewSubdivisionLevel();
+
+  inline const GeneratedImage& getReliefGenerator() const {return _reliefGenerator;}
 
   // For initialization
   inline SubdivisionLevel* getFirstSubdivLevel() {return _subdivisionLevels[0].get();}
-
-  void generateNewSubdivisionLevel();
 
   inline bool isOcean(size_t x, size_t y) const {
     return _subdivisionLevels[0]->isOcean(x,y);}
@@ -139,5 +142,5 @@ private:
 
   size_t _currentGlobalSubdivLvl;
 
-  const Perlin& _reliefGenerator;
+  GeneratedImage _reliefGenerator;
 };

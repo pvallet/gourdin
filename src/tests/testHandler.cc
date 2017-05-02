@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <fstream>
 
+#include "generatedImage.h"
 #include "reliefMaskGenerator.h"
 
 #define DELETE_LIST_NAME "to_delete"
@@ -92,8 +93,6 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 }
 
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
-  saveToImage(game._reliefGenerator.getPixels(), "relief.png");
-
   Perlin perlin(3, 0.06, 0.1, 512);
 
   for (size_t i = 0; i < 1; i++) {
@@ -111,8 +110,9 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   // sf::Clock dilatationTime;
   // reliefMaskGenerator.smoothDilatation(50);
   // std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
-  //
-  // saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
+  // saveToImage(reliefMaskGenerator.getPixels(), "Relief_mask.png");
+
+  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_generator.png");
 }
 
 void TestHandler::testImageHandling() const {
@@ -140,7 +140,7 @@ void TestHandler::testImageHandling() const {
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
   displayGameGeneratedComponents(controller.getGame());
-  testImageHandling();
+  // testImageHandling();
 }
 
 void TestHandler::clean() const {

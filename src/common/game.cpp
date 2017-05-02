@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.h"
+#include "perlin.h"
+#include "reliefMaskGenerator.h"
 
 #include <ctime>
 
@@ -15,8 +17,6 @@ Game::Game() :
   _wireframe(false),
   _contentGenerator(_terrainGeometry),
   _ocean(2),
-  _terrainGeometry(_reliefGenerator),
-  _reliefGenerator(3, 0.06, 0.75),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
@@ -43,6 +43,15 @@ void Game::init() {
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
+
+  Perlin perlinRelief(3, 0.06, 0.75, 512);
+  GeneratedImage reliefGenerator(perlinRelief.getPixels());
+  ReliefMaskGenerator reliefMaskGenerator(_terrainGeometry);
+  reliefMaskGenerator.generateMask(512);
+  reliefMaskGenerator.smoothDilatation(50);
+
+  reliefGenerator.multiply(reliefMaskGenerator.getPixels());
+  _terrainGeometry.setReliefGenerator(reliefGenerator);
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
   _skybox.load("res/skybox/");

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "generatedImage.h"
 #include "terrainGeometry.h"
 
 class ReliefMaskGenerator {
@@ -11,7 +10,7 @@ public:
   // Morphologic dilatation of the black regions, with grayness depending on the distance to the black region
   void smoothDilatation(float radius);
 
-  GeneratedImage getMask() const {return GeneratedImage(_islandMask);}
+  const std::vector<float>& getPixels() const {return _islandMask;}
 
 private:
   const TerrainGeometry& _terrainGeometry;

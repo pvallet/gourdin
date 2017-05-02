@@ -5,6 +5,9 @@
 
 #include "utils.h"
 
+GeneratedImage::GeneratedImage() :
+  _size(0) {}
+
 GeneratedImage::GeneratedImage(std::vector<float> pixels) {
   _size = sqrt(pixels.size());
 
@@ -19,7 +22,7 @@ void GeneratedImage::invert() {
   }
 }
 
-void GeneratedImage::applyConvolutionFilter(std::vector<float> filter) {
+void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   int filterSize = sqrt(filter.size());
 
   assert(filterSize % 2 == 1);
@@ -36,11 +39,12 @@ void GeneratedImage::applyConvolutionFilter(std::vector<float> filter) {
 
       if (curI < 0)
         curI += _size;
+      else if (curI >= _size)
+        curI -= _size;
+
       if (curJ < 0)
         curJ += _size;
-      if (curI >= _size)
-        curI -= _size;
-      if (curJ >= _size)
+      else if (curJ >= _size)
         curJ -= _size;
 
       nPixels[i*_size + j] += _pixels[curI*_size + curJ] * filter[k*filterSize + l];
@@ -50,6 +54,14 @@ void GeneratedImage::applyConvolutionFilter(std::vector<float> filter) {
   }
 
   _pixels = nPixels;
+}
+
+void GeneratedImage::multiply(const std::vector<float>& img) {
+  assert(img.size() == _pixels.size());
+
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] *= img[i];
+  }
 }
 
 std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {
@@ -94,4 +106,21 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   }
 
   return filter;
+}
+
+float GeneratedImage::getValueNormalizedCoord(float x, float y) const {
+  int intX = x * _size;
+  int intY = y * _size;
+
+  if (intX < 0)
+    intX = 0;
+  else if (intX >= _size)
+    intX = _size-1;
+
+  if (intY < 0)
+    intY = 0;
+  else if (intY >= _size)
+    intY = _size-1;
+
+  return _pixels[intX*_size + intY];
 }

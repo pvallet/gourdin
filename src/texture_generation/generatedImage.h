@@ -6,13 +6,16 @@
 // Handles a square black and white image
 class GeneratedImage {
 public:
+  GeneratedImage();
   GeneratedImage(std::vector<float> pixels);
 
   void invert();
   // For the edges, wraps the image around
-  void applyConvolutionFilter(std::vector<float> filter);
+  void applyConvolutionFilter(const std::vector<float>& filter);
+  void multiply(const std::vector<float>& img);
 
-  inline std::vector<float> getPixels() const {return _pixels;}
+  inline const std::vector<float>& getPixels() const {return _pixels;}
+  float getValueNormalizedCoord(float x, float y) const;
 
   // If the filter size is even, the generator makes it odd
   static std::vector<float> generateBoxFilter(size_t size);

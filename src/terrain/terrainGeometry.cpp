@@ -10,7 +10,7 @@
 #define GRID_SUBDIV 8
 
 #define PERLIN_OVER_GLOBAL_RATIO 1.f
-#define PERLIN_HEIGHT_FACTOR 3000.f
+#define PERLIN_HEIGHT_FACTOR 1000.f
 
 struct compTriClockwiseOrder {
   compTriClockwiseOrder(sf::Vector3f basePoint) {_basePoint = basePoint;}
@@ -143,7 +143,7 @@ void Vertex::addAdjacentTriangle(const Triangle* tri) {
   _sorted = false;
 }
 
-TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const Perlin& reliefGenerator) :
+TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const GeneratedImage& reliefGenerator) :
   _reliefGenerator(reliefGenerator) {
   std::vector<std::list<const Triangle*> > initializer(GRID_SUBDIV*GRID_SUBDIV);
   _trianglesInSubChunk.resize(NB_CHUNKS*NB_CHUNKS, initializer);
@@ -439,10 +439,10 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() con
   return triangles;
 }
 
-TerrainGeometry::TerrainGeometry(const Perlin& reliefGenerator) :
+TerrainGeometry::TerrainGeometry() :
   _chunkSubdivLvl(NB_CHUNKS*NB_CHUNKS, 0),
   _currentGlobalSubdivLvl(0),
-  _reliefGenerator(reliefGenerator) {
+  _reliefGenerator(std::vector<float>(1,0)) { // before giving the right relief generator, none is given
 
   for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
     _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(_reliefGenerator)));
