@@ -33,9 +33,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 			std::ostringstream convert;
 			convert << folderPath << i << ".png";
 
-			if (!img[i].loadFromFile(convert.str())) {
-				std::cerr << "Unable to open file " << std::endl;
-			}
+			img[i].loadFromFile(convert.str());
 
 			texSizes[i] = sf::Vector2f(img[i].getSize().x, img[i].getSize().y);
 

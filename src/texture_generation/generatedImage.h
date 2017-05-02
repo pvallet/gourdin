@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 // Handles a square black and white image
@@ -8,6 +9,11 @@ class GeneratedImage {
 public:
   GeneratedImage();
   GeneratedImage(std::vector<float> pixels);
+
+  void setPixels(const std::vector<float>& pixels);
+  // Reads the Red channel of the given image
+  bool loadFromFile(std::string filename);
+  void saveToFile(std::string filename) const;
 
   void invert();
   // For the edges, wraps the image around

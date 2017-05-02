@@ -1,7 +1,10 @@
 #include "generatedImage.h"
 
+#include <SFML/Graphics.hpp>
+
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 #include "utils.h"
 
@@ -9,11 +12,53 @@ GeneratedImage::GeneratedImage() :
   _size(0) {}
 
 GeneratedImage::GeneratedImage(std::vector<float> pixels) {
+  setPixels(pixels);
+}
+
+void GeneratedImage::setPixels(const std::vector<float>& pixels) {
   _size = sqrt(pixels.size());
 
   assert(pixels.size() == _size*_size);
 
   _pixels = pixels;
+}
+
+bool GeneratedImage::loadFromFile(std::string filename) {
+  sf::Image img;
+  if (!img.loadFromFile(filename))
+    return false;
+
+  if (img.getSize().x != img.getSize().y) {
+    std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
+    return false;
+  }
+
+  const sf::Uint8* imgPixels = img.getPixelsPtr();
+  _size = img.getSize().x;
+  _pixels.resize(_size*_size);
+
+  for (size_t i = 0; i < _size*_size; i++) {
+    _pixels[i] = imgPixels[4*i] / 255.f;
+  }
+
+  return true;
+}
+
+void GeneratedImage::saveToFile(std::string filename) const {
+  std::vector<sf::Uint8> rgbPixels(4*_pixels.size());
+
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    for (size_t j = 0; j < 3; j++) {
+      rgbPixels[4*i + j] = _pixels[i] * 255;
+    }
+    rgbPixels[4*i + 3] = 255;
+  }
+
+  sf::Texture texture;
+	texture.create(_size, _size);
+	texture.update(&rgbPixels[0]);
+
+	texture.copyToImage().saveToFile(filename);
 }
 
 void GeneratedImage::invert() {

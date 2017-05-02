@@ -25,12 +25,11 @@ void Interface::init() {
 
   // Minimap
   sf::Image mapImg;
-  if (!mapImg.loadFromFile("res/map/map.png")) {
-    std::cerr << "Unable to open file: " << "res/map/map.png" << std::endl;
+  if (mapImg.loadFromFile("res/map/map.png")) {
+    _minimapTexture.loadFromImage(mapImg);
+    _minimapTexture.setSmooth(true);
   }
 
-  _minimapTexture.loadFromImage(mapImg);
-	_minimapTexture.setSmooth(true);
 
   _minimapSprite.setTexture(_minimapTexture);
   _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));

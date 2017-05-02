@@ -373,5 +373,4 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 	}
 
 	initTerrainGeometry->computeNormals();
-	terrainGeometry.generateNewSubdivisionLevel();
 }

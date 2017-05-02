@@ -44,14 +44,26 @@ void Game::init() {
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 
-  Perlin perlinRelief(3, 0.06, 0.75, 512);
-  GeneratedImage reliefGenerator(perlinRelief.getPixels());
-  ReliefMaskGenerator reliefMaskGenerator(_terrainGeometry);
-  reliefMaskGenerator.generateMask(512);
-  reliefMaskGenerator.smoothDilatation(50);
+  GeneratedImage reliefGenerator;
 
-  reliefGenerator.multiply(reliefMaskGenerator.getPixels());
-  _terrainGeometry.setReliefGenerator(reliefGenerator);
+  if (reliefGenerator.loadFromFile("res/reliefMask.png"))
+    _terrainGeometry.setReliefGenerator(reliefGenerator);
+
+  else {
+    // Generate relief mask and feed it to the geometry handler
+    Perlin perlinRelief(3, 0.06, 0.75, 512);
+    reliefGenerator.setPixels(perlinRelief.getPixels());
+    ReliefMaskGenerator reliefMaskGenerator(_terrainGeometry);
+    reliefMaskGenerator.generateMask(512);
+    reliefMaskGenerator.smoothDilatation(50);
+
+    reliefGenerator.multiply(reliefMaskGenerator.getPixels());
+    reliefGenerator.saveToFile("res/reliefMask.png");
+    _terrainGeometry.setReliefGenerator(reliefGenerator);
+  }
+
+  // The base subdivision level should be 1, it will take into account the generated relief
+  _terrainGeometry.generateNewSubdivisionLevel();
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
   _skybox.load("res/skybox/");

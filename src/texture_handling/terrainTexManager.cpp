@@ -7,9 +7,7 @@
 sf::Vector2u TerrainTexManager::loadTexture(std::string folder) {
 	sf::Image img;
 
-  if (!img.loadFromFile(folder)) {
-    std::cerr << "Unable to open file " << std::endl;
-  }
+  img.loadFromFile(folder);
 
   _texIDs.push_back(0);
 
