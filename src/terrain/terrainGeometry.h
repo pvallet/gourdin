@@ -130,7 +130,7 @@ public:
   Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const;
 
 private:
-  void subdivideChunk(size_t x, size_t y, size_t subdivLvl);
+  void subdivideChunk(int x, int y, size_t subdivLvl);
 
   std::vector<std::unique_ptr<SubdivisionLevel> > _subdivisionLevels;
 

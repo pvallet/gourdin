@@ -131,9 +131,10 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   for (size_t i = 0; i < elemsToDisplay.size(); i++) {
-    Tree* tree; igMovingElement* animal;
+    Tree* tree = dynamic_cast<Tree*>(elemsToDisplay[i]);
+    igMovingElement* animal = dynamic_cast<igMovingElement*>(elemsToDisplay[i]);
 
-    if (tree = dynamic_cast<Tree*>(elemsToDisplay[i])) {
+    if (tree) {
       if (currentType != TREE || currentBiome != tree->getBiome()) {
         processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
         currentType  = TREE;
@@ -141,7 +142,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
       }
     }
 
-    else if (animal = dynamic_cast<igMovingElement*>(elemsToDisplay[i])) {
+    else if (animal) {
       if (currentType != ANIMAL || currentTexture != animal->getTexID()) {
         processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
         currentType   = ANIMAL;

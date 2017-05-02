@@ -94,6 +94,8 @@ bool Shader::load() {
 
     return false;
   }
+
+	return true;
 }
 
 

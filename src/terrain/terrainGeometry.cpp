@@ -469,7 +469,7 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
   }
 }
 
-void TerrainGeometry::subdivideChunk(size_t x, size_t y, size_t subdivLvl) {
+void TerrainGeometry::subdivideChunk(int x, int y, size_t subdivLvl) {
   if ( x >= 0 && x < NB_CHUNKS && y >= 0 && y < NB_CHUNKS ) {
     if (_chunkSubdivLvl[x*NB_CHUNKS + y ] < subdivLvl) {
       subdivideChunk(x-1,y-1,subdivLvl-1);

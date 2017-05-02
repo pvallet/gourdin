@@ -49,8 +49,8 @@ void EventHandlerSandbox::handleKeyPressed(sf::Event event) {
       float nbSelected = 0;
 
       for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion;
-        if (lion = dynamic_cast<Lion*>(*it)) {
+        Lion* lion = dynamic_cast<Lion*>(*it);
+        if (lion) {
           barycenter += lion->getPos();
           nbSelected++;
         }
@@ -67,8 +67,8 @@ void EventHandlerSandbox::handleKeyPressed(sf::Event event) {
       bool makeThemAllRun = false;
       bool generalStrategyChosen = false;
       for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion;
-        if (lion = dynamic_cast<Lion*>(*it)) {
+        Lion* lion = dynamic_cast<Lion*>(*it);
+        if (lion) {
           if (!generalStrategyChosen) {
             generalStrategyChosen = true;
             makeThemAllRun = !lion->isRunning();

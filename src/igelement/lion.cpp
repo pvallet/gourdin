@@ -88,7 +88,7 @@ void Lion::setTarget(sf::Vector2f t) {
 	Controllable::setTarget(t);
 	if (_status == WAITING) {
 		beginWalking();
-	} else if (_status = RUNNING) {
+	} else if (_status == RUNNING) {
 		launchAnimation(RUN);
 	}
 }
@@ -100,8 +100,8 @@ void Lion::kill(const std::unordered_set<igMovingElement*>& neighbors) {
 
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 		if (*it != this) {
-			Antilope *atlp;
-			if (atlp = dynamic_cast<Antilope*>(*it)) {
+			Antilope *atlp = dynamic_cast<Antilope*>(*it);
+			if (atlp) {
 				distance = vu::norm(_pos - atlp->getPos());
 
 				if (distance < _range) {
