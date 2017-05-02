@@ -36,7 +36,10 @@ void ReliefMaskGenerator::smoothDilatation(float radius) {
     if (_islandMask[i*_maskSize + j] == 0.f) {
       for (int k = std::max(0, i-dilSize+1); k < std::min((int)_maskSize, i+dilSize); k++) {
       for (int l = std::max(0, j-dilSize+1); l < std::min((int)_maskSize, j+dilSize); l++) {
-        _islandMask[k*_maskSize + l] = std::min(_islandMask[k*_maskSize + l], dilMask[abs(k-i)*dilSize + abs(l-j)]);
+        size_t currentIndex = k*_maskSize + l;
+        if (_islandMask[currentIndex] == 0)
+          continue;
+        _islandMask[currentIndex] = std::min(_islandMask[currentIndex], dilMask[abs(k-i)*dilSize + abs(l-j)]);
       }
       }
     }
