@@ -1,18 +1,18 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
+#include <cstddef>
 #include <vector>
 
+// Handles a square black and white image
 class GeneratedImage {
 public:
-  GeneratedImage(std::vector<float> blackNwhitePixels);
+  GeneratedImage(std::vector<float> pixels);
 
   void invert();
   // For the edges, wraps the image around
   void applyConvolutionFilter(std::vector<float> filter);
 
-  inline std::vector<sf::Uint8> getPixels() const {return _pixels;}
+  inline std::vector<float> getPixels() const {return _pixels;}
 
   // If the filter size is even, the generator makes it odd
   static std::vector<float> generateBoxFilter(size_t size);
@@ -21,5 +21,5 @@ public:
 private:
   size_t _size;
 
-  std::vector<sf::Uint8> _pixels;
+  std::vector<float> _pixels;
 };

@@ -5,26 +5,17 @@
 
 #include "utils.h"
 
-GeneratedImage::GeneratedImage(std::vector<float> blackNwhitePixels) {
-  _size = sqrt(blackNwhitePixels.size());
+GeneratedImage::GeneratedImage(std::vector<float> pixels) {
+  _size = sqrt(pixels.size());
 
-  assert(blackNwhitePixels.size() == _size*_size);
+  assert(pixels.size() == _size*_size);
 
-  _pixels.resize(_size*_size*4);
-
-  for (size_t i = 0; i < _size*_size; i++) {
-    _pixels[4*i] = blackNwhitePixels[i]*255;
-    _pixels[4*i+1] = blackNwhitePixels[i]*255;
-    _pixels[4*i+2] = blackNwhitePixels[i]*255;
-    _pixels[4*i+3] = 255;
-  }
+  _pixels = pixels;
 }
 
 void GeneratedImage::invert() {
   for (size_t i = 0; i < _size*_size; i++) {
-    for (size_t j = 0; j < 3; j++) {
-      _pixels[4*i+j] = 255 - _pixels[4*i+j];
-    }
+    _pixels[i] = 1 - _pixels[i];
   }
 }
 
@@ -34,7 +25,7 @@ void GeneratedImage::applyConvolutionFilter(std::vector<float> filter) {
   assert(filterSize % 2 == 1);
   assert(filter.size() == filterSize*filterSize);
 
-  std::vector<float> nPixels(4*_size*_size, 0);
+  std::vector<float> nPixels(_size*_size, 0);
 
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
@@ -52,17 +43,13 @@ void GeneratedImage::applyConvolutionFilter(std::vector<float> filter) {
       if (curJ >= _size)
         curJ -= _size;
 
-      for (size_t c = 0; c < 4; c++) {
-        nPixels[4*(i*_size + j) + c] += _pixels[4*(curI*_size + curJ) + c] * filter[k*filterSize + l];
-      }
+      nPixels[i*_size + j] += _pixels[curI*_size + curJ] * filter[k*filterSize + l];
     }
     }
   }
   }
 
-  for (size_t i = 0; i < 4*_size*_size; i++) {
-    _pixels[i] = nPixels[i];
-  }
+  _pixels = nPixels;
 }
 
 std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {

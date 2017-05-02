@@ -84,6 +84,18 @@ float Perlin::getValue(float x, float y) const {
   return res;
 }
 
+std::vector<float> Perlin::getPixels() const {
+  std::vector<float> img(_size*_size);
+
+  for (size_t i = 0; i < _size; i++) {
+    for (size_t j = 0; j < _size; j++) {
+      img[i*_size + j] = getValue(i,j);
+    }
+  }
+
+  return img;
+}
+
 void Perlin::shuffle() {
   for (size_t i = 0; i < _octaves; i++) {
     for (size_t j = 0; j < _sizeRandArray*_sizeRandArray; j++) {

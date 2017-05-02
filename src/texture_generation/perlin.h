@@ -20,8 +20,10 @@ public:
 
   void shuffle();
 
+
   static float cubic_interpolate(float before_p0, float p0, float p1, float after_p1, float t);
 
+  std::vector<float> getPixels() const;
   inline size_t getSize() const {return _size;}
 
 private:

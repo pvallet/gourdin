@@ -26,6 +26,19 @@ void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string 
   deleteList.close();
 }
 
+void TestHandler::saveToImage(const std::vector<float>& pixels, std::string filename) const {
+  std::vector<sf::Uint8> rgbPixels(4*pixels.size());
+
+  for (size_t i = 0; i < pixels.size(); i++) {
+    for (size_t j = 0; j < 3; j++) {
+      rgbPixels[4*i + j] = pixels[i] * 255;
+    }
+    rgbPixels[4*i + 3] = 255;
+  }
+
+  saveToImage(rgbPixels, filename);
+}
+
 std::vector<float> TestHandler::generateTestSquare(size_t size) const {
   std::vector<float> res(size*size, 0);
 
@@ -78,24 +91,8 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
   saveToImage(pixels, savename);
 }
 
-void TestHandler::PerlinSaveToImage(const Perlin& perlin, std::string savename) const {
-  size_t size = perlin.getSize();
-  std::vector<sf::Uint8> pixels(size * size * 4, 255);
-
-	for (int i = 0 ; i < size ; i++) { // Convert mask to array of pixels
-		for (int j = 0 ; j < size ; j++) {
-      float value = perlin.getValue(i, j);
-      pixels[i*4*size + j*4] = value*255;
-      pixels[i*4*size + j*4 + 1] = value*255;
-      pixels[i*4*size + j*4 + 2] = value*255;
-		}
-	}
-
-	saveToImage(pixels, savename);
-}
-
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
-  PerlinSaveToImage(game._reliefGenerator, "relief.png");
+  saveToImage(game._reliefGenerator.getPixels(), "relief.png");
 
   Perlin perlin(3, 0.06, 0.1, 512);
 
@@ -103,19 +100,19 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
     std::ostringstream convert;
     convert << i << ".png";
     perlin.shuffle();
-    PerlinSaveToImage(perlin, convert.str());
+    saveToImage(perlin.getPixels(), convert.str());
   }
 
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
-  ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
-  reliefMaskGenerator.generateMask(512);
-
-  sf::Clock dilatationTime;
-  reliefMaskGenerator.smoothDilatation(50);
-  std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
-
-  saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
+  // ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
+  // reliefMaskGenerator.generateMask(512);
+  //
+  // sf::Clock dilatationTime;
+  // reliefMaskGenerator.smoothDilatation(50);
+  // std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  //
+  // saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
 }
 
 void TestHandler::testImageHandling() const {
@@ -135,6 +132,9 @@ void TestHandler::testImageHandling() const {
   std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
 
   saveToImage(testSquare.getPixels(), "test_circle_gaussian_filter.png");
+
+  testSquare.invert();
+  saveToImage(testSquare.getPixels(), "invert.png");
 }
 
 void TestHandler::runTests(const Controller& controller) const {
