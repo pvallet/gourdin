@@ -9,6 +9,9 @@
 
 #define DELETE_LIST_NAME "to_delete"
 
+TestHandler::TestHandler (const sf::Clock& beginningOfProg) :
+  _beginningOfProg(beginningOfProg) {}
+
 void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) const {
   sf::Texture texture;
   int size = sqrt(pixels.size() / 4);
@@ -105,28 +108,38 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
 
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
-  // ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
-  // reliefMaskGenerator.generateMask(512);
-  // reliefMaskGenerator.smoothDilatation(50);
-  // saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
+  ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
+  reliefMaskGenerator.generateMask(512);
+
+  sf::Clock dilatationTime;
+  reliefMaskGenerator.smoothDilatation(50);
+  std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
+
+  saveToImage(reliefMaskGenerator.getMask().getPixels(), "Relief_mask.png");
 }
 
 void TestHandler::testImageHandling() const {
   GeneratedImage testSquare(generateTestCircle(512));
   saveToImage(testSquare.getPixels(), "test_circle.png");
 
-  saveToImage(GeneratedImage(GeneratedImage::generateGaussianFilter(20)).getPixels(), "gaussian_filter.png");
-
   GeneratedImage convol = testSquare;
+
+  sf::Clock boxFilterTime;
   convol.applyConvolutionFilter(GeneratedImage::generateBoxFilter(20));
+  std::cout << "Box filter time (20): " << boxFilterTime.getElapsedTime().asMilliseconds() << '\n';
+
   saveToImage(convol.getPixels(), "test_circle_box_filter.png");
 
-  testSquare.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20));
+  sf::Clock gaussianFilterTime;
+  testSquare.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20, 1/5.f));
+  std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
+
   saveToImage(testSquare.getPixels(), "test_circle_gaussian_filter.png");
 }
 
 void TestHandler::runTests(const Controller& controller) const {
-  // displayGameGeneratedComponents(controller.getGame());
+  std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
+  displayGameGeneratedComponents(controller.getGame());
   testImageHandling();
 }
 

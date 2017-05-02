@@ -4,7 +4,7 @@
 
 class TestHandler {
 public:
-  TestHandler () {}
+  TestHandler (const sf::Clock& beginningOfProg);
 
   void runTests(const Controller& controller) const;
   void clean() const;
@@ -21,4 +21,6 @@ private:
 
   void displayGameGeneratedComponents(const Game& game) const;
   void testImageHandling() const;
+
+  const sf::Clock& _beginningOfProg;
 };

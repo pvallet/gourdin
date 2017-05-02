@@ -78,13 +78,13 @@ std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {
   return filter;
 }
 
-std::vector<float> GeneratedImage::generateGaussianFilter(size_t size) {
+std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sigma) {
   if (size % 2 == 0)
     size--;
 
   std::vector<float> filter(size*size, 0);
 
-  float sigma = 1/3.f * (float) size;
+  sigma *= size;
   float s = 2.f * sigma * sigma;
   int halfSize = size/2;
 

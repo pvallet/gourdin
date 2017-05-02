@@ -14,7 +14,8 @@ int main(int argc, char* argv[]) {
 
 #ifndef NDEBUG
   bool onlyTests = false;
-  TestHandler testHandler;
+  sf::Clock beginningOfProg;
+  TestHandler testHandler(beginningOfProg);
 
   if (argc > 1) {
     if (strcmp(argv[1],"clean") == 0) {
