@@ -11,7 +11,7 @@ public:
   GeneratedImage(std::vector<float> pixels);
 
   void setPixels(const std::vector<float>& pixels);
-  // Reads the Red channel of the given image
+  // We store the 4 bytes of the floats in the RGBA channels
   bool loadFromFile(std::string filename);
   void saveToFile(std::string filename) const;
 

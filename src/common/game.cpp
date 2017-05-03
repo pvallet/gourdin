@@ -46,11 +46,12 @@ void Game::init() {
 
   GeneratedImage reliefGenerator;
 
-  if (reliefGenerator.loadFromFile("res/reliefMask.png"))
+  if (reliefGenerator.loadFromFile("res/map/reliefMask.png"))
     _terrainGeometry.setReliefGenerator(reliefGenerator);
 
   else {
-    // Generate relief mask and feed it to the geometry handler
+    std::cout << "Generating relief mask" << '\n';
+
     Perlin perlinRelief(3, 0.06, 0.75, 512);
     reliefGenerator.setPixels(perlinRelief.getPixels());
     ReliefMaskGenerator reliefMaskGenerator(_terrainGeometry);
@@ -58,7 +59,7 @@ void Game::init() {
     reliefMaskGenerator.smoothDilatation(50);
 
     reliefGenerator.multiply(reliefMaskGenerator.getPixels());
-    reliefGenerator.saveToFile("res/reliefMask.png");
+    reliefGenerator.saveToFile("res/map/reliefMask.png");
     _terrainGeometry.setReliefGenerator(reliefGenerator);
   }
 

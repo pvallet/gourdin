@@ -23,6 +23,11 @@ void GeneratedImage::setPixels(const std::vector<float>& pixels) {
   _pixels = pixels;
 }
 
+union ConvertFloat {
+  float f;
+  sf::Uint8 uc[4];
+};
+
 bool GeneratedImage::loadFromFile(std::string filename) {
   sf::Image img;
   if (!img.loadFromFile(filename))
@@ -35,10 +40,15 @@ bool GeneratedImage::loadFromFile(std::string filename) {
 
   const sf::Uint8* imgPixels = img.getPixelsPtr();
   _size = img.getSize().x;
-  _pixels.resize(_size*_size);
+  _pixels.resize(_size*_size, 0);
+  float maxFloat = pow(256, 4);
 
   for (size_t i = 0; i < _size*_size; i++) {
-    _pixels[i] = imgPixels[4*i] / 255.f;
+    ConvertFloat convert;
+    for (size_t j = 0; j < 4; j++) {
+      convert.uc[j] = imgPixels[4*i + j];
+    }
+    _pixels[i] = convert.f;
   }
 
   return true;
@@ -48,10 +58,12 @@ void GeneratedImage::saveToFile(std::string filename) const {
   std::vector<sf::Uint8> rgbPixels(4*_pixels.size());
 
   for (size_t i = 0; i < _pixels.size(); i++) {
-    for (size_t j = 0; j < 3; j++) {
-      rgbPixels[4*i + j] = _pixels[i] * 255;
+    ConvertFloat convert;
+    convert.f = _pixels[i];
+
+    for (size_t j = 0; j < 4; j++) {
+      rgbPixels[4*i + j] = convert.uc[j];
     }
-    rgbPixels[4*i + 3] = 255;
   }
 
   sf::Texture texture;

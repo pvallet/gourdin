@@ -93,7 +93,6 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 }
 
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
-
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
   ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
@@ -108,6 +107,7 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
 }
 
 void TestHandler::testImageHandling() const {
+  // Perlin
   Perlin perlin(3, 0.06, 0.1, 512);
 
   for (size_t i = 0; i < 1; i++) {
@@ -117,6 +117,7 @@ void TestHandler::testImageHandling() const {
     saveToImage(perlin.getPixels(), convert.str());
   }
 
+  // Filters
   GeneratedImage testSquare(generateTestCircle(512));
   saveToImage(testSquare.getPixels(), "test_circle.png");
 
@@ -134,8 +135,23 @@ void TestHandler::testImageHandling() const {
 
   saveToImage(testSquare.getPixels(), "test_circle_gaussian_filter.png");
 
+  // Invert
   testSquare.invert();
   saveToImage(testSquare.getPixels(), "invert.png");
+
+  // File I/O
+  Perlin iotest(3, 0.06, 0.1, 512);
+  GeneratedImage imgSaver(iotest.getPixels());
+  imgSaver.saveToFile("testSave.png");
+  GeneratedImage imgLoader;
+  imgLoader.loadFromFile("testSave.png");
+
+  if (imgSaver.getPixels() == imgLoader.getPixels())
+    std::cout << "OK - Save/Loading of a generated image" << '\n';
+  else
+    std::cout << "FAILED - Save/Loading of a generated image" << '\n';
+
+  remove("testSave.png");
 }
 
 void TestHandler::runTests(const Controller& controller) const {
