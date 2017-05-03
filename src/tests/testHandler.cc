@@ -93,6 +93,21 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 }
 
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
+
+  ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
+
+  ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
+  reliefMaskGenerator.generateMask(512);
+
+  sf::Clock dilatationTime;
+  reliefMaskGenerator.smoothDilatation(50);
+  std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  saveToImage(reliefMaskGenerator.getPixels(), "Relief_mask.png");
+
+  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_generator.png");
+}
+
+void TestHandler::testImageHandling() const {
   Perlin perlin(3, 0.06, 0.1, 512);
 
   for (size_t i = 0; i < 1; i++) {
@@ -102,20 +117,6 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
     saveToImage(perlin.getPixels(), convert.str());
   }
 
-  ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
-
-  // ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
-  // reliefMaskGenerator.generateMask(512);
-  //
-  // sf::Clock dilatationTime;
-  // reliefMaskGenerator.smoothDilatation(50);
-  // std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
-  // saveToImage(reliefMaskGenerator.getPixels(), "Relief_mask.png");
-
-  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_generator.png");
-}
-
-void TestHandler::testImageHandling() const {
   GeneratedImage testSquare(generateTestCircle(512));
   saveToImage(testSquare.getPixels(), "test_circle.png");
 
@@ -140,7 +141,7 @@ void TestHandler::testImageHandling() const {
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
   displayGameGeneratedComponents(controller.getGame());
-  // testImageHandling();
+  testImageHandling();
 }
 
 void TestHandler::clean() const {

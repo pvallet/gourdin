@@ -1,6 +1,3 @@
-// Code inspired by tutorial:
-// http://cochoy-jeremy.developpez.com/tutoriels/2d/introduction-bruit-perlin/
-
 #pragma once
 
 #include <cstddef>
@@ -20,9 +17,6 @@ public:
 
   void shuffle();
 
-
-  static float cubic_interpolate(float before_p0, float p0, float p1, float after_p1, float t);
-
   std::vector<float> getPixels() const;
   inline size_t getSize() const {return _size;}
 
@@ -34,7 +28,4 @@ private:
   float _persistence;
 
   std::vector<std::vector<float> > _randValues;
-
-  float smooth_noise_firstdim(int integer_x, int integer_y, float fractional_x, int octave) const;
-  float smooth_noise(float x, float y, int octave) const;
 };

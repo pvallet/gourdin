@@ -23,11 +23,16 @@ public:
   inline const std::vector<float>& getPixels() const {return _pixels;}
   float getValueNormalizedCoord(float x, float y) const;
 
+  static float bicubicInterpolate(float x, float y, const std::vector<float>& pixels);
+
   // If the filter size is even, the generator makes it odd
   static std::vector<float> generateBoxFilter(size_t size);
   static std::vector<float> generateGaussianFilter(size_t size, float sigma);
 
 private:
+  static float cubicInterpolate(float before_p0, float p0, float p1, float after_p1, float t);
+  static float bicubicFirstDim(int intX, int intY, float fracX, const std::vector<float>& pixels);
+
   size_t _size;
 
   std::vector<float> _pixels;

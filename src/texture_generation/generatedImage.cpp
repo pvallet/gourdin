@@ -153,19 +153,56 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   return filter;
 }
 
+float GeneratedImage::cubicInterpolate(float before_p0, float p0, float p1, float after_p1, float t) {
+  float a3 = -0.5*before_p0 + 1.5*p0 - 1.5*p1 + 0.5*after_p1;
+  float a2 = before_p0 - 2.5*p0 + 2*p1 - 0.5*after_p1;
+  float a1 = -0.5*before_p0 + 0.5*p1;
+  float a0 = p0;
+
+  return (a3 * t*t*t) + (a2 * t*t) + (a1 * t) + a0;
+}
+
+// Interpolation of a line for a fixed y
+float GeneratedImage::bicubicFirstDim(int intX, int intY, float fracX, const std::vector<float>& pixels) {
+  int size = sqrt(pixels.size());
+
+  // We make intX and intY positive so that we can take them modulo size to keep them whithin [0,size)
+  intX += (abs(intX) / size + 1) * size;
+  intY += (abs(intY) / size + 1) * size;
+
+  float v0 = pixels[(intX - 1)%size * size + intY%size];
+  float v1 = pixels[(intX    )%size * size + intY%size];
+  float v2 = pixels[(intX + 1)%size * size + intY%size];
+  float v3 = pixels[(intX + 2)%size * size + intY%size];
+
+  return cubicInterpolate(v0, v1, v2, v3, fracX);
+}
+
+// Interpolation of y
+float GeneratedImage::bicubicInterpolate(float x, float y, const std::vector<float>& pixels) {
+  int intX = (int)x;
+  float fracX = x - intX;
+  int intY = (int)y;
+  float fracY = y - intY;
+
+  float t0 = bicubicFirstDim(intX, intY - 1, fracX, pixels);
+  float t1 = bicubicFirstDim(intX, intY,     fracX, pixels);
+  float t2 = bicubicFirstDim(intX, intY + 1, fracX, pixels);
+  float t3 = bicubicFirstDim(intX, intY + 2, fracX, pixels);
+
+  return cubicInterpolate(t0, t1, t2, t3, fracY);
+}
+
 float GeneratedImage::getValueNormalizedCoord(float x, float y) const {
-  int intX = x * _size;
-  int intY = y * _size;
+  if (x < 0)
+    x = 0;
+  else if (x >= 1)
+    x = 1;
 
-  if (intX < 0)
-    intX = 0;
-  else if (intX >= _size)
-    intX = _size-1;
+  if (y < 0)
+    y = 0;
+  else if (y >= 1)
+    y = 1;
 
-  if (intY < 0)
-    intY = 0;
-  else if (intY >= _size)
-    intY = _size-1;
-
-  return _pixels[intX*_size + intY];
+  return bicubicInterpolate(x*_size, y*_size, _pixels);
 }
