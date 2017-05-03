@@ -16,9 +16,11 @@ public:
   void saveToFile(std::string filename) const;
 
   void invert();
+  void multiply(const std::vector<float>& img);
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);
-  void multiply(const std::vector<float>& img);
+  // Morphologic dilatation of the black regions, with grayness depending on the distance to the black region
+  void smoothDilatation(float radius);
 
   inline const std::vector<float>& getPixels() const {return _pixels;}
   float getValueNormalizedCoord(float x, float y) const;

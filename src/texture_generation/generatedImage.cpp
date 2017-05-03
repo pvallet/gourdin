@@ -79,6 +79,14 @@ void GeneratedImage::invert() {
   }
 }
 
+void GeneratedImage::multiply(const std::vector<float>& img) {
+  assert(img.size() == _pixels.size());
+
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] *= img[i];
+  }
+}
+
 void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   int filterSize = sqrt(filter.size());
 
@@ -113,11 +121,32 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   _pixels = nPixels;
 }
 
-void GeneratedImage::multiply(const std::vector<float>& img) {
-  assert(img.size() == _pixels.size());
+void GeneratedImage::smoothDilatation(float radius) {
+  int dilSize = round(radius)+1;
 
-  for (size_t i = 0; i < _pixels.size(); i++) {
-    _pixels[i] *= img[i];
+  std::vector<float> dilMask(dilSize*dilSize);
+
+  // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
+  for (size_t i = 0; i < dilSize; i++) {
+    for (size_t j = 0; j < dilSize; j++) {
+      dilMask[i*dilSize + j] = sqrt(i*i + j*j) / radius;
+    }
+  }
+
+  for (int i = 0; i < _size; i++) {
+  for (int j = 0; j < _size; j++) {
+    // Mask is only applied to expand black regions
+    if (_pixels[i*_size + j] == 0.f) {
+      for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {
+      for (int l = std::max(0, j-dilSize+1); l < std::min((int)_size, j+dilSize); l++) {
+        size_t currentIndex = k*_size + l;
+        if (_pixels[currentIndex] == 0)
+          continue;
+        _pixels[currentIndex] = std::min(_pixels[currentIndex], dilMask[abs(k-i)*dilSize + abs(l-j)]);
+      }
+      }
+    }
+  }
   }
 }
 

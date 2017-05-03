@@ -26,6 +26,8 @@ public:
   // indice 0 corresponds to the point refPoint in tri, and the other indices are
   // the other vertices in clockwise order
   std::array<size_t,3> sortIndices(sf::Vector3f refPoint) const;
+
+  static float getHeight(sf::Vector2f pos, const std::list<const Triangle*>& triangles);
 };
 
 class Vertex {
@@ -76,11 +78,12 @@ public:
   // Class to handle a single subdivision level
   class SubdivisionLevel {
   public:
-    SubdivisionLevel (const GeneratedImage& reliefGenerator);
+    SubdivisionLevel (const GeneratedImage* relief);
 
     // Init methods
     inline void goingToAddNPoints(size_t n) {_vertices.reserve(n);}
     // Insert the triangle to the structure and modify its points to take into account the relief generator
+    // If the relief generator is nullptr, the points are not modified
     void addTriangle(std::array<sf::Vector3f,3> p, Biome biome);
     void subdivideTriangles(std::list<const Triangle*>& triangles);
     void computeNormals    (std::list<Vertex*>&   vertices);
@@ -111,26 +114,26 @@ public:
     // Each triangle can belong to several subchunks
     std::vector<std::vector<std::list<const Triangle*> > > _trianglesInSubChunk;
 
-    const GeneratedImage& _reliefGenerator;
+    const GeneratedImage* _relief;
   };
 
   TerrainGeometry ();
-  inline void setReliefGenerator(GeneratedImage reliefGenerator) {_reliefGenerator = reliefGenerator;}
+  inline void setReliefGenerator(GeneratedImage reliefGenerator) {_relief = reliefGenerator;}
 
   void generateNewSubdivisionLevel();
 
-  inline const GeneratedImage& getReliefGenerator() const {return _reliefGenerator;}
+  inline const GeneratedImage& getReliefGenerator() const {return _relief;}
 
   // For initialization
   inline SubdivisionLevel* getFirstSubdivLevel() {return _subdivisionLevels[0].get();}
-
-  inline bool isOcean(size_t x, size_t y) const {
-    return _subdivisionLevels[0]->isOcean(x,y);}
-
   inline size_t getCurrentGlobalSubdivLvl() const {return _currentGlobalSubdivLvl;}
   std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
   std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
+
+  inline bool isOcean(size_t x, size_t y) const {return _subdivisionLevels[0]->isOcean(x,y);}
   Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const;
+  float getHeight(sf::Vector2f pos, size_t subdivLvl) const {
+    return Triangle::getHeight(pos, getTrianglesNearPos(pos, subdivLvl));}
 
 private:
   void subdivideChunk(int x, int y, size_t subdivLvl);
@@ -142,5 +145,5 @@ private:
 
   size_t _currentGlobalSubdivLvl;
 
-  GeneratedImage _reliefGenerator;
+  GeneratedImage _relief;
 };

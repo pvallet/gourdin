@@ -71,6 +71,32 @@ std::array<size_t,3> Triangle::sortIndices(sf::Vector3f refPoint) const {
   return res;
 }
 
+float Triangle::getHeight(sf::Vector2f pos, const std::list<const Triangle*>& triangles) {
+  for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
+    float x[3]; float y[3]; float z[3];
+
+    for (size_t i = 0; i < 3; i++) {
+      x[i] = (*tri)->vertices[i]->pos.x;
+			y[i] = (*tri)->vertices[i]->pos.y;
+			z[i] = (*tri)->vertices[i]->pos.z;
+    }
+
+    float s = ((y[1]-y[2])*(pos.x-x[2])+(x[2]-x[1])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    float t = ((y[2]-y[0])*(pos.x-x[2])+(x[0]-x[2])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
+			return s       * z[0] +
+	           t       * z[1] +
+	           (1-s-t) * z[2];
+    }
+  }
+
+  return 0;
+}
+
 void Vertex::sortTriangles() {
   if (!_sorted) {
     _sorted = true;
@@ -143,16 +169,17 @@ void Vertex::addAdjacentTriangle(const Triangle* tri) {
   _sorted = false;
 }
 
-TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const GeneratedImage& reliefGenerator) :
-  _reliefGenerator(reliefGenerator) {
+TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const GeneratedImage* relief) :
+  _relief(relief) {
   std::vector<std::list<const Triangle*> > initializer(GRID_SUBDIV*GRID_SUBDIV);
   _trianglesInSubChunk.resize(NB_CHUNKS*NB_CHUNKS, initializer);
 }
 
 void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<sf::Vector3f,3> p, Biome biome) {
-  for (size_t i = 0; i < 3; i++) {
-    p[i].z = (1-PERLIN_OVER_GLOBAL_RATIO) * p[i].z + PERLIN_OVER_GLOBAL_RATIO *
-     PERLIN_HEIGHT_FACTOR * _reliefGenerator.getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
+  if (_relief != nullptr) {
+    for (size_t i = 0; i < 3; i++) {
+      p[i].z = PERLIN_HEIGHT_FACTOR * _relief->getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
+    }
   }
 
   // Add the triangle to the list of all triangles
@@ -442,10 +469,13 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() con
 TerrainGeometry::TerrainGeometry() :
   _chunkSubdivLvl(NB_CHUNKS*NB_CHUNKS, 0),
   _currentGlobalSubdivLvl(0),
-  _reliefGenerator(std::vector<float>(1,0)) { // before giving the right relief generator, none is given
+  _relief(std::vector<float>(1,0)) { // before giving the right relief generator, none is given
 
-  for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
-    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(_reliefGenerator)));
+  // The first subdivision level should accept the geometry given as is
+  _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(nullptr)));
+
+  for (size_t i = 1; i < MAX_SUBDIV_LVL+1; i++) {
+    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(&_relief)));
   }
 }
 

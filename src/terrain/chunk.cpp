@@ -310,29 +310,5 @@ void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 }
 
 float Chunk::getHeight(sf::Vector2f pos) const {
-  std::list<const Triangle*> toTest = _terrainGeometry.getTrianglesNearPos(pos,_currentSubdivLvl);
-
-  for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
-    float x[3]; float y[3]; float z[3];
-
-    for (size_t i = 0; i < 3; i++) {
-      x[i] = (*tri)->vertices[i]->pos.x;
-			y[i] = (*tri)->vertices[i]->pos.y;
-			z[i] = (*tri)->vertices[i]->pos.z;
-    }
-
-    float s = ((y[1]-y[2])*(pos.x-x[2])+(x[2]-x[1])*(pos.y-y[2])) /
-              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
-
-    float t = ((y[2]-y[0])*(pos.x-x[2])+(x[0]-x[2])*(pos.y-y[2])) /
-              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
-			return s       * z[0] +
-	           t       * z[1] +
-	           (1-s-t) * z[2];
-    }
-  }
-
-  return 0;
+  return _terrainGeometry.getHeight(pos, _currentSubdivLvl);
 }

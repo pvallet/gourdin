@@ -6,7 +6,7 @@
 #include <fstream>
 
 #include "generatedImage.h"
-#include "reliefMaskGenerator.h"
+#include "reliefGenerator.h"
 
 #define DELETE_LIST_NAME "to_delete"
 
@@ -95,15 +95,7 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
-  ReliefMaskGenerator reliefMaskGenerator(game._terrainGeometry);
-  reliefMaskGenerator.generateMask(512);
-
-  sf::Clock dilatationTime;
-  reliefMaskGenerator.smoothDilatation(50);
-  std::cout << "Dilatation time (50): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
-  saveToImage(reliefMaskGenerator.getPixels(), "Relief_mask.png");
-
-  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_generator.png");
+  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief.png");
 }
 
 void TestHandler::testImageHandling() const {
@@ -112,32 +104,38 @@ void TestHandler::testImageHandling() const {
 
   for (size_t i = 0; i < 1; i++) {
     std::ostringstream convert;
-    convert << i << ".png";
+    convert << "perlin_" << i << ".png";
     perlin.shuffle();
     saveToImage(perlin.getPixels(), convert.str());
   }
 
+  // Test image
+  GeneratedImage testCircle(generateTestCircle(512));
+  saveToImage(testCircle.getPixels(), "test_circle.png");
+
   // Filters
-  GeneratedImage testSquare(generateTestCircle(512));
-  saveToImage(testSquare.getPixels(), "test_circle.png");
-
-  GeneratedImage convol = testSquare;
-
+  GeneratedImage boxFilter = testCircle;
   sf::Clock boxFilterTime;
-  convol.applyConvolutionFilter(GeneratedImage::generateBoxFilter(20));
+  boxFilter.applyConvolutionFilter(GeneratedImage::generateBoxFilter(20));
   std::cout << "Box filter time (20): " << boxFilterTime.getElapsedTime().asMilliseconds() << '\n';
+  saveToImage(boxFilter.getPixels(), "test_circle_box_filter.png");
 
-  saveToImage(convol.getPixels(), "test_circle_box_filter.png");
-
+  GeneratedImage gaussianFilter = testCircle;
   sf::Clock gaussianFilterTime;
-  testSquare.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20, 1/5.f));
+  gaussianFilter.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20, 1/5.f));
   std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
+  saveToImage(gaussianFilter.getPixels(), "test_circle_gaussian_filter.png");
 
-  saveToImage(testSquare.getPixels(), "test_circle_gaussian_filter.png");
+  GeneratedImage dilatation = testCircle;
+  sf::Clock dilatationTime;
+  dilatation.smoothDilatation(20);
+  std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  saveToImage(dilatation.getPixels(), "test_circle_smooth_dilatation.png");
 
   // Invert
-  testSquare.invert();
-  saveToImage(testSquare.getPixels(), "invert.png");
+  GeneratedImage invert = testCircle;
+  invert.invert();
+  saveToImage(invert.getPixels(), "invert.png");
 
   // File I/O
   Perlin iotest(3, 0.06, 0.1, 512);

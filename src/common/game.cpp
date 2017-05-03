@@ -5,8 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.h"
-#include "perlin.h"
-#include "reliefMaskGenerator.h"
+#include "reliefGenerator.h"
 
 #include <ctime>
 
@@ -44,23 +43,18 @@ void Game::init() {
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 
-  GeneratedImage reliefGenerator;
+  GeneratedImage relief;
 
-  if (reliefGenerator.loadFromFile("res/map/reliefMask.png"))
-    _terrainGeometry.setReliefGenerator(reliefGenerator);
+  if (relief.loadFromFile("res/map/relief.png"))
+    _terrainGeometry.setReliefGenerator(relief);
 
   else {
     std::cout << "Generating relief mask" << '\n';
 
-    Perlin perlinRelief(3, 0.06, 0.75, 512);
-    reliefGenerator.setPixels(perlinRelief.getPixels());
-    ReliefMaskGenerator reliefMaskGenerator(_terrainGeometry);
-    reliefMaskGenerator.generateMask(512);
-    reliefMaskGenerator.smoothDilatation(50);
-
-    reliefGenerator.multiply(reliefMaskGenerator.getPixels());
-    reliefGenerator.saveToFile("res/map/reliefMask.png");
-    _terrainGeometry.setReliefGenerator(reliefGenerator);
+    ReliefGenerator reliefGenerator(_terrainGeometry);
+    reliefGenerator.generateRelief(512);
+    reliefGenerator.saveToFile("res/map/relief.png");
+    _terrainGeometry.setReliefGenerator(reliefGenerator.getRelief());
   }
 
   // The base subdivision level should be 1, it will take into account the generated relief
