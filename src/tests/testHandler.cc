@@ -95,7 +95,16 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
-  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief.png");
+  ReliefGenerator reliefGenerator(game._terrainGeometry);
+  reliefGenerator.generateRelief(512);
+  saveToImage(reliefGenerator.getIslandMask().getPixels(), "relief_islandMask.png");
+  saveToImage(reliefGenerator.getElevationMask().getPixels(), "relief_elevationMask.png");
+
+  GeneratedImage elevationMask = reliefGenerator.getElevationMask();
+  Perlin perlinRelief(3, 0.06, 0.75, 512);
+  elevationMask.addAndNormalize(perlinRelief.getPixels(), 0.5);
+  saveToImage(elevationMask.getPixels(), "relief_combinedElevation.png");
+  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_relief.png");
 }
 
 void TestHandler::testImageHandling() const {

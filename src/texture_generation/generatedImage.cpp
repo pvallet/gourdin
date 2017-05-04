@@ -87,6 +87,16 @@ void GeneratedImage::multiply(const std::vector<float>& img) {
   }
 }
 
+void GeneratedImage::addAndNormalize(const std::vector<float>& img, float weightAdding) {
+  assert(img.size() == _pixels.size());
+
+  float normalizationFactor = 1 + weightAdding;
+
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] = (_pixels[i] + weightAdding * img[i]) / normalizationFactor;
+  }
+}
+
 void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   int filterSize = sqrt(filter.size());
 

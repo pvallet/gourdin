@@ -13,11 +13,16 @@ public:
   inline void saveToFile(std::string filename) const {_relief.saveToFile(filename);}
   inline const GeneratedImage& getRelief() const {return _relief;}
 
+  inline const GeneratedImage& getIslandMask() const {return _islandMask;}
+  inline const GeneratedImage& getElevationMask() const {return _elevationMask;}
+
 private:
-  void fillIslandMask(size_t size);
+  void convertMapData(size_t size);
 
   const TerrainGeometry& _terrainGeometry;
 
+  GeneratedImage _elevationMask;
   GeneratedImage _islandMask;
+  GeneratedImage _lakesMask;
   GeneratedImage _relief;
 };

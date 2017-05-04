@@ -17,6 +17,7 @@ public:
 
   void invert();
   void multiply(const std::vector<float>& img);
+  void addAndNormalize(const std::vector<float>& img, float weightAdding);
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);
   // Morphologic dilatation of the black regions, with grayness depending on the distance to the black region

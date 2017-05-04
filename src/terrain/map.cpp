@@ -8,7 +8,6 @@
 
 // The coordinates system in the XML file ends at MAP_MAX_COORD
 #define MAP_MAX_COORD 600.f
-#define HEIGHT_FACTOR 0.f
 
 bool Map::boolAttrib(std::string str) const {
 	if (str == std::string("true"))
@@ -356,15 +355,15 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 
 					points[0].x = (*edge)->corner0->x;
 					points[0].y = (*edge)->corner0->y;
-					points[0].z = (*edge)->corner0->elevation * HEIGHT_FACTOR;
+					points[0].z = (*edge)->corner0->elevation;
 
 					points[1].x = (*edge)->corner1->x;
 					points[1].y = (*edge)->corner1->y;
-					points[1].z = (*edge)->corner1->elevation * HEIGHT_FACTOR;
+					points[1].z = (*edge)->corner1->elevation;
 
 					points[2].x = (*ctr)->x;
 					points[2].y = (*ctr)->y;
-					points[2].z = (*ctr)->elevation * HEIGHT_FACTOR;
+					points[2].z = (*ctr)->elevation;
 
 					initTerrainGeometry->addTriangle(points, (*ctr)->biome);
 				}
