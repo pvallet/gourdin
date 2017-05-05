@@ -135,11 +135,23 @@ void TestHandler::testImageHandling() const {
   std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(gaussianFilter.getPixels(), "test_circle_gaussian_filter.png");
 
+  GeneratedImage smoothDilatation = testCircle;
+  sf::Clock smoothDilatationTime;
+  smoothDilatation.smoothDilatation(20);
+  std::cout << "Smooth dilatation time (20): " << smoothDilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  saveToImage(smoothDilatation.getPixels(), "test_circle_smooth_dilatation.png");
+
   GeneratedImage dilatation = testCircle;
   sf::Clock dilatationTime;
-  dilatation.smoothDilatation(20);
+  dilatation.nonWhiteDilatation(20);
   std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
-  saveToImage(dilatation.getPixels(), "test_circle_smooth_dilatation.png");
+  saveToImage(dilatation.getPixels(), "test_circle_dilatation.png");
+
+  // Combine
+  GeneratedImage white(512, 1.f);
+  Perlin randomAdding(3, 0.06, 0.1, 512);
+  white.combine(randomAdding.getPixels(), smoothDilatation.getPixels());
+  saveToImage(white.getPixels(), "test_circle_smooth_dilatation_combine_perlin.png");
 
   // Invert
   GeneratedImage invert = testCircle;

@@ -8,6 +8,7 @@
 class GeneratedImage {
 public:
   GeneratedImage();
+  GeneratedImage(size_t size, float color);
   GeneratedImage(std::vector<float> pixels);
 
   void setPixels(const std::vector<float>& pixels);
@@ -20,8 +21,11 @@ public:
   void addAndNormalize(const std::vector<float>& img, float weightAdding);
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);
+  void combine(const std::vector<float>& img, const std::vector<float>& mask);
   // Morphologic dilatation of the black regions, with grayness depending on the distance to the black region
   void smoothDilatation(float radius);
+  // Morphologic dilatation of the non white regions by a disk
+  void nonWhiteDilatation(float radius);
 
   inline const std::vector<float>& getPixels() const {return _pixels;}
   float getValueNormalizedCoord(float x, float y) const;

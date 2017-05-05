@@ -108,7 +108,6 @@ private:
 	void loadEdges(const TiXmlHandle& hRoot);
 	void loadCorners(const TiXmlHandle& hRoot);
 	void setPointersInDataStructures();
-	void fixLakes(); // Change biomes of lakes with non uniform elevation
 
 	std::vector<std::unique_ptr<Center> > _centers;
 	std::vector<std::unique_ptr<Edge> >   _edges;

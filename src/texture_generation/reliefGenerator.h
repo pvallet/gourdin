@@ -18,8 +18,13 @@ public:
 
 private:
   void convertMapData(size_t size);
+  // Average heights of contiguous pixels of a lake and feeds it to _lakesElevations
+  static std::vector<float> computeLakesElevations(
+    size_t size, const TerrainGeometry::SubdivisionLevel& smoother, float baseColor);
 
   const TerrainGeometry& _terrainGeometry;
+
+  GeneratedImage _lakesElevations;
 
   GeneratedImage _elevationMask;
   GeneratedImage _islandMask;

@@ -98,7 +98,7 @@ public:
     std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
     Biome getBiome(sf::Vector2f pos) const;
 
-    inline std::list<const Triangle*> getTriangles() const;
+    std::list<const Triangle*> getTriangles() const;
 
     // Returns the coordinates of the subchunk containing the position pos
     static std::array<sf::Vector2u, 2> getSubChunkInfo(sf::Vector2f pos);
@@ -126,6 +126,7 @@ public:
 
   // For initialization
   inline SubdivisionLevel* getFirstSubdivLevel() {return _subdivisionLevels[0].get();}
+  inline const SubdivisionLevel* getFirstSubdivLevel() const {return _subdivisionLevels[0].get();}
   inline size_t getCurrentGlobalSubdivLvl() const {return _currentGlobalSubdivLvl;}
   std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
   std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;

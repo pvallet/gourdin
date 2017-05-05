@@ -31,7 +31,7 @@ void ContentGenerator::init() {
 
   for (int i = 0 ; i < CONTENT_RES ; i++) {
 		for (int j = 0 ; j < CONTENT_RES ; j++) {
-      if (_perlinGenerator.getValue(i,j) > 0.6)
+      if (_perlinGenerator.getValue(i,j) > 0.4)
 			  _forestsMask[i][j] = true;
 		}
 	}

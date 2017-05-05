@@ -9,8 +9,7 @@
 // Subdivision of the chunks to store the triangles
 #define GRID_SUBDIV 8
 
-#define PERLIN_OVER_GLOBAL_RATIO 1.f
-#define PERLIN_HEIGHT_FACTOR 1000.f
+#define PERLIN_HEIGHT_FACTOR 2000.f
 
 struct compTriClockwiseOrder {
   compTriClockwiseOrder(sf::Vector3f basePoint) {_basePoint = basePoint;}
