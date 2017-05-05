@@ -20,10 +20,10 @@ public:
 private:
 	float t;
 
+	std::array<GLuint,36> _indices;
 	std::array<float,72> _vertices;
 	std::array<float,48> _coord;
 	std::array<float,24> _layer;
-	std::array<GLuint,36> _indices;
 
 	GLuint _vbo;
 	GLuint _ibo;

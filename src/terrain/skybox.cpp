@@ -6,14 +6,6 @@
 
 Skybox::Skybox() :
 	t(1000.),
-	_vertices {
-     -t,-t,-t,  -t, t,-t,  -t,-t, t,  -t, t, t, // XN
-      t, t,-t,   t,-t,-t,   t, t, t,   t,-t, t, // XP
-      t,-t,-t,  -t,-t,-t,   t,-t, t,  -t,-t, t, // YN
-     -t, t,-t,   t, t,-t,  -t, t, t,   t, t, t, // YP
-      t,-t,-t,  -t,-t,-t,   t, t,-t,  -t, t,-t, // ZN
-     -t, t, t,   t, t, t,  -t,-t, t,   t,-t, t  // ZP
-	},
   _indices {
      0,  1,  2,  2,  1,  3, // XN
      4,  5,  6,  6,  5,  7, // XP
@@ -22,6 +14,14 @@ Skybox::Skybox() :
     16, 17, 18, 18, 17, 19, // ZN
     20, 21, 22, 22, 21, 23  // ZP
   },
+	_vertices {
+     -t,-t,-t,  -t, t,-t,  -t,-t, t,  -t, t, t, // XN
+      t, t,-t,   t,-t,-t,   t, t, t,   t,-t, t, // XP
+      t,-t,-t,  -t,-t,-t,   t,-t, t,  -t,-t, t, // YN
+     -t, t,-t,   t, t,-t,  -t, t, t,   t, t, t, // YP
+      t,-t,-t,  -t,-t,-t,   t, t,-t,  -t, t,-t, // ZN
+     -t, t, t,   t, t, t,  -t,-t, t,   t,-t, t  // ZP
+	},
   _coord {
     0, 1,  1, 1,  0, 0,  1, 0,
 		0, 1,  1, 1,  0, 0,  1, 0,

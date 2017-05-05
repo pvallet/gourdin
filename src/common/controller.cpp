@@ -12,9 +12,9 @@ Controller::Controller(sf::RenderWindow& window) :
   _running(true),
   _interface(window),
   _game(),
-  _currentHandlerType(HDLR_SANDBOX),
   _eHandlerGame(_game,_interface),
   _eHandlerSandbox(_game,_interface),
+  _currentHandlerType(HDLR_SANDBOX),
   _window(window) {
 
   Camera& cam = Camera::getInstance();

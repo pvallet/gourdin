@@ -2,13 +2,42 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
+#include <cstring>
+
 #include "controller.h"
 
-int main() {
+#ifndef NDEBUG
+  #include "testHandler.hpp"
+#endif
+
+int main(int argc, char* argv[]) {
+
+#ifndef NDEBUG
+  bool onlyTests = false;
+  sf::Clock beginningOfProg;
+  TestHandler testHandler(beginningOfProg);
+
+  if (argc > 1) {
+    if (strcmp(argv[1],"clean") == 0) {
+      testHandler.clean();
+      return 0;
+    }
+    else if (strcmp(argv[1],"tests_only") == 0)
+      onlyTests = true;
+    else {
+      std::cout << "Unkown option, try 'clean' or 'tests_only'" << '\n';
+      return 0;
+    }
+  }
+#endif
+
   sf::ContextSettings context(24, 8, 4, 3, 0);
 
-  // sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+#ifndef NDEBUG
   sf::RenderWindow window(sf::VideoMode(1366, 768), "OpenGL", sf::Style::Default, context);
+#else
+  sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+#endif
 
   window.setVerticalSyncEnabled(true);
   window.setKeyRepeatEnabled(false);
@@ -26,6 +55,13 @@ int main() {
   Controller controller(window);
 
   controller.init();
+
+#ifndef NDEBUG
+  testHandler.runTests(controller);
+
+  if (onlyTests)
+    return 0;
+#endif
 
   controller.run();
 

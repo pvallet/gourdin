@@ -13,3 +13,5 @@ build/
 external/
 ignored/
 makebuild/
+
+res/map/relief.png

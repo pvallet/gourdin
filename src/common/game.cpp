@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.h"
+#include "reliefGenerator.h"
 
 #include <ctime>
 
@@ -13,11 +14,11 @@
 
 Game::Game() :
   _wireframe(false),
+  _contentGenerator(_terrainGeometry),
+  _ocean(2),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
-  _contentGenerator(_terrainGeometry),
-  _ocean(2) {}
+  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
 
 void Game::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -42,6 +43,23 @@ void Game::init() {
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 
+  GeneratedImage relief;
+
+  if (relief.loadFromFile("res/map/relief.png"))
+    _terrainGeometry.setReliefGenerator(relief);
+
+  else {
+    std::cout << "Generating relief mask" << '\n';
+
+    ReliefGenerator reliefGenerator(_terrainGeometry);
+    reliefGenerator.generateRelief(512);
+    reliefGenerator.saveToFile("res/map/relief.png");
+    _terrainGeometry.setReliefGenerator(reliefGenerator.getRelief());
+  }
+
+  // The base subdivision level should be 1, it will take into account the generated relief
+  _terrainGeometry.generateNewSubdivisionLevel();
+
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
   _skybox.load("res/skybox/");
 
@@ -55,7 +73,6 @@ void Game::init() {
 
   _igElementDisplay.init();
   _contentGenerator.init();
-  // _contentGenerator.saveToImage("contents");
 
   resetCamera();
 
@@ -75,7 +92,6 @@ void Game::generateChunk(size_t x, size_t y) {
 }
 
 sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
-  assert(index < 4 && "Error in Game::neighbour: Index out of bounds");
   switch(index) {
     case 0:
       return sf::Vector2i(x-1,y);
@@ -88,6 +104,10 @@ sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
       break;
     case 3:
       return sf::Vector2i(x,y+1);
+      break;
+    default:
+      std::cerr << "Error in Game::neighbour: Index out of bounds" << '\n';
+      return sf::Vector2i(x,y);
       break;
   }
 }
@@ -152,13 +172,13 @@ void Game::updateMovingElementsStates() {
 
   // Compute moving elements interactions
   for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
-    Antilope* atlp;
-    Lion* lion;
+    Antilope* atlp = dynamic_cast<Antilope*>(*it);
+    Lion* lion = dynamic_cast<Lion*>(*it);
 
-    if (atlp = dynamic_cast<Antilope*>(*it))
+    if (atlp)
       atlp->updateState(_activeElements);
 
-    else if (lion = dynamic_cast<Lion*>(*it))
+    else if (lion)
       lion->kill(_activeElements);
   }
 }
@@ -174,8 +194,8 @@ void Game::compute2DCorners() {
                                          glm::vec3(0, 1, 0));
 
   for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
-    Controllable* ctrl;
-    if (ctrl = dynamic_cast<Controllable*>(*it)) {
+    Controllable* ctrl = dynamic_cast<Controllable*>(*it);
+    if (ctrl) {
       // Calculate new corners
       glm::vec3 corners3[4];
       float width = ctrl->getSize().x;
@@ -314,8 +334,8 @@ void Game::renderLifeBars(sf::RenderWindow& window) const {
   float maxHeightFactor;
 
   for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    Lion* lion;
-    if (lion = dynamic_cast<Lion*>(*it)) {
+    Lion* lion = dynamic_cast<Lion*>(*it);
+    if (lion) {
       corners = (*it)->getScreenCoord();
       maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
@@ -476,8 +496,8 @@ void Game::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2f target = get2DCoord(screenTarget);
 
   for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    Controllable* ctrl;
-    if (ctrl = dynamic_cast<Controllable*>(*it)) {
+    Controllable* ctrl = dynamic_cast<Controllable*>(*it);
+    if (ctrl) {
       ctrl->setTarget(target);
     }
   }

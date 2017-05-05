@@ -72,8 +72,8 @@ sf::FloatRect AnimationManager::getCurrentSprite() const {
 }
 
 sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) const {
-  return (float) _animInfo.at(_currentAnim).steps * _animInfo.at(_currentAnim).duration
-			         + _animInfo.at(_currentAnim).pause;
+  return (float) _animInfo.at(type).steps * _animInfo.at(type).duration
+			         + _animInfo.at(type).pause;
 }
 
 size_t AnimationManager::getClosestOrient(float orientation) const {

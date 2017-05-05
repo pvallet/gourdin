@@ -1,7 +1,6 @@
 #include "contentGenerator.h"
 
 #include <cstdlib>
-#include <sstream>
 
 #include "antilope.h"
 #include "human.h"
@@ -12,10 +11,8 @@
 
 ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
   _terrainGeometry(terrainGeometry),
-  _perlinGenerator(0, CONTENT_RES),
+  _perlinGenerator(3, 0.06, 0.75, CONTENT_RES),
   _treesInChunk(NB_CHUNKS * NB_CHUNKS) {
-
-  _perlinGenerator.setParams(3, 0.06, 0.75);
 
   std::vector<bool> initForestsMask(CONTENT_RES,false);
   _forestsMask = std::vector<std::vector<bool> >(CONTENT_RES, initForestsMask);
@@ -38,28 +35,6 @@ void ContentGenerator::init() {
 			  _forestsMask[i][j] = true;
 		}
 	}
-}
-
-void ContentGenerator::saveToImage(std::string savename) const {
-  std::vector<sf::Uint8> pixels(CONTENT_RES * CONTENT_RES * 4, 255);
-
-	for (int i = 0 ; i < CONTENT_RES ; i++) { // Convert mask to array of pixels
-		for (int j = 0 ; j < CONTENT_RES ; j++) {
-      if (_forestsMask[i][j]) {
-        pixels[i*4*CONTENT_RES + j*4] = 0;
-        pixels[i*4*CONTENT_RES + j*4 + 2] = 0;
-      }
-		}
-	}
-
-	sf::Texture texture;
-	texture.create(CONTENT_RES, CONTENT_RES);
-	texture.update(&pixels[0]);
-
-  std::ostringstream convert;
-  convert << savename << ".png";
-
-	texture.copyToImage().saveToFile(convert.str());
 }
 
 bool ContentGenerator::isInForestMask(sf::Vector2f pos) const {

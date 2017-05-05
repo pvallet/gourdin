@@ -27,7 +27,16 @@
 
 enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 
+#ifndef NDEBUG
+	class TestHandler;
+#endif
+
 class Game {
+
+#ifndef NDEBUG
+	friend TestHandler;
+#endif
+
 public:
 	Game();
 

@@ -12,6 +12,19 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
+# handling warnings
+if(MSVC)
+  # Force to always compile with W4
+  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  endif()
+elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  # Update if necessary
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-switch -Wno-sign-compare -pedantic")
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
 # set (CMAKE_CXX_STANDARD 11)
@@ -53,12 +66,22 @@ set(INCLUDE_DIRS
 # Find sources recursively
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 file(GLOB_RECURSE HEADER_FILES "src/*.h")
+file(GLOB_RECURSE DEBUG_SOURCE_FILES "src/*.cc")
+file(GLOB_RECURSE DEBUG_HEADER_FILES "src/*.hpp")
 
 # Add the folders with headers to the include path
 foreach (_headerFile ${HEADER_FILES})
     get_filename_component(_dir ${_headerFile} PATH)
     list (APPEND INCLUDE_DIRS ${_dir})
 endforeach()
+
+# Only add debug classes if we are in debug mode
+if ( CMAKE_BUILD_TYPE MATCHES Debug )
+  foreach (_headerFile ${DEBUG_HEADER_FILES})
+      get_filename_component(_dir ${_headerFile} PATH)
+      list (APPEND INCLUDE_DIRS ${_dir})
+  endforeach()
+endif()
 
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 
@@ -68,8 +91,12 @@ list(REMOVE_DUPLICATES INCLUDE_DIRS)
 file(GLOB_RECURSE EXTERNAL_SOURCE_FILES "external_manual/*.cpp")
 list(APPEND SOURCE_FILES ${EXTERNAL_SOURCE_FILES})
 
-foreach (_headerFile ${EXTERNAL_SOURCE_FILES})
-    get_filename_component(_dir ${_headerFile} PATH)
+if ( CMAKE_BUILD_TYPE MATCHES Debug )
+  list(APPEND SOURCE_FILES ${DEBUG_SOURCE_FILES})
+endif()
+
+foreach (_sourceFile ${EXTERNAL_SOURCE_FILES})
+    get_filename_component(_dir ${_sourceFile} PATH)
     list (APPEND INCLUDE_DIRS ${_dir})
 endforeach()
 

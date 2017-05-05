@@ -9,6 +9,9 @@
 // Subdivision of the chunks to store the triangles
 #define GRID_SUBDIV 8
 
+#define PERLIN_OVER_GLOBAL_RATIO 1.f
+#define PERLIN_HEIGHT_FACTOR 1000.f
+
 struct compTriClockwiseOrder {
   compTriClockwiseOrder(sf::Vector3f basePoint) {_basePoint = basePoint;}
 
@@ -66,6 +69,32 @@ std::array<size_t,3> Triangle::sortIndices(sf::Vector3f refPoint) const {
     std::cerr << "Error in Triangle::sortIndices, no match for refPoint in triangle" << std::endl;
 
   return res;
+}
+
+float Triangle::getHeight(sf::Vector2f pos, const std::list<const Triangle*>& triangles) {
+  for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
+    float x[3]; float y[3]; float z[3];
+
+    for (size_t i = 0; i < 3; i++) {
+      x[i] = (*tri)->vertices[i]->pos.x;
+			y[i] = (*tri)->vertices[i]->pos.y;
+			z[i] = (*tri)->vertices[i]->pos.z;
+    }
+
+    float s = ((y[1]-y[2])*(pos.x-x[2])+(x[2]-x[1])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    float t = ((y[2]-y[0])*(pos.x-x[2])+(x[0]-x[2])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
+			return s       * z[0] +
+	           t       * z[1] +
+	           (1-s-t) * z[2];
+    }
+  }
+
+  return 0;
 }
 
 void Vertex::sortTriangles() {
@@ -140,12 +169,18 @@ void Vertex::addAdjacentTriangle(const Triangle* tri) {
   _sorted = false;
 }
 
-TerrainGeometry::SubdivisionLevel::SubdivisionLevel() {
+TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const GeneratedImage* relief) :
+  _relief(relief) {
   std::vector<std::list<const Triangle*> > initializer(GRID_SUBDIV*GRID_SUBDIV);
   _trianglesInSubChunk.resize(NB_CHUNKS*NB_CHUNKS, initializer);
 }
 
 void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<sf::Vector3f,3> p, Biome biome) {
+  if (_relief != nullptr) {
+    for (size_t i = 0; i < 3; i++) {
+      p[i].z = PERLIN_HEIGHT_FACTOR * _relief->getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
+    }
+  }
 
   // Add the triangle to the list of all triangles
   Triangle newTriangle;
@@ -419,15 +454,28 @@ Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
     }
   }
 
-  return BIOME_NB_ITEMS;
+  return OCEAN;
+}
+
+std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() const {
+  std::list<const Triangle*> triangles;
+  for (auto t = _triangles.begin(); t != _triangles.end(); t++) {
+    triangles.push_back(&(*t));
+  }
+
+  return triangles;
 }
 
 TerrainGeometry::TerrainGeometry() :
   _chunkSubdivLvl(NB_CHUNKS*NB_CHUNKS, 0),
-  _currentGlobalSubdivLvl(0) {
+  _currentGlobalSubdivLvl(0),
+  _relief(std::vector<float>(1,0)) { // before giving the right relief generator, none is given
 
-  for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
-    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel()));
+  // The first subdivision level should accept the geometry given as is
+  _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(nullptr)));
+
+  for (size_t i = 1; i < MAX_SUBDIV_LVL+1; i++) {
+    _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(&_relief)));
   }
 }
 
@@ -436,12 +484,9 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
     SubdivisionLevel* currentLvl = _subdivisionLevels[_currentGlobalSubdivLvl].get();
     SubdivisionLevel* nextLvl    = _subdivisionLevels[_currentGlobalSubdivLvl+1].get();
 
-    std::list<const Triangle*> currentTriangles;
-    for (auto t = currentLvl->_triangles.begin(); t != currentLvl->_triangles.end(); t++) {
-      currentTriangles.push_back(&(*t));
-    }
+    std::list<const Triangle*> currentTriangles = currentLvl->getTriangles();
 
-    nextLvl->goingToAddNPoints(currentLvl->_vertices.size() * 2);
+    nextLvl->goingToAddNPoints(currentTriangles.size() * 2);
     nextLvl->subdivideTriangles(currentTriangles);
     nextLvl->computeNormals();
 
@@ -454,7 +499,7 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
   }
 }
 
-void TerrainGeometry::subdivideChunk(size_t x, size_t y, size_t subdivLvl) {
+void TerrainGeometry::subdivideChunk(int x, int y, size_t subdivLvl) {
   if ( x >= 0 && x < NB_CHUNKS && y >= 0 && y < NB_CHUNKS ) {
     if (_chunkSubdivLvl[x*NB_CHUNKS + y ] < subdivLvl) {
       subdivideChunk(x-1,y-1,subdivLvl-1);
