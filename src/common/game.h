@@ -20,6 +20,8 @@
 #include "skybox.h"
 #include "terrainGeometry.h"
 
+#include "mapInfoExtractor.h"
+
 #include "terrainTexManager.h"
 
 #include "shader.h"
@@ -89,6 +91,8 @@ private:
   Ocean _ocean;
 	Skybox _skybox;
   TerrainGeometry _terrainGeometry;
+
+	MapInfoExtractor _mapInfoExtractor;
 
 	TerrainTexManager _terrainTexManager;
 	Shader _terrainShader;

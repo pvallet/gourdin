@@ -16,6 +16,7 @@ Game::Game() :
   _wireframe(false),
   _contentGenerator(_terrainGeometry),
   _ocean(2),
+  _mapInfoExtractor(_terrainGeometry),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
@@ -45,14 +46,16 @@ void Game::init() {
 
   GeneratedImage relief;
 
-  if (relief.loadFromFile("res/map/relief.png"))
+  if (false)// (relief.loadFromFile("res/map/relief.png"))
     _terrainGeometry.setReliefGenerator(relief);
 
   else {
     std::cout << "Generating relief mask" << '\n';
 
-    ReliefGenerator reliefGenerator(_terrainGeometry);
-    reliefGenerator.generateRelief(512);
+    _mapInfoExtractor.convertMapData(512);
+
+    ReliefGenerator reliefGenerator(_mapInfoExtractor);
+    reliefGenerator.generateRelief();
     reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(reliefGenerator.getRelief());
   }
