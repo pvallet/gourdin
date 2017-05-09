@@ -11,6 +11,8 @@ public:
   GeneratedImage(size_t size, float color);
   GeneratedImage(std::vector<float> pixels);
 
+  inline const float& operator[](size_t index) const {return _pixels[index];}
+
   void setPixels(const std::vector<float>& pixels);
   // We store the 4 bytes of the floats in the RGBA channels
   bool loadFromFile(std::string filename);

@@ -46,13 +46,14 @@ void Game::init() {
 
   GeneratedImage relief;
 
-  if (false)// (relief.loadFromFile("res/map/relief.png"))
+  if (relief.loadFromFile("res/map/relief.png"))
     _terrainGeometry.setReliefGenerator(relief);
 
   else {
     std::cout << "Generating relief mask" << '\n';
 
     _mapInfoExtractor.convertMapData(512);
+    _mapInfoExtractor.generateBiomesTransitions(3);
 
     ReliefGenerator reliefGenerator(_mapInfoExtractor);
     reliefGenerator.generateRelief();

@@ -40,7 +40,7 @@ void TestHandler::saveToImage(const std::vector<float>& pixels, std::string file
   saveToImage(rgbPixels, filename);
 }
 
-std::vector<float> TestHandler::generateTestSquare(size_t size) const {
+std::vector<float> TestHandler::generateTestSquare(size_t size) {
   std::vector<float> res(size*size, 0);
 
   for (size_t i = 0; i < size; i++) {
@@ -55,7 +55,7 @@ std::vector<float> TestHandler::generateTestSquare(size_t size) const {
   return res;
 }
 
-std::vector<float> TestHandler::generateTestCircle(size_t size) const {
+std::vector<float> TestHandler::generateTestCircle(size_t size) {
   std::vector<float> res(size*size, 0);
 
   for (size_t i = 0; i < size; i++) {
@@ -68,6 +68,16 @@ std::vector<float> TestHandler::generateTestCircle(size_t size) const {
       else
         res[i*size + j] = 1;
     }
+  }
+
+  return res;
+}
+
+std::vector<float> TestHandler::generatePlainCanvas(size_t size, float color) {
+  std::vector<float> res(size*size, 0);
+
+  for (size_t i = 0; i < size*size; i++) {
+    res[i] = color;
   }
 
   return res;
@@ -95,12 +105,27 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
 
-  saveToImage(game._mapInfoExtractor.getIslandMask().getPixels(), "relief_islandMask.png");
-  saveToImage(game._mapInfoExtractor.getLakesMask().getPixels(), "relief_lakesMask.png");
-  saveToImage(game._mapInfoExtractor.getLakesElevations().getPixels(), "relief_lakesElevations.png");
-  saveToImage(game._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
-
   saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_relief.png");
+
+  // If we generated the relief from the map and not loaded it from a previous generation
+  if (game._mapInfoExtractor.getSize() != 0) {
+    saveToImage(game._mapInfoExtractor.getIslandMask().getPixels(), "relief_islandMask.png");
+    saveToImage(game._mapInfoExtractor.getLakesMask().getPixels(), "relief_lakesMask.png");
+    saveToImage(game._mapInfoExtractor.getLakesElevations().getPixels(), "relief_lakesElevations.png");
+    saveToImage(game._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
+
+    // Test image fusion
+    std::array<GeneratedImage, BIOME_NB_ITEMS> plainImages;
+    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+      plainImages[i].setPixels(generatePlainCanvas(512, i / (float) BIOME_NB_ITEMS));
+    }
+    std::array<const GeneratedImage*, BIOME_NB_ITEMS> toSend;
+    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+      toSend[i] = &plainImages[i];
+    }
+
+    saveToImage(game._mapInfoExtractor.imageFusion(toSend).getPixels(), "biomeTransitions.png");
+  }
 }
 
 void TestHandler::testImageHandling() const {

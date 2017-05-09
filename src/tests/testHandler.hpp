@@ -14,8 +14,9 @@ private:
   void saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) const;
   void saveToImage(const std::vector<float>& pixels, std::string filename) const;
   // generates a black square on a white background
-  std::vector<float> generateTestSquare(size_t size) const;
-  std::vector<float> generateTestCircle(size_t size) const;
+  static std::vector<float> generateTestSquare(size_t size);
+  static std::vector<float> generateTestCircle(size_t size);
+  static std::vector<float> generatePlainCanvas(size_t size, float color);
 
   void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename) const;
 
