@@ -117,10 +117,12 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
     saveToImage(game._mapInfoExtractor.imageFusion(toSend).getPixels(), "biomeTransitions.png");
 
     // Display additional reliefs
-    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+    for (auto it = game._reliefGenerator._biomesAdditionalRelief.begin();
+             it != game._reliefGenerator._biomesAdditionalRelief.end(); it++) {
+
       std::stringstream convert;
-      convert << "biome_" << i << ".png";
-      saveToImage(game._reliefGenerator._biomesAdditionalRelief[i]->getPixels(), convert.str());
+      convert << "biome_" << it->first << ".png";
+      saveToImage(it->second.getPixels(), convert.str());
     }
 
     saveToImage(game._reliefGenerator._additionalRelief.getPixels(), "biome_combined.png");
@@ -196,7 +198,7 @@ void TestHandler::testImageHandling() const {
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
   displayGameGeneratedComponents(controller.getGame());
-  testImageHandling();
+  // testImageHandling();
 }
 
 void TestHandler::clean() const {

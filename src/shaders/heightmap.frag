@@ -10,6 +10,6 @@ out vec3 color;
 uniform sampler2D myTextureSampler;
 
 void main(){
-	color = texture2D( myTextureSampler, uv ).rgb *
+	color = texture2D( myTextureSampler, uv ).rgb * 
 		(0.5 + 0.5*dot(lightDir,normal));
 }

@@ -97,7 +97,8 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   // Sorting reduces the number of glCalls to display all the trees
   std::sort(res.begin(), res.end(), compTrees());
 
-  return res;
+  // return res;
+  return std::vector<igElement*>();
 }
 
 std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f center,
@@ -144,7 +145,8 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t
     res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[ANTILOPE])));
   }
 
-  return res;
+  // return res;
+  return std::vector<igMovingElement*>();
 }
 
 std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const {

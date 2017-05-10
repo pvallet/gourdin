@@ -27,10 +27,8 @@ private:
 
   const MapInfoExtractor& _mapInfoExtractor;
 
-  std::array<const GeneratedImage*, BIOME_NB_ITEMS> _biomesAdditionalRelief;
-
+  std::map<Biome, GeneratedImage> _biomesAdditionalRelief;
   GeneratedImage _addNoRelief;
-  GeneratedImage _addSandDunes;
 
   GeneratedImage _additionalRelief;
   GeneratedImage _relief;

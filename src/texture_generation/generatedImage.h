@@ -20,6 +20,7 @@ public:
 
   void invert();
   void multiply(const std::vector<float>& img);
+  inline void multiply(float factor) {for (size_t i = 0; i < _pixels.size(); i++) _pixels[i] *= factor;}
   void addAndNormalize(const std::vector<float>& img, float weightAdding);
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);

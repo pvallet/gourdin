@@ -293,7 +293,7 @@ void Chunk::computeSubdivisionLevel() {
 
 	if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);
-	else if (distanceToChunk > 2500)
+	else if (distanceToChunk > 9000)
 		setSubdivisionLevel(2);
 	else if (distanceToChunk > 500)
 		setSubdivisionLevel(3);

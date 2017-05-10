@@ -47,7 +47,7 @@ void Game::init() {
 
   GeneratedImage relief;
 
-  if (relief.loadFromFile("res/map/relief.png"))
+  if (false)//(relief.loadFromFile("res/map/relief.png"))
     _terrainGeometry.setReliefGenerator(relief);
 
   else {

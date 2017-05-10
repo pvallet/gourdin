@@ -9,18 +9,30 @@ ReliefGenerator::ReliefGenerator(const MapInfoExtractor& mapInfoExtractor) :
 void ReliefGenerator::fillAdditionalReliefs() {
   size_t size = _mapInfoExtractor.getSize();
 
-  _addNoRelief = GeneratedImage::generatePlainCanvas(size, 0);
+  // Core relief
+  Perlin coreRelief(3, 0.05, 0.7, size);
+  _addNoRelief = GeneratedImage(coreRelief.getPixels());
+  _addNoRelief.multiply(0.4);
 
-  Perlin perlinSandDunes(3, 0.06, 0.75, size);
-  _addSandDunes = perlinSandDunes.getPixels();
+  // Dunes
+  Perlin perlinDunes(1, 0.1, 0, size);
+  Perlin perlinSmallerDunes(1, 0.5, 0, size);
+  GeneratedImage dunes(perlinDunes.getPixels());
+  dunes.multiply(0.3);
+  _biomesAdditionalRelief[BEACH] = dunes;
+  dunes.addAndNormalize(perlinSmallerDunes.getPixels(), 0.1);
+  _biomesAdditionalRelief[SUBTROPICAL_DESERT] = dunes;
+
+  std::array<const GeneratedImage*, BIOME_NB_ITEMS> biomeFusion;
 
   for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
-    _biomesAdditionalRelief[i] = &_addNoRelief;
+    if (_biomesAdditionalRelief.find((Biome) i) == _biomesAdditionalRelief.end())
+      biomeFusion[i] = &_addNoRelief;
+    else
+      biomeFusion[i] = &_biomesAdditionalRelief.at((Biome) i);
   }
 
-  _biomesAdditionalRelief[SUBTROPICAL_DESERT] = &_addSandDunes;
-
-  _additionalRelief = _mapInfoExtractor.imageFusion(_biomesAdditionalRelief);
+  _additionalRelief = _mapInfoExtractor.imageFusion(biomeFusion);
 }
 
 void ReliefGenerator::generateRelief() {
@@ -29,8 +41,7 @@ void ReliefGenerator::generateRelief() {
   GeneratedImage lakesElevations = _mapInfoExtractor.getLakesElevations();
   GeneratedImage elevationMask = _mapInfoExtractor.getElevationMask();
 
-  islandMask.smoothDilatation(50);
-  // islandMask.loadFromFile("islandMask.png");
+  islandMask.smoothDilatation(10);
 
   lakesMask.smoothDilatation(5);
   lakesElevations.nonWhiteDilatation(5);
@@ -42,5 +53,7 @@ void ReliefGenerator::generateRelief() {
   fillAdditionalReliefs();
 
   _relief.setPixels(elevationMask.getPixels());
-  _relief.addAndNormalize(_additionalRelief.getPixels(), 0.1);
+
+  _additionalRelief.multiply(islandMask.getPixels());
+  _relief.addAndNormalize(_additionalRelief.getPixels(), 0.3);
 }
