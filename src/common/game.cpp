@@ -17,6 +17,7 @@ Game::Game() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _mapInfoExtractor(_terrainGeometry),
+  _reliefGenerator(_mapInfoExtractor),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
@@ -55,10 +56,9 @@ void Game::init() {
     _mapInfoExtractor.convertMapData(512);
     _mapInfoExtractor.generateBiomesTransitions(3);
 
-    ReliefGenerator reliefGenerator(_mapInfoExtractor);
-    reliefGenerator.generateRelief();
-    reliefGenerator.saveToFile("res/map/relief.png");
-    _terrainGeometry.setReliefGenerator(reliefGenerator.getRelief());
+    _reliefGenerator.generateRelief();
+    _reliefGenerator.saveToFile("res/map/relief.png");
+    _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
   }
 
   // The base subdivision level should be 1, it will take into account the generated relief

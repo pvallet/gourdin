@@ -16,7 +16,6 @@ private:
   // generates a black square on a white background
   static std::vector<float> generateTestSquare(size_t size);
   static std::vector<float> generateTestCircle(size_t size);
-  static std::vector<float> generatePlainCanvas(size_t size, float color);
 
   void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename) const;
 

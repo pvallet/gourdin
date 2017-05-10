@@ -3,10 +3,25 @@
 #include <cmath>
 #include <iostream>
 
-#include "perlin.h"
-
 ReliefGenerator::ReliefGenerator(const MapInfoExtractor& mapInfoExtractor) :
   _mapInfoExtractor(mapInfoExtractor) {}
+
+void ReliefGenerator::fillAdditionalReliefs() {
+  size_t size = _mapInfoExtractor.getSize();
+
+  _addNoRelief = GeneratedImage::generatePlainCanvas(size, 0);
+
+  Perlin perlinSandDunes(3, 0.06, 0.75, size);
+  _addSandDunes = perlinSandDunes.getPixels();
+
+  for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+    _biomesAdditionalRelief[i] = &_addNoRelief;
+  }
+
+  _biomesAdditionalRelief[SUBTROPICAL_DESERT] = &_addSandDunes;
+
+  _additionalRelief = _mapInfoExtractor.imageFusion(_biomesAdditionalRelief);
+}
 
 void ReliefGenerator::generateRelief() {
   GeneratedImage islandMask = _mapInfoExtractor.getIslandMask();
@@ -15,6 +30,7 @@ void ReliefGenerator::generateRelief() {
   GeneratedImage elevationMask = _mapInfoExtractor.getElevationMask();
 
   islandMask.smoothDilatation(50);
+  // islandMask.loadFromFile("islandMask.png");
 
   lakesMask.smoothDilatation(5);
   lakesElevations.nonWhiteDilatation(5);
@@ -23,13 +39,8 @@ void ReliefGenerator::generateRelief() {
   elevationMask.combine(lakesElevations.getPixels(), lakesMask.getPixels());
   lakesMask.invert();
 
-  // islandMask.loadFromFile("islandMask.png");
-
-  Perlin perlinRelief(3, 0.06, 0.75, _mapInfoExtractor.getSize());
-  GeneratedImage randomRelief(perlinRelief.getPixels());
-  randomRelief.multiply(islandMask.getPixels());
-  randomRelief.multiply(lakesMask.getPixels());
+  fillAdditionalReliefs();
 
   _relief.setPixels(elevationMask.getPixels());
-  // _relief.addAndNormalize(randomRelief.getPixels(), 0.5);
+  _relief.addAndNormalize(_additionalRelief.getPixels(), 0.1);
 }

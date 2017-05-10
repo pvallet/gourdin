@@ -248,6 +248,16 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   return filter;
 }
 
+std::vector<float> GeneratedImage::generatePlainCanvas(size_t size, float color) {
+  std::vector<float> res(size*size, 0);
+
+  for (size_t i = 0; i < size*size; i++) {
+    res[i] = color;
+  }
+
+  return res;
+}
+
 float GeneratedImage::cubicInterpolate(float before_p0, float p0, float p1, float after_p1, float t) {
   float a3 = -0.5*before_p0 + 1.5*p0 - 1.5*p1 + 0.5*after_p1;
   float a2 = before_p0 - 2.5*p0 + 2*p1 - 0.5*after_p1;

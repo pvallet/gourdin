@@ -73,16 +73,6 @@ std::vector<float> TestHandler::generateTestCircle(size_t size) {
   return res;
 }
 
-std::vector<float> TestHandler::generatePlainCanvas(size_t size, float color) {
-  std::vector<float> res(size*size, 0);
-
-  for (size_t i = 0; i < size*size; i++) {
-    res[i] = color;
-  }
-
-  return res;
-}
-
 void TestHandler::ContentGeneratorDisplayForestsMask(
   const ContentGenerator& contentGenerator, std::string savename) const {
 
@@ -117,7 +107,7 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
     // Test image fusion
     std::array<GeneratedImage, BIOME_NB_ITEMS> plainImages;
     for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
-      plainImages[i].setPixels(generatePlainCanvas(512, i / (float) BIOME_NB_ITEMS));
+      plainImages[i].setPixels(GeneratedImage::generatePlainCanvas(512, i / (float) BIOME_NB_ITEMS));
     }
     std::array<const GeneratedImage*, BIOME_NB_ITEMS> toSend;
     for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
@@ -125,6 +115,15 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
     }
 
     saveToImage(game._mapInfoExtractor.imageFusion(toSend).getPixels(), "biomeTransitions.png");
+
+    // Display additional reliefs
+    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+      std::stringstream convert;
+      convert << "biome_" << i << ".png";
+      saveToImage(game._reliefGenerator._biomesAdditionalRelief[i]->getPixels(), convert.str());
+    }
+
+    saveToImage(game._reliefGenerator._additionalRelief.getPixels(), "biome_combined.png");
   }
 }
 

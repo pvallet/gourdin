@@ -20,7 +20,7 @@
 #include "skybox.h"
 #include "terrainGeometry.h"
 
-#include "mapInfoExtractor.h"
+#include "reliefGenerator.h"
 
 #include "terrainTexManager.h"
 
@@ -93,6 +93,7 @@ private:
   TerrainGeometry _terrainGeometry;
 
 	MapInfoExtractor _mapInfoExtractor;
+	ReliefGenerator  _reliefGenerator;
 
 	TerrainTexManager _terrainTexManager;
 	Shader _terrainShader;
