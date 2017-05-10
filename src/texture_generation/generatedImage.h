@@ -38,7 +38,6 @@ public:
   // If the filter size is even, the generator makes it odd
   static std::vector<float> generateBoxFilter(size_t size);
   static std::vector<float> generateGaussianFilter(size_t size, float sigma);
-  static std::vector<float> generatePlainCanvas(size_t size, float color);
 
 private:
   static float cubicInterpolate(float before_p0, float p0, float p1, float after_p1, float t);

@@ -46,6 +46,7 @@ bool GeneratedImage::loadFromFile(std::string filename) {
   _size = img.getSize().x;
   _pixels.resize(_size*_size, 0);
 
+  #pragma omp parallel for
   for (size_t i = 0; i < _size*_size; i++) {
     ConvertFloat convert;
     for (size_t j = 0; j < 4; j++) {
@@ -60,6 +61,7 @@ bool GeneratedImage::loadFromFile(std::string filename) {
 void GeneratedImage::saveToFile(std::string filename) const {
   std::vector<sf::Uint8> rgbPixels(4*_pixels.size());
 
+  #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
     ConvertFloat convert;
     convert.f = _pixels[i];
@@ -77,6 +79,7 @@ void GeneratedImage::saveToFile(std::string filename) const {
 }
 
 void GeneratedImage::invert() {
+  #pragma omp parallel for
   for (size_t i = 0; i < _size*_size; i++) {
     _pixels[i] = 1 - _pixels[i];
   }
@@ -85,6 +88,7 @@ void GeneratedImage::invert() {
 void GeneratedImage::multiply(const std::vector<float>& img) {
   assert(img.size() == _pixels.size());
 
+  #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
     _pixels[i] *= img[i];
   }
@@ -95,6 +99,7 @@ void GeneratedImage::addAndNormalize(const std::vector<float>& img, float weight
 
   float normalizationFactor = 1 + weightAdding;
 
+  #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
     _pixels[i] = (_pixels[i] + weightAdding * img[i]) / normalizationFactor;
   }
@@ -104,6 +109,7 @@ void GeneratedImage::combine(const std::vector<float>& img, const std::vector<fl
   assert(img.size() == _pixels.size());
   assert(mask.size() == _pixels.size());
 
+  #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
     _pixels[i] = img[i] * mask[i] + _pixels[i] * (1-mask[i]);
   }
@@ -117,6 +123,7 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
 
   std::vector<float> nPixels(_size*_size, 0);
 
+  #pragma omp parallel for collapse(2)
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
     for (int k = 0; k < filterSize; k++) {
@@ -149,12 +156,14 @@ void GeneratedImage::smoothDilatation(float radius) {
   std::vector<float> dilMask(dilSize*dilSize);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
+  #pragma omp parallel for collapse (2)
   for (size_t i = 0; i < dilSize; i++) {
     for (size_t j = 0; j < dilSize; j++) {
       dilMask[i*dilSize + j] = sqrt(i*i + j*j) / radius;
     }
   }
 
+  #pragma omp parallel for collapse (2)
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
     // Mask is only applied to expand black regions
@@ -178,6 +187,7 @@ void GeneratedImage::nonWhiteDilatation(float radius) {
   std::vector<float> dilMask(dilSize*dilSize, 0);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
+  #pragma omp parallel for collapse (2)
   for (size_t i = 0; i < dilSize; i++) {
     for (size_t j = 0; j < dilSize; j++) {
       if (sqrt(i*i + j*j) <= radius)
@@ -186,6 +196,7 @@ void GeneratedImage::nonWhiteDilatation(float radius) {
   }
 
   std::vector<float> result = _pixels;
+  #pragma omp parallel for collapse (2)
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
     // Mask is only applied to expand black regions
@@ -210,6 +221,7 @@ std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {
 
   std::vector<float> filter(size*size, 0);
 
+  #pragma omp parallel for
   for (size_t i = 0; i < size*size; i++) {
     filter[i] = 1.f / (float) (size*size);
   }
@@ -230,6 +242,7 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   // sum is for normalization
   float sum = 0.f;
 
+  #pragma omp parallel for collapse (2)
   for (int i = -halfSize; i <= halfSize; i++) {
     for (int j = -halfSize; j <= halfSize; j++) {
       float r2 = i*i + j*j;
@@ -241,21 +254,12 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   }
 
   // normalize the filter
+  #pragma omp parallel for
   for (size_t i = 0; i < size*size; i++) {
     filter[i] /= sum;
   }
 
   return filter;
-}
-
-std::vector<float> GeneratedImage::generatePlainCanvas(size_t size, float color) {
-  std::vector<float> res(size*size, 0);
-
-  for (size_t i = 0; i < size*size; i++) {
-    res[i] = color;
-  }
-
-  return res;
 }
 
 float GeneratedImage::cubicInterpolate(float before_p0, float p0, float p1, float after_p1, float t) {
