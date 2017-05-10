@@ -19,18 +19,8 @@ sudo apt-get install build-essential libgl1-mesa-dev libgomp1 cmake
 ```
 Then you will need the dependencies of the project. Prefer using the ones from the repositories as building them from the source takes a while.
 ```
-libsfml-dev libglew-dev libglm-dev
+sudo apt-get install libsfml-dev libglew-dev libglm-dev
 ```
-You might need to build these dependencies locally, for example if your repository does not have the right version (e.g. SFML < 2.4.1). In order to do that, run the script
-```
-./get_dependencies
-```
-to get all of them, or specify the libraries you want to build locally
-```
-./get_dependencies SFML
-```
-
-The entries are `glm`, `SFML` and `glew`.
 
 #### 2. Building the project
 
@@ -40,17 +30,34 @@ mkdir build && cd build
 cmake ..
 make -j4
 ```
+If cmake does not work because a dependency is not satisfied (e.g. SFML < 2.4.1), please refer to the section
+
+3.(Optional) Build dependencies locally.
 
 To run gourdin, go the root of the project (with `cd ..`) and then run the executable:
 ```
 ./build/bin/Release/out
 ```
 
-Be sure to pick the right path, for example if you chose a debug build.
+Be sure to pick the right path, for example if you chose a debug build you might want to run `./build/bin/Debug/out`
 
 If you want to configure Code::Blocks in order to use its debugger, please refer to the section
 
 Windows -> 3.Configure your Code::Blocks project
+
+#### 3. (Optional) Build dependencies locally
+
+You might need to build these dependencies locally, for example if your repository does not have the right version (e.g. SFML < 2.4.1). In order to do that, run the script with no argument to get all of them.
+```
+./get_dependencies
+```
+You can also specify which libraries you want to build.
+```
+./get_dependencies SFML
+```
+
+The entries are `glm`, `SFML` and `glew`.
+
 
 ## Windows
 
