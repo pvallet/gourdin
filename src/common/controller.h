@@ -23,7 +23,7 @@ public:
 private:
 	void render() const;
 
-	void benchmark(size_t range);
+	void benchmark();
 
 	bool _running;
 	sf::Time _elapsed;

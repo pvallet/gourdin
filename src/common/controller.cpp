@@ -61,7 +61,7 @@ void Controller::run() {
         _running = _eHandlerGame.handleEvent(event,_currentHandlerType);
       else {
         if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::B)
-          benchmark(100);
+          benchmark();
         _running = _eHandlerSandbox.handleEvent(event,_currentHandlerType);
       }
 
@@ -83,24 +83,26 @@ void Controller::run() {
   }
 }
 
-void Controller::benchmark(size_t range) {
+void Controller::benchmark() {
   Camera& cam = Camera::getInstance();
+
+  cam.setPointedPos(sf::Vector2f(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
+  cam.setValues(5000, 225.f, INIT_PHI);
 
   sf::Time totalElapsed, elapsed;
   sf::Clock frameClock;
 
-  _game.resetCamera();
-
-  for (size_t i = 0; i < range; i++) {
+  for (size_t i = 0; i < 100; i++) {
     elapsed = frameClock.restart();
     totalElapsed += elapsed;
-    cam.zoom(5.f * i);
+    cam.setPointedPos(sf::Vector2f(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
+                                   CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
     _game.update(elapsed);
     render();
   }
 
-  std::cout << "Rendered " << range << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * range << std::endl;
+  std::cout << "Rendered " << 100 << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
+  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * 100 << std::endl;
 
   _game.resetCamera();
 }
