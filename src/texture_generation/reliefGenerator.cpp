@@ -55,5 +55,6 @@ void ReliefGenerator::generateRelief() {
   _relief.setPixels(elevationMask.getPixels());
 
   _additionalRelief.multiply(islandMask.getPixels());
+  _additionalRelief.multiply(lakesMask.getPixels());
   _relief.addAndNormalize(_additionalRelief.getPixels(), 0.3);
 }

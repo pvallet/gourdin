@@ -242,7 +242,6 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
   // sum is for normalization
   float sum = 0.f;
 
-  #pragma omp parallel for collapse (2)
   for (int i = -halfSize; i <= halfSize; i++) {
     for (int j = -halfSize; j <= halfSize; j++) {
       float r2 = i*i + j*j;

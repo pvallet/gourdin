@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #include <map>
+#include <set>
 
 class MapInfoExtractor {
 public:
@@ -25,6 +26,13 @@ private:
   // Average heights of contiguous pixels of a lake and feeds it to _lakesElevations
   static std::vector<float> computeLakesElevations(
     size_t size, const TerrainGeometry::SubdivisionLevel& smoother, float baseColor);
+
+  // Recursive functions to compute lakes elevations
+  // They help simplify lakes adjacency to point always to the lowest one
+  // (e.g. if lake 2 is lake 1 and lake 3 is lake 2, put lake 3 is lake 1)
+  static size_t getLowestIndexAdjacentLake(const std::vector<std::set<size_t> >& adjacentLakes,
+    std::set<size_t>& nodesSeen, size_t node);
+
 
   const TerrainGeometry& _terrainGeometry;
 
