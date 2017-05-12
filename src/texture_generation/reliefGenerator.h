@@ -28,7 +28,7 @@ private:
   const MapInfoExtractor& _mapInfoExtractor;
 
   std::map<Biome, GeneratedImage> _biomesAdditionalRelief;
-  GeneratedImage _addNoRelief;
+  GeneratedImage _defaultRelief;
 
   GeneratedImage _additionalRelief;
   GeneratedImage _relief;

@@ -202,6 +202,7 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
 GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedImage*, BIOME_NB_ITEMS>& imgs) const {
   std::vector<float> result(_size*_size, 0);
 
+  #pragma omp parallel for collapse (2)
   for (size_t i = 0; i < _size; i++) {
   for (size_t j = 0; j < _size; j++) {
     size_t currentIndex = i*_size + j;

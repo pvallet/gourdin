@@ -10,7 +10,7 @@
 #include <ctime>
 
 #define CHUNK_BEGIN_X 14
-#define CHUNK_BEGIN_Y 16
+#define CHUNK_BEGIN_Y 20
 
 Game::Game() :
   _wireframe(false),
@@ -47,14 +47,14 @@ void Game::init() {
 
   GeneratedImage relief;
 
-  if (false)//(relief.loadFromFile("res/map/relief.png"))
+  if (relief.loadFromFile("res/map/relief.png"))
     _terrainGeometry.setReliefGenerator(relief);
 
   else {
     std::cout << "Generating relief mask" << '\n';
 
     _mapInfoExtractor.convertMapData(512);
-    _mapInfoExtractor.generateBiomesTransitions(3);
+    _mapInfoExtractor.generateBiomesTransitions(7);
 
     _reliefGenerator.generateRelief();
     _reliefGenerator.saveToFile("res/map/relief.png");
