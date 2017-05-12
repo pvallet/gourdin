@@ -61,7 +61,7 @@ void Game::init() {
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
   }
 
-  // The base subdivision level should be 1, it will take into account the generated relief
+  // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
   _terrainGeometry.generateNewSubdivisionLevel();
 
   _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));

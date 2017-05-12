@@ -85,24 +85,9 @@ void GeneratedImage::invert() {
   }
 }
 
-void GeneratedImage::multiply(const std::vector<float>& img) {
-  assert(img.size() == _pixels.size());
-
-  #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
-    _pixels[i] *= img[i];
-  }
-}
-
-void GeneratedImage::addAndNormalize(const std::vector<float>& img, float weightAdding) {
-  assert(img.size() == _pixels.size());
-
-  float normalizationFactor = 1 + weightAdding;
-
-  #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
-    _pixels[i] = (_pixels[i] + weightAdding * img[i]) / normalizationFactor;
-  }
+void GeneratedImage::normalize() {
+  float max = *std::max_element(_pixels.begin(), _pixels.end());
+  *this /= max;
 }
 
 void GeneratedImage::combine(const std::vector<float>& img, const std::vector<float>& mask) {
@@ -313,4 +298,72 @@ float GeneratedImage::getValueNormalizedCoord(float x, float y) const {
     y = 1;
 
   return bicubicInterpolate(x*_size, y*_size, _pixels);
+}
+
+GeneratedImage& GeneratedImage::operator+=(const GeneratedImage& rhs) {
+  assert(rhs._size == _size);
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] += rhs._pixels[i];
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator-=(const GeneratedImage& rhs) {
+  assert(rhs._size == _size);
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] -= rhs._pixels[i];
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator*=(const GeneratedImage& rhs) {
+  assert(rhs._size == _size);
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] *= rhs._pixels[i];
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator/=(const GeneratedImage& rhs) {
+  assert(rhs._size == _size);
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] /= rhs._pixels[i];
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator+=(float rhs) {
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] += rhs;
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator-=(float rhs) {
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] -= rhs;
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator*=(float rhs) {
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] *= rhs;
+  }
+  return *this;
+}
+
+GeneratedImage& GeneratedImage::operator/=(float rhs) {
+  #pragma omp parallel for
+  for (size_t i = 0; i < _pixels.size(); i++) {
+    _pixels[i] /= rhs;
+  }
+  return *this;
 }

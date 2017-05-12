@@ -12,15 +12,16 @@ void ReliefGenerator::fillAdditionalReliefs() {
   // Core relief
   Perlin coreRelief(3, 0.05, 0.7, size);
   _addNoRelief = GeneratedImage(coreRelief.getPixels());
-  _addNoRelief.multiply(0.4);
+  _addNoRelief *= 0.4;
 
   // Dunes
   Perlin perlinDunes(1, 0.1, 0, size);
   Perlin perlinSmallerDunes(1, 0.5, 0, size);
   GeneratedImage dunes(perlinDunes.getPixels());
-  dunes.multiply(0.3);
+  dunes *= 0.3;
   _biomesAdditionalRelief[BEACH] = dunes;
-  dunes.addAndNormalize(perlinSmallerDunes.getPixels(), 0.1);
+  dunes += GeneratedImage(perlinSmallerDunes.getPixels()) * 0.1;
+  dunes /= 1.1;
   _biomesAdditionalRelief[SUBTROPICAL_DESERT] = dunes;
 
   std::array<const GeneratedImage*, BIOME_NB_ITEMS> biomeFusion;
@@ -54,7 +55,7 @@ void ReliefGenerator::generateRelief() {
 
   _relief.setPixels(elevationMask.getPixels());
 
-  _additionalRelief.multiply(islandMask.getPixels());
-  _additionalRelief.multiply(lakesMask.getPixels());
-  _relief.addAndNormalize(_additionalRelief.getPixels(), 0.3);
+  _additionalRelief *= islandMask * lakesMask;
+  _relief += _additionalRelief * 0.3;
+  _relief.normalize();
 }

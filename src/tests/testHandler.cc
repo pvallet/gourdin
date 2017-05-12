@@ -169,6 +169,17 @@ void TestHandler::testImageHandling() const {
   std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(dilatation.getPixels(), "test_circle_dilatation.png");
 
+  // Operators
+  GeneratedImage operations = testCircle;
+  operations *= 0.5;
+  saveToImage(operations.getPixels(), "test_circle_multiply.png");
+  operations += 0.5;
+  saveToImage(operations.getPixels(), "test_circle_multiply-add.png");
+  operations -= 0.5;
+  saveToImage(operations.getPixels(), "test_circle_multiply-add-substract.png");
+  operations /= 0.5;
+  saveToImage(operations.getPixels(), "test_circle_multiply-add-substract-divide.png");
+
   // Combine
   GeneratedImage white(512, 1.f);
   Perlin randomAdding(3, 0.06, 0.1, 512);

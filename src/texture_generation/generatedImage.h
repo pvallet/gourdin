@@ -19,9 +19,7 @@ public:
   void saveToFile(std::string filename) const;
 
   void invert();
-  void multiply(const std::vector<float>& img);
-  inline void multiply(float factor) {for (size_t i = 0; i < _pixels.size(); i++) _pixels[i] *= factor;}
-  void addAndNormalize(const std::vector<float>& img, float weightAdding);
+  void normalize();
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);
   void combine(const std::vector<float>& img, const std::vector<float>& mask);
@@ -46,4 +44,50 @@ private:
   size_t _size;
 
   std::vector<float> _pixels;
+
+public:
+
+  // Overloaded operators
+
+  GeneratedImage& operator+=(const GeneratedImage& rhs);
+  friend GeneratedImage operator+(GeneratedImage lhs, const GeneratedImage& rhs) {
+    lhs += rhs; return lhs;
+  }
+
+  GeneratedImage& operator-=(const GeneratedImage& rhs);
+  friend GeneratedImage operator-(GeneratedImage lhs, const GeneratedImage& rhs) {
+    lhs -= rhs; return lhs;
+  }
+
+  GeneratedImage& operator*=(const GeneratedImage& rhs);
+  friend GeneratedImage operator*(GeneratedImage lhs, const GeneratedImage& rhs) {
+    lhs *= rhs; return lhs;
+  }
+
+  GeneratedImage& operator/=(const GeneratedImage& rhs);
+  friend GeneratedImage operator/(GeneratedImage lhs, const GeneratedImage& rhs) {
+    lhs /= rhs; return lhs;
+  }
+
+  // We define operators for simple values to avoid creating a new image
+
+  GeneratedImage& operator+=(float rhs);
+  friend GeneratedImage operator+(GeneratedImage lhs, float rhs) {
+    lhs += rhs; return lhs;
+  }
+
+  GeneratedImage& operator-=(float rhs);
+  friend GeneratedImage operator-(GeneratedImage lhs, float rhs) {
+    lhs -= rhs; return lhs;
+  }
+
+  GeneratedImage& operator*=(float rhs);
+  friend GeneratedImage operator*(GeneratedImage lhs, float rhs) {
+    lhs *= rhs; return lhs;
+  }
+
+  GeneratedImage& operator/=(float rhs);
+  friend GeneratedImage operator/(GeneratedImage lhs, float rhs) {
+    lhs /= rhs; return lhs;
+  }
 };
