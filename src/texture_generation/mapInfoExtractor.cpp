@@ -1,16 +1,22 @@
 #include "mapInfoExtractor.h"
 
+#define HEIGHT_FUNCTION(h) (0.8f * pow(h, 2) + 0.2f * h)
+
 MapInfoExtractor::MapInfoExtractor(const TerrainGeometry& terrainGeometry) :
   _terrainGeometry(terrainGeometry),
-  _size(0) {}
+  _size(0),
+  _transitionSize(0) {}
 
 void MapInfoExtractor::convertMapData(size_t size) {
-  std::vector<float> elevationMask(size*size);
-  std::vector<float> islandMask(size*size);
-  std::vector<float> lakesMask(size*size);
+  _elevationMask = GeneratedImage(size,0);
   _biomes.resize(size*size, OCEAN);
   _size = size;
 
+  for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+    _biomesMasks[i] = GeneratedImage(512, 0);
+  }
+
+  // Subdivide the geometry first level of detail to smooth it
   const TerrainGeometry::SubdivisionLevel* firstSubdiv = _terrainGeometry.getFirstSubdivLevel();
   TerrainGeometry::SubdivisionLevel smoother(NULL);
 
@@ -26,33 +32,24 @@ void MapInfoExtractor::convertMapData(size_t size) {
       sf::Vector2f pos(i * MAX_COORD / size, j * MAX_COORD / size);
       size_t index = i*size + j;
       _biomes[index] = smoother.getBiome(pos);
+      _biomesMasks[_biomes[index]][index] = 1;
 
-      elevationMask[index] = pow(Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos)), 2);
-      if (elevationMask[index] > maxHeight)
-        maxHeight = elevationMask[index];
+      float height = Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos));
 
-      islandMask[index] = _biomes[index] == OCEAN ? 0 : 1;
-
-      if (_biomes[index] == WATER || _biomes[index] == LAKE || _biomes[index] == MARSH || _biomes[index] == RIVER)
-        lakesMask[index] = 0;
-      else
-        lakesMask[index] = 1;
+      _elevationMask[index] = HEIGHT_FUNCTION(height);
+      if (_elevationMask[index] > maxHeight)
+        maxHeight = _elevationMask[index];
     }
   }
 
-  std::vector<float> lakesElevations = computeLakesElevations(size, smoother, maxHeight);
+  computeLakesElevations(size, smoother, maxHeight);
 
   // Normalizations
   #pragma omp parallel for
   for (size_t i = 0; i < size*size; i++) {
-    elevationMask[i] /= maxHeight;
-    lakesElevations[i] /= maxHeight;
+    _elevationMask[i] /= maxHeight;
+    _lakesElevations[i] /= maxHeight;
   }
-
-  _lakesElevations.setPixels(lakesElevations);
-  _elevationMask.setPixels(elevationMask);
-  _islandMask.setPixels(islandMask);
-  _lakesMask.setPixels(lakesMask);
 }
 
 size_t MapInfoExtractor::getLowestIndexAdjacentLake(const std::vector<std::set<size_t> >& adjacentLakes,
@@ -74,7 +71,7 @@ size_t MapInfoExtractor::getLowestIndexAdjacentLake(const std::vector<std::set<s
     return -1;
 }
 
-std::vector<float> MapInfoExtractor::computeLakesElevations(
+void MapInfoExtractor::computeLakesElevations(
   size_t size, const TerrainGeometry::SubdivisionLevel& smoother, float baseColor) {
   std::vector<size_t> lakesInit(size, -1);
   // Lakes positions
@@ -94,7 +91,8 @@ std::vector<float> MapInfoExtractor::computeLakesElevations(
       Biome biome = smoother.getBiome(pos);
 
       if (biome == WATER || biome == LAKE || biome == MARSH || biome == RIVER) {
-        float pixelHeight = pow(Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos)), 2);
+        float pixelHeight = Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos));
+        pixelHeight = HEIGHT_FUNCTION(pixelHeight);
 
         if (i > 0 && lakes[i-1][j] != -1) {
           size_t abovePixel = lakes[i-1][j];
@@ -156,24 +154,21 @@ std::vector<float> MapInfoExtractor::computeLakesElevations(
     lakesTotalElevation[i] /= (float) lakesNumberOfPixels[i];
   }
 
-  std::vector<float> lakesElevations(size*size);
+  _lakesElevations = GeneratedImage(size,baseColor);
   #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < size; i++) {
     for (size_t j = 0; j < size; j++) {
-      if (lakes[i][j] == -1)
-        lakesElevations[i*size + j] = baseColor;
-      else
-        lakesElevations[i*size + j] = lakesTotalElevation[lakes[i][j]];
+      if (lakes[i][j] != -1)
+        _lakesElevations[i*size + j] = lakesTotalElevation[lakes[i][j]];
     }
   }
-
-  return lakesElevations;
 }
 
 void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
+  _transitionSize = transitionSize;
   int dilSize = round(transitionSize)+1;
 
-  _biomesMasks.resize(_size*_size);
+  _biomesCombinations.resize(_size*_size);
   std::vector<float> dilMask(dilSize*dilSize);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
@@ -194,10 +189,10 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
       size_t currentIndex = k*_size + l;
 
       // Initialize a new biome inserted in the map
-      if (_biomesMasks[currentIndex].find(biome) == _biomesMasks[currentIndex].end())
-        _biomesMasks[currentIndex][biome] = 0;
+      if (_biomesCombinations[currentIndex].find(biome) == _biomesCombinations[currentIndex].end())
+        _biomesCombinations[currentIndex][biome] = 0;
 
-      _biomesMasks[currentIndex][biome] = std::max(_biomesMasks[currentIndex][biome], dilMask[abs(k-i)*dilSize + abs(l-j)]);
+      _biomesCombinations[currentIndex][biome] = std::max(_biomesCombinations[currentIndex][biome], dilMask[abs(k-i)*dilSize + abs(l-j)]);
     }
     }
   }
@@ -212,7 +207,7 @@ GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedIma
     size_t currentIndex = i*_size + j;
     float normalizationFactor = 0;
 
-    for (auto biome = _biomesMasks[currentIndex].begin(); biome != _biomesMasks[currentIndex].end(); biome++) {
+    for (auto biome = _biomesCombinations[currentIndex].begin(); biome != _biomesCombinations[currentIndex].end(); biome++) {
       result[currentIndex] += biome->second * (*imgs[biome->first])[currentIndex];
       normalizationFactor += biome->second;
     }

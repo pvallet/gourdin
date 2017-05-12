@@ -135,7 +135,41 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   _pixels = nPixels;
 }
 
-void GeneratedImage::smoothDilatation(float radius) {
+void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongsToExpandedRegion) {
+  int dilSize = round(radius)+1;
+
+  std::vector<float> dilMask(dilSize*dilSize, 0);
+
+  // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
+  #pragma omp parallel for collapse (2)
+  for (size_t i = 0; i < dilSize; i++) {
+    for (size_t j = 0; j < dilSize; j++) {
+      if (sqrt(i*i + j*j) <= radius)
+        dilMask[i*dilSize + j] = 1;
+    }
+  }
+
+  std::vector<float> result = _pixels;
+  #pragma omp parallel for collapse (2)
+  for (int i = 0; i < _size; i++) {
+  for (int j = 0; j < _size; j++) {
+
+    if (belongsToExpandedRegion(_pixels[i*_size + j])) {
+      for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {
+      for (int l = std::max(0, j-dilSize+1); l < std::min((int)_size, j+dilSize); l++) {
+
+        if (dilMask[abs(k-i)*dilSize + abs(l-j)] == 1)
+          result[k*_size + l] = _pixels[i*_size + j];
+      }
+      }
+    }
+  }
+  }
+
+  _pixels = result;
+}
+
+void GeneratedImage::smoothBlackDilatation(float radius) {
   int dilSize = round(radius)+1;
 
   std::vector<float> dilMask(dilSize*dilSize);
@@ -164,40 +198,6 @@ void GeneratedImage::smoothDilatation(float radius) {
     }
   }
   }
-}
-
-void GeneratedImage::nonWhiteDilatation(float radius) {
-  int dilSize = round(radius)+1;
-
-  std::vector<float> dilMask(dilSize*dilSize, 0);
-
-  // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
-  #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < dilSize; i++) {
-    for (size_t j = 0; j < dilSize; j++) {
-      if (sqrt(i*i + j*j) <= radius)
-        dilMask[i*dilSize + j] = 1;
-    }
-  }
-
-  std::vector<float> result = _pixels;
-  #pragma omp parallel for collapse (2)
-  for (int i = 0; i < _size; i++) {
-  for (int j = 0; j < _size; j++) {
-    // Mask is only applied to expand black regions
-    if (_pixels[i*_size + j] != 1.f) {
-      for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {
-      for (int l = std::max(0, j-dilSize+1); l < std::min((int)_size, j+dilSize); l++) {
-
-        if (dilMask[abs(k-i)*dilSize + abs(l-j)] == 1)
-          result[k*_size + l] = _pixels[i*_size + j];
-      }
-      }
-    }
-  }
-  }
-
-  _pixels = result;
 }
 
 std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {

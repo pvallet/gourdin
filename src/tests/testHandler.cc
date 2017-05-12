@@ -99,8 +99,6 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
 
   // If we generated the relief from the map and not loaded it from a previous generation
   if (game._mapInfoExtractor.getSize() != 0) {
-    saveToImage(game._mapInfoExtractor.getIslandMask().getPixels(), "relief_islandMask.png");
-    saveToImage(game._mapInfoExtractor.getLakesMask().getPixels(), "relief_lakesMask.png");
     saveToImage(game._mapInfoExtractor.getLakesElevations().getPixels(), "relief_lakesElevations.png");
     saveToImage(game._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
 
@@ -159,13 +157,13 @@ void TestHandler::testImageHandling() const {
 
   GeneratedImage smoothDilatation = testCircle;
   sf::Clock smoothDilatationTime;
-  smoothDilatation.smoothDilatation(20);
+  smoothDilatation.smoothBlackDilatation(20);
   std::cout << "Smooth dilatation time (20): " << smoothDilatationTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(smoothDilatation.getPixels(), "test_circle_smooth_dilatation.png");
 
   GeneratedImage dilatation = testCircle;
   sf::Clock dilatationTime;
-  dilatation.nonWhiteDilatation(20);
+  dilatation.dilatation(20, [](float pixel) {return pixel != 1;});
   std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(dilatation.getPixels(), "test_circle_dilatation.png");
 

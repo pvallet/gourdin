@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cassert>
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -10,8 +12,6 @@ public:
   GeneratedImage();
   GeneratedImage(size_t size, float color);
   GeneratedImage(std::vector<float> pixels);
-
-  inline const float& operator[](size_t index) const {return _pixels[index];}
 
   void setPixels(const std::vector<float>& pixels);
   // We store the 4 bytes of the floats in the RGBA channels
@@ -23,10 +23,10 @@ public:
   // For the edges, wraps the image around
   void applyConvolutionFilter(const std::vector<float>& filter);
   void combine(const std::vector<float>& img, const std::vector<float>& mask);
-  // Morphologic dilatation of the black regions, with grayness depending on the distance to the black region
-  void smoothDilatation(float radius);
-  // Morphologic dilatation of the non white regions by a disk
-  void nonWhiteDilatation(float radius);
+  // Morphologic dilatation of the region defined by the function belongsToExpandedRegion
+  void dilatation(float radius, std::function<bool(float)> belongsToExpandedRegion);
+  // Morphologic dilatation of the white region where grayness depends on the distance to the white region
+  void smoothBlackDilatation(float radius);
 
   inline const std::vector<float>& getPixels() const {return _pixels;}
   float getValueNormalizedCoord(float x, float y) const;
@@ -48,6 +48,9 @@ private:
 public:
 
   // Overloaded operators
+
+  inline float& operator[](size_t index)       {assert(index < _size*_size); return _pixels[index];}
+  inline float  operator[](size_t index) const {assert(index < _size*_size); return _pixels[index];}
 
   GeneratedImage& operator+=(const GeneratedImage& rhs);
   friend GeneratedImage operator+(GeneratedImage lhs, const GeneratedImage& rhs) {
