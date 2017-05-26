@@ -23,7 +23,7 @@ void ReliefGenerator::fillAdditionalReliefs() {
       hills[i] = 0.3;
   }
   hills -= 0.35;
-  hills *= 0.4;
+  hills *= 0.3;
   GeneratedImage hillsMask = _mapInfoExtractor.getBiomeMask(BARE) +
                              _mapInfoExtractor.getBiomeMask(SNOW) +
                              _mapInfoExtractor.getBiomeMask(TAIGA) +
