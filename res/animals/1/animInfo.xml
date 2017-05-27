@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 
+<standardParams size="8.0" speed="0"/>
+
 <lstAnim>
-	<anim nbOri="8" steps="5"  duration="100" pause="100" type="0"/>
-	<anim nbOri="8" steps="15" duration="80"  pause="0"   type="1"/>
-	<anim nbOri="8" steps="14" duration="120" pause="-1"  type="2"/>
-	<anim nbOri="8" steps="10" duration="40"  pause="0"   type="3"/>
+	<anim nbOri="8" steps="5"  duration="200" pause="1100" type="0"/>
+	<anim nbOri="8" steps="15" duration="50"  pause="0"   type="1"/>
+	<anim nbOri="8" steps="14" duration="80" pause="-1"  type="2"/>
+	<anim nbOri="8" steps="10" duration="70"  pause="0"   type="3"/>
 </lstAnim>

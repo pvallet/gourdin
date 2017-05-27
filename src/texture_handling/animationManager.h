@@ -24,6 +24,7 @@ public:
 	}
 
 	inline sf::Vector2f getRawSize() const {return _animInfo.at(_currentAnim).spriteSize;}
+	inline const AnimalParameters& getParameters() const {return _texManager.getParameters();}
 
 	sf::Time getAnimationTime(ANM_TYPE type) const;
 

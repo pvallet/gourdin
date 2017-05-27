@@ -8,7 +8,6 @@
 
 enum ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
 
-typedef struct AnimInfo AnimInfo;
 struct AnimInfo {
 	int steps;
 	int orientations;
@@ -22,13 +21,17 @@ struct AnimInfo {
 	size_t texLayer;
 };
 
+struct AnimalParameters {
+	float size;
+	float speed;
+};
 
 /** One instance that will load the textures and metadata used commonly by
   * AnimationManager instances.
   */
 class AnimationManagerInitializer {
 public:
-  AnimationManagerInitializer () {}
+  AnimationManagerInitializer ();
 
   void load(std::string folderPath);
 
@@ -38,12 +41,15 @@ public:
 	inline GLuint getTexID() const {return _texArray.texID;}
 
   inline int getMaxHeight() const {return _maxHeight;}
-  inline std::map<ANM_TYPE, AnimInfo> const & getAnimInfo() const {return _animInfo;}
+  inline const std::map<ANM_TYPE, AnimInfo>& getAnimInfo() const {return _animInfo;}
+	inline const AnimalParameters& getParameters() const {return _parameters;}
 
 private:
   int _maxHeight;
 
   std::map<ANM_TYPE, AnimInfo>  _animInfo;
+
+	AnimalParameters _parameters;
 
 	TextureArray _texArray;
 };

@@ -13,7 +13,7 @@
 int main(int argc, char* argv[]) {
 
 #ifndef NDEBUG
-  bool onlyTests = false;
+  bool tests = false;
   sf::Clock beginningOfProg;
   TestHandler testHandler(beginningOfProg);
 
@@ -22,10 +22,10 @@ int main(int argc, char* argv[]) {
       testHandler.clean();
       return 0;
     }
-    else if (strcmp(argv[1],"tests_only") == 0)
-      onlyTests = true;
+    else if (strcmp(argv[1],"tests") == 0)
+      tests = true;
     else {
-      std::cout << "Unkown option, try 'clean' or 'tests_only'" << '\n';
+      std::cout << "Unkown option, try 'clean' or 'tests'" << '\n';
       return 0;
     }
   }
@@ -57,10 +57,10 @@ int main(int argc, char* argv[]) {
   controller.init();
 
 #ifndef NDEBUG
-  testHandler.runTests(controller);
-
-  if (onlyTests)
+  if (tests) {
+    testHandler.runTests(controller);
     return 0;
+  }
 #endif
 
   controller.run();

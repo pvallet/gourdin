@@ -3,7 +3,6 @@
 #include <cstdlib>
 
 #include "antilope.h"
-#include "human.h"
 #include "lion.h"
 #include "tree.h"
 
@@ -183,7 +182,7 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const
       animal = AOE2_MAN;
     else
       animal = WOMAN;
-    res.push_back(new Human(positions[i], AnimationManager(_animManagerInits[animal])));
+    res.push_back(new Controllable(positions[i], AnimationManager(_animManagerInits[animal])));
   }
 
   return res;

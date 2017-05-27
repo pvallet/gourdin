@@ -84,7 +84,7 @@ void Game::init() {
                     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
-  appendNewElements(_contentGenerator.genHerds());
+  // appendNewElements(_contentGenerator.genHerds());
 }
 
 void Game::generateChunk(size_t x, size_t y) {
@@ -515,7 +515,7 @@ void Game::moveCamera(sf::Vector2f newAimedPos) {
   cam.setPointedPos(newAimedPos);
 }
 
-Human* Game::moveCharacter(sf::Vector2i screenTarget, Human* focusedCharacter) {
+Controllable* Game::moveCharacter(sf::Vector2i screenTarget, Controllable* focusedCharacter) {
   for (size_t i = 0; i < _tribe.size(); i++) {
     sf::IntRect spriteRect = _tribe[i]->getScreenCoord();
 
@@ -535,7 +535,7 @@ void Game::genTribe(sf::Vector2f pos) {
   std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
   appendNewElements(tribe);
   for (size_t i = 0; i < tribe.size(); i++) {
-    _tribe.push_back(dynamic_cast<Human*>(tribe[i]));
+    _tribe.push_back(dynamic_cast<Controllable*>(tribe[i]));
   }
 }
 

@@ -4,6 +4,11 @@
 
 #include "tinyxml.h"
 
+AnimationManagerInitializer::AnimationManagerInitializer () {
+  _parameters.size = 0.f;
+  _parameters.speed = 0.f;
+}
+
 void AnimationManagerInitializer::load(std::string folderPath) {
   std::string xmlFile = folderPath + "animInfo.xml";
 
@@ -15,10 +20,17 @@ void AnimationManagerInitializer::load(std::string folderPath) {
   }
 
   TiXmlHandle hdl(&doc);
-  TiXmlElement *elem = hdl.FirstChildElement().FirstChildElement().Element();
+  TiXmlElement *elem = hdl.FirstChildElement("standardParams").Element();
+
+  if (elem) {
+    elem->QueryFloatAttribute("size", &_parameters.size);
+    elem->QueryFloatAttribute("speed", &_parameters.speed);
+  }
+
+  elem = hdl.FirstChildElement("lstAnim").FirstChildElement().Element();
 
   if (elem == nullptr)
-    std::cerr << "Empty xml file: " << xmlFile << std::endl;
+    std::cerr << "XML file: " << xmlFile << " lacks animation information." << std::endl;
 
   _maxHeight = 0;
 

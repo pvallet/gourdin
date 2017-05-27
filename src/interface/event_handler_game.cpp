@@ -60,11 +60,11 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) &&
       moveFocused != _focusedCharacter->getPos()) {
 
-    std::vector<Human*> tribe = _game.getTribe();
+    std::vector<Controllable*> tribe = _game.getTribe();
     sf::Vector2f direction = moveFocused - _focusedCharacter->getPos();
     float threshold = sqrt(2)/2.f;
 
-    Human* closestHuman = _focusedCharacter;
+    Controllable* closestHuman = _focusedCharacter;
     float closestDist = MAX_COORD;
 
     for (size_t i = 0; i < tribe.size(); i++) {
@@ -126,7 +126,7 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (!_draggingCamera) {
-      Human* previous = _focusedCharacter;
+      Controllable* previous = _focusedCharacter;
       _focusedCharacter = _game.moveCharacter(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
 

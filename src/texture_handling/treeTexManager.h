@@ -7,7 +7,6 @@
 #include "texArray.h"
 #include "utils.h"
 
-typedef struct Flora Flora;
 struct Flora {
 	Biome biome;
 	int nbTrees;

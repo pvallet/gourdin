@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 
+<standardParams size="6.0" speed="0"/>
+
 <lstAnim>
 	<anim nbOri="8" steps="10" duration="100" pause="500" type="0"/>
 	<anim nbOri="8" steps="12" duration="80" pause="0" type="1"/>

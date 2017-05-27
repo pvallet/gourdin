@@ -2,7 +2,7 @@
 
 #include "event_handler.h"
 
-class Human;
+class Controllable;
 
 class EventHandlerGame : public EventHandler {
 public:
@@ -27,5 +27,5 @@ private:
   sf::Clock _transferStart;
   sf::Vector2f _previousFocusedPos;
 
-  Human* _focusedCharacter;
+  Controllable* _focusedCharacter;
 };

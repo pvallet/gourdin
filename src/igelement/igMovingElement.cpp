@@ -7,11 +7,14 @@
 
 igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics) :
 	igElement(position),
-	_speed(0.f),
 	_dead(false),
 	_graphics(graphics) {
 	_size = _graphics.getRawSize();
 	_size /= _size.y;
+	_size *= _graphics.getParameters().size;
+	_speed = _graphics.getParameters().speed;
+
+	launchAnimation(WAIT);
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {

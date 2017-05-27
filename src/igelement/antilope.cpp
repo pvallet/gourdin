@@ -19,7 +19,6 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 	_bStatus(ORIENTATION),
 	_moving(false) {
 
-	_size *= 5.f;
 	_lineOfSight = _lineOfSightStandard;
 
 	_averageRecovering = sf::seconds(3.f);
@@ -28,8 +27,6 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
 
 	_timePhase = generateTimePhase(_averageEating);
 	_beginPhase.restart();
-
-	launchAnimation(WAIT);
 }
 
 
