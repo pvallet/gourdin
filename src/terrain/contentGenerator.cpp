@@ -72,8 +72,6 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   sf::Vector2f chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
   std::vector<igElement*> res;
 
-  // _treesInChunk[x*CHUNK_SIZE + y].reserve(100);
-
   for (size_t i = 0; i < 400; i++) {
     sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
@@ -96,6 +94,30 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 
   // Sorting reduces the number of glCalls to display all the trees
   std::sort(res.begin(), res.end(), compTrees());
+
+  return res;
+}
+
+std::vector<igMovingElement*> ContentGenerator::genHerds() const {
+  std::vector<igMovingElement*> res;
+
+  for (size_t i = 0; i < 400; i++) {
+    sf::Vector2f pos(RANDOMF * MAX_COORD, RANDOMF * MAX_COORD);
+
+    Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
+
+    if (biomeInPos == TEMPERATE_RAIN_FOREST ||
+        biomeInPos == TEMPERATE_DECIDUOUS_FOREST ||
+        biomeInPos == GRASSLAND) {
+      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 15 + 5, DEER);
+      res.insert(res.end(), newItems.begin(), newItems.end());
+    }
+
+    else if (biomeInPos == TROPICAL_SEASONAL_FOREST) {
+      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 25 + 10, ANTILOPE);
+      res.insert(res.end(), newItems.begin(), newItems.end());
+    }
+  }
 
   return res;
 }
@@ -135,13 +157,13 @@ std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f cent
   return res;
 }
 
-std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count) const {
+std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count, Animals animal) const {
   std::vector<igMovingElement*> res;
 
   std::vector<sf::Vector2f> positions = scatteredPositions(pos, count, 10, 5);
 
   for (size_t i = 0; i < positions.size(); i++) {
-    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[ANTILOPE])));
+    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal])));
   }
 
   return res;

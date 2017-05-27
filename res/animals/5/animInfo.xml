@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
 <lstAnim>
-	<anim nbOri="8" steps="15" duration="150" pause="350" type="0"/>
+	<anim nbOri="8" steps="15" duration="150" pause="400" type="0"/>
 	<anim nbOri="8" steps="15" duration="80"  pause="0"   type="1"/>
 </lstAnim>

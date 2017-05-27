@@ -82,7 +82,9 @@ void Game::init() {
 
   appendNewElements(_contentGenerator.genHerd(
                     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20));
+                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
+
+  appendNewElements(_contentGenerator.genHerds());
 }
 
 void Game::generateChunk(size_t x, size_t y) {

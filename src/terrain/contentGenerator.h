@@ -24,8 +24,8 @@ public:
   void saveToImage(std::string savename) const;
 
   std::vector<igElement*> genForestsInChunk(size_t x, size_t y);
-  // std::vector<igElement*> genHerdsInChunk(size_t x, size_t y);
-  std::vector<igMovingElement*> genHerd(sf::Vector2f pos, size_t count) const;
+  std::vector<igMovingElement*> genHerds() const;
+  std::vector<igMovingElement*> genHerd(sf::Vector2f pos, size_t count, Animals animal) const;
   std::vector<igMovingElement*> genTribe(sf::Vector2f pos) const;
   std::vector<igMovingElement*> genLion(sf::Vector2f pos) const;
 
