@@ -5,7 +5,7 @@ EventHandler::EventHandler(Game& game, Interface& interface):
   _game(game),
   _interface(interface) {}
 
-bool EventHandler::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
+bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
   bool running = true;
 
   if (event.type == sf::Event::Closed)

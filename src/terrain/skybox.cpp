@@ -1,8 +1,8 @@
 #include "skybox.h"
 
-#include <iostream>
+#include "utils.h"
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
+#include <iostream>
 
 Skybox::Skybox() :
 	t(1000.),

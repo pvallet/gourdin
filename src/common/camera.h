@@ -12,8 +12,6 @@
 
 #define ELEMENT_NEAR_PLANE 20.f
 
-#define RAD M_PI / 180.f
-
 #define MIN_R 120.f
 #define INIT_R 150.f
 #define INIT_PHI 60.f

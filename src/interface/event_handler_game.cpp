@@ -8,12 +8,15 @@
 #define TIME_TRANSFER_MS 100
 #define MIN_DIST_TO_DEFINE_DRAG 40
 
+#define MIN_CAM_ANGLE_WITH_GROUND 30.f
+
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
+  _minScalarProductWithGround(sin(RAD*MIN_CAM_ANGLE_WITH_GROUND)),
   _povCamera(false),
   _draggingCamera(false) {}
 
-void EventHandlerGame::handleKeyPressed(sf::Event event) {
+void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   Camera& cam = Camera::getInstance();
 
   sf::Vector2f moveFocused = _focusedCharacter->getPos();
@@ -99,7 +102,7 @@ void EventHandlerGame::handleKeyPressed(sf::Event event) {
   }
 }
 
-void EventHandlerGame::handleKeyReleased(sf::Event event) {
+void EventHandlerGame::handleKeyReleased(const sf::Event& event) {
   switch(event.key.code) {
     case sf::Keyboard::Z:
     case sf::Keyboard::Q:
@@ -116,7 +119,7 @@ void EventHandlerGame::handleKeyReleased(sf::Event event) {
   }
 }
 
-bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
+bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
   if (event.type == sf::Event::MouseButtonPressed) {
@@ -184,7 +187,49 @@ bool EventHandlerGame::handleEvent(sf::Event event, EventHandlerType& currentHan
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerGame::onGoingEvents(sf::Time elapsed) {
+void EventHandlerGame::handleCameraGodMode(const sf::Time& elapsed, float& theta, float& phi) const {
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
+
+  // We make the camera move only if the new position is not too close to the ground in angle
+  // Otherwise we find the closest available values
+  if (vu::dot(normal, vu::carthesian(1, theta, phi)) < _minScalarProductWithGround) {
+    std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
+      sin(phi*RAD)*normal.x, sin(phi*RAD)*normal.y, _minScalarProductWithGround - cos(phi*RAD)*normal.z);
+
+    std::pair<float,float> distsToThetasLim;
+    distsToThetasLim.first  = std::min(std::abs(theta-thetasLim.first),
+                                       std::abs(std::abs(theta-thetasLim.first)-360));
+    distsToThetasLim.second = std::min(std::abs(theta-thetasLim.second),
+                                       std::abs(std::abs(theta-thetasLim.second)-360));
+
+    if (distsToThetasLim.first < distsToThetasLim.second)
+      theta = thetasLim.first;
+    else
+      theta = thetasLim.second;
+  }
+}
+
+void EventHandlerGame::handleCameraPOVMode(const sf::Time& elapsed, float& theta, float& phi) const {
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    phi += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    phi -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+}
+
+void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   Camera& cam = Camera::getInstance();
 
   float transferProgress = _transferStart.getElapsedTime().asMilliseconds() / (float) TIME_TRANSFER_MS;
@@ -195,27 +240,15 @@ void EventHandlerGame::onGoingEvents(sf::Time elapsed) {
     cam.setPointedPos(_previousFocusedPos + transferProgress *
       (_focusedCharacter->getPos() - _previousFocusedPos));
 
-  if (_povCamera) {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-      cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+  float theta = cam.getTheta();
+  float phi   = cam.getPhi();
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-      cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+  if (_povCamera)
+    handleCameraPOVMode(elapsed, theta, phi);
+  else
+    handleCameraGodMode(elapsed, theta, phi);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      cam.rotate(0.f, ROTATION_ANGLE_PS * elapsed.asSeconds());
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      cam.rotate(0.f, - ROTATION_ANGLE_PS * elapsed.asSeconds());
-  }
-
-  else {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-      cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-      cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
-  }
+  cam.setValues(cam.getZoom(), theta, phi);
 
   if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
     sf::Vector2f moveFocused = _focusedCharacter->getPos();
@@ -246,4 +279,30 @@ void EventHandlerGame::gainFocus() {
     _game.genTribe(cam.getPointedPos());
     _focusedCharacter = _game.getTribe().front();
   }
+}
+
+std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, float b, float c) {
+  // The code is a transcription of Wolfram Alpha solution
+  std::pair<float,float> res(0,0);
+
+  if (a == -c) {
+    res.first = 180;
+    res.second = 180;
+  }
+
+  else {
+    float underRoot = a*a + b*b - c*c;
+    if (underRoot >= 0) {
+      res.first  = 2 * atan((b - sqrt(underRoot)) / (a + c)) / RAD;
+      res.second = 2 * atan((b + sqrt(underRoot)) / (a + c)) / RAD;
+
+      // Results are in range (-180, 180], make them in range [0,360)
+      if (res.first < 0)
+        res.first += 360;
+      if (res.second < 0)
+        res.second += 360;
+    }
+  }
+
+  return res;
 }

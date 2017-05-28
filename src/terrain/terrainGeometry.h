@@ -27,8 +27,11 @@ public:
   // the other vertices in clockwise order
   std::array<size_t,3> sortIndices(sf::Vector3f refPoint) const;
 
-  static float getHeight(sf::Vector2f pos, const std::list<const Triangle*>& triangles);
-  static const Triangle* getTriangleContaining(sf::Vector2f pos, const std::list<const Triangle*>& triangles);
+  // Returns the triangle containing the given pos, and stores the barycentric
+  // coordinates in barCoord: barCoord[i] corresponds to vertices[]
+  // barCoord is expected to be a float array of size 3
+  static const Triangle* getTriangleContaining(sf::Vector2f pos,
+    const std::list<const Triangle*>& triangles, float* barCoord = nullptr);
 };
 
 class Vertex {

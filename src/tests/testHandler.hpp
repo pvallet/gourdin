@@ -20,7 +20,9 @@ private:
   void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename) const;
 
   void displayGameGeneratedComponents(const Game& game) const;
-  void testImageHandling() const;
+  void testPerlin() const;
+  void testGeneratedImage() const;
+  void testEventHandlerGame(const EventHandlerGame& eHandlerGame) const;
 
   const sf::Clock& _beginningOfProg;
 };

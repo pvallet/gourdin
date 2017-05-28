@@ -563,7 +563,7 @@ sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   return sf::Vector2f( modelCoord.x, modelCoord.y);
 }
 
-sf::Vector3f Game::getNormInCameraPointedPos() const {
+sf::Vector3f Game::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
   sf::Vector2u chunkPos = convertToChunkCoords(cam.getPointedPos());
 

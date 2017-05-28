@@ -9,8 +9,6 @@
 #include "utils.h"
 #include "vecUtils.h"
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
-
 igElement::igElement(sf::Vector2f position) :
 	_pos(position),
 	_camOrientation(0.f) {

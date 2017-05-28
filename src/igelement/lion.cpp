@@ -92,7 +92,7 @@ void Lion::setTarget(sf::Vector2f t) {
 
 void Lion::kill(const std::list<igMovingElement*>& neighbors) {
 	float distance;
-	igMovingElement* closest = NULL;
+	igMovingElement* closest = nullptr;
 	float nearestDist = _range;
 
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {

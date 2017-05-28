@@ -34,7 +34,7 @@ void MapInfoExtractor::convertMapData(size_t size) {
       _biomes[index] = smoother.getBiome(pos);
       _biomesMasks[_biomes[index]][index] = 1;
 
-      float height = Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos));
+      float height = smoother.getHeight(pos);
 
       _elevationMask[index] = HEIGHT_FUNCTION(height);
       if (_elevationMask[index] > maxHeight)
@@ -91,7 +91,7 @@ void MapInfoExtractor::computeLakesElevations(
       Biome biome = smoother.getBiome(pos);
 
       if (biome == WATER || biome == LAKE || biome == MARSH || biome == RIVER) {
-        float pixelHeight = Triangle::getHeight(pos, smoother.getTrianglesNearPos(pos));
+        float pixelHeight = smoother.getHeight(pos);
         pixelHeight = HEIGHT_FUNCTION(pixelHeight);
 
         if (i > 0 && lakes[i-1][j] != -1) {

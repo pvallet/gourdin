@@ -9,6 +9,10 @@
 #include "game.h"
 #include "interface.h"
 
+#ifndef NDEBUG
+	class TestHandler;
+#endif
+
 /* Controls the main loop of the program
  */
 class Controller {
@@ -18,7 +22,9 @@ public:
 	void init();
 	void run();
 
-	const Game& getGame() const {return _game;}
+#ifndef NDEBUG
+	friend TestHandler;
+#endif
 
 private:
 	void render() const;

@@ -127,8 +127,7 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   }
 }
 
-void TestHandler::testImageHandling() const {
-  // Perlin
+void TestHandler::testPerlin() const {
   Perlin perlin(3, 0.06, 0.1, 512);
 
   for (size_t i = 0; i < 1; i++) {
@@ -137,7 +136,9 @@ void TestHandler::testImageHandling() const {
     perlin.shuffle();
     saveToImage(perlin.getPixels(), convert.str());
   }
+}
 
+void TestHandler::testGeneratedImage() const {
   // Test image
   GeneratedImage testCircle(generateTestCircle(512));
   saveToImage(testCircle.getPixels(), "test_circle.png");
@@ -197,17 +198,34 @@ void TestHandler::testImageHandling() const {
   imgLoader.loadFromFile("testSave.png");
 
   if (imgSaver.getPixels() == imgLoader.getPixels())
-    std::cout << "OK - Save/Loading of a generated image" << '\n';
+    std::cout << "OK     - Save/Loading of a generated image" << '\n';
   else
     std::cout << "FAILED - Save/Loading of a generated image" << '\n';
 
   remove("testSave.png");
 }
 
+void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) const {
+  std::pair<float,float> solutions = eHandlerGame.solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
+
+  if ((solutions.first == 11*M_PI/12.f/RAD && solutions.second == 17*M_PI/12.f/RAD) ||
+      (solutions.second == 11*M_PI/12.f/RAD && solutions.first == 17*M_PI/12.f/RAD))
+    std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c" << '\n';
+
+  else {
+    std::cout << "FAILED - Solving a*cos(x) + b*sin(x) = c" << '\n';
+  }
+
+  std::cout << "         Solutions are (" << solutions.first << "," << solutions.second << "), "
+            << "should be (" << 11*M_PI/12.f/RAD << "," << 17*M_PI/12.f/RAD << ")." << '\n';
+}
+
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
-  displayGameGeneratedComponents(controller.getGame());
-  testImageHandling();
+  // displayGameGeneratedComponents(controller._game);
+  // testPerlin();
+  // testGeneratedImage();
+  testEventHandlerGame(controller._eHandlerGame);
 }
 
 void TestHandler::clean() const {

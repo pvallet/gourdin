@@ -1,8 +1,6 @@
 #include "ocean.h"
 #include "vecUtils.h"
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
-
 Ocean::Ocean(float oversizeFactor) :
 	_vertices{
        -MAX_COORD*oversizeFactor,    -MAX_COORD*oversizeFactor,    0,

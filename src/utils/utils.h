@@ -6,7 +6,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
+#define RAD (M_PI / 180.f)
 
 #define CHUNK_SIZE 512.f
 #define NB_CHUNKS 50
@@ -16,6 +16,8 @@
 #define TERRAIN_TEX_TRANSITION_SIZE 20.f
 
 #define RANDOMF (rand() / (float) RAND_MAX)
+
+#define BUFFER_OFFSET(a) ((char*)NULL + (a))
 
 enum Animals {ANTILOPE, DEER, LION, WOLF, LEOPARD,
 	 AOE1_MAN, AOE2_MAN, WOMAN, ANIMALS_NB_ITEMS};

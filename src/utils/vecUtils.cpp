@@ -28,11 +28,10 @@ sf::Vector3f vu::cross(const sf::Vector3f& u, const sf::Vector3f& v) {
 
 sf::Vector3f vu::carthesian(float r, float theta, float phi) {
     sf::Vector3f u;
-    float rad = M_PI / 180.f;
 
-    u.x = r*sin(phi*rad)*cos(theta*rad);
-    u.y = r*sin(phi*rad)*sin(theta*rad);
-    u.z = r*cos(phi*rad);
+    u.x = r*sin(phi*RAD)*cos(theta*RAD);
+    u.y = r*sin(phi*RAD)*sin(theta*RAD);
+    u.z = r*cos(phi*RAD);
 
     return u;
 }

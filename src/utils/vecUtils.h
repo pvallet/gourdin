@@ -6,6 +6,7 @@
 #include "utils.h"
 
 #include <cmath>
+#include <map>
 
 inline bool operator < (const sf::Vector3f& lhs, const sf::Vector3f& rhs) {
   if (lhs.x < rhs.x)

@@ -12,8 +12,8 @@ public:
   EventHandler(Game& game, Interface& interface);
 
   // Returns whether the game will stop or not
-  virtual bool handleEvent(sf::Event event, EventHandlerType& currentHandler);
-  virtual void onGoingEvents(sf::Time elapsed) = 0;
+  virtual bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
+  virtual void onGoingEvents(const sf::Time& elapsed) = 0;
 
   virtual void gainFocus() = 0;
 

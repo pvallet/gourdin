@@ -11,7 +11,7 @@ EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
   _addSelect(false) {}
 
-void EventHandlerSandbox::handleClick(sf::Event event) {
+void EventHandlerSandbox::handleClick(const sf::Event& event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
@@ -40,7 +40,7 @@ void EventHandlerSandbox::handleClick(sf::Event event) {
   }
 }
 
-void EventHandlerSandbox::handleKeyPressed(sf::Event event) {
+void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
   switch(event.key.code) {
     // Go back to selection
     case sf::Keyboard::Space: {
@@ -104,7 +104,7 @@ void EventHandlerSandbox::handleKeyPressed(sf::Event event) {
   }
 }
 
-bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& currentHandler) {
+bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
   if (event.type == sf::Event::MouseWheelMoved)
@@ -135,7 +135,7 @@ bool EventHandlerSandbox::handleEvent(sf::Event event, EventHandlerType& current
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerSandbox::onGoingEvents(sf::Time elapsed) {
+void EventHandlerSandbox::onGoingEvents(const sf::Time& elapsed) {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PS * elapsed.asSeconds() *

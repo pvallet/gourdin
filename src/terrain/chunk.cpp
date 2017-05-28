@@ -5,8 +5,6 @@
 #include "camera.h"
 #include "vecUtils.h"
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
-
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                                     TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
