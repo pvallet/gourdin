@@ -49,6 +49,7 @@ public:
 	void setSubdivisionLevel(size_t newSubdLvl);
 
 	float getHeight(sf::Vector2f pos) const;
+	sf::Vector3f getNorm(sf::Vector2f pos) const;
 	inline bool isVisible() const {return _visible;}
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 

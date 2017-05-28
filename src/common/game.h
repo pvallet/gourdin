@@ -57,6 +57,8 @@ public:
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
+	sf::Vector3f getNormInCameraPointedPos() const;
+
 	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 	inline const std::vector<Controllable*>& getTribe() const {return _tribe;}

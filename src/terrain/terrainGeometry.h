@@ -28,6 +28,7 @@ public:
   std::array<size_t,3> sortIndices(sf::Vector3f refPoint) const;
 
   static float getHeight(sf::Vector2f pos, const std::list<const Triangle*>& triangles);
+  static const Triangle* getTriangleContaining(sf::Vector2f pos, const std::list<const Triangle*>& triangles);
 };
 
 class Vertex {
@@ -96,9 +97,12 @@ public:
 
     std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y) const;
     std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
-    Biome getBiome(sf::Vector2f pos) const;
 
     std::list<const Triangle*> getTriangles() const;
+
+    float getHeight(sf::Vector2f pos) const;
+    Biome getBiome (sf::Vector2f pos) const;
+    sf::Vector3f getNorm(sf::Vector2f pos) const;
 
     // Returns the coordinates of the subchunk containing the position pos
     static std::array<sf::Vector2u, 2> getSubChunkInfo(sf::Vector2f pos);
@@ -129,15 +133,21 @@ public:
   inline const SubdivisionLevel* getFirstSubdivLevel() const {return _subdivisionLevels[0].get();}
   inline size_t getCurrentGlobalSubdivLvl() const {return _currentGlobalSubdivLvl;}
   std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
-  std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const;
 
   inline bool isOcean(size_t x, size_t y) const {return _subdivisionLevels[0]->isOcean(x,y);}
-  Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const;
-  float getHeight(sf::Vector2f pos, size_t subdivLvl) const {
-    return Triangle::getHeight(pos, getTrianglesNearPos(pos, subdivLvl));}
+
+  inline float getHeight(sf::Vector2f pos, size_t subdivLvl) const {
+    return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getHeight(pos);}
+
+  inline Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const {
+    return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getBiome(pos);}
+
+  inline sf::Vector3f getNorm(sf::Vector2f pos, size_t subdivLvl) const {
+    return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getNorm(pos);}
 
 private:
   void subdivideChunk(int x, int y, size_t subdivLvl);
+  size_t protectedSubdivLvl(sf::Vector2f pos, size_t subdivLvl) const;
 
   std::vector<std::unique_ptr<SubdivisionLevel> > _subdivisionLevels;
 

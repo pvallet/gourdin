@@ -312,3 +312,7 @@ void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 float Chunk::getHeight(sf::Vector2f pos) const {
   return _terrainGeometry.getHeight(pos, _currentSubdivLvl);
 }
+
+sf::Vector3f Chunk::getNorm(sf::Vector2f pos) const {
+	return _terrainGeometry.getNorm(pos, _currentSubdivLvl);
+}

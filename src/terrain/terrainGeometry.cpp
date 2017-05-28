@@ -96,6 +96,29 @@ float Triangle::getHeight(sf::Vector2f pos, const std::list<const Triangle*>& tr
   return 0;
 }
 
+const Triangle* Triangle::getTriangleContaining(sf::Vector2f pos, const std::list<const Triangle*>& triangles) {
+  for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
+    float x[3]; float y[3];
+
+    for (size_t i = 0; i < 3; i++) {
+      x[i] = (*tri)->vertices[i]->pos.x;
+      y[i] = (*tri)->vertices[i]->pos.y;
+    }
+
+    float s = ((y[1]-y[2])*(pos.x-x[2])+(x[2]-x[1])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    float t = ((y[2]-y[0])*(pos.x-x[2])+(x[0]-x[2])*(pos.y-y[2])) /
+              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
+
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
+      return *tri;
+    }
+  }
+
+  return nullptr;
+}
+
 void Vertex::sortTriangles() {
   if (!_sorted) {
     _sorted = true;
@@ -428,34 +451,6 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTrianglesNearPo
                              [intCoord[1].x*GRID_SUBDIV + intCoord[1].y];
 }
 
-Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
-  std::array<sf::Vector2u, 2> intCoord = getSubChunkInfo(pos);
-  std::list<const Triangle*> toTest =
-    _trianglesInSubChunk[intCoord[0].x*NB_CHUNKS  + intCoord[0].y]
-                        [intCoord[1].x*GRID_SUBDIV + intCoord[1].y];
-
-  for (auto tri = toTest.begin(); tri != toTest.end(); tri++) {
-    float x[3]; float y[3];
-
-    for (size_t i = 0; i < 3; i++) {
-      x[i] = (*tri)->vertices[i]->pos.x;
-      y[i] = (*tri)->vertices[i]->pos.y;
-    }
-
-    float s = ((y[1]-y[2])*(pos.x-x[2])+(x[2]-x[1])*(pos.y-y[2])) /
-              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
-
-    float t = ((y[2]-y[0])*(pos.x-x[2])+(x[0]-x[2])*(pos.y-y[2])) /
-              ((y[1]-y[2])*(x[0]-x[2])+(x[2]-x[1])*(y[0]-y[2]));
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1 && s + t <= 1) {
-      return (*tri)->biome;
-    }
-  }
-
-  return OCEAN;
-}
-
 std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() const {
   std::list<const Triangle*> triangles;
   for (auto t = _triangles.begin(); t != _triangles.end(); t++) {
@@ -463,6 +458,22 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() con
   }
 
   return triangles;
+}
+
+float TerrainGeometry::SubdivisionLevel::getHeight(sf::Vector2f pos) const {
+  return Triangle::getHeight(pos, getTrianglesNearPos(pos));
+}
+
+Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
+  const Triangle* triContaining = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos));
+
+  return triContaining == nullptr ? OCEAN : triContaining->biome;
+}
+
+sf::Vector3f TerrainGeometry::SubdivisionLevel::getNorm(sf::Vector2f pos) const {
+  const Triangle* triContaining = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos));
+
+  return triContaining == nullptr ? sf::Vector3f(0,0,1) : triContaining->normal;
 }
 
 TerrainGeometry::TerrainGeometry() :
@@ -531,7 +542,7 @@ std::list<const Triangle*> TerrainGeometry::getTrianglesInChunk(size_t x, size_t
   return _subdivisionLevels[subdivLvl]->getTrianglesInChunk(x,y);
 }
 
-std::list<const Triangle*> TerrainGeometry::getTrianglesNearPos  (sf::Vector2f pos, size_t subdivLvl) const {
+size_t TerrainGeometry::protectedSubdivLvl(sf::Vector2f pos, size_t subdivLvl) const {
   std::array<sf::Vector2u, 2> intCoord = SubdivisionLevel::getSubChunkInfo(pos);
 
   size_t currentSubdivLvl = _chunkSubdivLvl[intCoord[0].x*NB_CHUNKS  + intCoord[0].y];
@@ -539,16 +550,5 @@ std::list<const Triangle*> TerrainGeometry::getTrianglesNearPos  (sf::Vector2f p
   if (subdivLvl > currentSubdivLvl)
     subdivLvl = currentSubdivLvl;
 
-  return _subdivisionLevels[subdivLvl]->getTrianglesNearPos(pos);
-}
-
-Biome TerrainGeometry::getBiome (sf::Vector2f pos, size_t subdivLvl) const {
-  std::array<sf::Vector2u, 2> intCoord = SubdivisionLevel::getSubChunkInfo(pos);
-
-  size_t currentSubdivLvl = _chunkSubdivLvl[intCoord[0].x*NB_CHUNKS  + intCoord[0].y];
-
-  if (subdivLvl > currentSubdivLvl)
-    subdivLvl = currentSubdivLvl;
-
-  return _subdivisionLevels[subdivLvl]->getBiome(pos);
+  return subdivLvl;
 }
