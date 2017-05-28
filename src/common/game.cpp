@@ -249,14 +249,13 @@ void Game::compute2DCorners() {
 
 void Game::update(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
-  int camPosX = cam.getPointedPos().x < 0 ? cam.getPointedPos().x / CHUNK_SIZE - 1 : cam.getPointedPos().x / CHUNK_SIZE;
-  int camPosY = cam.getPointedPos().y < 0 ? cam.getPointedPos().y / CHUNK_SIZE - 1 : cam.getPointedPos().y / CHUNK_SIZE;
+  sf::Vector2u camPos = convertToChunkCoords(cam.getPointedPos());
 
   // Update camera
-  if (_chunkStatus[camPosX][camPosY] == NOT_GENERATED)
-    generateChunk(camPosX, camPosY);
+  if (_chunkStatus[camPos.x][camPos.y] == NOT_GENERATED)
+    generateChunk(camPos.x, camPos.y);
 
-  cam.setHeight( _terrain[camPosX][camPosY]->getHeight(cam.getPointedPos()));
+  cam.setHeight( _terrain[camPos.x][camPos.y]->getHeight(cam.getPointedPos()));
   cam.apply();
 
   // Update terrains
@@ -285,7 +284,7 @@ void Game::update(sf::Time elapsed) {
 
   LogText& logText = LogText::getInstance();
   std::ostringstream subdivLvl;
-  subdivLvl << "Current subdivision level: " << _terrain[camPosX][camPosY]->getSubdivisionLevel() << std::endl;
+  subdivLvl << "Current subdivision level: " << _terrain[camPos.x][camPos.y]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
 
   // Update positions of igMovingElement regardless of them being visible
@@ -299,29 +298,28 @@ void Game::update(sf::Time elapsed) {
   std::vector<std::list<igMovingElement*> > sortedElements(NB_CHUNKS*NB_CHUNKS);
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    size_t chunkPosX = (*it)->getPos().x / CHUNK_SIZE;
-    size_t chunkPosY = (*it)->getPos().y / CHUNK_SIZE;
+    sf::Vector2u chunkPos = convertToChunkCoords((*it)->getPos());
 
-    if (chunkPosX >= NB_CHUNKS)
-      chunkPosX = NB_CHUNKS-1;
-    if (chunkPosY >= NB_CHUNKS)
-      chunkPosY = NB_CHUNKS-1;
+    if (!(*it)->isDead())
+      sortedElements[chunkPos.x * NB_CHUNKS + chunkPos.y].push_back(it->get());
+  }
 
-    if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
+  updateMovingElementsStates(sortedElements);
+
+  // Update graphics of visible elements
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    sf::Vector2u chunkPos = convertToChunkCoords((*it)->getPos());
+
+    if (_chunkStatus[chunkPos.x][chunkPos.y] == VISIBLE) {
       // No test yet to see if the element can move to its new pos (no collision)
-      float height = _terrain[chunkPosX][chunkPosY]->getHeight((*it)->getPos());
+      float height = _terrain[chunkPos.x][chunkPos.y]->getHeight((*it)->getPos());
 
       (*it)->setHeight(height);
       (*it)->updateDisplay(elapsed, cam.getTheta());
 
       visibleElmts.push_back(it->get());
     }
-
-    if (!(*it)->isDead())
-      sortedElements[chunkPosX * NB_CHUNKS + chunkPosY].push_back(it->get());
   }
-
-  updateMovingElementsStates(sortedElements);
 
   _igElementDisplay.loadElements(visibleElmts);
 

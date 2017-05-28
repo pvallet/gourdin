@@ -18,7 +18,6 @@ igElement::igElement(sf::Vector2f position) :
 	_orientation = RANDOMF * 360.f;
 }
 
-
 void igElement::updateDisplay(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 

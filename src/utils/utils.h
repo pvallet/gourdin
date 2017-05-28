@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/System.hpp>
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -15,7 +17,7 @@
 
 #define RANDOMF (rand() / (float) RAND_MAX)
 
-enum Animals {ANTILOPE, DEER, LION, //WOLF, LEOPARD,
+enum Animals {ANTILOPE, DEER, LION, WOLF, LEOPARD,
 	 AOE1_MAN, AOE2_MAN, WOMAN, ANIMALS_NB_ITEMS};
 
 enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
@@ -26,8 +28,9 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			BIOME_NB_ITEMS
 		};
 
-bool glCheckError(const char *file, int line);
+sf::Vector2u convertToChunkCoords(sf::Vector2f pos);
 
+bool glCheckError(const char *file, int line);
 
 // regex to replace gl calls: ([_a-zA-Z]* = )?(gl[^ :;>]*\([^;]*\));
 // replace with _glCheck($2);

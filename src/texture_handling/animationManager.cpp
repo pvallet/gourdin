@@ -15,8 +15,8 @@ AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
 size_t AnimationManager::launchAnimation(ANM_TYPE type) {
   if (_currentAnim != type) {
     _currentAnim = type;
-
     _currentSprite = 0;
+		_alreadyElapsed = sf::Time::Zero;
   }
 
 	return _animInfo[type].texLayer;

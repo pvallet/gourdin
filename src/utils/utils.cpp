@@ -6,6 +6,24 @@
 #include <iostream>
 #include <string>
 
+sf::Vector2u convertToChunkCoords(sf::Vector2f pos) {
+  sf::Vector2u chunkPos;
+  if (pos.x < 0)
+    pos.x = 0;
+  if (pos.y < 0)
+    pos.y = 0;
+
+  chunkPos.x = pos.x / CHUNK_SIZE;
+  chunkPos.y = pos.y / CHUNK_SIZE;
+
+  if (chunkPos.x >= NB_CHUNKS)
+    chunkPos.x = NB_CHUNKS-1;
+  if (chunkPos.y >= NB_CHUNKS)
+    chunkPos.y = NB_CHUNKS-1;
+
+  return chunkPos;
+}
+
 bool glCheckError(const char *file, int line) {
   GLenum err (glGetError());
 

@@ -12,7 +12,7 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
 	_loseBreathSpeed(10.f),
 	_speedWalking(10.f),
 	_speedRunning(21.f),
-	_range(5.f),
+	_range(7.f),
 	_status(WAITING) {
 
 	_speed = _speedWalking;

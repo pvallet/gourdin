@@ -190,6 +190,20 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const
 
 std::vector<igMovingElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
   std::vector<igMovingElement*> res;
-  res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION])));
+  Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
+
+  if (biomeInPos == TROPICAL_RAIN_FOREST)
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LEOPARD])));
+  else if (biomeInPos == TROPICAL_SEASONAL_FOREST)
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION])));
+
+  else if (biomeInPos == TEMPERATE_RAIN_FOREST ||
+           biomeInPos == TEMPERATE_DECIDUOUS_FOREST ||
+           biomeInPos == GRASSLAND ||
+           biomeInPos == TAIGA ||
+           biomeInPos == SHRUBLAND ||
+           biomeInPos == TUNDRA)
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[WOLF])));
+
   return res;
 }
