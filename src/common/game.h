@@ -67,7 +67,8 @@ private:
   void generateNeighbourChunks(size_t x, size_t y);
 	void generateChunk          (size_t x, size_t y);
   void appendNewElements(std::vector<igMovingElement*> elems);
-  void updateMovingElementsStates();
+	// The parameter contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
+  static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
 	void compute2DCorners();
 
 	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
@@ -79,7 +80,7 @@ private:
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks
 	std::set<Controllable*> _selectedElmts;
-  std::unordered_set<igMovingElement*> _activeElements;
+  std::set<Controllable*> _controllableElements;
 
 	std::vector<Controllable*> _tribe;
 

@@ -84,7 +84,7 @@ void Game::init() {
                     sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
-  // appendNewElements(_contentGenerator.genHerds());
+  appendNewElements(_contentGenerator.genHerds());
 }
 
 void Game::generateChunk(size_t x, size_t y) {
@@ -151,41 +151,37 @@ void Game::appendNewElements(std::vector<igMovingElement*> elems) {
     _igMovingElements.push_back(std::unique_ptr<igMovingElement>(elems[i]));
 
   for (size_t i = 0; i < elems.size(); i++) {
-    if (!elems[i]->isDead())
-      _activeElements.insert(elems[i]);
+    Controllable* ctrl = dynamic_cast<Controllable*>(elems[i]);
+    if (ctrl)
+      _controllableElements.insert(ctrl);
   }
 }
 
-void Game::updateMovingElementsStates() {
-  // Remove the dead elements from the selection and the interacting elements
-  std::vector<igMovingElement*> toDelete;
-  for (auto it = _selectedElmts.begin(); it != _selectedElmts.end(); it++) {
-    if ((*it)->isDead())
-      toDelete.push_back(*it);
-  }
-  for (size_t i = 0; i < toDelete.size(); i++) {
-    _selectedElmts.erase((Controllable*) toDelete[i]);
-  }
-  toDelete.clear();
+void Game::updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
+      if (!sortedElements[i*NB_CHUNKS + j].empty()) {
+        std::list<igMovingElement*> elmtsInSurroundingChunks;
 
-  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
-    if ((*it)->isDead())
-      toDelete.push_back(*it);
-  }
-  for (size_t i = 0; i < toDelete.size(); i++) {
-    _activeElements.erase(toDelete[i]);
-  }
+        for (int k = std::max(0, i-1); k < std::min(NB_CHUNKS-1, i+1); k++) {
+        for (int l = std::max(0, j-1); l < std::min(NB_CHUNKS-1, j+1); l++) {
+          elmtsInSurroundingChunks.insert(elmtsInSurroundingChunks.end(),
+            sortedElements[k*NB_CHUNKS + l].begin(), sortedElements[k*NB_CHUNKS + l].end());
+        }
+        }
 
-  // Compute moving elements interactions
-  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
-    Antilope* atlp = dynamic_cast<Antilope*>(*it);
-    Lion* lion = dynamic_cast<Lion*>(*it);
+        for (auto it = sortedElements[i*NB_CHUNKS + j].begin(); it != sortedElements[i*NB_CHUNKS + j].end(); it++) {
+          Antilope* atlp = dynamic_cast<Antilope*>(*it);
+          Lion* lion = dynamic_cast<Lion*>(*it);
 
-    if (atlp)
-      atlp->updateState(_activeElements);
+          if (atlp)
+            atlp->updateState(elmtsInSurroundingChunks);
 
-    else if (lion)
-      lion->kill(_activeElements);
+          else if (lion)
+            lion->kill(elmtsInSurroundingChunks);
+        }
+      }
+    }
   }
 }
 
@@ -199,22 +195,21 @@ void Game::compute2DCorners() {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
-  for (auto it = _activeElements.begin(); it != _activeElements.end(); it++) {
-    Controllable* ctrl = dynamic_cast<Controllable*>(*it);
-    if (ctrl) {
+  for (auto it = _controllableElements.begin(); it != _controllableElements.end(); it++) {
+    if (!(*it)->isDead()) {
       // Calculate new corners
       glm::vec3 corners3[4];
-      float width = ctrl->getSize().x;
-      float height = ctrl->getSize().y;
+      float width = (*it)->getSize().x;
+      float height = (*it)->getSize().y;
 
       corners3[0] = glm::vec3( 0,  width/2, height);
       corners3[1] = glm::vec3( 0, -width/2, height);
       corners3[2] = glm::vec3( 0, -width/2, 0);
       corners3[3] = glm::vec3( 0,  width/2, 0);
 
-      glm::vec3 translatePos(ctrl->getPos().x,
-                             ctrl->getPos().y,
-                             ctrl->getHeight());
+      glm::vec3 translatePos((*it)->getPos().x,
+                             (*it)->getPos().y,
+                             (*it)->getHeight());
 
       glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
 
@@ -247,7 +242,7 @@ void Game::compute2DCorners() {
         }
       }
 
-      ctrl->setProjectedVertices(vertices);
+      (*it)->setProjectedVertices(vertices);
     }
   }
 }
@@ -293,23 +288,24 @@ void Game::update(sf::Time elapsed) {
   subdivLvl << "Current subdivision level: " << _terrain[camPosX][camPosY]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
 
-  updateMovingElementsStates();
   // Update positions of igMovingElement regardless of them being visible
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     (*it)->update(elapsed);
   }
 
-   // Fill the visible elements
-   std::vector<igElement*> visibleElmts;
+  // Fill the visible elements
+  std::vector<igElement*> visibleElmts;
+  // sortedElements contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
+  std::vector<std::list<igMovingElement*> > sortedElements(NB_CHUNKS*NB_CHUNKS);
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    int chunkPosX = (*it)->getPos().x / CHUNK_SIZE;
-    int chunkPosY = (*it)->getPos().y / CHUNK_SIZE;
+    size_t chunkPosX = (*it)->getPos().x / CHUNK_SIZE;
+    size_t chunkPosY = (*it)->getPos().y / CHUNK_SIZE;
 
-    if (chunkPosX == NB_CHUNKS)
-      chunkPosX--;
-    if (chunkPosY == NB_CHUNKS)
-      chunkPosY--;
+    if (chunkPosX >= NB_CHUNKS)
+      chunkPosX = NB_CHUNKS-1;
+    if (chunkPosY >= NB_CHUNKS)
+      chunkPosY = NB_CHUNKS-1;
 
     if (_chunkStatus[chunkPosX][chunkPosY] == VISIBLE) {
       // No test yet to see if the element can move to its new pos (no collision)
@@ -320,9 +316,25 @@ void Game::update(sf::Time elapsed) {
 
       visibleElmts.push_back(it->get());
     }
+
+    if (!(*it)->isDead())
+      sortedElements[chunkPosX * NB_CHUNKS + chunkPosY].push_back(it->get());
   }
 
+  updateMovingElementsStates(sortedElements);
+
   _igElementDisplay.loadElements(visibleElmts);
+
+  // Remove the dead elements from the selection and the controllable elements
+  std::vector<igMovingElement*> toDelete;
+  for (auto it = _controllableElements.begin(); it != _controllableElements.end(); it++) {
+   if ((*it)->isDead())
+     toDelete.push_back(*it);
+  }
+  for (size_t i = 0; i < toDelete.size(); i++) {
+   _controllableElements.erase((Controllable*) toDelete[i]);
+   _selectedElmts.erase((Controllable*) toDelete[i]);
+  }
 
   compute2DCorners();
 }

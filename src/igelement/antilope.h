@@ -2,7 +2,7 @@
 
 #include <SFML/System.hpp>
 
-#include <unordered_set>
+#include <list>
 
 #include "igMovingElement.h"
 
@@ -24,7 +24,7 @@ public:
 	virtual ~Antilope() {}
 
 	// React to the environment
-	void updateState(const std::unordered_set<igMovingElement*>& neighbors);
+	void updateState(const std::list<igMovingElement*>& neighbors);
 
 	void beginIdle();
 	void beginFleeing();
@@ -34,7 +34,7 @@ public:
 private:
 	sf::Time generateTimePhase(sf::Time average) const;
 
-	BoidsInfo getInfoFromNeighbors(const std::unordered_set<igMovingElement*>& neighbors) const;
+	BoidsInfo getInfoFromNeighbors(const std::list<igMovingElement*>& neighbors) const;
 	void reactWhenIdle      (const BoidsInfo& info);
 	void reactWhenFleeing   (const BoidsInfo& info);
 	void reactWhenRecovering(const BoidsInfo& info);

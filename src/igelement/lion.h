@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_set>
+#include <list>
 
 #include "controllable.h"
 
@@ -22,7 +22,7 @@ public:
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 
-	void kill(const std::unordered_set<igMovingElement*>& neighbors);
+	void kill(const std::list<igMovingElement*>& neighbors);
 
 private:
 	float _stamina; // Percentage
