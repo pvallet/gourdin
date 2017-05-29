@@ -445,9 +445,13 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() con
 float TerrainGeometry::SubdivisionLevel::getHeight(sf::Vector2f pos) const {
   float barCoord[3];
   const Triangle* t = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos), barCoord);
-  return barCoord[0]*t->vertices[0]->pos.z +
-         barCoord[1]*t->vertices[1]->pos.z +
-         barCoord[2]*t->vertices[2]->pos.z;
+
+  if (t == nullptr)
+    return 0;
+  else
+    return barCoord[0]*t->vertices[0]->pos.z +
+           barCoord[1]*t->vertices[1]->pos.z +
+           barCoord[2]*t->vertices[2]->pos.z;
 }
 
 Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {

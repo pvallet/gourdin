@@ -7,6 +7,7 @@
 
 #include "generatedImage.h"
 #include "reliefGenerator.h"
+#include "vecUtils.h"
 
 #define DELETE_LIST_NAME "to_delete"
 
@@ -127,6 +128,23 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
   }
 }
 
+void TestHandler::testVecUtils() const {
+  sf::Vector3f testVec(1,8,-2);
+  sf::Vector3f testVecSpherical = vu::spherical(testVec);
+  sf::Vector3f testVecBack = vu::carthesian(testVecSpherical);
+
+  float precision = 0.00001;
+
+  if (vu::norm(testVec - testVecBack) < precision)
+    std::cout << "OK     - Conversion to spherical coordinates and back with precision " << precision << '\n';
+  else {
+    std::cout << "FAILED - Conversion to spherical coordinates and back with precision " << precision << '\n';
+    std::cout << "         vector (" << testVec.x << "," << testVec.y << "," << testVec.z << ") "
+              << "has been converted to (" << testVecSpherical.x << "," << testVecSpherical.y << "," << testVecSpherical.z << ") "
+              << "and back to  (" << testVecBack.x << "," << testVecBack.y << "," << testVecBack.z << ") " << '\n';
+  }
+}
+
 void TestHandler::testPerlin() const {
   Perlin perlin(3, 0.06, 0.1, 512);
 
@@ -208,21 +226,20 @@ void TestHandler::testGeneratedImage() const {
 void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) const {
   std::pair<float,float> solutions = eHandlerGame.solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
 
-  if ((solutions.first == 11*M_PI/12.f/RAD && solutions.second == 17*M_PI/12.f/RAD) ||
-      (solutions.second == 11*M_PI/12.f/RAD && solutions.first == 17*M_PI/12.f/RAD))
+  if (solutions.first == 11*M_PI/12.f/RAD && solutions.second == 17*M_PI/12.f/RAD)
     std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c" << '\n';
 
   else {
     std::cout << "FAILED - Solving a*cos(x) + b*sin(x) = c" << '\n';
+    std::cout << "         Solutions are (" << solutions.first << "," << solutions.second << "), "
+              << "should be (" << 11*M_PI/12.f/RAD << "," << 17*M_PI/12.f/RAD << ")." << '\n';
   }
-
-  std::cout << "         Solutions are (" << solutions.first << "," << solutions.second << "), "
-            << "should be (" << 11*M_PI/12.f/RAD << "," << 17*M_PI/12.f/RAD << ")." << '\n';
 }
 
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
   // displayGameGeneratedComponents(controller._game);
+  testVecUtils();
   // testPerlin();
   // testGeneratedImage();
   testEventHandlerGame(controller._eHandlerGame);

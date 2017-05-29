@@ -8,11 +8,11 @@
 #define TIME_TRANSFER_MS 100
 #define MIN_DIST_TO_DEFINE_DRAG 40
 
-#define MIN_CAM_ANGLE_WITH_GROUND 30.f
+#define MAX_GROUND_ANGLE_FOR_CAM 0.f
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
-  _minScalarProductWithGround(sin(RAD*MIN_CAM_ANGLE_WITH_GROUND)),
+  _minScalarProductWithGround(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM)),
   _povCamera(false),
   _draggingCamera(false) {}
 
@@ -24,21 +24,13 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
 
   switch(event.key.code) {
     case sf::Keyboard::Num1:
-      if (_povCamera) {
-        cam.setValues(MIN_R, cam.getTheta() + 180, INIT_PHI);
-        cam.setAdditionalHeight(0);
-        _interface.setPovCamera(false);
-        _povCamera = false;
-      }
+      if (_povCamera)
+        resetCamera(false);
       break;
 
     case sf::Keyboard::Num2:
-      if (!_povCamera) {
-        cam.setValues(0.1, cam.getTheta() + 180, 90.f);
-        cam.setAdditionalHeight(_focusedCharacter->getSize().y);
-        _interface.setPovCamera(true);
-        _povCamera = true;
-      }
+      if (!_povCamera)
+        resetCamera(true);
       break;
 
     case sf::Keyboard::S:
@@ -198,21 +190,21 @@ void EventHandlerGame::handleCameraGodMode(const sf::Time& elapsed, float& theta
 
   // We make the camera move only if the new position is not too close to the ground in angle
   // Otherwise we find the closest available values
-  if (vu::dot(normal, vu::carthesian(1, theta, phi)) < _minScalarProductWithGround) {
-    std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
-      sin(phi*RAD)*normal.x, sin(phi*RAD)*normal.y, _minScalarProductWithGround - cos(phi*RAD)*normal.z);
-
-    std::pair<float,float> distsToThetasLim;
-    distsToThetasLim.first  = std::min(std::abs(theta-thetasLim.first),
-                                       std::abs(std::abs(theta-thetasLim.first)-360));
-    distsToThetasLim.second = std::min(std::abs(theta-thetasLim.second),
-                                       std::abs(std::abs(theta-thetasLim.second)-360));
-
-    if (distsToThetasLim.first < distsToThetasLim.second)
-      theta = thetasLim.first;
-    else
-      theta = thetasLim.second;
-  }
+  // if (vu::dot(normal, vu::carthesian(1, theta, 90)) < _minScalarProductWithGround) {
+  //   std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
+  //     normal.x, normal.y, _minScalarProductWithGround);
+  //
+  //   std::pair<float,float> distsToThetasLim;
+  //   distsToThetasLim.first  = std::min(std::abs(theta-thetasLim.first),
+  //                                      std::abs(std::abs(theta-thetasLim.first)-360));
+  //   distsToThetasLim.second = std::min(std::abs(theta-thetasLim.second),
+  //                                      std::abs(std::abs(theta-thetasLim.second)-360));
+  //
+  //   if (distsToThetasLim.first < distsToThetasLim.second)
+  //     theta = thetasLim.first;
+  //   else
+  //     theta = thetasLim.second;
+  // }
 }
 
 void EventHandlerGame::handleCameraPOVMode(const sf::Time& elapsed, float& theta, float& phi) const {
@@ -227,6 +219,22 @@ void EventHandlerGame::handleCameraPOVMode(const sf::Time& elapsed, float& theta
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
     phi -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+  sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
+
+  // We make the camera move only if the new pointed direction is not too close to the ground in angle
+  // Otherwise we find the closest available phi for the given theta
+  if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _minScalarProductWithGround) {
+    std::pair<float,float> phisLim = solveAcosXplusBsinXequalC(
+      normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, _minScalarProductWithGround);
+
+    phi = phisLim.first;
+  }
+
+  if (phi < 0)
+    phi = 0;
+  if (phi > 180)
+    phi = 180;
 }
 
 void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
@@ -268,12 +276,29 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   }
 }
 
+void EventHandlerGame::resetCamera(bool pov) {
+  Camera& cam = Camera::getInstance();
+
+  _povCamera = pov;
+  _interface.setPovCamera(pov);
+
+  sf::Vector3f terrainNormal = vu::spherical(_game.getNormalOnCameraPointedPos());
+
+  if (pov) {
+    cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);
+    cam.setAdditionalHeight(_focusedCharacter->getSize().y);
+  }
+
+  else {
+    cam.setValues(MIN_R, terrainNormal.y, INIT_PHI);
+    cam.setAdditionalHeight(0);
+  }
+}
+
 void EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
-  cam.setZoom(MIN_R);
 
-  _povCamera = false;
-  _interface.setPovCamera(false);
+  resetCamera(false);
 
   if (_game.getTribe().size() == 0) {
     _game.genTribe(cam.getPointedPos());
@@ -302,6 +327,10 @@ std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, flo
       if (res.second < 0)
         res.second += 360;
     }
+
+    // Ensure the ascending order
+    if (res.second < res.first)
+      std::swap(res.first,res.second);
   }
 
   return res;

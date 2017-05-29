@@ -12,6 +12,8 @@
 
 #define ELEMENT_NEAR_PLANE 20.f
 
+// r, theta, phi follows the mathematical convention: theta is the azimuthal and phi the polar angle
+
 #define MIN_R 120.f
 #define INIT_R 150.f
 #define INIT_PHI 60.f

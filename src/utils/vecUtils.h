@@ -41,6 +41,10 @@ float dot(const sf::Vector3f& u, const sf::Vector3f& v);
 sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v);
 
 sf::Vector3f carthesian(float r, float theta, float phi);
+sf::Vector3f spherical(float x, float y, float z);
+
+inline sf::Vector3f carthesian(sf::Vector3f u) {return carthesian(u.x,u.y,u.z);}
+inline sf::Vector3f spherical (sf::Vector3f u) {return spherical (u.x,u.y,u.z);}
 
 sf::Vector3f convertSFML(glm::vec3 u);
 
