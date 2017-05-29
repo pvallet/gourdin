@@ -234,6 +234,19 @@ void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) con
     std::cout << "         Solutions are (" << solutions.first << "," << solutions.second << "), "
               << "should be (" << 11*M_PI/12.f/RAD << "," << 17*M_PI/12.f/RAD << ")." << '\n';
   }
+
+  float angle1 = 350;
+  float angle2 = 20;
+
+  if (eHandlerGame.absDistBetweenAngles(angle1, angle2) == 30 &&
+      eHandlerGame.absDistBetweenAngles(angle2, angle1) == 30)
+    std::cout << "OK     - Absolute distance between two angles mod 360" << '\n';
+
+  else {
+    std::cout << "FAILED - Absolute distance between two angles mod 360" << '\n';
+    std::cout << "         Distance is " << eHandlerGame.absDistBetweenAngles(angle1,angle2)
+              << ", should be " << 30 << '\n';
+  }
 }
 
 void TestHandler::runTests(const Controller& controller) const {

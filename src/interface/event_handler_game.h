@@ -15,11 +15,14 @@ public:
 
   // Returns two solutions in the range [0,360) in ascending order
   static std::pair<float, float> solveAcosXplusBsinXequalC(float a, float b, float c);
+  // Takes two angles in [0,360)
+  // Returns the distance between two angles in degrees mod 360
+  static float absDistBetweenAngles(float a, float b);
 
 private:
   void handleKeyPressed(const sf::Event& event);
   void handleKeyReleased(const sf::Event& event);
-  void handleCameraGodMode(const sf::Time& elapsed, float& theta, float& phi) const;
+  void handleCameraGodMode(const sf::Time& elapsed, float& theta) const;
   void handleCameraPOVMode(const sf::Time& elapsed, float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal
   void resetCamera(bool pov);
