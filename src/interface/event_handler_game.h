@@ -22,13 +22,14 @@ public:
 private:
   void handleKeyPressed(const sf::Event& event);
   void handleKeyReleased(const sf::Event& event);
-  void handleCameraGodMode(const sf::Time& elapsed, float& theta) const;
-  void handleCameraPOVMode(const sf::Time& elapsed, float& theta, float& phi) const;
+  void handleCamBoundsGodMode(float& theta) const;
+  void handleCamBoundsPOVMode(float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal
   void resetCamera(bool pov);
 
   // Scalar product between terrain normal and (1,cam.theta,90)
-  const float _minScalarProductWithGround;
+  const float _maxScalarProductWithGroundPOV;
+  const float _minScalarProductWithGroundGod;
 
   bool _povCamera;
 

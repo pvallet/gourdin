@@ -8,11 +8,13 @@
 #define TIME_TRANSFER_MS 100
 #define MIN_DIST_TO_DEFINE_DRAG 40
 
-#define MAX_GROUND_ANGLE_FOR_CAM 0.f
+#define MAX_GROUND_ANGLE_FOR_CAM_POV 0.f
+#define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
-  _minScalarProductWithGround(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM)),
+  _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
+  _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _povCamera(false),
   _draggingCamera(false) {}
 
@@ -137,8 +139,12 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
   else if (event.type == sf::Event::MouseMoved) {
     if (_beginDragLeft != sf::Vector2i(0,0)) {
       if (_povCamera) {
+        _oldTheta = cam.getTheta();
+        _oldPhi = cam.getPhi();
         cam.setTheta(_oldTheta + (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
         cam.setPhi(_oldPhi + (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+        _beginDragLeft.x = event.mouseMove.x;
+        _beginDragLeft.y = event.mouseMove.y;
         _draggingCamera = true;
       }
 
@@ -179,50 +185,43 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerGame::handleCameraGodMode(const sf::Time& elapsed, float& theta) const {
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-    theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
+  sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-    theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+  // The steeper the slope, the less the user can move around
+  float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
+
+  // We make the camera move only if the new theta is in the allowed zone
+  if (vu::dot(normal, vu::carthesian(1, theta, 90)) < actualMinScalarProduct) {
+    // New theta with given phi
+    std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
+      normal.x, normal.y, actualMinScalarProduct);
+
+    std::pair<float,float> distsToThetasLim;
+    distsToThetasLim.first  = absDistBetweenAngles(theta, thetasLim.first);
+    distsToThetasLim.second = absDistBetweenAngles(theta, thetasLim.second);
+
+    if (distsToThetasLim.first < distsToThetasLim.second)
+      theta = thetasLim.first;
+    else
+      theta = thetasLim.second;
+  }
 }
 
-void EventHandlerGame::handleCameraPOVMode(const sf::Time& elapsed, float& theta, float& phi) const {
-  float oldPhi, oldTheta;
-
-  if (_draggingCamera) {
-    oldPhi = _oldPhi; oldTheta = _oldTheta;
-  }
-  else {
-    oldPhi = phi; oldTheta = theta;
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-      theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-      theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-      phi += ROTATION_ANGLE_PS * elapsed.asSeconds();
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-      phi -= ROTATION_ANGLE_PS * elapsed.asSeconds();
-  }
-
+void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
   sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
-  // Otherwise we choose between phi and theta which is the simplest to compensate
-  if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _minScalarProductWithGround) {
+  if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
     // New phi with given theta
     std::pair<float,float> phisLim = solveAcosXplusBsinXequalC(
-      normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, _minScalarProductWithGround);
+      normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, _maxScalarProductWithGroundPOV);
 
     float nPhi = phisLim.first;
 
     // New theta with given phi
     std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
-      sin(phi*RAD)*normal.x, sin(phi*RAD)*normal.y, _minScalarProductWithGround - cos(phi*RAD)*normal.z);
+      sin(phi*RAD)*normal.x, sin(phi*RAD)*normal.y, _maxScalarProductWithGroundPOV - cos(phi*RAD)*normal.z);
 
     std::pair<float,float> distsToThetasLim;
     distsToThetasLim.first  = absDistBetweenAngles(theta, thetasLim.first);
@@ -236,15 +235,17 @@ void EventHandlerGame::handleCameraPOVMode(const sf::Time& elapsed, float& theta
       nTheta = thetasLim.second;
 
     // We choose the easiest correction that goes along with the main direction of the camera changes
-    if (absDistBetweenAngles(theta, oldTheta) < std::abs(phi - oldPhi))
+    if (absDistBetweenAngles(theta, _oldTheta) < std::abs(phi - _oldPhi))
       theta = nTheta;
     else
       phi = nPhi;
 
     // If it is still not sufficient to guarantee that the camera is far enough to the ground,
     // we modify phi.
-    if (vu::dot(normal, vu::carthesian(1, nTheta, phi)) > _minScalarProductWithGround + 1e-5)
+    if (vu::dot(normal, vu::carthesian(1, nTheta, phi)) > _maxScalarProductWithGroundPOV + 1e-5) {
       phi = nPhi;
+      theta = _oldTheta;
+    }
   }
 
   if (phi < 0)
@@ -267,10 +268,35 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
 
-  if (_povCamera)
-    handleCameraPOVMode(elapsed, theta, phi);
-  else
-    handleCameraGodMode(elapsed, theta);
+  if (_povCamera) {
+    if (!_draggingCamera) {
+      _oldPhi = phi; _oldTheta = theta;
+
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+        phi += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        phi -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+    }
+
+    handleCamBoundsPOVMode(theta, phi);
+  }
+
+  else {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+      theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+      theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+
+    handleCamBoundsGodMode(theta);
+  }
 
   cam.setValues(cam.getZoom(), theta, phi);
 
