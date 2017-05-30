@@ -194,7 +194,7 @@ size_t Chunk::draw() const {
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
 
-		glDrawElements(GL_TRIANGLES, it->second.indices.size(), GL_UNSIGNED_INT, INDEX_OFFSET(0));
+		glDrawElements(GL_TRIANGLES, it->second.indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
