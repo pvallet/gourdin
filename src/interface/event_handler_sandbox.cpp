@@ -45,18 +45,21 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
     // Go back to selection
     case sf::Keyboard::Space: {
       std::set<Controllable*> sel = _game.getSelection();
-      sf::Vector2f barycenter;
-      float nbSelected = 0;
 
-      for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion = dynamic_cast<Lion*>(*it);
-        if (lion) {
-          barycenter += lion->getPos();
-          nbSelected++;
+      if (!sel.empty()) {
+        sf::Vector2f barycenter;
+        float nbSelected = 0;
+
+        for (auto it = sel.begin(); it != sel.end(); ++it) {
+          Lion* lion = dynamic_cast<Lion*>(*it);
+          if (lion) {
+            barycenter += lion->getPos();
+            nbSelected++;
+          }
         }
+        Camera& cam = Camera::getInstance();
+        cam.setPointedPos(barycenter / nbSelected);
       }
-      Camera& cam = Camera::getInstance();
-      cam.setPointedPos(barycenter / nbSelected);
       break;
     }
 
