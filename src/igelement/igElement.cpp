@@ -23,10 +23,10 @@ void igElement::updateDisplay(sf::Time elapsed, float theta) {
 }
 
 void igElement::setVertices() {
-	_vertices[0] = 0; _vertices[1]  =  _size.x/2; _vertices[2]  = _size.y;
-	_vertices[3] = 0; _vertices[4]  = -_size.x/2; _vertices[5]  = _size.y;
-	_vertices[6] = 0; _vertices[7]  = -_size.x/2; _vertices[8]  = 0;
-	_vertices[9] = 0; _vertices[10] =  _size.x/2; _vertices[11] = 0;
+	_vertices[0] = 0; _vertices[1]  =  _size.x/2 + _offset.x; _vertices[2]  = _size.y + _offset.y;
+	_vertices[3] = 0; _vertices[4]  = -_size.x/2 + _offset.x; _vertices[5]  = _size.y + _offset.y;
+	_vertices[6] = 0; _vertices[7]  = -_size.x/2 + _offset.x; _vertices[8]  =       0 + _offset.y;
+	_vertices[9] = 0; _vertices[10] =  _size.x/2 + _offset.x; _vertices[11] =       0 + _offset.y;
 }
 
 void igElement::setPosArray() {

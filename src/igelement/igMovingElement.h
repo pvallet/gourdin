@@ -12,8 +12,6 @@ public:
 	igMovingElement(sf::Vector2f position, AnimationManager graphics);
 	virtual ~igMovingElement() {}
 
-	virtual bool needsToUpdateHeight() const {return true;}
-
 	void launchAnimation (ANM_TYPE type);
 	virtual void updateDisplay(sf::Time elapsed, float theta); // Update sprite
 	virtual void update(sf::Time elapsed); // Update pos and inner statuses

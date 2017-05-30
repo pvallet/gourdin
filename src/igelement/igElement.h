@@ -36,6 +36,7 @@ protected:
 
 	sf::Vector2f _pos;
 	sf::Vector2f _size;
+	sf::Vector2f _offset; // To adapt the sprite to the terrain
 
 	float _height;
 
