@@ -25,10 +25,15 @@ public:
 	inline bool isDead() const {return _dead;}
 
 protected:
+	void setDirection(sf::Vector2f direction);
+
 	float _speed; // Distance per second
 	bool _dead;
 
 	AnimationManager _graphics;
 
-	sf::Vector2f _direction; // Normalized vector towards the target
+private:
+	// Normalized vector towards the target
+	// It is private to guarantee a correct normalization
+	sf::Vector2f _direction;
 };

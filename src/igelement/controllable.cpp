@@ -14,7 +14,7 @@ void Controllable::update(sf::Time elapsed) {
   if (!_dead) {
     igMovingElement::update(elapsed);
     // The element has gone too far
-    if (vu::dot((_target - _pos), _direction) < 0) {
+    if (vu::dot((_target - _pos), getDirection()) < 0) {
       _pos = _target;
       stop();
     }
@@ -26,8 +26,7 @@ void Controllable::setTarget(sf::Vector2f t) {
     launchAnimation(WALK);
 		_target = t;
 
-		_direction = (t-_pos);
-		_direction /= vu::norm(_direction);
+		setDirection(t-_pos);
 	}
 }
 

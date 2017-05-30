@@ -31,8 +31,7 @@ void Lion::update(sf::Time elapsed) {
 
 		case ATTACKING:
 			_target = _prey->getPos();
-			_direction = _prey->getPos() - _pos;
-			_direction /= vu::norm(_direction);
+			setDirection(_prey->getPos() - _pos);
 			_speed = _prey->getSpeed() - 1.f;
 
 			if (_beginAttack.getElapsedTime() >= _animAttack) {

@@ -47,14 +47,20 @@ void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
 }
 
 void igMovingElement::update(sf::Time elapsed) {
-	if (_direction.x != 0.f || _direction.y != 0.f) {
-		_pos.x += _direction.x * _speed * elapsed.asSeconds();
-		_pos.y += _direction.y * _speed * elapsed.asSeconds();
-	}
+	_pos.x += _direction.x * _speed * elapsed.asSeconds();
+	_pos.y += _direction.y * _speed * elapsed.asSeconds();
 }
 
 void igMovingElement::die() {
 	launchAnimation(DIE);
 	_speed = 0.f;
 	_dead = true;
+}
+
+void igMovingElement::setDirection(sf::Vector2f direction) {
+	_direction = direction;
+	float norm = vu::norm(_direction);
+
+	if (norm != 0)
+		_direction /= norm;
 }

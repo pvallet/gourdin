@@ -106,10 +106,8 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 	if (info.nbFlee != 0)
 		beginFleeing();
 
-	if (info.nbAttract != 0 && info.nbAttract <= 2) {
-		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
-		_direction /= vu::norm(_direction);
-	}
+	if (info.nbAttract != 0 && info.nbAttract <= 2)
+		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 
 	else if (_beginPhase.getElapsedTime() > _timePhase) {
 		if (_moving) {
@@ -121,15 +119,12 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 		}
 
 		else {
-			if (info.minRepDst != _repulsionRadius) { // There is someone inside the repulsion radius
-				_direction = _pos - info.closestRep;
-				_direction /= vu::norm(_direction);
-			}
+			if (info.minRepDst != _repulsionRadius) // There is someone inside the repulsion radius
+				setDirection(_pos - info.closestRep);
 
 			else {
 				float theta = RANDOMF * 2.f * M_PI;
-				_direction.x = cos(theta);
-				_direction.y = sin(theta);
+				setDirection(sf::Vector2f(cos(theta), sin(theta)));
 			}
 
 			_speed = _speedWalking;
@@ -143,39 +138,27 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 
 void Antilope::reactWhenFleeing(const BoidsInfo& info) {
 	// Take into account the closest elements
-	if (info.minRepDst != _repulsionRadius) {
-		_direction = _pos - info.closestRep;
-		_direction /= vu::norm(_direction);
-	}
+	if (info.minRepDst != _repulsionRadius)
+		setDirection(_pos - info.closestRep);
 
 	else if (info.nbDir != 0) {
 		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
-		if (zbla.x != 0 && zbla.y != 0) {
-			_direction = info.sumOfDirs / (float) info.nbDir;
-			_direction /= vu::norm(_direction);
-		}
+		if (zbla.x != 0 && zbla.y != 0)
+			setDirection(info.sumOfDirs / (float) info.nbDir);
 
-		else {
-			_direction.x = 1.f;
-			_direction.y = 0.f;
-		}
+		else
+			setDirection(sf::Vector2f(1,0));
 	}
 
-	else if (info.nbAttract != 0) {
-		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
-		_direction /= vu::norm(_direction);
-	}
+	else if (info.nbAttract != 0)
+		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 
-	else if (info.nbFlee != 0) {
-		_direction = _pos - info.sumPosFlee / (float) info.nbFlee;
-		_direction /= vu::norm(_direction);
-	}
+	else if (info.nbFlee != 0)
+		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
 
 	// Take into account the hunter for half as much
-	if (info.nbFlee != 0) {
-		_direction = _pos - info.sumPosFlee / (float) info.nbFlee;
-		_direction /= vu::norm(_direction);
-	}
+	if (info.nbFlee != 0)
+		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
 
 	else {
 		beginRecovering();
@@ -195,30 +178,24 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 
 	else if (info.minRepDst != _repulsionRadius &&
 			(_bStatus == REPULSION || vu::norm(_pos-info.closestRep) < _repulsionRadius * 0.8) ) {
-		_direction = _pos - info.closestRep;
-		_direction /= vu::norm(_direction);
+		setDirection(_pos - info.closestRep);
 		_bStatus = REPULSION;
 	}
 
 	else if (info.nbDir != 0) { // TODO : Hysteresis
 		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
-		if (zbla.x != 0 && zbla.y != 0) {
-			_direction = info.sumOfDirs / (float) info.nbDir;
-			_direction /= vu::norm(_direction);
-		}
+		if (zbla.x != 0 && zbla.y != 0)
+			setDirection(info.sumOfDirs / (float) info.nbDir);
 
-		else {
-			_direction.x = 1.f;
-			_direction.y = 0.f;
-		}
+		else
+			setDirection(sf::Vector2f(1,0));
 
 		_bStatus = ORIENTATION;
 	}
 
 	else if (info.nbAttract != 0 &&
 			(_bStatus == ATTRACTION || vu::norm(info.sumPosAttract / (float) info.nbAttract - _pos) < _attractionRadius * 0.8) ) {
-		_direction = info.sumPosAttract / (float) info.nbAttract - _pos;
-		_direction /= vu::norm(_direction);
+		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 		_bStatus = ATTRACTION;
 	}
 }
