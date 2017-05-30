@@ -8,7 +8,9 @@
 	#include <unistd.h>
 #endif
 
-// #define CORE_PROFILE
+#ifdef __APPLE__
+#define CORE_PROFILE
+#endif
 
 Shader::Shader() :
 	_vertexID(0),

@@ -9,7 +9,9 @@
 #include "game.h"
 #include "interface.h"
 
-// #define CORE_PROFILE
+#ifdef __APPLE__
+#define CORE_PROFILE
+#endif
 
 #ifndef NDEBUG
 	class TestHandler;
