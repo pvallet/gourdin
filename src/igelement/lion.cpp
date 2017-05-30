@@ -32,7 +32,7 @@ void Lion::update(sf::Time elapsed) {
 		case ATTACKING:
 			_target = _prey->getPos();
 			setDirection(_prey->getPos() - _pos);
-			_speed = _prey->getSpeed() - 1.f;
+			_speed = _prey->getSpeed() * 0.9f;
 
 			if (_beginAttack.getElapsedTime() >= _animAttack) {
 				_prey->die();
@@ -51,8 +51,9 @@ void Lion::update(sf::Time elapsed) {
 }
 
 void Lion::stop() {
-	Controllable::stop();
+	_speed = _speedWalking;
 	_status = WAITING;
+	Controllable::stop();
 }
 
 void Lion::beginRunning() {

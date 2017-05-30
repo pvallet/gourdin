@@ -31,8 +31,11 @@ void Controllable::setTarget(sf::Vector2f t) {
 }
 
 void Controllable::stop() {
-	launchAnimation(WAIT);
-  _target = _pos;
+  if (!_dead) {
+    _target = _pos;
+    setDirection(sf::Vector2f(0,0));
+    launchAnimation(WAIT);
+  }
 }
 
 sf::IntRect Controllable::getScreenCoord() const {

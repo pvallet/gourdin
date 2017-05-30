@@ -27,7 +27,7 @@ void igMovingElement::launchAnimation(ANM_TYPE type) {
 		_size.x *= _graphics.getRawSize().x;
 		_size.y *= _graphics.getRawSize().y;
 
-		_offset = (oldSize - _size) / 2.f;
+		_offset.y += (oldSize.y - _size.y) / 2.f;
 		setVertices();
 	}
 }
