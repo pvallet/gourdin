@@ -353,18 +353,21 @@ void Game::renderLifeBars(sf::RenderWindow& window) const {
     Lion* lion = dynamic_cast<Lion*>(*it);
     if (lion) {
       corners = (*it)->getScreenCoord();
-      maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+      // Otherwise the selected element is outside the screen
+      if (corners.width != 0) {
+        maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-        lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
+          lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
 
-      lifeBar.setPosition(corners.left + corners.width/2 - 10,
-        corners.top - corners.height*maxHeightFactor + corners.height - 5);
-      fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
-        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+        lifeBar.setPosition(corners.left + corners.width/2 - 10,
+          corners.top - corners.height*maxHeightFactor + corners.height - 5);
+        fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+          corners.top - corners.height*maxHeightFactor + corners.height - 5);
 
-      window.draw(lifeBar);
-      window.draw(fullLifeBar);
-      lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+        window.draw(lifeBar);
+        window.draw(fullLifeBar);
+        lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+      }
     }
   }
 }
