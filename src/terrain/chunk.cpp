@@ -114,15 +114,15 @@ void Chunk::generateBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, currentBuffers->vbo);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0,
 		BUFFER_OFFSET(currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0]));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0,
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0,
 		BUFFER_OFFSET(currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0] +
 		              currentBuffers->normals. size()*sizeof currentBuffers->normals[0]));
 
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
