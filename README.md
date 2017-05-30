@@ -58,6 +58,31 @@ You can also specify which libraries you want to build.
 
 The entries are `glm`, `SFML` and `glew`.
 
+## Mac OS
+
+#### 1. Homebrew
+
+In order to easily install the dependencies, we recommend to use Homebrew, a package manager similar to apt-get in linux.
+
+```
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+#### 2. Dependencies
+
+You then need CMake to generate your project and Clang (C++ compiler) to build it:
+```
+brew install --with-clang llvm
+brew install cmake
+```
+Finally install the dependencies of the project:
+```
+brew install glew glm sfml
+```
+
+#### 3. Building the project
+
+In order to build the project, please refer to the section Linux -> 2. Building the project.
 
 ## Windows
 
