@@ -25,6 +25,7 @@ private:
 	std::array<float,48> _coord;
 	std::array<float,24> _layer;
 
+	GLuint _vao;
 	GLuint _vbo;
 	GLuint _ibo;
 

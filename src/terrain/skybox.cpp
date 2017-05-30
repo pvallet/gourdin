@@ -60,6 +60,23 @@ Skybox::Skybox() :
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(_indices), &_indices[0]);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// vao
+
+	glGenVertexArrays(1, &_vao);
+  glBindVertexArray(_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord)));
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 Skybox::~Skybox() {
@@ -72,28 +89,13 @@ void Skybox::load(std::string filename) {
 }
 
 void Skybox::draw() const {
+	glBindVertexArray(_vao);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
-
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord)));
-
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
 
   glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+	glBindVertexArray(_vao);
 }

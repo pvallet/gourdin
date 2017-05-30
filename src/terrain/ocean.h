@@ -23,6 +23,7 @@ private:
 	std::array<float,8>  _coord;
 	std::array<GLuint,4> _indices;
 
+	GLuint _vao;
 	GLuint _vbo;
 	GLuint _ibo;
 	GLuint _tex;
