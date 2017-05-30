@@ -1,6 +1,5 @@
 #include "map.h"
 
-#include <omp.h>
 #include "tinyxml.h"
 
 #include <iostream>

@@ -59,6 +59,7 @@ void Game::init() {
     _reliefGenerator.generateRelief();
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
+    std::cout << "Done Generating relief mask" << '\n';
   }
 
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
