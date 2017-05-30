@@ -9,6 +9,8 @@
 #include "game.h"
 #include "interface.h"
 
+// #define CORE_PROFILE
+
 #ifndef NDEBUG
 	class TestHandler;
 #endif

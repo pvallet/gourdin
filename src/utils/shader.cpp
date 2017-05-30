@@ -8,6 +8,8 @@
 	#include <unistd.h>
 #endif
 
+// #define CORE_PROFILE
+
 Shader::Shader() :
 	_vertexID(0),
 	_fragmentID(0),
@@ -127,7 +129,13 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
 
   const GLchar* str = sourceCode.c_str();
 
-	glShaderSource(shader, 1, &str, 0);
+#ifdef CORE_PROFILE
+	const char *sources[2] = { "#version 330\n", str };
+#else
+	const char *sources[2] = { "#version 130\n", str };
+#endif
+
+	glShaderSource(shader, 2, sources, 0);
 
   glCompileShader(shader);
 

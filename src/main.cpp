@@ -31,7 +31,11 @@ int main(int argc, char* argv[]) {
   }
 #endif
 
+#ifdef CORE_PROFILE
+  sf::ContextSettings context(24, 8, 4, 3, 3, sf::ContextSettings::Core);
+#else
   sf::ContextSettings context(24, 8, 4, 3, 0);
+#endif
 
 #ifndef NDEBUG
   sf::RenderWindow window(sf::VideoMode(1366, 768), "OpenGL", sf::Style::Default, context);

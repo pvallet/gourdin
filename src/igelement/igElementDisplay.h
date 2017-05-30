@@ -7,7 +7,7 @@
 
 #include "igElement.h"
 
-#define IGE_BUFFER_SIZE 10000
+#define IGE_BUFFER_SIZE 100
 
 enum DrawType {STATIC_DRAW, STREAM_DRAW};
 
@@ -33,6 +33,7 @@ protected:
 
   GLuint _vao;
   GLuint _vbo;
+  GLuint _ibo;
   std::vector<GLuint> _texIDs;
   std::vector<GLuint> _nbElemsInSpree;
 };

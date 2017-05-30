@@ -8,11 +8,14 @@
 
 igElementDisplay::igElementDisplay() :
   _vao(0),
-  _vbo(0) {}
+  _vbo(0),
+  _ibo(0) {}
 
 void igElementDisplay::reset() {
+  glDeleteBuffers(1, &_ibo);
   glDeleteBuffers(1, &_vbo);
   glDeleteVertexArrays(1, &_vao);
+  _ibo = 0;
   _vbo = 0;
   _vao = 0;
 }
@@ -23,8 +26,9 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
 
   _capacity = capacity;
 
-  glGenBuffers(1, &_vbo);
+  // vbo
 
+  glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
   if (drawType == STREAM_DRAW)
@@ -35,6 +39,28 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
       NULL, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  // ibo
+
+  glGenBuffers(1, &_ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+
+  std::vector<GLuint> indices(6*_capacity);
+
+  for (size_t i = 0; i < _capacity; i++) {
+    indices[6*i]     = 0 + 4*i;
+    indices[6*i + 1] = 1 + 4*i;
+    indices[6*i + 2] = 2 + 4*i;
+    indices[6*i + 3] = 0 + 4*i;
+    indices[6*i + 4] = 2 + 4*i;
+    indices[6*i + 5] = 3 + 4*i;
+  }
+
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, _capacity * 6 * sizeof(indices[0]), NULL, GL_STATIC_DRAW);
+  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _capacity * 6 * sizeof(indices[0]), &indices[0]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  // vao
 
   glGenVertexArrays(1, &_vao);
   glBindVertexArray(_vao);
@@ -54,7 +80,6 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
   glEnableVertexAttribArray(3);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-
   glBindVertexArray(0);
 }
 
@@ -162,18 +187,20 @@ size_t igElementDisplay::drawElements() const {
   size_t cursor = 0;
 
   glBindVertexArray(_vao);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
   for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texIDs[i]);
 
-    glDrawArrays(GL_QUADS, cursor, 4 * _nbElemsInSpree[i]);
+    glDrawElements(GL_TRIANGLES, 6 * _nbElemsInSpree[i], GL_UNSIGNED_INT, INDEX_OFFSET(cursor));
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
-    cursor += 4 * _nbElemsInSpree[i];
+    cursor += 6 * _nbElemsInSpree[i];
   }
 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  return cursor / 4;
+  return cursor / 6;
 }

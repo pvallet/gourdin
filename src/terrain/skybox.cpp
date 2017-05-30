@@ -80,8 +80,9 @@ Skybox::Skybox() :
 }
 
 Skybox::~Skybox() {
+	glDeleteBuffers(1, &_ibo);
 	glDeleteBuffers(1, &_vbo);
-  glDeleteBuffers(1, &_ibo);
+	glDeleteVertexArrays(1, &_vao);
 }
 
 void Skybox::load(std::string filename) {
@@ -93,7 +94,7 @@ void Skybox::draw() const {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
-  glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+  glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, INDEX_OFFSET(0));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);

@@ -1,4 +1,4 @@
-#version 130
+// Version is defined by shader compiler, 130 for compatibility and 330 for core
 
 in vec2 texCoord;
 in float layer;

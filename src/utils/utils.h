@@ -18,6 +18,7 @@
 #define RANDOMF (rand() / (float) RAND_MAX)
 
 #define BUFFER_OFFSET(a) ((char*)NULL + (a))
+#define INDEX_OFFSET(a) ((void*) (a * sizeof(GLuint)))
 
 enum Animals {ANTILOPE, DEER, LION, WOLF, LEOPARD,
 	 AOE1_MAN, AOE2_MAN, WOMAN, ANIMALS_NB_ITEMS};

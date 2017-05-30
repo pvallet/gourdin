@@ -22,13 +22,19 @@ Controller::Controller(sf::RenderWindow& window) :
 }
 
 void Controller::init() {
+
+#ifndef CORE_PROFILE
   _interface.init();
+#endif
+
   _game.init();
 }
 
 void Controller::render() const {
   if (_running) {
     _game.render();
+
+#ifndef CORE_PROFILE
     _window.pushGLStates();
 
     if (_currentHandlerType == HDLR_SANDBOX) {
@@ -42,8 +48,10 @@ void Controller::render() const {
     if (_currentHandlerType == HDLR_SANDBOX)
       _interface.renderLog(_elapsed);
 
-    _window.display();
     _window.popGLStates();
+#endif
+
+    _window.display();
   }
 }
 
