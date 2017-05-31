@@ -192,7 +192,7 @@ size_t igElementDisplay::drawElements() const {
   for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texIDs[i]);
 
-    glDrawElements(GL_TRIANGLES, 6 * _nbElemsInSpree[i], GL_UNSIGNED_INT, INDEX_OFFSET(cursor));
+    glDrawElements(GL_TRIANGLES, 6 * _nbElemsInSpree[i], GL_UNSIGNED_INT, BUFFER_OFFSET(cursor * sizeof(GLuint)));
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
