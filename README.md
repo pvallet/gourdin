@@ -5,6 +5,72 @@ purposes.
 
 For more details about its development, please refer to report.pdf (coming soon).
 
+Contact: <luap.vallet@gmail.com>
+
+---
+
+Two modes are featured in gourdin, a Sandbox mode and a Game mode.
+
+The **Sandbox** mode is made to be able to see the whole structure of the island and navigate through the different biomes easily. This is still a work in progress so there is still obvious work to be done on texture transitions and forests structure.
+
+There are some antilope and deer herds scattered over the island, and appear only on certain biomes. The antilopes appear only on the biome with small plants with big leaves (making the environment more consistent is on the TO-DO list). The deers are easier to find.
+
+As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;)
+
+Any feedback on the structure of the island and the environment is much appreciated (the controls of the predators is not the main purpose of this mode).
+
+The **Game** mode is made to show how would be the controls and the camera for a game using this engine. In this mode you control a small tribe that you can move around, switching focus among characters. There are two camera types, a 'God' camera and a point-of-view one.
+
+You can move around using the mouse or the keyboard. The main purpose is to see if this type of controls would be suitable for portable devices.
+
+Any feedback on the global ergonomy of the controls and camera would be much appreciated. If that also gives you gamedesign ideas, tell me about it!
+
+## Usage
+
+The controls are displayed in the main screen in gourdin under Linux and Windows. However, Mac OS requires a greater OpenGL version that is not compatible with SFML, hence the interface is absent.
+
+This is why we also provide the controls here.
+
+#### 1. Sandbox mode
+The controls of the sandbox mode are pretty much the same as a RTS game (see Populous: The Beginning).
+
+```
+M:  Switch to Game mode
+Left-Right:  Rotate camera
+Up-Down:     Go forwards/backwards
+B:  Launch benchmark
+L:  Hide/Display log
+W:  Switch to wireframe display
+
+Click on the minimap to jump there
+Right-click to make a lion appear
+Select it with the left mouse button
+Move it around with the right button
+Lshift:  Make it run
+```
+
+#### 2. Game mode
+
+###### God camera
+```
+M: Switch to Sandbox mode
+1: God camera
+2: POV camera
+A-E:  Rotate camera
+ZQSD: Move focused character
+LShift+ZQSD: Change focused character to closest in given direction
+(The game is optimised for AZERTY keyboards)
+
+Click to move the character in the center
+Click on another character to change the focus
+Click and drag to rotate the camera
+```
+
+###### POV camera
+The controls are the same but you move the camera around with the arrows (you can still use the mouse).
+
+---
+
 ## Installation
 
 The installation is done with CMake to be cross-platform.
@@ -58,6 +124,8 @@ You can also specify which libraries you want to build.
 
 The entries are `glm`, `SFML` and `glew`.
 
+---
+
 ## Mac OS
 
 #### 1. Homebrew
@@ -83,6 +151,10 @@ brew install glew glm sfml
 #### 3. Building the project
 
 In order to build the project, please refer to the section Linux -> 2. Building the project.
+
+Please note that cmake might throw some errors about testing OpenMP. You can ignore them, the CMake config file is not up to date with the compiler Clang, that features OpenMP natively.
+
+---
 
 ## Windows
 
