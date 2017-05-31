@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
 
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
@@ -27,10 +27,7 @@ endif()
 
 set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-# set (CMAKE_CXX_STANDARD 11)
-
-set(extra_flags "-std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${extra_flags}")
+set (CMAKE_CXX_STANDARD 11)
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
