@@ -73,7 +73,21 @@ The controls are the same but you move the camera around with the arrows (you ca
 
 ## Installation
 
-The installation is done with CMake to be cross-platform.
+On **Windows** you have two options:
+* Download the [installer](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-windows-setup.exe) to install gourdin on your computer. You will be able to run it through the windows menu and create a desktop icon if you want. If you have an error telling you that you don't have the permissions to run it, right ctrl-click on it and choose "Run as administrator".
+* Download [gourdin-windows-folder.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-windows-folder.zip) that contains the directory with all the game info. You can unzip it and run it directly by double-clicking on `gourdin.exe`
+
+On **Mac OS** you should download [gourdin-mac.app.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-mac.app.zip). Then you only have to `ctrl-click` on it and choose open to allow executing from an unidentifed developer (me).
+
+On **Linux** there is no pre-built package, you have to build it from source.
+
+All the files are available here: https://github.com/pvallet/gourdin/releases/
+
+---
+
+## Building from source
+
+The building is done with CMake to be cross-platform.
 
 ## Linux
 
