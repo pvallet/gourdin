@@ -15,7 +15,7 @@ The **Sandbox** mode is made to be able to see the whole structure of the island
 
 There are some antilope and deer herds scattered over the island, and appear only on certain biomes. The antilopes appear only on the biome with small plants with big leaves (making the environment more consistent is on the TO-DO list). The deers are easier to find.
 
-As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;)
+As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;) If you manage to get them close enough to the antilopes, they will attack.
 
 Any feedback on the structure of the island and the environment is much appreciated (the controls of the predators is not the main purpose of this mode).
 
