@@ -126,9 +126,11 @@ void Interface::renderLog(sf::Time elapsed) const {
 void Interface::renderInfo(bool inGameMode) const {
   std::ostringstream text;
 
+  text << "Esc: " << "Quit game" << std::endl
+       << "M:   " << "Switch to Sandbox mode" << std::endl;
+
   if (inGameMode) {
-    text << "M: " << "Switch to Sandbox mode" << std::endl
-         << "1: " << "God camera" << std::endl
+    text << "1: " << "God camera" << std::endl
          << "2: " << "POV camera" << std::endl;
     if (_povCamera)
     text << "Arrows: " << "Move camera around" << std::endl;
@@ -144,8 +146,7 @@ void Interface::renderInfo(bool inGameMode) const {
   }
 
   else {
-    text << "M: " << "Switch to Game mode" << std::endl
-         << "Left-Right: " << "Rotate camera" << std::endl
+    text << "Left-Right: " << "Rotate camera" << std::endl
          << "Up-Down:    " << "Go forwards/backwards" << std::endl
          << "B: " << "Launch benchmark" << std::endl
          << "L: " << "Hide/Display log" << std::endl

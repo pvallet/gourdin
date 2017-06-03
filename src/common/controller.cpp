@@ -73,6 +73,9 @@ void Controller::run() {
         _running = _eHandlerSandbox.handleEvent(event,_currentHandlerType);
       }
 
+      if (!_running)
+        break;
+
       if (_currentHandlerType != lastHandlerType) {
         if (_currentHandlerType == HDLR_GAME)
           _eHandlerGame.gainFocus();
