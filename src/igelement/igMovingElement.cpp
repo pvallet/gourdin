@@ -5,10 +5,11 @@
 #include <cmath>
 #include <iostream>
 
-igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics) :
+igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igElement(position),
 	_dead(false),
-	_graphics(graphics) {
+	_graphics(graphics),
+	_terrainGeometry(terrainGeometry) {
 	_size = _graphics.getRawSize();
 	_size /= _size.y;
 	_size *= _graphics.getParameters().size;
@@ -47,14 +48,25 @@ void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
 }
 
 void igMovingElement::update(sf::Time elapsed) {
-	_pos.x += _direction.x * _speed * elapsed.asSeconds();
-	_pos.y += _direction.y * _speed * elapsed.asSeconds();
+	sf::Vector2f newPos = _pos + _direction * _speed * elapsed.asSeconds();
+
+	if (_terrainGeometry.isWater(newPos, 0))
+		stop();
+	else
+		_pos = newPos;
 }
 
 void igMovingElement::die() {
 	launchAnimation(DIE);
 	_speed = 0.f;
 	_dead = true;
+}
+
+void igMovingElement::stop() {
+	if (!_dead) {
+    setDirection(sf::Vector2f(0,0));
+    launchAnimation(WAIT);
+  }
 }
 
 void igMovingElement::setDirection(sf::Vector2f direction) {

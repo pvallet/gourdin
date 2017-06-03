@@ -77,8 +77,11 @@ void Controller::run() {
         break;
 
       if (_currentHandlerType != lastHandlerType) {
-        if (_currentHandlerType == HDLR_GAME)
-          _eHandlerGame.gainFocus();
+        if (_currentHandlerType == HDLR_GAME) {
+          // If we can spawn a tribe we go back to sandbox mode
+          if (!_eHandlerGame.gainFocus())
+            _currentHandlerType = HDLR_SANDBOX;
+        }
         else
           _eHandlerSandbox.gainFocus();
       }

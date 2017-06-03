@@ -11,7 +11,7 @@ public:
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);
 
-  void gainFocus();
+  bool gainFocus();
 
   // Returns two solutions in the range [0,360) in ascending order
   static std::pair<float, float> solveAcosXplusBsinXequalC(float a, float b, float c);

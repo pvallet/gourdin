@@ -169,10 +169,12 @@ void EventHandlerSandbox::onGoingEvents(const sf::Time& elapsed) {
     cam.translate(0.f, realTranslationValue);
 }
 
-void EventHandlerSandbox::gainFocus() {
+bool EventHandlerSandbox::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 
   LogText& logText = LogText::getInstance();
   logText.clear();
+
+  return true;
 }

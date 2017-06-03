@@ -9,7 +9,7 @@ public:
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);
 
-  void gainFocus();
+  bool gainFocus();
 
 private:
   void handleClick(const sf::Event& event);

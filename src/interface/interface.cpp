@@ -127,7 +127,7 @@ void Interface::renderInfo(bool inGameMode) const {
   std::ostringstream text;
 
   text << "Esc: " << "Quit game" << std::endl
-       << "M:   " << "Switch to Sandbox mode" << std::endl;
+       << "M: " << "Switch to Sandbox mode" << std::endl;
 
   if (inGameMode) {
     text << "1: " << "God camera" << std::endl

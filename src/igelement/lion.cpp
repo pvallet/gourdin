@@ -5,8 +5,8 @@
 #include "antilope.h"
 #include "vecUtils.h"
 
-Lion::Lion(sf::Vector2f position, AnimationManager graphics) :
-	Controllable(position, graphics),
+Lion::Lion(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+	Controllable(position, graphics, terrainGeometry),
 	_stamina(100),
 	_catchBreathSpeed(25.f),
 	_loseBreathSpeed(10.f),

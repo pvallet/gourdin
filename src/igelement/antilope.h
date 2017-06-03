@@ -20,7 +20,7 @@ struct BoidsInfo {
 
 class Antilope : public igMovingElement {
 public:
-	Antilope(sf::Vector2f position, AnimationManager graphics);
+	Antilope(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Antilope() {}
 
 	// React to the environment

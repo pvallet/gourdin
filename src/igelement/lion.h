@@ -8,7 +8,7 @@ enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING};
 
 class Lion : public Controllable {
 public:
-	Lion(sf::Vector2f position, AnimationManager _graphics);
+	Lion(sf::Vector2f position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Lion() {}
 
 	virtual void update(sf::Time elapsed);

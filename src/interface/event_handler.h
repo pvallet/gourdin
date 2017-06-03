@@ -15,7 +15,7 @@ public:
   virtual bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   virtual void onGoingEvents(const sf::Time& elapsed) = 0;
 
-  virtual void gainFocus() = 0;
+  virtual bool gainFocus() = 0;
 
 protected:
   Game& _game;

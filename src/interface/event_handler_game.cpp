@@ -337,15 +337,21 @@ void EventHandlerGame::resetCamera(bool pov) {
   }
 }
 
-void EventHandlerGame::gainFocus() {
+bool EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
+  
+  if (_game.getTribe().size() == 0) {
+    _game.genTribe(cam.getPointedPos());
+    // If we cannot generate a tribe, we fall back to sandbox mode
+    if (_game.getTribe().size() == 0)
+      return false;
+
+    _focusedCharacter = _game.getTribe().front();
+  }
 
   resetCamera(false);
 
-  if (_game.getTribe().size() == 0) {
-    _game.genTribe(cam.getPointedPos());
-    _focusedCharacter = _game.getTribe().front();
-  }
+  return true;
 }
 
 std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, float b, float c) {

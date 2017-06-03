@@ -5,17 +5,19 @@
 
 #include "animationManager.h"
 #include "igElement.h"
+#include "terrainGeometry.h"
 #include "utils.h"
 
 class igMovingElement : public igElement {
 public:
-	igMovingElement(sf::Vector2f position, AnimationManager graphics);
+	igMovingElement(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~igMovingElement() {}
 
 	void launchAnimation (ANM_TYPE type);
 	virtual void updateDisplay(sf::Time elapsed, float theta); // Update sprite
 	virtual void update(sf::Time elapsed); // Update pos and inner statuses
 	virtual void die();
+	virtual void stop();
 
 	inline size_t getTexID() const {return _graphics.getTexID();}
 
@@ -31,6 +33,8 @@ protected:
 	bool _dead;
 
 	AnimationManager _graphics;
+
+	const TerrainGeometry& _terrainGeometry;
 
 private:
 	// Normalized vector towards the target

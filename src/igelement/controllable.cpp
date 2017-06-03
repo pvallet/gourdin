@@ -4,8 +4,8 @@
 #include "vecUtils.h"
 #include <iostream>
 
-Controllable::Controllable(sf::Vector2f position, AnimationManager graphics) :
- 	igMovingElement(position, graphics),
+Controllable::Controllable(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+ 	igMovingElement(position, graphics, terrainGeometry),
   _target(position) {
 
 }
@@ -31,11 +31,8 @@ void Controllable::setTarget(sf::Vector2f t) {
 }
 
 void Controllable::stop() {
-  if (!_dead) {
-    _target = _pos;
-    setDirection(sf::Vector2f(0,0));
-    launchAnimation(WAIT);
-  }
+  _target = _pos;
+  igMovingElement::stop();
 }
 
 sf::IntRect Controllable::getScreenCoord() const {

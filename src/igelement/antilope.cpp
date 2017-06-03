@@ -7,8 +7,8 @@
 #include "utils.h"
 #include "vecUtils.h"
 
-Antilope::Antilope(sf::Vector2f position, AnimationManager graphics) :
-	igMovingElement(position, graphics),
+Antilope::Antilope(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+	igMovingElement(position, graphics, terrainGeometry),
 	_lineOfSightStandard(50.f),
 	_repulsionRadius(8.f),
 	_orientationRadius(15.f),

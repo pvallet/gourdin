@@ -145,6 +145,9 @@ std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f cent
         add = false;
     }
 
+    if (_terrainGeometry.isWater(p,0))
+      add = false;
+
     if (add) {
       res.push_back(p);
 
@@ -162,7 +165,7 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t
   std::vector<sf::Vector2f> positions = scatteredPositions(pos, count, 10, 5);
 
   for (size_t i = 0; i < positions.size(); i++) {
-    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal])));
+    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
   }
 
   return res;
@@ -182,7 +185,7 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const
       animal = AOE2_MAN;
     else
       animal = WOMAN;
-    res.push_back(new Controllable(positions[i], AnimationManager(_animManagerInits[animal])));
+    res.push_back(new Controllable(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
   }
 
   return res;
@@ -193,9 +196,9 @@ std::vector<igMovingElement*> ContentGenerator::genLion(sf::Vector2f pos) const 
   Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
   if (biomeInPos == TROPICAL_RAIN_FOREST)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LEOPARD])));
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LEOPARD]), _terrainGeometry));
   else if (biomeInPos == TROPICAL_SEASONAL_FOREST)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION])));
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION]), _terrainGeometry));
 
   else if (biomeInPos == TEMPERATE_RAIN_FOREST ||
            biomeInPos == TEMPERATE_DECIDUOUS_FOREST ||
@@ -203,7 +206,7 @@ std::vector<igMovingElement*> ContentGenerator::genLion(sf::Vector2f pos) const 
            biomeInPos == TAIGA ||
            biomeInPos == SHRUBLAND ||
            biomeInPos == TUNDRA)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[WOLF])));
+    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[WOLF]), _terrainGeometry));
 
   return res;
 }

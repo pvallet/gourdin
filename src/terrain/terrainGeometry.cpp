@@ -442,16 +442,25 @@ std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTriangles() con
   return triangles;
 }
 
+bool TerrainGeometry::SubdivisionLevel::isWater(sf::Vector2f pos) const {
+  const Triangle* t = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos));
+
+  if (t == nullptr)
+    return true;
+
+  return t->biome == OCEAN || t->biome == WATER || t->biome == LAKE || t->biome == MARSH || t->biome == RIVER;
+}
+
 float TerrainGeometry::SubdivisionLevel::getHeight(sf::Vector2f pos) const {
   float barCoord[3];
   const Triangle* t = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos), barCoord);
 
   if (t == nullptr)
     return 0;
-  else
-    return barCoord[0]*t->vertices[0]->pos.z +
-           barCoord[1]*t->vertices[1]->pos.z +
-           barCoord[2]*t->vertices[2]->pos.z;
+
+  return barCoord[0]*t->vertices[0]->pos.z +
+         barCoord[1]*t->vertices[1]->pos.z +
+         barCoord[2]*t->vertices[2]->pos.z;
 }
 
 Biome TerrainGeometry::SubdivisionLevel::getBiome(sf::Vector2f pos) const {
@@ -466,11 +475,10 @@ sf::Vector3f TerrainGeometry::SubdivisionLevel::getNorm(sf::Vector2f pos) const 
 
   if (t == nullptr)
     return sf::Vector3f(0,0,1);
-  else {
-    return barCoord[0]*t->vertices[0]->normal +
-           barCoord[1]*t->vertices[1]->normal +
-           barCoord[2]*t->vertices[2]->normal;
-  }
+
+  return barCoord[0]*t->vertices[0]->normal +
+         barCoord[1]*t->vertices[1]->normal +
+         barCoord[2]*t->vertices[2]->normal;
 }
 
 TerrainGeometry::TerrainGeometry() :

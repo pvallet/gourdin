@@ -103,6 +103,7 @@ public:
 
     std::list<const Triangle*> getTriangles() const;
 
+    bool isWater(sf::Vector2f pos) const;
     float getHeight(sf::Vector2f pos) const;
     Biome getBiome (sf::Vector2f pos) const;
     sf::Vector3f getNorm(sf::Vector2f pos) const;
@@ -138,6 +139,9 @@ public:
   std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y, size_t subdivLvl);
 
   inline bool isOcean(size_t x, size_t y) const {return _subdivisionLevels[0]->isOcean(x,y);}
+
+  inline bool isWater(sf::Vector2f pos, size_t subdivLvl) const  {
+    return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->isWater(pos);}
 
   inline float getHeight(sf::Vector2f pos, size_t subdivLvl) const {
     return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getHeight(pos);}

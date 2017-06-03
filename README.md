@@ -35,7 +35,8 @@ This is why we also provide the controls here.
 The controls of the sandbox mode are pretty much the same as a RTS game (see Populous: The Beginning).
 
 ```
-M:  Switch to Game mode
+Esc: Quit game
+M: Switch to Sandbox mode
 Left-Right:  Rotate camera
 Up-Down:     Go forwards/backwards
 B:  Launch benchmark
@@ -53,6 +54,7 @@ Lshift:  Make it run
 
 ###### God camera
 ```
+Esc: Quit game
 M: Switch to Sandbox mode
 1: God camera
 2: POV camera

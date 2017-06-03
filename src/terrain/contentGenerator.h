@@ -34,6 +34,9 @@ public:
 private:
   bool isInForestMask(sf::Vector2f pos) const;
   bool notTooCloseToOtherTrees(sf::Vector2f pos, float distance) const;
+  // Generates randomly count positions around center within a radius radius.
+  // Two individuals cannot be closer than minProximity and cannot be on water.
+  // The function might return less than count positions if they are not suitable
   std::vector<sf::Vector2f> scatteredPositions(sf::Vector2f center,
     size_t count, float radius, float minProximity) const;
 

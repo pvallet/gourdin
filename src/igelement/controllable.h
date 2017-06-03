@@ -6,7 +6,7 @@
 
 class Controllable : public igMovingElement {
 public:
-	Controllable(sf::Vector2f position, AnimationManager _graphics);
+	Controllable(sf::Vector2f position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Controllable() {}
 
 	virtual void update(sf::Time elapsed);
