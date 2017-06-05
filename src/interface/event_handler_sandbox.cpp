@@ -5,11 +5,15 @@
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define TRANSLATION_VALUE_PS 0.7f
-#define ZOOM_FACTOR 50.f
+#define SCROLL_SPEED_SLOW 50.f
+#define SCROLL_SPEED_FAST 200.f
 
 EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
-  _addSelect(false) {}
+  _addSelect(false),
+  _scrollSpeed(SCROLL_SPEED_SLOW) {
+  interface.setScrollSpeedToSlow(true);
+}
 
 void EventHandlerSandbox::handleClick(const sf::Event& event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
@@ -101,6 +105,17 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       _interface.switchLog();
       break;
 
+    case sf::Keyboard::S:
+      if (_scrollSpeed == SCROLL_SPEED_SLOW) {
+        _scrollSpeed = SCROLL_SPEED_FAST;
+        _interface.setScrollSpeedToSlow(false);
+      }
+      else {
+        _scrollSpeed = SCROLL_SPEED_SLOW;
+        _interface.setScrollSpeedToSlow(true);
+      }
+      break;
+
     case sf::Keyboard::W:
       _game.switchWireframe();
       break;
@@ -111,7 +126,7 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
   Camera& cam = Camera::getInstance();
 
   if (event.type == sf::Event::MouseWheelMoved)
-    cam.zoom(- ZOOM_FACTOR * event.mouseWheel.delta);
+    cam.zoom(- _scrollSpeed * event.mouseWheel.delta);
 
   else if (event.type == sf::Event::MouseButtonPressed)
     handleClick(event);

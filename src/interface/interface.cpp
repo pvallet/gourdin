@@ -133,9 +133,9 @@ void Interface::renderInfo(bool inGameMode) const {
     text << "1: " << "God camera" << std::endl
          << "2: " << "POV camera" << std::endl;
     if (_povCamera)
-    text << "Arrows: " << "Move camera around" << std::endl;
+      text << "Arrows: " << "Move camera around" << std::endl;
     else
-    text << "A-E:  " << "Rotate camera" << std::endl;
+      text << "A-E:  " << "Rotate camera" << std::endl;
     text << "ZQSD: " << "Move focused character" << std::endl
          << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
          << "(The game is optimised for AZERTY keyboards)" << std::endl
@@ -149,8 +149,12 @@ void Interface::renderInfo(bool inGameMode) const {
     text << "Left-Right: " << "Rotate camera" << std::endl
          << "Up-Down:    " << "Go forwards/backwards" << std::endl
          << "B: " << "Launch benchmark" << std::endl
-         << "L: " << "Hide/Display log" << std::endl
-         << "W: " << "Switch to wireframe display" << std::endl
+         << "L: " << "Hide/Display log" << std::endl;
+    if (_scrollSpeedSlow)
+      text << "S: " << "Set scroll speed to 'fast'" << std::endl;
+    else
+      text << "S: " << "Set scroll speed to 'slow'" << std::endl;
+    text << "W: " << "Switch to wireframe display" << std::endl
          << std::endl
          << "Click on the minimap to jump there" << std::endl
          << "Right-click to make a lion appear" << std::endl

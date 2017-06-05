@@ -39,9 +39,10 @@ Esc: Quit game
 M: Switch to Sandbox mode
 Left-Right:  Rotate camera
 Up-Down:     Go forwards/backwards
-B:  Launch benchmark
-L:  Hide/Display log
-W:  Switch to wireframe display
+B: Launch benchmark
+L: Hide/Display log
+S: Switch scroll speed to fast/slow
+W: Switch to wireframe display
 
 Click on the minimap to jump there
 Right-click to make a lion appear

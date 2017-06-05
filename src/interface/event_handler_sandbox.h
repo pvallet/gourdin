@@ -16,6 +16,7 @@ private:
   void handleKeyPressed(const sf::Event& event);
 
   bool _addSelect;
+  float _scrollSpeed;
 
   sf::IntRect _rectSelect;
 };

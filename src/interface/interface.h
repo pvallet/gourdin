@@ -21,11 +21,13 @@ public:
 
   inline void switchLog() {_displayLog = !_displayLog;}
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
+  inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
 
 private:
 
   bool _displayLog;
   bool _povCamera;
+  bool _scrollSpeedSlow;
   sf::RectangleShape _rectSelect;
   sf::Font _logFont;
   sf::Text _log;
