@@ -5,8 +5,8 @@
 
 #define ROTATION_ANGLE_PS 60.f // PS = per second
 #define TRANSLATION_VALUE_PS 0.7f
-#define SCROLL_SPEED_SLOW 50.f
-#define SCROLL_SPEED_FAST 200.f
+#define SCROLL_SPEED_SLOW 30.f
+#define SCROLL_SPEED_FAST 250.f
 
 EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
   EventHandler::EventHandler(game, interface),
