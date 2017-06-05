@@ -8,7 +8,7 @@
 #define TIME_TRANSFER_MS 100
 #define MIN_DIST_TO_DEFINE_DRAG 40
 
-#define MAX_GROUND_ANGLE_FOR_CAM_POV 0.f
+#define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
 EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
@@ -213,38 +213,25 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
   if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
-    // New phi with given theta
-    std::pair<float,float> phisLim = solveAcosXplusBsinXequalC(
-      normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, _maxScalarProductWithGroundPOV);
 
-    float nPhi = phisLim.first;
+    float nPhi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
+    float phiIsTooFarByAmount = nPhi - phi;
 
-    // New theta with given phi
-    std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
-      sin(phi*RAD)*normal.x, sin(phi*RAD)*normal.y, _maxScalarProductWithGroundPOV - cos(phi*RAD)*normal.z);
+    if (phiIsTooFarByAmount > 0) {
+      float normalTheta = vu::spherical(normal).y;
 
-    std::pair<float,float> distsToThetasLim;
-    distsToThetasLim.first  = absDistBetweenAngles(theta, thetasLim.first);
-    distsToThetasLim.second = absDistBetweenAngles(theta, thetasLim.second);
+      if (firstIsOnPositiveSideOfSecond(theta, normalTheta))
+        theta += phiIsTooFarByAmount;
+      else
+        theta -= phiIsTooFarByAmount;
 
-    float nTheta = 0;
+      if (firstIsOnPositiveSideOfSecond(theta, normalTheta) !=
+          firstIsOnPositiveSideOfSecond(_oldTheta, normalTheta) &&
+          absDistBetweenAngles(theta, normalTheta + 180) < 90 &&
+          phi != _oldPhi)
+        theta = normalTheta + 180;
 
-    if (distsToThetasLim.first < distsToThetasLim.second)
-      nTheta = thetasLim.first;
-    else
-      nTheta = thetasLim.second;
-
-    // We choose the easiest correction that goes along with the main direction of the camera changes
-    if (absDistBetweenAngles(theta, _oldTheta) < std::abs(phi - _oldPhi))
-      theta = nTheta;
-    else
-      phi = nPhi;
-
-    // If it is still not sufficient to guarantee that the camera is far enough to the ground,
-    // we modify phi.
-    if (vu::dot(normal, vu::carthesian(1, nTheta, phi)) > _maxScalarProductWithGroundPOV + 1e-5) {
-      phi = nPhi;
-      theta = _oldTheta;
+      phi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
     }
   }
 
@@ -339,7 +326,7 @@ void EventHandlerGame::resetCamera(bool pov) {
 
 bool EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
-  
+
   if (_game.getTribe().size() == 0) {
     _game.genTribe(cam.getPointedPos());
     // If we cannot generate a tribe, we fall back to sandbox mode
@@ -382,6 +369,18 @@ std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, flo
   }
 
   return res;
+}
+
+float EventHandlerGame::getPhiLimForGivenTheta(float theta, sf::Vector3f normal, float maxDotProduct) {
+  return solveAcosXplusBsinXequalC(
+    normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
+}
+
+bool EventHandlerGame::firstIsOnPositiveSideOfSecond(float first, float second) {
+  float secondAnglePlus90 = second + 90;
+  if (secondAnglePlus90 > 360)
+    secondAnglePlus90 -= 360;
+  return absDistBetweenAngles(first, secondAnglePlus90) < 90;
 }
 
 float EventHandlerGame::absDistBetweenAngles(float a, float b) {
