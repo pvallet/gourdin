@@ -197,7 +197,14 @@ void Game::compute2DCorners() {
                                          glm::vec3(0, 1, 0));
 
   for (auto it = _controllableElements.begin(); it != _controllableElements.end(); it++) {
-    if (!(*it)->isDead()) {
+    sf::Vector3f pos;
+    pos.x = (*it)->getPos().x;
+    pos.y = (*it)->getPos().y;
+    pos.z = (*it)->getHeight();
+
+    std::array<float,12> vertices;
+
+    if (!(*it)->isDead() && vu::norm(pos-cam.getPos()) > ELEMENT_NEAR_PLANE) {
       // Calculate new corners
       glm::vec3 corners3[4];
       float width = (*it)->getSize().x;
@@ -227,24 +234,20 @@ void Game::compute2DCorners() {
         w3 = tmp.w;
       }
 
-      std::array<float,12> vertices;
-
-      if (corners3[3].z * w3 > ELEMENT_NEAR_PLANE) {
-        for (size_t i = 0; i < 4; i++) {
-          vertices[3*i]     = corners3[i].x;
-          vertices[3*i + 1] = corners3[i].y;
-          vertices[3*i + 2] = corners3[i].z;
-        }
+      for (size_t i = 0; i < 4; i++) {
+        vertices[3*i]     = corners3[i].x;
+        vertices[3*i + 1] = corners3[i].y;
+        vertices[3*i + 2] = corners3[i].z;
       }
-
-      else {
-        for (size_t i = 0; i < 12; i++) {
-          vertices[i] = 0;
-        }
-      }
-
-      (*it)->setProjectedVertices(vertices);
     }
+    
+    else {
+      for (size_t i = 0; i < 12; i++) {
+        vertices[i] = 0;
+      }
+    }
+
+    (*it)->setProjectedVertices(vertices);
   }
 }
 
@@ -437,11 +440,15 @@ void Game::render() const {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
+  glm::vec3 camPos = vu::convertGLM(cam.getPos());
+
   glUseProgram(_igEShader.getProgramID());
   glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "VP"),
     1, GL_FALSE, &MVP[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MODEL"),
     1, GL_FALSE, &rotateElements[0][0]);
+  glUniform3fv(glGetUniformLocation(_igEShader.getProgramID(), "camPos"),
+    1, &camPos[0]);
 
   // Two passes to avoid artifacts due to alpha blending
 

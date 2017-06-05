@@ -7,7 +7,7 @@
 
 #include "igElement.h"
 
-#define IGE_BUFFER_SIZE 100
+#define IGE_BUFFER_SIZE 10000
 
 enum DrawType {STATIC_DRAW, STREAM_DRAW};
 

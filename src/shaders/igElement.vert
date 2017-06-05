@@ -15,14 +15,15 @@ uniform mat4 VP;
 uniform mat4 MODEL;
 
 uniform float elementNearPlane;
+uniform vec3 camPos;
 
 void main(){
-	gl_Position = VP * (vec4(in_Pos,0) + MODEL * vec4(in_Vertex,1));
-
-	if (gl_Position.z < elementNearPlane)
+	if (length(in_Pos-camPos) < elementNearPlane)
 		discardFrag = 1;
 	else
 		discardFrag = 0;
+
+	gl_Position = VP * (vec4(in_Pos,0) + MODEL * vec4(in_Vertex,1));
 
 	texCoord = in_TexCoord;
 	layer = in_Layer;
