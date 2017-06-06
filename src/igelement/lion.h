@@ -4,7 +4,7 @@
 
 #include "controllable.h"
 
-enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING};
+enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
 
 class Lion : public Controllable {
 public:
@@ -19,6 +19,7 @@ public:
 	void beginRunning();
 	void beginWalking();
 	void beginAttacking();
+	void beginChasing();
 
 	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim);
 	inline float getStamina() const {return _stamina;}
@@ -30,7 +31,8 @@ private:
 	float _loseBreathSpeed;
 	float _speedWalking;
 	float _speedRunning;
-	float _range;
+	float _rangeAttack;
+	float _rangeChase;
 
 	LionStatus _status;
 

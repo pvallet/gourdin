@@ -12,7 +12,8 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics, const TerrainGeomet
 	_loseBreathSpeed(10.f),
 	_speedWalking(10.f),
 	_speedRunning(21.f),
-	_range(7.f),
+	_rangeAttack(7.f),
+	_rangeChase(15.f),
 	_status(WAITING) {
 
 	_speed = _speedWalking;
@@ -20,31 +21,35 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics, const TerrainGeomet
 }
 
 void Lion::update(sf::Time elapsed) {
-	switch(_status) {
-		case RUNNING:
-			_stamina -= elapsed.asSeconds() * _loseBreathSpeed;
-			if (_stamina <= 0.f) {
-				_stamina = 0.f;
-				beginWalking();
-			}
-			break;
+	if (_status == RUNNING || _status == CHASING) {
+		_stamina -= elapsed.asSeconds() * _loseBreathSpeed;
+		if (_stamina <= 0.f) {
+			_stamina = 0.f;
+			beginWalking();
+		}
 
-		case ATTACKING:
+		if (_status == CHASING) {
 			_target = _prey->getPos();
 			setDirection(_prey->getPos() - _pos);
-			_speed = _prey->getSpeed() * 0.9f;
+		}
+	}
 
-			if (_beginAttack.getElapsedTime() >= _animAttack) {
-				_prey->die();
-				stop();
-			}
-			break;
+	else if (_status == ATTACKING) {
+		_target = _prey->getPos();
+		setDirection(_prey->getPos() - _pos);
 
-		default:
-			_stamina += elapsed.asSeconds() * _catchBreathSpeed;
-			if (_stamina >= 100.f)
-				_stamina = 100.f;
-			break;
+		_speed = _prey->getSpeed() * 0.9f;
+
+		if (_beginAttack.getElapsedTime() >= _animAttack) {
+			_prey->die();
+			stop();
+		}
+	}
+
+	else {
+		_stamina += elapsed.asSeconds() * _catchBreathSpeed;
+		if (_stamina >= 100.f)
+			_stamina = 100.f;
 	}
 
 	Controllable::update(elapsed);
@@ -81,6 +86,14 @@ void Lion::beginAttacking() {
 	}
 }
 
+void Lion::beginChasing() {
+	if (_status != CHASING && _status != ATTACKING && _status != WALKING) {
+		_status = CHASING;
+		_speed = _speedRunning;
+		launchAnimation(RUN);
+	}
+}
+
 void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
 	(void) anim;
 	if (_status == RUNNING)
@@ -97,7 +110,7 @@ void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
 void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 	float distance;
 	igMovingElement* closest = nullptr;
-	float nearestDist = _range;
+	float nearestDist = _rangeChase;
 
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 		if (*it != this) {
@@ -105,7 +118,7 @@ void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 			if (atlp) {
 				distance = vu::norm(_pos - atlp->getPos());
 
-				if (distance < _range) {
+				if (distance < _rangeChase) {
 					if (distance < nearestDist) {
 						nearestDist = distance;
 						closest = atlp;
@@ -117,6 +130,9 @@ void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 
 	if (closest) {
 		_prey = closest;
-		beginAttacking();
+		if (nearestDist < _rangeAttack)
+			beginAttacking();
+		else
+			beginChasing();
 	}
 }
