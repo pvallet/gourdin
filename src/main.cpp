@@ -29,6 +29,9 @@ int main(int argc, char* argv[]) {
       return 0;
     }
   }
+#else
+  (void) argc;
+  (void) argv;
 #endif
 
 #ifdef CORE_PROFILE

@@ -20,6 +20,8 @@ void igElement::updateDisplay(sf::Time elapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
+
+	(void)elapsed;
 }
 
 void igElement::setVertices() {

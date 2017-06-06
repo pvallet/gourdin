@@ -82,6 +82,7 @@ void Lion::beginAttacking() {
 }
 
 void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
+	(void) anim;
 	if (_status == RUNNING)
 		Controllable::setTarget(t, RUN);
 	else {
@@ -93,7 +94,7 @@ void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
 	}
 }
 
-void Lion::kill(const std::list<igMovingElement*>& neighbors) {
+void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 	float distance;
 	igMovingElement* closest = nullptr;
 	float nearestDist = _range;

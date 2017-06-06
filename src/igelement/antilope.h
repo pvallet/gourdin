@@ -24,7 +24,7 @@ public:
 	virtual ~Antilope() {}
 
 	// React to the environment
-	void updateState(const std::list<igMovingElement*>& neighbors);
+	virtual void updateState(const std::list<igMovingElement*>& neighbors);
 
 	void beginIdle();
 	void beginFleeing();

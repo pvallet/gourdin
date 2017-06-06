@@ -172,14 +172,7 @@ void Game::updateMovingElementsStates(const std::vector<std::list<igMovingElemen
         }
 
         for (auto it = sortedElements[i*NB_CHUNKS + j].begin(); it != sortedElements[i*NB_CHUNKS + j].end(); it++) {
-          Antilope* atlp = dynamic_cast<Antilope*>(*it);
-          Lion* lion = dynamic_cast<Lion*>(*it);
-
-          if (atlp)
-            atlp->updateState(elmtsInSurroundingChunks);
-
-          else if (lion)
-            lion->kill(elmtsInSurroundingChunks);
+          (*it)->updateState(elmtsInSurroundingChunks);
         }
       }
     }
@@ -221,17 +214,12 @@ void Game::compute2DCorners() {
 
       glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
 
-      // We keep track of the normalization factor to get the absolute z screen value,
-      // in order to remove nearest igElements
-      float w3;
-
       // Compute their projections
       for (size_t i = 0; i < 4; i++) {
         glm::vec4 tmp(corners3[i], 1.f);
         tmp = model * tmp;
         tmp = cam.getViewProjectionMatrix() * tmp;
         corners3[i] = glm::vec3(tmp) / tmp.w;
-        w3 = tmp.w;
       }
 
       for (size_t i = 0; i < 4; i++) {
@@ -240,7 +228,7 @@ void Game::compute2DCorners() {
         vertices[3*i + 2] = corners3[i].z;
       }
     }
-    
+
     else {
       for (size_t i = 0; i < 12; i++) {
         vertices[i] = 0;

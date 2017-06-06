@@ -12,6 +12,8 @@ public:
 	virtual ~Lion() {}
 
 	virtual void update(sf::Time elapsed);
+	// React to the environment
+	virtual void updateState(const std::list<igMovingElement*>& neighbors);
 
 	virtual void stop();
 	void beginRunning();
@@ -21,8 +23,6 @@ public:
 	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim);
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
-
-	void kill(const std::list<igMovingElement*>& neighbors);
 
 private:
 	float _stamina; // Percentage
