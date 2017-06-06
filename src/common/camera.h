@@ -15,6 +15,7 @@
 // r, theta, phi follows the mathematical convention: theta is the azimuthal and phi the polar angle
 
 #define MIN_R 120.f
+#define MAX_R 12500.f
 #define INIT_R 150.f
 #define INIT_PHI 60.f
 #define INIT_THETA 180.f
@@ -64,7 +65,7 @@ private:
 
 	void translate (float dWinX, float dWinY);
 	void rotate (float dtheta, float dphi);
-	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r;}
+	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r; _r = _r > MAX_R ? MAX_R : _r;}
 	inline void setTheta(float theta) {_theta = theta;}
 	inline void setPhi  (float phi) {_phi = phi;}
 	inline void setZoom (float r) {_r = r;}
