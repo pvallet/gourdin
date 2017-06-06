@@ -81,12 +81,15 @@ void Lion::beginAttacking() {
 	}
 }
 
-void Lion::setTarget(sf::Vector2f t) {
-	Controllable::setTarget(t);
-	if (_status == WAITING) {
-		beginWalking();
-	} else if (_status == RUNNING) {
-		launchAnimation(RUN);
+void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
+	if (_status == RUNNING)
+		Controllable::setTarget(t, RUN);
+	else {
+		Controllable::setTarget(t, WALK);
+
+		if (_status == WAITING) {
+			beginWalking();
+		}
 	}
 }
 

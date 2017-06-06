@@ -18,7 +18,7 @@ public:
 	void beginWalking();
 	void beginAttacking();
 
-	virtual void setTarget(sf::Vector2f t);
+	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim);
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 

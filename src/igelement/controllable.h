@@ -10,7 +10,7 @@ public:
 	virtual ~Controllable() {}
 
 	virtual void update(sf::Time elapsed);
-	virtual void setTarget(sf::Vector2f t);
+	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim = WALK);
 	virtual void stop();
 
 	inline void setProjectedVertices(std::array<float,12> nVertices) {_projectedVertices = nVertices;}

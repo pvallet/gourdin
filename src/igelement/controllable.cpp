@@ -21,12 +21,11 @@ void Controllable::update(sf::Time elapsed) {
   }
 }
 
-void Controllable::setTarget(sf::Vector2f t) {
+void Controllable::setTarget(sf::Vector2f t, ANM_TYPE anim) {
 	if (!_dead) {
-    launchAnimation(WALK);
 		_target = t;
-
 		setDirection(t-_pos);
+    launchAnimation(anim);
 	}
 }
 
