@@ -98,5 +98,5 @@ void Skybox::draw() const {
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-	glBindVertexArray(_vao);
+	glBindVertexArray(0);
 }

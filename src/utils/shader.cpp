@@ -1,12 +1,6 @@
 #include "shader.h"
-#include "camera.h"
 
 #include <cassert>
-
-#ifdef __linux__
-	#include <signal.h>
-	#include <unistd.h>
-#endif
 
 #ifdef __APPLE__
 #define CORE_PROFILE
@@ -164,9 +158,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     delete[] error;
 		glDeleteShader(shader);
 
-#ifdef __linux__
-		kill(getpid(),SIGINT);
-#endif
+		assert(false);
 
     return false;
   }
