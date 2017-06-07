@@ -1,4 +1,4 @@
-#include "game.h"
+#include "engine.h"
 
 #include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
@@ -12,7 +12,7 @@
 #define CHUNK_BEGIN_X 14
 #define CHUNK_BEGIN_Y 20
 
-Game::Game() :
+Engine::Engine() :
   _wireframe(false),
   _contentGenerator(_terrainGeometry),
   _ocean(2),
@@ -22,7 +22,7 @@ Game::Game() :
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
 
-void Game::resetCamera() {
+void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
@@ -30,7 +30,7 @@ void Game::resetCamera() {
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 }
 
-void Game::init() {
+void Engine::init() {
   srand(time(NULL));
 
   _terrainShader.load();
@@ -88,7 +88,7 @@ void Game::init() {
   appendNewElements(_contentGenerator.genHerds());
 }
 
-void Game::generateChunk(size_t x, size_t y) {
+void Engine::generateChunk(size_t x, size_t y) {
   Chunk* newChunk = new Chunk(x, y, _terrainTexManager, _terrainGeometry);
   newChunk->generate();
   _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
@@ -98,7 +98,7 @@ void Game::generateChunk(size_t x, size_t y) {
   _terrain[x][y]->setTrees(newTrees);
 }
 
-sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
+sf::Vector2i Engine::neighbour(size_t x, size_t y, size_t index) const {
   switch(index) {
     case 0:
       return sf::Vector2i(x-1,y);
@@ -113,13 +113,13 @@ sf::Vector2i Game::neighbour(size_t x, size_t y, size_t index) const {
       return sf::Vector2i(x,y+1);
       break;
     default:
-      std::cerr << "Error in Game::neighbour: Index out of bounds" << '\n';
+      std::cerr << "Error in Engine::neighbour: Index out of bounds" << '\n';
       return sf::Vector2i(x,y);
       break;
   }
 }
 
-void Game::generateNeighbourChunks(size_t x, size_t y) {
+void Engine::generateNeighbourChunks(size_t x, size_t y) {
   if (_chunkStatus[x][y] == EDGE) {
     sf::Vector2i tmp;
     for (size_t i = 0; i < 4; i++) {
@@ -146,7 +146,7 @@ void Game::generateNeighbourChunks(size_t x, size_t y) {
   _chunkStatus[x][y] = VISIBLE;
 }
 
-void Game::appendNewElements(std::vector<igMovingElement*> elems) {
+void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
 
   for (size_t i = 0; i < elems.size(); i++)
     _igMovingElements.push_back(std::unique_ptr<igMovingElement>(elems[i]));
@@ -158,7 +158,7 @@ void Game::appendNewElements(std::vector<igMovingElement*> elems) {
   }
 }
 
-void Game::updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements) {
+void Engine::updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements) {
   for (int i = 0; i < NB_CHUNKS; i++) {
     for (int j = 0; j < NB_CHUNKS; j++) {
       if (!sortedElements[i*NB_CHUNKS + j].empty()) {
@@ -179,7 +179,7 @@ void Game::updateMovingElementsStates(const std::vector<std::list<igMovingElemen
   }
 }
 
-void Game::compute2DCorners() {
+void Engine::compute2DCorners() {
   Camera& cam = Camera::getInstance();
   glm::mat4 rotateElements = glm::rotate(glm::mat4(1.f),
                                          (float) M_PI / 180.f * cam.getTheta(),
@@ -239,7 +239,7 @@ void Game::compute2DCorners() {
   }
 }
 
-void Game::update(sf::Time elapsed) {
+void Engine::update(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
   sf::Vector2u camPos = convertToChunkCoords(cam.getPointedPos());
 
@@ -329,7 +329,7 @@ void Game::update(sf::Time elapsed) {
   compute2DCorners();
 }
 
-void Game::renderLifeBars(sf::RenderWindow& window) const {
+void Engine::renderLifeBars(sf::RenderWindow& window) const {
   sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
   lifeBar.setFillColor(sf::Color::Green);
 
@@ -364,7 +364,7 @@ void Game::renderLifeBars(sf::RenderWindow& window) const {
   }
 }
 
-void Game::render() const {
+void Engine::render() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;
 
@@ -477,7 +477,7 @@ void Game::render() const {
   logText.addLine(renderStats.str());
 }
 
-void Game::select(sf::IntRect rect, bool add) {
+void Engine::select(sf::IntRect rect, bool add) {
   if (!add)
     _selectedElmts.clear();
 
@@ -507,7 +507,7 @@ void Game::select(sf::IntRect rect, bool add) {
   }
 }
 
-void Game::moveSelection(sf::Vector2i screenTarget) {
+void Engine::moveSelection(sf::Vector2i screenTarget) {
   sf::Vector2f target = get2DCoord(screenTarget);
 
   for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
@@ -518,13 +518,13 @@ void Game::moveSelection(sf::Vector2i screenTarget) {
   }
 }
 
-void Game::moveCamera(sf::Vector2f newAimedPos) {
+void Engine::moveCamera(sf::Vector2f newAimedPos) {
   generateChunk(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(newAimedPos);
 }
 
-Controllable* Game::moveCharacter(sf::Vector2i screenTarget, Controllable* focusedCharacter) {
+Controllable* Engine::moveCharacter(sf::Vector2i screenTarget, Controllable* focusedCharacter) {
   for (size_t i = 0; i < _tribe.size(); i++) {
     sf::IntRect spriteRect = _tribe[i]->getScreenCoord();
 
@@ -536,11 +536,11 @@ Controllable* Game::moveCharacter(sf::Vector2i screenTarget, Controllable* focus
   return focusedCharacter;
 }
 
-void Game::addLion(sf::Vector2i screenTarget) {
+void Engine::addLion(sf::Vector2i screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
 }
 
-void Game::genTribe(sf::Vector2f pos) {
+void Engine::genTribe(sf::Vector2f pos) {
   std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
   appendNewElements(tribe);
   for (size_t i = 0; i < tribe.size(); i++) {
@@ -548,7 +548,7 @@ void Game::genTribe(sf::Vector2f pos) {
   }
 }
 
-sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
+sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) const {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
@@ -562,7 +562,7 @@ sf::Vector2f Game::get2DCoord(sf::Vector2i screenTarget) const {
   return sf::Vector2f( modelCoord.x, modelCoord.y);
 }
 
-sf::Vector3f Game::getNormalOnCameraPointedPos() const {
+sf::Vector3f Engine::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
   sf::Vector2u chunkPos = convertToChunkCoords(cam.getPointedPos());
 

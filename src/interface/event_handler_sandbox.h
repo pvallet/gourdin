@@ -4,7 +4,7 @@
 
 class EventHandlerSandbox : public EventHandler {
 public:
-  EventHandlerSandbox(Game& game, Interface& interface);
+  EventHandlerSandbox(Engine& engine, Interface& interface);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);

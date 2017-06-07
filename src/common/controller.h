@@ -6,8 +6,9 @@
 
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"
-#include "game.h"
+#include "engine.h"
 #include "interface.h"
+#include "game.h"
 
 #ifdef __APPLE__
 #define CORE_PROFILE
@@ -39,7 +40,7 @@ private:
 	sf::Time _elapsed;
 
 	Interface _interface;
-	Game _game;
+	Engine _engine;
 
 	EventHandlerGame    _eHandlerGame;
 	EventHandlerSandbox _eHandlerSandbox;

@@ -11,9 +11,9 @@
 Controller::Controller(sf::RenderWindow& window) :
   _running(true),
   _interface(window),
-  _game(),
-  _eHandlerGame(_game,_interface),
-  _eHandlerSandbox(_game,_interface),
+  _engine(),
+  _eHandlerGame(_engine,_interface),
+  _eHandlerSandbox(_engine,_interface),
   _currentHandlerType(HDLR_SANDBOX),
   _window(window) {
 
@@ -27,20 +27,20 @@ void Controller::init() {
   _interface.init();
 #endif
 
-  _game.init();
+  _engine.init();
 }
 
 void Controller::render() const {
   if (_running) {
-    _game.render();
+    _engine.render();
 
 #ifndef CORE_PROFILE
     _window.pushGLStates();
 
     if (_currentHandlerType == HDLR_SANDBOX) {
-      _game.renderLifeBars(_window);
+      _engine.renderLifeBars(_window);
       _interface.renderRectSelect();
-      _interface.renderMinimap(_game);
+      _interface.renderMinimap(_engine);
     }
 
     _interface.renderInfo(_currentHandlerType == HDLR_GAME);
@@ -92,7 +92,7 @@ void Controller::run() {
     else
       _eHandlerSandbox.onGoingEvents(_elapsed);
 
-    _game.update(_elapsed);
+    _engine.update(_elapsed);
     render();
   }
 }
@@ -111,12 +111,12 @@ void Controller::benchmark() {
     totalElapsed += elapsed;
     cam.setPointedPos(sf::Vector2f(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
                                    CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
-    _game.update(elapsed);
+    _engine.update(elapsed);
     render();
   }
 
   std::cout << "Rendered " << 100 << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
   std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * 100 << std::endl;
 
-  _game.resetCamera();
+  _engine.resetCamera();
 }

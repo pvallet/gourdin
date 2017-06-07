@@ -4,14 +4,14 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-class Game;
+class Engine;
 
 class Interface {
 public:
   Interface(sf::RenderWindow& window);
   void init();
 
-  void renderMinimap(const Game& game) const;
+  void renderMinimap(const Engine& engine) const;
   void renderLog(sf::Time elapsed) const;
   void renderInfo(bool inGameMode) const;
   void renderRectSelect() const;

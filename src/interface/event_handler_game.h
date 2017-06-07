@@ -6,7 +6,7 @@ class Controllable;
 
 class EventHandlerGame : public EventHandler {
 public:
-  EventHandlerGame(Game& game, Interface& interface);
+  EventHandlerGame(Engine& engine, Interface& interface);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);

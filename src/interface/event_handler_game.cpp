@@ -11,8 +11,8 @@
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
-EventHandlerGame::EventHandlerGame(Game& game, Interface& interface) :
-  EventHandler::EventHandler(game, interface),
+EventHandlerGame::EventHandlerGame(Engine& engine, Interface& interface) :
+  EventHandler::EventHandler(engine, interface),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _povCamera(false),
@@ -57,7 +57,7 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) &&
       moveFocused != _focusedCharacter->getPos()) {
 
-    std::vector<Controllable*> tribe = _game.getTribe();
+    std::vector<Controllable*> tribe = _engine.getTribe();
     sf::Vector2f direction = moveFocused - _focusedCharacter->getPos();
     float threshold = sqrt(2)/2.f;
 
@@ -124,7 +124,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (!_draggingCamera) {
       Controllable* previous = _focusedCharacter;
-      _focusedCharacter = _game.moveCharacter(
+      _focusedCharacter = _engine.moveCharacter(
         sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
 
       if (previous != _focusedCharacter) {
@@ -186,7 +186,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 }
 
 void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
-  sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
+  sf::Vector3f normal = _engine.getNormalOnCameraPointedPos();
 
   // The steeper the slope, the less the user can move around
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
@@ -209,7 +209,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
 }
 
 void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
-  sf::Vector3f normal = _game.getNormalOnCameraPointedPos();
+  sf::Vector3f normal = _engine.getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
   if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
@@ -311,7 +311,7 @@ void EventHandlerGame::resetCamera(bool pov) {
   _povCamera = pov;
   _interface.setPovCamera(pov);
 
-  sf::Vector3f terrainNormal = vu::spherical(_game.getNormalOnCameraPointedPos());
+  sf::Vector3f terrainNormal = vu::spherical(_engine.getNormalOnCameraPointedPos());
 
   if (pov) {
     cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);
@@ -327,13 +327,13 @@ void EventHandlerGame::resetCamera(bool pov) {
 bool EventHandlerGame::gainFocus() {
   Camera& cam = Camera::getInstance();
 
-  if (_game.getTribe().size() == 0) {
-    _game.genTribe(cam.getPointedPos());
+  if (_engine.getTribe().size() == 0) {
+    _engine.genTribe(cam.getPointedPos());
     // If we cannot generate a tribe, we fall back to sandbox mode
-    if (_game.getTribe().size() == 0)
+    if (_engine.getTribe().size() == 0)
       return false;
 
-    _focusedCharacter = _game.getTribe().front();
+    _focusedCharacter = _engine.getTribe().front();
   }
 
   resetCamera(false);

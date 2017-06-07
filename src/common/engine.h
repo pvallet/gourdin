@@ -32,14 +32,14 @@ enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 	class TestHandler;
 #endif
 
-class Game {
+class Engine {
 
 #ifndef NDEBUG
 	friend TestHandler;
 #endif
 
 public:
-	Game();
+	Engine();
 
 	void resetCamera();
   void init();
@@ -77,7 +77,7 @@ private:
 
 	bool _wireframe;
 
-  std::vector<std::unique_ptr<igMovingElement> > _igMovingElements; // Elements stored in game
+  std::vector<std::unique_ptr<igMovingElement> > _igMovingElements;
 
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks

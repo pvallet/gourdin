@@ -1,8 +1,8 @@
 #include "event_handler.h"
 #include "camera.h"
 
-EventHandler::EventHandler(Game& game, Interface& interface):
-  _game(game),
+EventHandler::EventHandler(Engine& engine, Interface& interface):
+  _engine(engine),
   _interface(interface) {}
 
 bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {

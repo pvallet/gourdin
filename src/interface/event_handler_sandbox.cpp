@@ -8,8 +8,8 @@
 #define SCROLL_SPEED_SLOW 30.f
 #define SCROLL_SPEED_FAST 250.f
 
-EventHandlerSandbox::EventHandlerSandbox(Game& game, Interface& interface) :
-  EventHandler::EventHandler(game, interface),
+EventHandlerSandbox::EventHandlerSandbox(Engine& engine, Interface& interface) :
+  EventHandler::EventHandler(engine, interface),
   _addSelect(false),
   _scrollSpeed(SCROLL_SPEED_SLOW) {
   interface.setScrollSpeedToSlow(true);
@@ -19,7 +19,7 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
   sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-    _game.moveCamera(MAX_COORD * minimapCoord);
+    _engine.moveCamera(MAX_COORD * minimapCoord);
   }
 
   else {
@@ -36,10 +36,10 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
 
     // Move selection
     if (event.mouseButton.button == sf::Mouse::Right) {
-      if (_game.getSelection().empty())
-        _game.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+      if (_engine.getSelection().empty())
+        _engine.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
       else
-        _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+        _engine.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
     }
   }
 }
@@ -48,7 +48,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
   switch(event.key.code) {
     // Go back to selection
     case sf::Keyboard::Space: {
-      std::set<Controllable*> sel = _game.getSelection();
+      std::set<Controllable*> sel = _engine.getSelection();
 
       if (!sel.empty()) {
         sf::Vector2f barycenter;
@@ -69,7 +69,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
 
     // Make the lions run
     case sf::Keyboard::LShift: {
-      std::set<Controllable*> sel = _game.getSelection();
+      std::set<Controllable*> sel = _engine.getSelection();
 
       bool makeThemAllRun = false;
       bool generalStrategyChosen = false;
@@ -93,7 +93,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
 
     // Delete first selected lion
     case sf::Keyboard::Delete: {
-      std::set<Controllable*> sel = _game.getSelection();
+      std::set<Controllable*> sel = _engine.getSelection();
 
       for (auto it = sel.begin(); it != sel.end(); it++) {
         (*it)->die();
@@ -117,7 +117,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       break;
 
     case sf::Keyboard::W:
-      _game.switchWireframe();
+      _engine.switchWireframe();
       break;
   }
 }
@@ -133,7 +133,7 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left) {
-      _game.select(_rectSelect, _addSelect);
+      _engine.select(_rectSelect, _addSelect);
       _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
       _interface.setRectSelect(_rectSelect);
     }

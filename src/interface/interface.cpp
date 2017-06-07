@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "camera.h"
-#include "game.h"
+#include "engine.h"
 
 Interface::Interface(sf::RenderWindow& window):
   _displayLog(true),
@@ -35,7 +35,7 @@ void Interface::init() {
   _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
 }
 
-void Interface::renderMinimap(const Game& game) const {
+void Interface::renderMinimap(const Engine& engine) const {
   Camera& cam = Camera::getInstance();
 
   // Background image
@@ -70,7 +70,7 @@ void Interface::renderMinimap(const Game& game) const {
   sf::Color edge(0,0,0,200);
   sf::Color fog(0,0,0,100);
 
-  const std::vector<std::vector<ChunkStatus> > chunkStatus = game.getChunkStatus();
+  const std::vector<std::vector<ChunkStatus> > chunkStatus = engine.getChunkStatus();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -126,7 +126,7 @@ void Interface::renderLog(sf::Time elapsed) const {
 void Interface::renderInfo(bool inGameMode) const {
   std::ostringstream text;
 
-  text << "Esc: " << "Quit game" << std::endl
+  text << "Esc: " << "Quit engine" << std::endl
        << "M: " << "Switch to Sandbox mode" << std::endl;
 
   if (inGameMode) {
@@ -138,7 +138,7 @@ void Interface::renderInfo(bool inGameMode) const {
       text << "A-E:  " << "Rotate camera" << std::endl;
     text << "ZQSD: " << "Move focused character" << std::endl
          << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
-         << "(The game is optimised for AZERTY keyboards)" << std::endl
+         << "(The engine is optimised for AZERTY keyboards)" << std::endl
          << std::endl
          << "Click to move the character in the center" << std::endl
          << "Click on another character to change the focus" << std::endl

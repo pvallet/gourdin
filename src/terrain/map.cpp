@@ -281,7 +281,7 @@ void Map::load(std::string path) {
 	loadEdges(hRoot);
 	loadCorners(hRoot);
 
-	// Convert to game coordinates
+	// Convert to engine coordinates
 
 	#pragma omp parallel for
 	for (unsigned int i = 0 ; i < _centers.size() ; i++) {

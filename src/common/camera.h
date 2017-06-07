@@ -24,7 +24,7 @@ class Controller;
 class EventHandler;
 class EventHandlerGame;
 class EventHandlerSandbox;
-class Game;
+class Engine;
 
 class Camera {
 public:
@@ -55,7 +55,7 @@ public:
 
 	friend EventHandlerGame;
 	friend EventHandlerSandbox;
-	friend Game;
+	friend Engine;
 
 private:
 	Camera();
