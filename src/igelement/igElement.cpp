@@ -21,7 +21,7 @@ void igElement::updateDisplay(sf::Time elapsed, float theta) {
 
 	_camOrientation = theta;
 
-	(void)elapsed;
+	(void) elapsed;
 }
 
 void igElement::setVertices() {

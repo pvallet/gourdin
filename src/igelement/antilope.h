@@ -31,6 +31,10 @@ public:
 	void beginRecovering();
 
 	inline float getLineOfSight() const {return _lineOfSight;}
+
+protected:
+	void setDirection(sf::Vector2f direction);
+
 private:
 	sf::Time generateTimePhase(sf::Time average) const;
 
@@ -53,9 +57,13 @@ private:
 	BoidStatus _bStatus; // To control hysteresis
 	bool _moving;
 
-	sf::Time _averageRecovering;
-	sf::Time _averageEating;
-	sf::Time _averageFindingFood;
+	const sf::Time _averageRecovering;
+	const sf::Time _averageEating;
+	const sf::Time _averageFindingFood;
 	sf::Time _timePhase;
 	sf::Clock _beginPhase;
+
+	sf::Clock _lastDirectionChange;
+	const sf::Time _averageTimeBeforeChangingDir;
+	sf::Time _timeBeforeChangingDir;
 };

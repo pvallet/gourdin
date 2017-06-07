@@ -29,7 +29,7 @@ public:
 	inline bool isDead() const {return _dead;}
 
 protected:
-	void setDirection(sf::Vector2f direction);
+	virtual void setDirection(sf::Vector2f direction);
 
 	float _speed; // Distance per second
 	bool _dead;

@@ -17,13 +17,14 @@ Antilope::Antilope(sf::Vector2f position, AnimationManager graphics, const Terra
 	_speedRunning(15.f),
 	_aStatus(IDLE),
 	_bStatus(ORIENTATION),
-	_moving(false) {
+	_moving(false),
+	_averageRecovering(sf::seconds(3.f)),
+	_averageEating(sf::seconds(7.f)),
+	_averageFindingFood(sf::seconds(2.f)),
+	_averageTimeBeforeChangingDir(sf::milliseconds(500)),
+	_timeBeforeChangingDir(sf::Time::Zero) {
 
 	_lineOfSight = _lineOfSightStandard;
-
-	_averageRecovering = sf::seconds(3.f);
-	_averageEating = sf::seconds(7.f);
-	_averageFindingFood = sf::seconds(2.f);
 
 	_timePhase = generateTimePhase(_averageEating);
 	_beginPhase.restart();
@@ -36,6 +37,7 @@ void Antilope::beginIdle() {
 	_speed = 0.f;
 	_moving = false;
 	launchAnimation(WAIT);
+	_beginPhase.restart();
 }
 
 void Antilope::beginFleeing() {
@@ -44,6 +46,7 @@ void Antilope::beginFleeing() {
 	_speed = _speedRunning;
 	_moving = true;
 	launchAnimation(RUN);
+	_beginPhase.restart();
 }
 
 void Antilope::beginRecovering() {
@@ -52,6 +55,8 @@ void Antilope::beginRecovering() {
 	_speed = _speedWalking;
 	_moving = true;
 	launchAnimation(WALK);
+	_timePhase = generateTimePhase(_averageRecovering);
+	_beginPhase.restart();
 }
 
 sf::Time Antilope::generateTimePhase(sf::Time average) const {
@@ -137,8 +142,10 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 }
 
 void Antilope::reactWhenFleeing(const BoidsInfo& info) {
-	// Take into account the closest elements
-	if (info.minRepDst != _repulsionRadius)
+	if (info.nbFlee != 0)
+		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
+
+	else if (info.minRepDst != _repulsionRadius)
 		setDirection(_pos - info.closestRep);
 
 	else if (info.nbDir != 0) {
@@ -153,28 +160,20 @@ void Antilope::reactWhenFleeing(const BoidsInfo& info) {
 	else if (info.nbAttract != 0)
 		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 
-	else if (info.nbFlee != 0)
-		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
-
 	// Take into account the hunter for half as much
 	if (info.nbFlee != 0)
 		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
 
-	else {
+	else
 		beginRecovering();
-		_timePhase = generateTimePhase(_averageRecovering);
-		_beginPhase.restart();
-	}
 }
 
 void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	if (info.nbFlee != 0)
 		beginFleeing();
 
-	else if (_beginPhase.getElapsedTime() > _timePhase) {
+	else if (_beginPhase.getElapsedTime() > _timePhase)
 		beginIdle();
-		_beginPhase.restart();
-	}
 
 	else if (info.minRepDst != _repulsionRadius &&
 			(_bStatus == REPULSION || vu::norm(_pos-info.closestRep) < _repulsionRadius * 0.8) ) {
@@ -215,5 +214,18 @@ void Antilope::updateState(const std::list<igMovingElement*>& neighbors) {
 		case RECOVERING:
 			reactWhenRecovering(info);
 			break;
+	}
+}
+
+void Antilope::setDirection(sf::Vector2f direction) {
+	if (_lastDirectionChange.getElapsedTime() > _timeBeforeChangingDir) {
+		igMovingElement::setDirection(direction);
+		_lastDirectionChange.restart();
+		_timeBeforeChangingDir = generateTimePhase(_averageTimeBeforeChangingDir);
+
+		// if the antilope has been fleeing for a long time, it will try its luck
+		// by going for a longer time towards the same direction
+		if (_aStatus == FLEEING)
+			_timeBeforeChangingDir += 0.5f * _beginPhase.getElapsedTime();
 	}
 }

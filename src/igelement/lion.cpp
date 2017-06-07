@@ -11,13 +11,13 @@ Lion::Lion(sf::Vector2f position, AnimationManager graphics, const TerrainGeomet
 	_catchBreathSpeed(25.f),
 	_loseBreathSpeed(10.f),
 	_speedWalking(10.f),
-	_speedRunning(21.f),
-	_rangeAttack(7.f),
-	_rangeChase(15.f),
+	_speedRunning(18.f),
+	_rangeAttack(8.f),
+	_rangeChase(13.f),
 	_status(WAITING) {
 
 	_speed = _speedWalking;
-	_animAttack = graphics.getAnimationTime(ATTACK);
+	_animAttack = 2.f * graphics.getAnimationTime(ATTACK);
 }
 
 void Lion::update(sf::Time elapsed) {
@@ -38,7 +38,7 @@ void Lion::update(sf::Time elapsed) {
 		_target = _prey->getPos();
 		setDirection(_prey->getPos() - _pos);
 
-		_speed = _prey->getSpeed() * 0.9f;
+		_speed = _prey->getSpeed() * 0.8f;
 
 		if (_beginAttack.getElapsedTime() >= _animAttack) {
 			_prey->die();
@@ -96,7 +96,7 @@ void Lion::beginChasing() {
 
 void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
 	(void) anim;
-	if (_status == RUNNING)
+	if (_status == RUNNING || _status == ATTACKING || _status == CHASING)
 		Controllable::setTarget(t, RUN);
 	else {
 		Controllable::setTarget(t, WALK);
