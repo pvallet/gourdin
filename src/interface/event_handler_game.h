@@ -1,12 +1,11 @@
 #pragma once
 
 #include "event_handler.h"
-
-class Controllable;
+#include "gameGame.h"
 
 class EventHandlerGame : public EventHandler {
 public:
-  EventHandlerGame(Engine& engine, Interface& interface);
+  EventHandlerGame(GameGame& game);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);
@@ -43,5 +42,5 @@ private:
   sf::Clock _transferStart;
   sf::Vector2f _previousFocusedPos;
 
-  Controllable* _focusedCharacter;
+  GameGame& _game;
 };

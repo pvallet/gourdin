@@ -8,7 +8,8 @@
 #include "event_handler_sandbox.h"
 #include "engine.h"
 #include "interface.h"
-#include "game.h"
+#include "gameGame.h"
+#include "gameSandbox.h"
 
 #ifdef __APPLE__
 #define CORE_PROFILE
@@ -41,6 +42,8 @@ private:
 
 	Interface _interface;
 	Engine _engine;
+	GameGame _gameGame;
+	GameSandbox _gameSandbox;
 
 	EventHandlerGame    _eHandlerGame;
 	EventHandlerSandbox _eHandlerSandbox;

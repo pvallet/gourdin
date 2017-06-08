@@ -59,9 +59,9 @@ public:
 
 	sf::Vector3f getNormalOnCameraPointedPos() const;
 
-	inline const std::set<Controllable*>& getSelection() const {return _selectedElmts;}
+	inline const std::set<Controllable*>& getSelection() {return _selectedElmts;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
-	inline const std::vector<Controllable*>& getTribe() const {return _tribe;}
+	inline const std::vector<Controllable*>& getTribe() {return _tribe;}
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk

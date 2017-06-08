@@ -11,17 +11,18 @@
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
-EventHandlerGame::EventHandlerGame(Engine& engine, Interface& interface) :
-  EventHandler::EventHandler(engine, interface),
+EventHandlerGame::EventHandlerGame(GameGame& game) :
+  EventHandler::EventHandler(),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _povCamera(false),
-  _draggingCamera(false) {}
+  _draggingCamera(false),
+  _game(game) {}
 
 void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   Camera& cam = Camera::getInstance();
 
-  sf::Vector2f moveFocused = _focusedCharacter->getPos();
+  sf::Vector2f moveFocused = _game.getFocusedPos();
   float theta = cam.getTheta()*M_PI/180.f;
 
   switch(event.key.code) {
@@ -55,44 +56,11 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
 
   // Switch selection to closest character in the direction given by moveFocused
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) &&
-      moveFocused != _focusedCharacter->getPos()) {
+      moveFocused != _game.getFocusedPos()) {
 
-    std::vector<Controllable*> tribe = _engine.getTribe();
-    sf::Vector2f direction = moveFocused - _focusedCharacter->getPos();
-    float threshold = sqrt(2)/2.f;
-
-    Controllable* closestHuman = _focusedCharacter;
-    float closestDist = MAX_COORD;
-
-    for (size_t i = 0; i < tribe.size(); i++) {
-      sf::Vector2f toChar = tribe[i]->getPos() - _focusedCharacter->getPos();
-      float distance = vu::norm(toChar);
-
-      // Character is in the right direction, with +- M_PI/4 margin
-      if (vu::dot(toChar, direction)/distance > threshold) {
-
-        // Checks whether the character is visible on the screen
-        sf::IntRect screenCoord = tribe[i]->getScreenCoord();
-        if (screenCoord.top > (int) cam.getH())
-          continue;
-        if (screenCoord.left > (int) cam.getW())
-          continue;
-        if (screenCoord.top + screenCoord.height < 0)
-          continue;
-        if (screenCoord.left + screenCoord.width < 0)
-          continue;
-
-
-        if (distance < closestDist) {
-          closestDist = distance;
-          closestHuman = tribe[i];
-        }
-      }
-    }
-
-    _previousFocusedPos = _focusedCharacter->getPos();
+    _previousFocusedPos = _game.getFocusedPos();
+    _game.changeFocusInDirection(moveFocused - _game.getFocusedPos());
     _transferStart.restart();
-    _focusedCharacter = closestHuman;
   }
 }
 
@@ -108,7 +76,7 @@ void EventHandlerGame::handleKeyReleased(const sf::Event& event) {
           !sf::Keyboard::isKeyPressed(sf::Keyboard::S) &&
           !sf::Keyboard::isKeyPressed(sf::Keyboard::D) &&
           !sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-        _focusedCharacter->stop();
+        _game.stopMoving();
       break;
   }
 }
@@ -123,13 +91,12 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (!_draggingCamera) {
-      Controllable* previous = _focusedCharacter;
-      _focusedCharacter = _engine.moveCharacter(
-        sf::Vector2i(event.mouseButton.x, event.mouseButton.y), _focusedCharacter);
+      sf::Vector2f previousPos = _game.getFocusedPos();
+      _game.moveCharacter(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 
-      if (previous != _focusedCharacter) {
+      if (previousPos != _game.getFocusedPos()) {
         _transferStart.restart();
-        _previousFocusedPos = previous->getPos();
+        _previousFocusedPos = previousPos;
       }
     }
 
@@ -186,7 +153,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 }
 
 void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
-  sf::Vector3f normal = _engine.getNormalOnCameraPointedPos();
+  sf::Vector3f normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // The steeper the slope, the less the user can move around
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
@@ -209,7 +176,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
 }
 
 void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
-  sf::Vector3f normal = _engine.getNormalOnCameraPointedPos();
+  sf::Vector3f normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
   if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
@@ -247,10 +214,10 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   float transferProgress = _transferStart.getElapsedTime().asMilliseconds() / (float) TIME_TRANSFER_MS;
 
   if (transferProgress > 1)
-    cam.setPointedPos(_focusedCharacter->getPos());
+    cam.setPointedPos(_game.getFocusedPos());
   else
     cam.setPointedPos(_previousFocusedPos + transferProgress *
-      (_focusedCharacter->getPos() - _previousFocusedPos));
+      (_game.getFocusedPos() - _previousFocusedPos));
 
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
@@ -288,7 +255,7 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   cam.setValues(cam.getZoom(), theta, phi);
 
   if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-    sf::Vector2f moveFocused = _focusedCharacter->getPos();
+    sf::Vector2f moveFocused = _game.getFocusedPos();
     float theta = cam.getTheta()*M_PI/180.f;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
@@ -300,8 +267,8 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
       moveFocused += sf::Vector2f(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
 
-    if (moveFocused != _focusedCharacter->getPos())
-      _focusedCharacter->setTarget(moveFocused);
+    if (moveFocused != _game.getFocusedPos())
+      _game.setTarget(moveFocused);
   }
 }
 
@@ -309,13 +276,13 @@ void EventHandlerGame::resetCamera(bool pov) {
   Camera& cam = Camera::getInstance();
 
   _povCamera = pov;
-  _interface.setPovCamera(pov);
+  _game.setPovCamera(pov);
 
-  sf::Vector3f terrainNormal = vu::spherical(_engine.getNormalOnCameraPointedPos());
+  sf::Vector3f terrainNormal = vu::spherical(_game.getEngine().getNormalOnCameraPointedPos());
 
   if (pov) {
     cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);
-    cam.setAdditionalHeight(_focusedCharacter->getSize().y);
+    cam.setAdditionalHeight(_game.getCharacterHeight());
   }
 
   else {
@@ -325,16 +292,8 @@ void EventHandlerGame::resetCamera(bool pov) {
 }
 
 bool EventHandlerGame::gainFocus() {
-  Camera& cam = Camera::getInstance();
-
-  if (_engine.getTribe().size() == 0) {
-    _engine.genTribe(cam.getPointedPos());
-    // If we cannot generate a tribe, we fall back to sandbox mode
-    if (_engine.getTribe().size() == 0)
-      return false;
-
-    _focusedCharacter = _engine.getTribe().front();
-  }
+  if (!_game.genTribe())
+    return false;
 
   resetCamera(false);
 

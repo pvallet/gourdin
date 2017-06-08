@@ -8,18 +8,19 @@
 #define SCROLL_SPEED_SLOW 30.f
 #define SCROLL_SPEED_FAST 250.f
 
-EventHandlerSandbox::EventHandlerSandbox(Engine& engine, Interface& interface) :
-  EventHandler::EventHandler(engine, interface),
+EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
+  EventHandler::EventHandler(),
   _addSelect(false),
-  _scrollSpeed(SCROLL_SPEED_SLOW) {
-  interface.setScrollSpeedToSlow(true);
+  _scrollSpeed(SCROLL_SPEED_SLOW),
+  _game(game) {
+  _game.getInterface().setScrollSpeedToSlow(true);
 }
 
 void EventHandlerSandbox::handleClick(const sf::Event& event) {
-  sf::Vector2f minimapCoord = _interface.getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
+  sf::Vector2f minimapCoord = _game.getInterface().getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-    _engine.moveCamera(MAX_COORD * minimapCoord);
+    _game.moveCamera(MAX_COORD * minimapCoord);
   }
 
   else {
@@ -31,93 +32,47 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
           _addSelect = false;
 
       _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
-      _interface.setRectSelect(_rectSelect);
+      _game.getInterface().setRectSelect(_rectSelect);
     }
 
     // Move selection
     if (event.mouseButton.button == sf::Mouse::Right) {
-      if (_engine.getSelection().empty())
-        _engine.addLion(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-      else
-        _engine.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+      _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
     }
   }
 }
 
 void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
   switch(event.key.code) {
-    // Go back to selection
-    case sf::Keyboard::Space: {
-      std::set<Controllable*> sel = _engine.getSelection();
-
-      if (!sel.empty()) {
-        sf::Vector2f barycenter;
-        float nbSelected = 0;
-
-        for (auto it = sel.begin(); it != sel.end(); ++it) {
-          Lion* lion = dynamic_cast<Lion*>(*it);
-          if (lion) {
-            barycenter += lion->getPos();
-            nbSelected++;
-          }
-        }
-        Camera& cam = Camera::getInstance();
-        cam.setPointedPos(barycenter / nbSelected);
-      }
+    case sf::Keyboard::Space:
+      _game.goBackToSelection();
       break;
-    }
 
-    // Make the lions run
-    case sf::Keyboard::LShift: {
-      std::set<Controllable*> sel = _engine.getSelection();
-
-      bool makeThemAllRun = false;
-      bool generalStrategyChosen = false;
-      for (auto it = sel.begin(); it != sel.end(); ++it) {
-        Lion* lion = dynamic_cast<Lion*>(*it);
-        if (lion) {
-          if (!generalStrategyChosen) {
-            generalStrategyChosen = true;
-            makeThemAllRun = !lion->isRunning();
-          }
-          if (generalStrategyChosen) {
-            if (makeThemAllRun)
-              lion->beginRunning();
-            else
-              lion->beginWalking();
-          }
-        }
-      }
+    case sf::Keyboard::LShift:
+      _game.makeLionsRun();
       break;
-    }
 
     // Delete first selected lion
-    case sf::Keyboard::Delete: {
-      std::set<Controllable*> sel = _engine.getSelection();
-
-      for (auto it = sel.begin(); it != sel.end(); it++) {
-        (*it)->die();
-        break;
-      }
-    }
+    case sf::Keyboard::Delete:
+      _game.killLion();
 
     case sf::Keyboard::L:
-      _interface.switchLog();
+    _game.getInterface().switchLog();
       break;
 
     case sf::Keyboard::S:
       if (_scrollSpeed == SCROLL_SPEED_SLOW) {
         _scrollSpeed = SCROLL_SPEED_FAST;
-        _interface.setScrollSpeedToSlow(false);
+        _game.getInterface().setScrollSpeedToSlow(false);
       }
       else {
         _scrollSpeed = SCROLL_SPEED_SLOW;
-        _interface.setScrollSpeedToSlow(true);
+        _game.getInterface().setScrollSpeedToSlow(true);
       }
       break;
 
     case sf::Keyboard::W:
-      _engine.switchWireframe();
+      _game.switchWireframe();
       break;
   }
 }
@@ -133,9 +88,9 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left) {
-      _engine.select(_rectSelect, _addSelect);
+      _game.select(_rectSelect, _addSelect);
       _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
-      _interface.setRectSelect(_rectSelect);
+      _game.getInterface().setRectSelect(_rectSelect);
     }
   }
 
@@ -143,7 +98,7 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
     if (_beginDragLeft != sf::Vector2i(0,0)) {
       _rectSelect.width  = event.mouseMove.x - _rectSelect.left;
       _rectSelect.height = event.mouseMove.y - _rectSelect.top;
-      _interface.setRectSelect(_rectSelect);
+      _game.getInterface().setRectSelect(_rectSelect);
     }
   }
 

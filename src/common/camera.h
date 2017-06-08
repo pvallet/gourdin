@@ -25,6 +25,7 @@ class EventHandler;
 class EventHandlerGame;
 class EventHandlerSandbox;
 class Engine;
+class GameSandbox;
 
 class Camera {
 public:
@@ -49,13 +50,12 @@ public:
 	inline glm::mat4 getSkyboxViewProjectionMatrix() const {return _skyboxViewProjection;}
 	inline float getZoom() const {return _r;}
 
-	// To resize the camera
 	friend Controller;
 	friend EventHandler;
-
 	friend EventHandlerGame;
 	friend EventHandlerSandbox;
 	friend Engine;
+	friend GameSandbox;
 
 private:
 	Camera();

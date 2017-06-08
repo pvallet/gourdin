@@ -1,10 +1,11 @@
 #pragma once
 
 #include "event_handler.h"
+#include "gameSandbox.h"
 
 class EventHandlerSandbox : public EventHandler {
 public:
-  EventHandlerSandbox(Engine& engine, Interface& interface);
+  EventHandlerSandbox(GameSandbox& game);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(const sf::Time& elapsed);
@@ -19,4 +20,6 @@ private:
   float _scrollSpeed;
 
   sf::IntRect _rectSelect;
+
+  GameSandbox& _game;
 };

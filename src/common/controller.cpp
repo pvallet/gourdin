@@ -12,8 +12,10 @@ Controller::Controller(sf::RenderWindow& window) :
   _running(true),
   _interface(window),
   _engine(),
-  _eHandlerGame(_engine,_interface),
-  _eHandlerSandbox(_engine,_interface),
+  _gameGame(_engine,_interface),
+  _gameSandbox(_engine,_interface),
+  _eHandlerGame(_gameGame),
+  _eHandlerSandbox(_gameSandbox),
   _currentHandlerType(HDLR_SANDBOX),
   _window(window) {
 

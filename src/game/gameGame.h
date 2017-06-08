@@ -1,0 +1,29 @@
+#pragma once
+
+#include "engine.h"
+#include "interface.h"
+
+class GameGame {
+public:
+  GameGame (Engine& engine, Interface& interface);
+
+  bool genTribe();
+  void changeFocusInDirection(sf::Vector2f direction);
+
+  inline sf::Vector2f getFocusedPos() const {return _focusedCharacter->getPos();}
+  inline float getCharacterHeight() const {return _focusedCharacter->getSize().y;}
+
+  inline void setPovCamera(bool povCamera) {_interface.setPovCamera(povCamera);}
+  inline void setTarget(sf::Vector2f target) {_focusedCharacter->setTarget(target);}
+  inline void stopMoving() {_focusedCharacter->stop();}
+  inline void moveCharacter(sf::Vector2i screenTarget) {
+    _focusedCharacter = _engine.moveCharacter(screenTarget, _focusedCharacter);}
+
+  inline const Engine& getEngine() const {return _engine;}
+
+private:
+  Controllable* _focusedCharacter;
+
+  Engine& _engine;
+  Interface& _interface;
+};
