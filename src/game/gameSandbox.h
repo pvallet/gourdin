@@ -10,7 +10,8 @@ public:
   void update(sf::Time elapsed);
   void render() const;
 
-  void moveSelection(sf::Vector2i screenPos);
+  void select(sf::IntRect rect, bool add);
+  void moveSelection(sf::Vector2i screenTarget);
   void goBackToSelection();
   void makeLionsRun();
   void killLion();
@@ -22,7 +23,6 @@ public:
   inline void moveCamera(sf::Vector2f newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
   inline void switchWireframe() {_engine.switchWireframe();}
-  inline void select(sf::IntRect rect, bool add) {_engine.select(rect,add);}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
 
@@ -31,6 +31,8 @@ private:
 
   bool _displayLog;
   bool _scrollSpeedSlow;
+
+  std::set<Lion*> _selection;
 
   sf::RenderWindow& _window;
   Engine& _engine;

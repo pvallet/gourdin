@@ -46,8 +46,6 @@ public:
 
 	void update(sf::Time elapsed);
 	void render() const;
-	void renderLifeBars(sf::RenderWindow& window) const;
-	void select(sf::IntRect rect, bool add);
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
 	// Returns the character on which the player has clicked if so, otherwise returns focusedCharacter
@@ -59,9 +57,11 @@ public:
 
 	sf::Vector3f getNormalOnCameraPointedPos() const;
 
-	inline const std::set<Controllable*>& getSelection() {return _selectedElmts;}
+	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 	inline const std::vector<Controllable*>& getTribe() {return _tribe;}
+
+	static sf::Vector2f get2DCoord(sf::Vector2i screenTarget);
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
@@ -73,15 +73,12 @@ private:
   static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
 	void compute2DCorners();
 
-	sf::Vector2f get2DCoord(sf::Vector2i screenTarget) const;
-
 	bool _wireframe;
 
   std::vector<std::unique_ptr<igMovingElement> > _igMovingElements;
 
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks
-	std::set<Controllable*> _selectedElmts;
   std::set<Controllable*> _controllableElements;
 
 	std::vector<Controllable*> _tribe;

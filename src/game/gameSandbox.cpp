@@ -11,6 +11,17 @@ GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& i
 void GameSandbox::update(sf::Time elapsed) {
   LogText& logText = LogText::getInstance();
   logText.addFPSandCamInfo(elapsed);
+
+  // Remove the dead elements from the selected elements
+  std::vector<Lion*> toDelete;
+  for (auto it = _selection.begin(); it != _selection.end(); it++) {
+   if ((*it)->isDead())
+     toDelete.push_back(*it);
+  }
+  for (size_t i = 0; i < toDelete.size(); i++) {
+   _selection.erase(toDelete[i]);
+  }
+
   _engine.update(elapsed);
 }
 
@@ -20,9 +31,9 @@ void GameSandbox::render() const {
 #ifndef CORE_PROFILE
   _window.pushGLStates();
 
-  _engine.renderLifeBars(_window);
+  _interface.renderLifeBars(_selection);
   _interface.renderRectSelect();
-  _interface.renderMinimap(_engine);
+  _interface.renderMinimap(_engine.getChunkStatus());
 
   _interface.renderTextTopLeft(getInfoText());
 
@@ -64,26 +75,60 @@ std::string GameSandbox::getInfoText() const {
   return text.str();
 }
 
-void GameSandbox::moveSelection(sf::Vector2i screenPos) {
-  if (_engine.getSelection().empty())
-    _engine.addLion(screenPos);
-  else
-    _engine.moveSelection(screenPos);
+void GameSandbox::select(sf::IntRect rect, bool add) {
+  if (!add)
+    _selection.clear();
+
+  const std::set<Controllable*> controllableElements = _engine.getControllableElements();
+  for (auto it = controllableElements.begin(); it != controllableElements.end(); it++) {
+    Lion *lion = dynamic_cast<Lion*>(*it);
+    if (lion && !lion->isDead()) {
+      // controllableElements[i] is not selected yet, we can bother to calculate
+      if (_selection.find(lion) == _selection.end()) {
+        sf::IntRect SpriteRect = lion->getScreenCoord();
+
+        int centerX, centerY;
+
+        centerX = SpriteRect.left + SpriteRect.width / 2;
+        centerY = SpriteRect.top + SpriteRect.height / 2;
+
+        if (rect.contains(centerX, centerY))
+          _selection.insert(lion);
+
+        else if (   SpriteRect.contains(rect.left, rect.top) ||
+                    SpriteRect.contains(rect.left + rect.width, rect.top) ||
+                    SpriteRect.contains(rect.left + rect.width, rect.top + rect.height) ||
+                    SpriteRect.contains(rect.left, rect.top + rect.height)  ) {
+          _selection.insert(lion);
+        }
+      }
+    }
+  }
+}
+
+void GameSandbox::moveSelection(sf::Vector2i screenTarget) {
+  if (_selection.empty())
+    _engine.addLion(screenTarget);
+  else {
+    sf::Vector2f target = Engine::get2DCoord(screenTarget);
+
+    for(auto it = _selection.begin(); it != _selection.end(); ++it) {
+      Controllable* ctrl = dynamic_cast<Controllable*>(*it);
+      if (ctrl) {
+        ctrl->setTarget(target);
+      }
+    }
+  }
 }
 
 void GameSandbox::goBackToSelection() {
-  std::set<Controllable*> sel = _engine.getSelection();
-
-  if (!sel.empty()) {
+  if (!_selection.empty()) {
     sf::Vector2f barycenter;
     float nbSelected = 0;
 
-    for (auto it = sel.begin(); it != sel.end(); ++it) {
-      Lion* lion = dynamic_cast<Lion*>(*it);
-      if (lion) {
-        barycenter += lion->getPos();
-        nbSelected++;
-      }
+    for (auto it = _selection.begin(); it != _selection.end(); ++it) {
+      barycenter += (*it)->getPos();
+      nbSelected++;
     }
     Camera& cam = Camera::getInstance();
     cam.setPointedPos(barycenter / nbSelected);
@@ -91,33 +136,25 @@ void GameSandbox::goBackToSelection() {
 }
 
 void GameSandbox::makeLionsRun() {
-  std::set<Controllable*> sel = _engine.getSelection();
-
   bool makeThemAllRun = false;
   bool generalStrategyChosen = false;
-  for (auto it = sel.begin(); it != sel.end(); ++it) {
-    Lion* lion = dynamic_cast<Lion*>(*it);
-    if (lion) {
-      if (!generalStrategyChosen) {
-        generalStrategyChosen = true;
-        makeThemAllRun = !lion->isRunning();
-      }
-      if (generalStrategyChosen) {
-        if (makeThemAllRun)
-          lion->beginRunning();
-        else
-          lion->beginWalking();
-      }
+  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
+    if (!generalStrategyChosen) {
+      generalStrategyChosen = true;
+      makeThemAllRun = !(*it)->isRunning();
+    }
+    if (generalStrategyChosen) {
+      if (makeThemAllRun)
+        (*it)->beginRunning();
+      else
+        (*it)->beginWalking();
     }
   }
 }
 
 void GameSandbox::killLion() {
-  std::set<Controllable*> sel = _engine.getSelection();
-
-  for (auto it = sel.begin(); it != sel.end(); it++) {
-    (*it)->die();
-  }
+  if (!_selection.empty())
+    (*_selection.begin())->die();
 }
 
 void GameSandbox::clearLog() const {

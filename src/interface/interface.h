@@ -4,17 +4,20 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 
-class Engine;
+#include <set>
+
+#include "engine.h"
 
 class Interface {
 public:
   Interface(sf::RenderWindow& window);
   void init();
 
-  void renderMinimap(const Engine& engine) const;
+  void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
   void renderTextTopLeft(const std::string& string) const;
   void renderTextTopRight(const std::string& string) const;
   void renderRectSelect() const;
+  void renderLifeBars(std::set<Lion*> selection) const;
 
   sf::Vector2f getMinimapClickCoord(float x, float y) const;
   void setRectSelect(sf::IntRect rect);

@@ -55,6 +55,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
     // Delete first selected lion
     case sf::Keyboard::Delete:
       _game.killLion();
+      break;
 
     case sf::Keyboard::B:
       _game.benchmark();

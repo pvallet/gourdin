@@ -1,7 +1,5 @@
 #include "interface.h"
 
-#include <iostream>
-
 #include "camera.h"
 #include "engine.h"
 
@@ -33,7 +31,7 @@ void Interface::init() {
   _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
 }
 
-void Interface::renderMinimap(const Engine& engine) const {
+void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
   Camera& cam = Camera::getInstance();
 
   // Background image
@@ -67,8 +65,6 @@ void Interface::renderMinimap(const Engine& engine) const {
   miniChunk.setFillColor(sf::Color::Black);
   sf::Color edge(0,0,0,200);
   sf::Color fog(0,0,0,100);
-
-  const std::vector<std::vector<ChunkStatus> > chunkStatus = engine.getChunkStatus();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -109,6 +105,38 @@ void Interface::renderTextTopLeft(const std::string& string) const {
 
 void Interface::renderRectSelect() const {
   _window.draw(_rectSelect);
+}
+
+void Interface::renderLifeBars(std::set<Lion*> selection) const {
+  sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
+  lifeBar.setFillColor(sf::Color::Green);
+
+  sf::RectangleShape fullLifeBar(sf::Vector2f(20.f, 2.f));
+  fullLifeBar.setFillColor(sf::Color::Transparent);
+  fullLifeBar.setOutlineColor(sf::Color::Black);
+  fullLifeBar.setOutlineThickness(1);
+
+  sf::IntRect corners;
+  float maxHeightFactor;
+
+  for(auto it = selection.begin(); it != selection.end(); ++it) {
+    corners = (*it)->getScreenCoord();
+    // Otherwise the selected element is outside the screen
+    if (corners.width != 0) {
+      maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+
+        lifeBar.setSize(sf::Vector2f(20.f* (*it)->getStamina() / 100.f, 2.f));
+
+      lifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+      fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
+        corners.top - corners.height*maxHeightFactor + corners.height - 5);
+
+      _window.draw(lifeBar);
+      _window.draw(fullLifeBar);
+      lifeBar.setSize(sf::Vector2f(20.f, 2.f));
+    }
+  }
 }
 
 sf::Vector2f Interface::getMinimapClickCoord(float x, float y) const {

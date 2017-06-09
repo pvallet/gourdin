@@ -315,53 +315,17 @@ void Engine::update(sf::Time elapsed) {
 
   _igElementDisplay.loadElements(visibleElmts);
 
-  // Remove the dead elements from the selection and the controllable elements
-  std::vector<igMovingElement*> toDelete;
+  // Remove the dead elements from the controllable elements
+  std::vector<Controllable*> toDelete;
   for (auto it = _controllableElements.begin(); it != _controllableElements.end(); it++) {
    if ((*it)->isDead())
      toDelete.push_back(*it);
   }
   for (size_t i = 0; i < toDelete.size(); i++) {
-   _controllableElements.erase((Controllable*) toDelete[i]);
-   _selectedElmts.erase((Controllable*) toDelete[i]);
+   _controllableElements.erase(toDelete[i]);
   }
 
   compute2DCorners();
-}
-
-void Engine::renderLifeBars(sf::RenderWindow& window) const {
-  sf::RectangleShape lifeBar(sf::Vector2f(20.f, 2.f));
-  lifeBar.setFillColor(sf::Color::Green);
-
-  sf::RectangleShape fullLifeBar(sf::Vector2f(20.f, 2.f));
-  fullLifeBar.setFillColor(sf::Color::Transparent);
-  fullLifeBar.setOutlineColor(sf::Color::Black);
-  fullLifeBar.setOutlineThickness(1);
-
-  sf::IntRect corners;
-  float maxHeightFactor;
-
-  for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    Lion* lion = dynamic_cast<Lion*>(*it);
-    if (lion) {
-      corners = (*it)->getScreenCoord();
-      // Otherwise the selected element is outside the screen
-      if (corners.width != 0) {
-        maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
-
-          lifeBar.setSize(sf::Vector2f(20.f* lion->getStamina() / 100.f, 2.f));
-
-        lifeBar.setPosition(corners.left + corners.width/2 - 10,
-          corners.top - corners.height*maxHeightFactor + corners.height - 5);
-        fullLifeBar.setPosition(corners.left + corners.width/2 - 10,
-          corners.top - corners.height*maxHeightFactor + corners.height - 5);
-
-        window.draw(lifeBar);
-        window.draw(fullLifeBar);
-        lifeBar.setSize(sf::Vector2f(20.f, 2.f));
-      }
-    }
-  }
 }
 
 void Engine::render() const {
@@ -477,47 +441,6 @@ void Engine::render() const {
   logText.addLine(renderStats.str());
 }
 
-void Engine::select(sf::IntRect rect, bool add) {
-  if (!add)
-    _selectedElmts.clear();
-
-  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    Lion *lion = dynamic_cast<Lion*>(it->get());
-    if (lion && !lion->isDead()) {
-      // _igMovingElements[i] is not selected yet, we can bother to calculate
-      if (_selectedElmts.find(lion) == _selectedElmts.end()) {
-        sf::IntRect SpriteRect = lion->getScreenCoord();
-
-        int centerX, centerY;
-
-        centerX = SpriteRect.left + SpriteRect.width / 2;
-        centerY = SpriteRect.top + SpriteRect.height / 2;
-
-        if (rect.contains(centerX, centerY))
-          _selectedElmts.insert(lion);
-
-        else if (   SpriteRect.contains(rect.left, rect.top) ||
-                    SpriteRect.contains(rect.left + rect.width, rect.top) ||
-                    SpriteRect.contains(rect.left + rect.width, rect.top + rect.height) ||
-                    SpriteRect.contains(rect.left, rect.top + rect.height)  ) {
-          _selectedElmts.insert(lion);
-        }
-      }
-    }
-  }
-}
-
-void Engine::moveSelection(sf::Vector2i screenTarget) {
-  sf::Vector2f target = get2DCoord(screenTarget);
-
-  for(auto it = _selectedElmts.begin(); it != _selectedElmts.end(); ++it) {
-    Controllable* ctrl = dynamic_cast<Controllable*>(*it);
-    if (ctrl) {
-      ctrl->setTarget(target);
-    }
-  }
-}
-
 void Engine::moveCamera(sf::Vector2f newAimedPos) {
   generateChunk(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
   Camera& cam = Camera::getInstance();
@@ -548,7 +471,7 @@ void Engine::genTribe(sf::Vector2f pos) {
   }
 }
 
-sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) const {
+sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
