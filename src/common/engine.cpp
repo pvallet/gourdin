@@ -482,11 +482,11 @@ void Engine::select(sf::IntRect rect, bool add) {
     _selectedElmts.clear();
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    Controllable *ctrl = dynamic_cast<Controllable*>(it->get());
-    if (ctrl && !ctrl->isDead()) {
+    Lion *lion = dynamic_cast<Lion*>(it->get());
+    if (lion && !lion->isDead()) {
       // _igMovingElements[i] is not selected yet, we can bother to calculate
-      if (_selectedElmts.find(ctrl) == _selectedElmts.end()) {
-        sf::IntRect SpriteRect = ctrl->getScreenCoord();
+      if (_selectedElmts.find(lion) == _selectedElmts.end()) {
+        sf::IntRect SpriteRect = lion->getScreenCoord();
 
         int centerX, centerY;
 
@@ -494,13 +494,13 @@ void Engine::select(sf::IntRect rect, bool add) {
         centerY = SpriteRect.top + SpriteRect.height / 2;
 
         if (rect.contains(centerX, centerY))
-          _selectedElmts.insert(ctrl);
+          _selectedElmts.insert(lion);
 
         else if (   SpriteRect.contains(rect.left, rect.top) ||
                     SpriteRect.contains(rect.left + rect.width, rect.top) ||
                     SpriteRect.contains(rect.left + rect.width, rect.top + rect.height) ||
                     SpriteRect.contains(rect.left, rect.top + rect.height)  ) {
-          _selectedElmts.insert(ctrl);
+          _selectedElmts.insert(lion);
         }
       }
     }

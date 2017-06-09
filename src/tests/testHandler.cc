@@ -93,15 +93,15 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
   saveToImage(pixels, savename);
 }
 
-void TestHandler::displayGameGeneratedComponents(const Game& game) const {
-  ContentGeneratorDisplayForestsMask(game._contentGenerator, "contents.png");
+void TestHandler::displayEngineGeneratedComponents(const Engine& engine) const {
+  ContentGeneratorDisplayForestsMask(engine._contentGenerator, "contents.png");
 
-  saveToImage(game._terrainGeometry.getReliefGenerator().getPixels(), "relief_relief.png");
+  saveToImage(engine._terrainGeometry.getReliefGenerator().getPixels(), "relief_relief.png");
 
   // If we generated the relief from the map and not loaded it from a previous generation
-  if (game._mapInfoExtractor.getSize() != 0) {
-    saveToImage(game._mapInfoExtractor.getLakesElevations().getPixels(), "relief_lakesElevations.png");
-    saveToImage(game._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
+  if (engine._mapInfoExtractor.getSize() != 0) {
+    saveToImage(engine._mapInfoExtractor.getLakesElevations().getPixels(), "relief_lakesElevations.png");
+    saveToImage(engine._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
 
     // Test image fusion
     std::array<GeneratedImage, BIOME_NB_ITEMS> plainImages;
@@ -113,18 +113,18 @@ void TestHandler::displayGameGeneratedComponents(const Game& game) const {
       toSend[i] = &plainImages[i];
     }
 
-    saveToImage(game._mapInfoExtractor.imageFusion(toSend).getPixels(), "biomeTransitions.png");
+    saveToImage(engine._mapInfoExtractor.imageFusion(toSend).getPixels(), "biomeTransitions.png");
 
     // Display additional reliefs
-    for (auto it = game._reliefGenerator._biomesAdditionalRelief.begin();
-             it != game._reliefGenerator._biomesAdditionalRelief.end(); it++) {
+    for (auto it = engine._reliefGenerator._biomesAdditionalRelief.begin();
+             it != engine._reliefGenerator._biomesAdditionalRelief.end(); it++) {
 
       std::stringstream convert;
       convert << "biome_" << it->first << ".png";
       saveToImage(it->second.getPixels(), convert.str());
     }
 
-    saveToImage(game._reliefGenerator._additionalRelief.getPixels(), "biome_combined.png");
+    saveToImage(engine._reliefGenerator._additionalRelief.getPixels(), "biome_combined.png");
   }
 }
 

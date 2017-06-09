@@ -13,7 +13,7 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
   _addSelect(false),
   _scrollSpeed(SCROLL_SPEED_SLOW),
   _game(game) {
-  _game.getInterface().setScrollSpeedToSlow(true);
+  _game.setScrollSpeedToSlow(true);
 }
 
 void EventHandlerSandbox::handleClick(const sf::Event& event) {
@@ -56,18 +56,22 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
     case sf::Keyboard::Delete:
       _game.killLion();
 
+    case sf::Keyboard::B:
+      _game.benchmark();
+      break;
+
     case sf::Keyboard::L:
-    _game.getInterface().switchLog();
+      _game.switchLog();
       break;
 
     case sf::Keyboard::S:
-      if (_scrollSpeed == SCROLL_SPEED_SLOW) {
+      if (_game.getScrollSpeedSlow()) {
         _scrollSpeed = SCROLL_SPEED_FAST;
-        _game.getInterface().setScrollSpeedToSlow(false);
+        _game.setScrollSpeedToSlow(false);
       }
       else {
         _scrollSpeed = SCROLL_SPEED_SLOW;
-        _game.getInterface().setScrollSpeedToSlow(true);
+        _game.setScrollSpeedToSlow(true);
       }
       break;
 
@@ -143,8 +147,7 @@ bool EventHandlerSandbox::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 
-  LogText& logText = LogText::getInstance();
-  logText.clear();
+  _game.clearLog();
 
   return true;
 }

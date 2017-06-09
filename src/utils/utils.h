@@ -56,7 +56,9 @@ public:
 
 	inline void clear() {_text.str("");}
 	inline void addLine(std::string newLine) { _text << newLine;}
+	void addFPSandCamInfo(sf::Time elapsed);
 	inline std::string getText() const {return _text.str();}
+
 
 private:
 	LogText() {}

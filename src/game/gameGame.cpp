@@ -2,9 +2,50 @@
 
 #include "camera.h"
 
-GameGame::GameGame (Engine& engine, Interface& interface):
+GameGame::GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface):
+  _window(window),
   _engine(engine),
   _interface(interface) {}
+
+void GameGame::update(sf::Time elapsed) {
+  _engine.update(elapsed);
+}
+
+void GameGame::render() const {
+  _engine.render();
+
+#ifndef CORE_PROFILE
+  _window.pushGLStates();
+
+  _interface.renderTextTopLeft(getInfoText());
+
+  _window.popGLStates();
+#endif
+
+  _window.display();
+}
+
+std::string GameGame::getInfoText() const {
+  std::ostringstream text;
+
+  text << "Esc: " << "Quit engine" << std::endl
+       << "M: " << "Switch to Sandbox mode" << std::endl
+       << "1: " << "God camera" << std::endl
+       << "2: " << "POV camera" << std::endl;
+  if (_povCamera)
+    text << "Arrows: " << "Move camera around" << std::endl;
+  else
+    text << "A-E:  " << "Rotate camera" << std::endl;
+  text << "ZQSD: " << "Move focused character" << std::endl
+      << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
+      << "(The engine is optimised for AZERTY keyboards)" << std::endl
+      << std::endl
+      << "Click to move the character in the center" << std::endl
+      << "Click on another character to change the focus" << std::endl
+      << "Click and drag to rotate the camera" << std::endl;
+
+  return text.str();
+}
 
 bool GameGame::genTribe() {
   Camera& cam = Camera::getInstance();

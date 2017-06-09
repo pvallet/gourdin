@@ -15,9 +15,10 @@ EventHandlerGame::EventHandlerGame(GameGame& game) :
   EventHandler::EventHandler(),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
-  _povCamera(false),
   _draggingCamera(false),
-  _game(game) {}
+  _game(game) {
+  _game.setPovCamera(false);
+}
 
 void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   Camera& cam = Camera::getInstance();
@@ -27,12 +28,12 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
 
   switch(event.key.code) {
     case sf::Keyboard::Num1:
-      if (_povCamera)
+      if (_game.getPovCamera())
         resetCamera(false);
       break;
 
     case sf::Keyboard::Num2:
-      if (!_povCamera)
+      if (!_game.getPovCamera())
         resetCamera(true);
       break;
 
@@ -105,7 +106,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 
   else if (event.type == sf::Event::MouseMoved) {
     if (_beginDragLeft != sf::Vector2i(0,0)) {
-      if (_povCamera) {
+      if (_game.getPovCamera()) {
         _oldTheta = cam.getTheta();
         _oldPhi = cam.getPhi();
         cam.setTheta(_oldTheta + (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
@@ -222,7 +223,7 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
 
-  if (_povCamera) {
+  if (_game.getPovCamera()) {
     if (!_draggingCamera) {
       _oldPhi = phi; _oldTheta = theta;
 
@@ -275,7 +276,6 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
 void EventHandlerGame::resetCamera(bool pov) {
   Camera& cam = Camera::getInstance();
 
-  _povCamera = pov;
   _game.setPovCamera(pov);
 
   sf::Vector3f terrainNormal = vu::spherical(_game.getEngine().getNormalOnCameraPointedPos());

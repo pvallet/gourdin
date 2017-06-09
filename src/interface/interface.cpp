@@ -6,8 +6,6 @@
 #include "engine.h"
 
 Interface::Interface(sf::RenderWindow& window):
-  _displayLog(true),
-  _povCamera(false),
   _rectSelect(sf::Vector2f(0.f, 0.f)),
   _window(window) {}
 
@@ -96,77 +94,16 @@ void Interface::renderMinimap(const Engine& engine) const {
   }
 }
 
-void Interface::renderLog(sf::Time elapsed) const {
-  LogText& logText = LogText::getInstance();
-
-  if (_displayLog) {
-    Camera& cam = Camera::getInstance();
-    int fps = 1.f / elapsed.asSeconds();
-
-    std::ostringstream convert;
-    convert << "X: " << cam.getPointedPos().x << "\n"
-    << "Y: " << cam.getPointedPos().y << std::endl;
-    convert << "R: " << cam.getZoom() << "\n"
-    << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
-    (cam.getTheta() < 0 ? 360 : 0) << "\n"
-    << "Phi: " << cam.getPhi() << std::endl;
-    convert << "FPS: " << fps << std::endl;
-
-    convert << logText.getText();
-
-    sf::Text log(_log);
-    log.setString(convert.str());
-    log.setPosition(_window.getSize().x - log.getLocalBounds().width, 0);
-    _window.draw(log);
-  }
-
-  logText.clear();
+void Interface::renderTextTopRight(const std::string& string) const {
+  sf::Text text(_log);
+  text.setString(string);
+  text.setPosition(_window.getSize().x - text.getLocalBounds().width, 0);
+  _window.draw(text);
 }
 
-void Interface::renderInfo(bool inGameMode) const {
-  std::ostringstream text;
-
-  text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Sandbox mode" << std::endl;
-
-  if (inGameMode) {
-    text << "1: " << "God camera" << std::endl
-         << "2: " << "POV camera" << std::endl;
-    if (_povCamera)
-      text << "Arrows: " << "Move camera around" << std::endl;
-    else
-      text << "A-E:  " << "Rotate camera" << std::endl;
-    text << "ZQSD: " << "Move focused character" << std::endl
-         << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
-         << "(The engine is optimised for AZERTY keyboards)" << std::endl
-         << std::endl
-         << "Click to move the character in the center" << std::endl
-         << "Click on another character to change the focus" << std::endl
-         << "Click and drag to rotate the camera" << std::endl;
-  }
-
-  else {
-    text << "Left-Right: " << "Rotate camera" << std::endl
-         << "Up-Down:    " << "Go forwards/backwards" << std::endl
-         << "B: " << "Launch benchmark" << std::endl
-         << "L: " << "Hide/Display log" << std::endl;
-    if (_scrollSpeedSlow)
-      text << "S: " << "Set scroll speed to 'fast'" << std::endl;
-    else
-      text << "S: " << "Set scroll speed to 'slow'" << std::endl;
-    text << "W: " << "Switch to wireframe display" << std::endl
-         << std::endl
-         << "Click on the minimap to jump there" << std::endl
-         << "Right-click to make a lion appear" << std::endl
-         << "Select it with the left mouse button" << std::endl
-         << "Move it around with the right button" << std::endl
-         << "Lshift: " << "Make it run" << std::endl
-         << std::endl
-         << "Go hunt them juicy antilopes!" << std::endl;
-  }
-
+void Interface::renderTextTopLeft(const std::string& string) const {
   sf::Text info(_log);
-  info.setString(text.str());
+  info.setString(string);
   _window.draw(info);
 }
 

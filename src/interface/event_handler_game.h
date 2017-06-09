@@ -32,8 +32,6 @@ private:
   const float _maxScalarProductWithGroundPOV;
   const float _minScalarProductWithGroundGod;
 
-  bool _povCamera;
-
   float _oldTheta;
   float _oldPhi;
 

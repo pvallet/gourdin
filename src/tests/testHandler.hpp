@@ -19,7 +19,7 @@ private:
 
   void ContentGeneratorDisplayForestsMask(const ContentGenerator& contentGenerator, std::string savename) const;
 
-  void displayGameGeneratedComponents(const Engine& engine) const;
+  void displayEngineGeneratedComponents(const Engine& engine) const;
   void testVecUtils() const;
   void testPerlin() const;
   void testGeneratedImage() const;

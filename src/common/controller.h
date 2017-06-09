@@ -33,8 +33,6 @@ public:
 #endif
 
 private:
-	void render() const;
-
 	void benchmark();
 
 	bool _running;
