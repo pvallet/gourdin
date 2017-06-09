@@ -447,28 +447,21 @@ void Engine::moveCamera(sf::Vector2f newAimedPos) {
   cam.setPointedPos(newAimedPos);
 }
 
-Controllable* Engine::moveCharacter(sf::Vector2i screenTarget, Controllable* focusedCharacter) {
-  for (size_t i = 0; i < _tribe.size(); i++) {
-    sf::IntRect spriteRect = _tribe[i]->getScreenCoord();
-
-    if (spriteRect.contains(screenTarget))
-      return _tribe[i];
-  }
-
-  focusedCharacter->setTarget(get2DCoord(screenTarget));
-  return focusedCharacter;
-}
 
 void Engine::addLion(sf::Vector2i screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
 }
 
-void Engine::genTribe(sf::Vector2f pos) {
+std::vector<Controllable*> Engine::genTribe(sf::Vector2f pos) {
   std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
   appendNewElements(tribe);
+
+  std::vector<Controllable*> res;
   for (size_t i = 0; i < tribe.size(); i++) {
-    _tribe.push_back(dynamic_cast<Controllable*>(tribe[i]));
+    res.push_back(dynamic_cast<Controllable*>(tribe[i]));
   }
+
+  return res;
 }
 
 sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) {
@@ -476,7 +469,7 @@ sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) {
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
   GLfloat d;
- glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
+  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
 
   glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),

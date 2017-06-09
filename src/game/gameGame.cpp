@@ -49,13 +49,13 @@ std::string GameGame::getInfoText() const {
 
 bool GameGame::genTribe() {
   Camera& cam = Camera::getInstance();
-  if (_engine.getTribe().size() == 0) {
-    _engine.genTribe(cam.getPointedPos());
+  if (_tribe.size() == 0) {
+    _tribe = _engine.genTribe(cam.getPointedPos());
     // If we cannot generate a tribe, we fall back to sandbox mode
-    if (_engine.getTribe().size() == 0)
+    if (_tribe.size() == 0)
       return false;
 
-    _focusedCharacter = _engine.getTribe().front();
+    _focusedCharacter = _tribe.front();
   }
 
   return true;
@@ -63,21 +63,20 @@ bool GameGame::genTribe() {
 
 void GameGame::changeFocusInDirection(sf::Vector2f direction) {
   Camera& cam = Camera::getInstance();
-  std::vector<Controllable*> tribe = _engine.getTribe();
   float threshold = sqrt(2)/2.f;
 
   Controllable* closestHuman = _focusedCharacter;
   float closestDist = MAX_COORD;
 
-  for (size_t i = 0; i < tribe.size(); i++) {
-    sf::Vector2f toChar = tribe[i]->getPos() - _focusedCharacter->getPos();
+  for (size_t i = 0; i < _tribe.size(); i++) {
+    sf::Vector2f toChar = _tribe[i]->getPos() - _focusedCharacter->getPos();
     float distance = vu::norm(toChar);
 
     // Character is in the right direction, with +- M_PI/4 margin
     if (vu::dot(toChar, direction)/distance > threshold) {
 
       // Checks whether the character is visible on the screen
-      sf::IntRect screenCoord = tribe[i]->getScreenCoord();
+      sf::IntRect screenCoord = _tribe[i]->getScreenCoord();
       if (screenCoord.top > (int) cam.getH())
         continue;
       if (screenCoord.left > (int) cam.getW())
@@ -90,10 +89,23 @@ void GameGame::changeFocusInDirection(sf::Vector2f direction) {
 
       if (distance < closestDist) {
         closestDist = distance;
-        closestHuman = tribe[i];
+        closestHuman = _tribe[i];
       }
     }
   }
 
   _focusedCharacter = closestHuman;
+}
+
+void GameGame::moveCharacter(sf::Vector2i screenTarget) {
+  for (size_t i = 0; i < _tribe.size(); i++) {
+    sf::IntRect spriteRect = _tribe[i]->getScreenCoord();
+
+    if (spriteRect.contains(screenTarget)) {
+      _focusedCharacter = _tribe[i];
+      return;
+    }
+  }
+
+  _focusedCharacter->setTarget(Engine::get2DCoord(screenTarget));
 }

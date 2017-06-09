@@ -48,10 +48,8 @@ public:
 	void render() const;
 	void moveSelection(sf::Vector2i screenTarget);
 	void moveCamera(sf::Vector2f newAimedPos);
-	// Returns the character on which the player has clicked if so, otherwise returns focusedCharacter
-	Controllable* moveCharacter(sf::Vector2i screenTarget, Controllable* focusedCharacter);
 	void addLion(sf::Vector2i screenTarget);
-	void genTribe(sf::Vector2f pos);
+	std::vector<Controllable*> genTribe(sf::Vector2f pos);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
@@ -59,7 +57,6 @@ public:
 
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
-	inline const std::vector<Controllable*>& getTribe() {return _tribe;}
 
 	static sf::Vector2f get2DCoord(sf::Vector2i screenTarget);
 
@@ -80,8 +77,6 @@ private:
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks
   std::set<Controllable*> _controllableElements;
-
-	std::vector<Controllable*> _tribe;
 
 	igElementDisplay _igElementDisplay;
   ContentGenerator _contentGenerator;

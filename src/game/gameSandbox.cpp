@@ -53,7 +53,7 @@ std::string GameSandbox::getInfoText() const {
   std::ostringstream text;
 
   text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Sandbox mode" << std::endl
+       << "M: " << "Switch to Game mode" << std::endl
        << "Left-Right: " << "Rotate camera" << std::endl
        << "Up-Down:    " << "Go forwards/backwards" << std::endl
        << "B: " << "Launch benchmark" << std::endl
