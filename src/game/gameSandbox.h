@@ -10,8 +10,8 @@ public:
   void update(sf::Time elapsed);
   void render() const;
 
-  void select(sf::IntRect rect, bool add);
-  void moveSelection(sf::Vector2i screenTarget);
+  void select(glm::ivec4 rect, bool add);
+  void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
   void makeLionsRun();
   void killLion();
@@ -20,7 +20,7 @@ public:
 
   inline Interface& getInterface() const {return _interface;}
 
-  inline void moveCamera(sf::Vector2f newPos) {_engine.moveCamera(newPos);}
+  inline void moveCamera(glm::vec2 newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}

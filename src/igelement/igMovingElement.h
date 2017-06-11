@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <string>
 
 #include "animationManager.h"
@@ -10,7 +9,7 @@
 
 class igMovingElement : public igElement {
 public:
-	igMovingElement(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
+	igMovingElement(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~igMovingElement() {}
 
 	void launchAnimation (ANM_TYPE type);
@@ -24,12 +23,12 @@ public:
 	inline size_t getTexID() const {return _graphics.getTexID();}
 
 	inline virtual float getMaxHeightFactor() const {return _graphics.getMaxHeightFactor();}
-	inline sf::Vector2f getDirection() const {return _direction;}
+	inline glm::vec2 getDirection() const {return _direction;}
 	inline float getSpeed() const {return _speed;}
 	inline bool isDead() const {return _dead;}
 
 protected:
-	virtual void setDirection(sf::Vector2f direction);
+	virtual void setDirection(glm::vec2 direction);
 
 	float _speed; // Distance per second
 	bool _dead;
@@ -41,5 +40,5 @@ protected:
 private:
 	// Normalized vector towards the target
 	// It is private to guarantee a correct normalization
-	sf::Vector2f _direction;
+	glm::vec2 _direction;
 };

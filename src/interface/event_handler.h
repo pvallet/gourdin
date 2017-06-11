@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Window.hpp>
+#include <glm/glm.hpp>
 
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
@@ -15,5 +16,5 @@ public:
   virtual bool gainFocus() = 0;
 
 protected:
-  sf::Vector2i _beginDragLeft;
+  glm::ivec2 _beginDragLeft;
 };

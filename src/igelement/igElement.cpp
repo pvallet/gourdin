@@ -1,6 +1,5 @@
 #include "igElement.h"
 
-#include <SFML/Graphics.hpp>
 #include <cmath>
 #include <iostream>
 #include <ctime>
@@ -9,7 +8,7 @@
 #include "utils.h"
 #include "vecUtils.h"
 
-igElement::igElement(sf::Vector2f position) :
+igElement::igElement(glm::vec2 position) :
 	_pos(position),
 	_camOrientation(0.f) {
 
@@ -39,15 +38,15 @@ void igElement::setPosArray() {
 	}
 }
 
-void igElement::setTexCoord(sf::FloatRect rect) {
-	_coord2D[0] = rect.left + rect.width;
-	_coord2D[1] = rect.top;
-	_coord2D[2] = rect.left;
-	_coord2D[3] = rect.top;
-	_coord2D[4] = rect.left;
-	_coord2D[5] = rect.top  + rect.height;
-	_coord2D[6] = rect.left + rect.width;
-	_coord2D[7] = rect.top  + rect.height;
+void igElement::setTexCoord(glm::vec4 rect) {
+	_coord2D[0] = rect.x + rect.z;
+	_coord2D[1] = rect.y;
+	_coord2D[2] = rect.x;
+	_coord2D[3] = rect.y;
+	_coord2D[4] = rect.x;
+	_coord2D[5] = rect.y + rect.w;
+	_coord2D[6] = rect.x + rect.z;
+	_coord2D[7] = rect.y + rect.w;
 }
 
 void igElement::setLayer(size_t layer) {

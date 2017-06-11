@@ -66,18 +66,20 @@ void AnimationManagerInitializer::load(std::string folderPath) {
 
   int i = 0;
   for (auto it = _animInfo.begin(); it != _animInfo.end(); it++) {
-    sf::FloatRect texRect = _texArray.getTexRectangle(i);
-    it->second.sprite = sf::FloatRect(0, 0, 1.f / it->second.steps        * texRect.width,
-                                            1.f / it->second.orientations * texRect.height);
+    glm::vec4 texRect = _texArray.getTexRectangle(i);
+    it->second.spriteRect = glm::vec4(0,
+                                      0,
+                                      1.f / it->second.steps        * texRect.z,
+                                      1.f / it->second.orientations * texRect.w);
 
     std::ostringstream convert;
     convert << folderPath << i << ".png";
-    sf::Vector2f texSize = _texArray.texSizes[i];
-    it->second.spriteSize = sf::Vector2f(texSize.x / it->second.steps,
-                                         texSize.y / it->second.orientations);
+    glm::vec2 texSize = _texArray.texSizes[i];
+    it->second.spriteAbsoluteSize = glm::vec2(texSize.x / it->second.steps,
+                                              texSize.y / it->second.orientations);
 
-    if (it->second.spriteSize.y > _maxHeight)
-      _maxHeight = it->second.spriteSize.y;
+    if (it->second.spriteAbsoluteSize.y > _maxHeight)
+      _maxHeight = it->second.spriteAbsoluteSize.y;
 
     i++;
   }

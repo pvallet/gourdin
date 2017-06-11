@@ -46,23 +46,23 @@ public:
 
 	void update(sf::Time elapsed);
 	void render() const;
-	void moveSelection(sf::Vector2i screenTarget);
-	void moveCamera(sf::Vector2f newAimedPos);
-	void addLion(sf::Vector2i screenTarget);
-	std::vector<Controllable*> genTribe(sf::Vector2f pos);
+	void moveSelection(glm::ivec2 screenTarget);
+	void moveCamera(glm::vec2 newAimedPos);
+	void addLion(glm::ivec2 screenTarget);
+	std::vector<Controllable*> genTribe(glm::vec2 pos);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
-	sf::Vector3f getNormalOnCameraPointedPos() const;
+	glm::vec3 getNormalOnCameraPointedPos() const;
 
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 
-	static sf::Vector2f get2DCoord(sf::Vector2i screenTarget);
+	static glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
-	sf::Vector2i neighbour      (size_t x, size_t y, size_t index) const;
+	glm::ivec2 neighbour      (size_t x, size_t y, size_t index) const;
   void generateNeighbourChunks(size_t x, size_t y);
 	void generateChunk          (size_t x, size_t y);
   void appendNewElements(std::vector<igMovingElement*> elems);

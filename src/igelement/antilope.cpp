@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "vecUtils.h"
 
-Antilope::Antilope(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igMovingElement(position, graphics, terrainGeometry),
 	_lineOfSightStandard(50.f),
 	_repulsionRadius(8.f),
@@ -129,7 +129,7 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 
 			else {
 				float theta = RANDOMF * 2.f * M_PI;
-				setDirection(sf::Vector2f(cos(theta), sin(theta)));
+				setDirection(glm::vec2(cos(theta), sin(theta)));
 			}
 
 			_speed = _speedWalking;
@@ -149,12 +149,12 @@ void Antilope::reactWhenFleeing(const BoidsInfo& info) {
 		setDirection(_pos - info.closestRep);
 
 	else if (info.nbDir != 0) {
-		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
+		glm::vec2 zbla = info.sumOfDirs / (float) info.nbDir;
 		if (zbla.x != 0 && zbla.y != 0)
 			setDirection(info.sumOfDirs / (float) info.nbDir);
 
 		else
-			setDirection(sf::Vector2f(1,0));
+			setDirection(glm::vec2(1,0));
 	}
 
 	else if (info.nbAttract != 0)
@@ -181,13 +181,13 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 		_bStatus = REPULSION;
 	}
 
-	else if (info.nbDir != 0) { // TODO : Hysteresis
-		sf::Vector2f zbla = info.sumOfDirs / (float) info.nbDir;
+	else if (info.nbDir != 0) {
+		glm::vec2 zbla = info.sumOfDirs / (float) info.nbDir;
 		if (zbla.x != 0 && zbla.y != 0)
 			setDirection(info.sumOfDirs / (float) info.nbDir);
 
 		else
-			setDirection(sf::Vector2f(1,0));
+			setDirection(glm::vec2(1,0));
 
 		_bStatus = ORIENTATION;
 	}
@@ -217,7 +217,7 @@ void Antilope::updateState(const std::list<igMovingElement*>& neighbors) {
 	}
 }
 
-void Antilope::setDirection(sf::Vector2f direction) {
+void Antilope::setDirection(glm::vec2 direction) {
 	if (_lastDirectionChange.getElapsedTime() > _timeBeforeChangingDir) {
 		igMovingElement::setDirection(direction);
 		_lastDirectionChange.restart();

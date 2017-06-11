@@ -5,7 +5,7 @@
 
 class Tree : public igElement {
 public:
-	Tree(sf::Vector2f position, const TreeTexManager& _manager, Biome _biome, int _index);
+	Tree(glm::vec2 position, const TreeTexManager& _manager, Biome _biome, int _index);
 	virtual ~Tree() {}
 
 	inline Biome getBiome() const {return _biome;}

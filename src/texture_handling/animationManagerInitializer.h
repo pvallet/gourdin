@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-
+#include <SFML/System.hpp>
+#include <map>
 #include <string>
 
 #include "texArray.h"
@@ -15,8 +15,10 @@ struct AnimInfo {
 	sf::Time pause; 	// Before starting the anim over
 	bool loop; 			// If false, pause is infinite
 
-	sf::Vector2f spriteSize;
-	sf::FloatRect sprite; // Relative to the size of the texture
+	glm::vec2 spriteAbsoluteSize;
+	// Relative to the size of the texture
+	// Two first coordinates are the coordinates of the top left corner, and two last the width and height
+	glm::vec4 spriteRect;
 
 	size_t texLayer;
 };

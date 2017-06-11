@@ -5,7 +5,7 @@
 #include "antilope.h"
 #include "vecUtils.h"
 
-Lion::Lion(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	Controllable(position, graphics, terrainGeometry),
 	_stamina(100),
 	_catchBreathSpeed(25.f),
@@ -94,7 +94,7 @@ void Lion::beginChasing() {
 	}
 }
 
-void Lion::setTarget(sf::Vector2f t, ANM_TYPE anim) {
+void Lion::setTarget(glm::vec2 t, ANM_TYPE anim) {
 	(void) anim;
 	if (_status == RUNNING || _status == ATTACKING || _status == CHASING)
 		Controllable::setTarget(t, RUN);

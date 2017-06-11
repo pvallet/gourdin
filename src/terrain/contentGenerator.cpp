@@ -36,12 +36,12 @@ void ContentGenerator::init() {
 	}
 }
 
-bool ContentGenerator::isInForestMask(sf::Vector2f pos) const {
+bool ContentGenerator::isInForestMask(glm::vec2 pos) const {
   return _forestsMask[(int) (pos.x / MAX_COORD * CONTENT_RES)]
                      [(int) (pos.y / MAX_COORD * CONTENT_RES)];
 }
 
-bool ContentGenerator::notTooCloseToOtherTrees(sf::Vector2f pos, float distance) const {
+bool ContentGenerator::notTooCloseToOtherTrees(glm::vec2 pos, float distance) const {
   for (size_t i = std::max((int) ((pos.x - distance)/CHUNK_SIZE), 0);
               i < std::min((int) ((pos.x + distance)/CHUNK_SIZE), NB_CHUNKS); i++) {
   for (size_t j = std::max((int) ((pos.y - distance)/CHUNK_SIZE), 0);
@@ -68,11 +68,11 @@ struct compTrees {
 };
 
 std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) {
-  sf::Vector2f chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
+  glm::vec2 chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
   std::vector<igElement*> res;
 
   for (size_t i = 0; i < 400; i++) {
-    sf::Vector2f pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
+    glm::vec2 pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
@@ -101,7 +101,7 @@ std::vector<igMovingElement*> ContentGenerator::genHerds() const {
   std::vector<igMovingElement*> res;
 
   for (size_t i = 0; i < 400; i++) {
-    sf::Vector2f pos(RANDOMF * MAX_COORD, RANDOMF * MAX_COORD);
+    glm::vec2 pos(RANDOMF * MAX_COORD, RANDOMF * MAX_COORD);
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
@@ -121,14 +121,14 @@ std::vector<igMovingElement*> ContentGenerator::genHerds() const {
   return res;
 }
 
-std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f center,
+std::vector<glm::vec2> ContentGenerator::scatteredPositions(glm::vec2 center,
   size_t count, float radius, float minProximity) const {
 
   float r, theta;
-  sf::Vector2f p, diff;
+  glm::vec2 p, diff;
   bool add;
 
-  std::vector<sf::Vector2f> res;
+  std::vector<glm::vec2> res;
 
   for (size_t i = 0 ; i < 2*count ; i++) {
     add = true;
@@ -159,10 +159,10 @@ std::vector<sf::Vector2f> ContentGenerator::scatteredPositions(sf::Vector2f cent
   return res;
 }
 
-std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t count, Animals animal) const {
+std::vector<igMovingElement*> ContentGenerator::genHerd(glm::vec2 pos, size_t count, Animals animal) const {
   std::vector<igMovingElement*> res;
 
-  std::vector<sf::Vector2f> positions = scatteredPositions(pos, count, 10, 5);
+  std::vector<glm::vec2> positions = scatteredPositions(pos, count, 10, 5);
 
   for (size_t i = 0; i < positions.size(); i++) {
     res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
@@ -171,10 +171,10 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(sf::Vector2f pos, size_t
   return res;
 }
 
-std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const {
+std::vector<igMovingElement*> ContentGenerator::genTribe(glm::vec2 pos) const {
   std::vector<igMovingElement*> res;
 
-  std::vector<sf::Vector2f> positions = scatteredPositions(pos, RANDOMF * 5 + 5, 10, 5);
+  std::vector<glm::vec2> positions = scatteredPositions(pos, RANDOMF * 5 + 5, 10, 5);
 
   for (size_t i = 0; i < positions.size(); i++) {
     float randNumber = RANDOMF;
@@ -191,7 +191,7 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(sf::Vector2f pos) const
   return res;
 }
 
-std::vector<igMovingElement*> ContentGenerator::genLion(sf::Vector2f pos) const {
+std::vector<igMovingElement*> ContentGenerator::genLion(glm::vec2 pos) const {
   std::vector<igMovingElement*> res;
   Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 

@@ -23,7 +23,7 @@ EventHandlerGame::EventHandlerGame(GameGame& game) :
 void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   Camera& cam = Camera::getInstance();
 
-  sf::Vector2f moveFocused = _game.getFocusedPos();
+  glm::vec2 moveFocused = _game.getFocusedPos();
   float theta = cam.getTheta()*M_PI/180.f;
 
   switch(event.key.code) {
@@ -38,19 +38,19 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
       break;
 
     case sf::Keyboard::S:
-      moveFocused += sf::Vector2f(cos(theta), sin(theta));
+      moveFocused += glm::vec2(cos(theta), sin(theta));
       break;
 
     case sf::Keyboard::D:
-      moveFocused += sf::Vector2f(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
+      moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
       break;
 
     case sf::Keyboard::Z:
-      moveFocused += sf::Vector2f(cos(theta+M_PI), sin(theta+M_PI));
+      moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
       break;
 
     case sf::Keyboard::Q:
-      moveFocused += sf::Vector2f(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+      moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
       break;
 
   }
@@ -92,8 +92,8 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (!_draggingCamera) {
-      sf::Vector2f previousPos = _game.getFocusedPos();
-      _game.moveCharacter(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+      glm::vec2 previousPos = _game.getFocusedPos();
+      _game.moveCharacter(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
 
       if (previousPos != _game.getFocusedPos()) {
         _transferStart.restart();
@@ -105,7 +105,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
   }
 
   else if (event.type == sf::Event::MouseMoved) {
-    if (_beginDragLeft != sf::Vector2i(0,0)) {
+    if (_beginDragLeft != glm::ivec2(0,0)) {
       if (_game.getPovCamera()) {
         _oldTheta = cam.getTheta();
         _oldPhi = cam.getPhi();
@@ -117,7 +117,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
       }
 
       else {
-        sf::Vector2i newMousePos = sf::Vector2i(event.mouseMove.x,event.mouseMove.y);
+        glm::ivec2 newMousePos = glm::ivec2(event.mouseMove.x,event.mouseMove.y);
         if (vu::norm(_beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
           _draggingCamera = true;
 
@@ -154,7 +154,7 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
 }
 
 void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
-  sf::Vector3f normal = _game.getEngine().getNormalOnCameraPointedPos();
+  glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // The steeper the slope, the less the user can move around
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
@@ -177,7 +177,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
 }
 
 void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
-  sf::Vector3f normal = _game.getEngine().getNormalOnCameraPointedPos();
+  glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
   if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
@@ -256,17 +256,17 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
   cam.setValues(cam.getZoom(), theta, phi);
 
   if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
-    sf::Vector2f moveFocused = _game.getFocusedPos();
+    glm::vec2 moveFocused = _game.getFocusedPos();
     float theta = cam.getTheta()*M_PI/180.f;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-      moveFocused += sf::Vector2f(cos(theta), sin(theta));
+      moveFocused += glm::vec2(cos(theta), sin(theta));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-      moveFocused += sf::Vector2f(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
+      moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-      moveFocused += sf::Vector2f(cos(theta+M_PI), sin(theta+M_PI));
+      moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-      moveFocused += sf::Vector2f(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+      moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
 
     if (moveFocused != _game.getFocusedPos())
       _game.setTarget(moveFocused);
@@ -278,7 +278,7 @@ void EventHandlerGame::resetCamera(bool pov) {
 
   _game.setPovCamera(pov);
 
-  sf::Vector3f terrainNormal = vu::spherical(_game.getEngine().getNormalOnCameraPointedPos());
+  glm::vec3 terrainNormal = vu::spherical(_game.getEngine().getNormalOnCameraPointedPos());
 
   if (pov) {
     cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);
@@ -330,7 +330,7 @@ std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, flo
   return res;
 }
 
-float EventHandlerGame::getPhiLimForGivenTheta(float theta, sf::Vector3f normal, float maxDotProduct) {
+float EventHandlerGame::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
   return solveAcosXplusBsinXequalC(
     normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
 }

@@ -1,15 +1,16 @@
 #pragma once
 
+#include <SFML/System.hpp>
+#include <glm/glm.hpp>
+
 #include <array>
 #include <string>
-
-#include <SFML/Graphics.hpp>
 
 // ig = ingame
 
 class igElement {
 public:
-	igElement(sf::Vector2f position);
+	igElement(glm::vec2 position);
 
 	virtual void updateDisplay(sf::Time elapsed, float theta);
 	inline void setHeight(float height) {_height = height; setPosArray();}
@@ -18,10 +19,10 @@ public:
 
 	virtual size_t getTexID() const = 0;
 
-	inline sf::Vector2f getPos() const {return _pos;}
+	inline glm::vec2 getPos() const {return _pos;}
 	inline float getHeight() const {return _height;}
 	inline float getOrientation() const {return _orientation;}
-	inline sf::Vector2f getSize() const {return _size;}
+	inline glm::vec2 getSize() const {return _size;}
 
 	inline std::array<float, 12> getVertices() const {return _vertices;}
 	inline std::array<float, 12> getPosArray() const {return _posArray;}
@@ -31,13 +32,13 @@ public:
 protected:
 	void setVertices(); // Uses the _size attribute
 	void setPosArray();
-	void setTexCoord(sf::FloatRect rect);
+	void setTexCoord(glm::vec4 rect);
 	void setLayer(size_t layer);
 	void setOrientation(float nOrientation);
 
-	sf::Vector2f _pos;
-	sf::Vector2f _size;
-	sf::Vector2f _offset; // To adapt the sprite to the terrain
+	glm::vec2 _pos;
+	glm::vec2 _size;
+	glm::vec2 _offset; // To adapt the sprite to the terrain
 
 	float _height;
 

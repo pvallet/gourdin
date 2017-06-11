@@ -24,7 +24,7 @@ Engine::Engine() :
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
-  cam.setPointedPos(sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+  cam.setPointedPos(glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
@@ -82,7 +82,7 @@ void Engine::init() {
   resetCamera();
 
   appendNewElements(_contentGenerator.genHerd(
-                    sf::Vector2f(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                    glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                                  CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
   appendNewElements(_contentGenerator.genHerds());
@@ -98,35 +98,34 @@ void Engine::generateChunk(size_t x, size_t y) {
   _terrain[x][y]->setTrees(newTrees);
 }
 
-sf::Vector2i Engine::neighbour(size_t x, size_t y, size_t index) const {
+glm::ivec2 Engine::neighbour(size_t x, size_t y, size_t index) const {
   switch(index) {
     case 0:
-      return sf::Vector2i(x-1,y);
+      return glm::ivec2(x-1,y);
       break;
     case 1:
-      return sf::Vector2i(x+1,y);
+      return glm::ivec2(x+1,y);
       break;
     case 2:
-      return sf::Vector2i(x,y-1);
+      return glm::ivec2(x,y-1);
       break;
     case 3:
-      return sf::Vector2i(x,y+1);
+      return glm::ivec2(x,y+1);
       break;
     default:
       std::cerr << "Error in Engine::neighbour: Index out of bounds" << '\n';
-      return sf::Vector2i(x,y);
+      return glm::ivec2(x,y);
       break;
   }
 }
 
 void Engine::generateNeighbourChunks(size_t x, size_t y) {
   if (_chunkStatus[x][y] == EDGE) {
-    sf::Vector2i tmp;
+    glm::ivec2 tmp;
     for (size_t i = 0; i < 4; i++) {
       tmp = neighbour(x,y,i);
 
       // We check if the neighbour chunk is within the map space.
-      // If not, we should generate oceans TODO
       if (tmp.x >= 0 && tmp.x < _chunkStatus.size() && tmp.y >= 0 && tmp.y < _chunkStatus.size()) {
         if (_chunkStatus[tmp.x][tmp.y] == NOT_GENERATED) {
           // If the chunk to be generated is not handled by the map, we don't do anything
@@ -190,7 +189,7 @@ void Engine::compute2DCorners() {
                                          glm::vec3(0, 1, 0));
 
   for (auto it = _controllableElements.begin(); it != _controllableElements.end(); it++) {
-    sf::Vector3f pos;
+    glm::vec3 pos;
     pos.x = (*it)->getPos().x;
     pos.y = (*it)->getPos().y;
     pos.z = (*it)->getHeight();
@@ -241,7 +240,7 @@ void Engine::compute2DCorners() {
 
 void Engine::update(sf::Time elapsed) {
   Camera& cam = Camera::getInstance();
-  sf::Vector2u camPos = convertToChunkCoords(cam.getPointedPos());
+  glm::uvec2 camPos = convertToChunkCoords(cam.getPointedPos());
 
   // Update camera
   if (_chunkStatus[camPos.x][camPos.y] == NOT_GENERATED)
@@ -290,7 +289,7 @@ void Engine::update(sf::Time elapsed) {
   std::vector<std::list<igMovingElement*> > sortedElements(NB_CHUNKS*NB_CHUNKS);
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    sf::Vector2u chunkPos = convertToChunkCoords((*it)->getPos());
+    glm::uvec2 chunkPos = convertToChunkCoords((*it)->getPos());
 
     if (!(*it)->isDead())
       sortedElements[chunkPos.x * NB_CHUNKS + chunkPos.y].push_back(it->get());
@@ -300,7 +299,7 @@ void Engine::update(sf::Time elapsed) {
 
   // Update graphics of visible elements
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    sf::Vector2u chunkPos = convertToChunkCoords((*it)->getPos());
+    glm::uvec2 chunkPos = convertToChunkCoords((*it)->getPos());
 
     if (_chunkStatus[chunkPos.x][chunkPos.y] == VISIBLE) {
       // No test yet to see if the element can move to its new pos (no collision)
@@ -441,18 +440,18 @@ void Engine::render() const {
   logText.addLine(renderStats.str());
 }
 
-void Engine::moveCamera(sf::Vector2f newAimedPos) {
+void Engine::moveCamera(glm::vec2 newAimedPos) {
   generateChunk(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(newAimedPos);
 }
 
 
-void Engine::addLion(sf::Vector2i screenTarget) {
+void Engine::addLion(glm::ivec2 screenTarget) {
   appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
 }
 
-std::vector<Controllable*> Engine::genTribe(sf::Vector2f pos) {
+std::vector<Controllable*> Engine::genTribe(glm::vec2 pos) {
   std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
   appendNewElements(tribe);
 
@@ -464,7 +463,7 @@ std::vector<Controllable*> Engine::genTribe(sf::Vector2f pos) {
   return res;
 }
 
-sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) {
+glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
@@ -475,12 +474,12 @@ sf::Vector2f Engine::get2DCoord(sf::Vector2i screenTarget) {
     glm::mat4(1.f), cam.getViewProjectionMatrix(),
     glm::vec4(0,0, cam.getW(), cam.getH()));
 
-  return sf::Vector2f( modelCoord.x, modelCoord.y);
+  return glm::vec2( modelCoord.x, modelCoord.y);
 }
 
-sf::Vector3f Engine::getNormalOnCameraPointedPos() const {
+glm::vec3 Engine::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
-  sf::Vector2u chunkPos = convertToChunkCoords(cam.getPointedPos());
+  glm::uvec2 chunkPos = convertToChunkCoords(cam.getPointedPos());
 
   return _terrain[chunkPos.x][chunkPos.y]->getNorm(cam.getPointedPos());
 }

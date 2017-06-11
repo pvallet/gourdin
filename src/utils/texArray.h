@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <SFML/Graphics.hpp>
+#include <glm/glm.hpp>
 
 class TextureArray {
 public:
@@ -18,16 +18,16 @@ public:
 	void loadTextures(size_t count, std::string folderPath);
 
 	// Returns the size of the current texture relative to the size of the array texture
-	inline sf::FloatRect getTexRectangle(size_t index) const {
-		return sf::FloatRect(0,
-			                   0,
-			                   texSizes[index].x / maxTexSize.x,
-			                   texSizes[index].y / maxTexSize.y);
+	inline glm::vec4 getTexRectangle(size_t index) const {
+		return glm::vec4(0,
+			               0,
+										 texSizes[index].x / maxTexSize.x,
+			               texSizes[index].y / maxTexSize.y);
 	}
 
 	GLuint texID;
-	sf::Vector2f maxTexSize;
-	std::vector<sf::Vector2f> texSizes;
+	glm::vec2 maxTexSize;
+	std::vector<glm::vec2> texSizes;
 
 private:
 	size_t _count;

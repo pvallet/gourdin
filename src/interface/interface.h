@@ -19,8 +19,8 @@ public:
   void renderRectSelect() const;
   void renderLifeBars(std::set<Lion*> selection) const;
 
-  sf::Vector2f getMinimapClickCoord(float x, float y) const;
-  void setRectSelect(sf::IntRect rect);
+  glm::vec2 getMinimapClickCoord(float x, float y) const;
+  void setRectSelect(glm::ivec4 rect);
 
 private:
   sf::RectangleShape _rectSelect;

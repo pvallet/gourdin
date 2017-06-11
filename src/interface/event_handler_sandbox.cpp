@@ -17,7 +17,7 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
 }
 
 void EventHandlerSandbox::handleClick(const sf::Event& event) {
-  sf::Vector2f minimapCoord = _game.getInterface().getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
+  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
     _game.moveCamera(MAX_COORD * minimapCoord);
@@ -31,13 +31,13 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
       else
           _addSelect = false;
 
-      _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
+      _rectSelect = glm::ivec4(event.mouseButton.x, event.mouseButton.y,0,0);
       _game.getInterface().setRectSelect(_rectSelect);
     }
 
     // Move selection
     if (event.mouseButton.button == sf::Mouse::Right) {
-      _game.moveSelection(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+      _game.moveSelection(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
     }
   }
 }
@@ -94,15 +94,15 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left) {
       _game.select(_rectSelect, _addSelect);
-      _rectSelect = sf::IntRect(event.mouseButton.x, event.mouseButton.y,0,0);
+      _rectSelect = glm::ivec4(event.mouseButton.x, event.mouseButton.y,0,0);
       _game.getInterface().setRectSelect(_rectSelect);
     }
   }
 
   else if (event.type == sf::Event::MouseMoved) {
-    if (_beginDragLeft != sf::Vector2i(0,0)) {
-      _rectSelect.width  = event.mouseMove.x - _rectSelect.left;
-      _rectSelect.height = event.mouseMove.y - _rectSelect.top;
+    if (_beginDragLeft != glm::ivec2(0,0)) {
+      _rectSelect.z = event.mouseMove.x - _rectSelect.x;
+      _rectSelect.w = event.mouseMove.y - _rectSelect.y;
       _game.getInterface().setRectSelect(_rectSelect);
     }
   }

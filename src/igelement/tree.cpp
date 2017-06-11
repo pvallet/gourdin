@@ -1,7 +1,7 @@
 #include "tree.h"
 #include "animationManager.h"
 
-Tree::Tree(sf::Vector2f position, const TreeTexManager& manager, Biome biome, int index) :
+Tree::Tree(glm::vec2 position, const TreeTexManager& manager, Biome biome, int index) :
 	igElement(position),
 	_manager(manager),
 	_biome(biome),

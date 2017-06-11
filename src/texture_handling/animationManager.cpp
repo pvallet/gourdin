@@ -62,13 +62,13 @@ void AnimationManager::update(sf::Time elapsed, float nOrientation) {
   _currentOrient = getClosestOrient(nOrientation);
 }
 
-sf::FloatRect AnimationManager::getCurrentSprite() const {
-	sf::FloatRect sprite = _animInfo.at(_currentAnim).sprite;
+glm::vec4 AnimationManager::getCurrentSpriteRect() const {
+	glm::vec4 spriteRect = _animInfo.at(_currentAnim).spriteRect;
 
-  sprite.left += _currentSprite * sprite.width;
-  sprite.top += _currentOrient * sprite.height;
+  spriteRect.x += _currentSprite * spriteRect.z;
+  spriteRect.y += _currentOrient * spriteRect.w;
 
-  return sprite;
+  return spriteRect;
 }
 
 sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) const {

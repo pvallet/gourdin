@@ -328,7 +328,7 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 		if (toDraw) {
 			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {
 				if (!(*edge)->mapEdge) {
-					std::array<sf::Vector3f, 3> points;
+					std::array<glm::vec3, 3> points;
 
 					points[0].x = (*edge)->corner0->x;
 					points[0].y = (*edge)->corner0->y;

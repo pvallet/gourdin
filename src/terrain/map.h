@@ -64,11 +64,11 @@ public:
 	Corner* corner0;
 	Corner* corner1;
 
-	sf::Vector2f normalToCenter0; // set in computeEdgeBoundingBoxes
+	glm::vec2 normalToCenter0; // set in computeEdgeBoundingBoxes
 
 	// Minimal distance to any point of the edge. Iso distances are half disk U rectangle U half disk
-	float getDistanceToEdge(sf::Vector2f pos);
-	bool isOnSameSideAsCenter0(sf::Vector2f pos) const;
+	float getDistanceToEdge(glm::vec2 pos);
+	bool isOnSameSideAsCenter0(glm::vec2 pos) const;
 
 };
 

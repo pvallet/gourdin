@@ -8,8 +8,8 @@
 #include <iostream>
 #include <string>
 
-sf::Vector2u convertToChunkCoords(sf::Vector2f pos) {
-  sf::Vector2u chunkPos;
+glm::uvec2 convertToChunkCoords(glm::vec2 pos) {
+  glm::uvec2 chunkPos;
   if (pos.x < 0)
     pos.x = 0;
   if (pos.y < 0)

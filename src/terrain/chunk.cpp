@@ -163,14 +163,14 @@ void Chunk::computeChunkBoundingBox() {
 		}
 	}
 
-	currentBuffers->corners[0] = sf::Vector3f(minCoord[0], minCoord[1], minCoord[2]);
-	currentBuffers->corners[1] = sf::Vector3f(minCoord[0], minCoord[1], maxCoord[2]);
-	currentBuffers->corners[2] = sf::Vector3f(minCoord[0], maxCoord[1], minCoord[2]);
-	currentBuffers->corners[3] = sf::Vector3f(minCoord[0], maxCoord[1], maxCoord[2]);
-	currentBuffers->corners[4] = sf::Vector3f(maxCoord[0], minCoord[1], minCoord[2]);
-	currentBuffers->corners[5] = sf::Vector3f(maxCoord[0], minCoord[1], maxCoord[2]);
-	currentBuffers->corners[6] = sf::Vector3f(maxCoord[0], maxCoord[1], minCoord[2]);
-	currentBuffers->corners[7] = sf::Vector3f(maxCoord[0], maxCoord[1], maxCoord[2]);
+	currentBuffers->corners[0] = glm::vec3(minCoord[0], minCoord[1], minCoord[2]);
+	currentBuffers->corners[1] = glm::vec3(minCoord[0], minCoord[1], maxCoord[2]);
+	currentBuffers->corners[2] = glm::vec3(minCoord[0], maxCoord[1], minCoord[2]);
+	currentBuffers->corners[3] = glm::vec3(minCoord[0], maxCoord[1], maxCoord[2]);
+	currentBuffers->corners[4] = glm::vec3(maxCoord[0], minCoord[1], minCoord[2]);
+	currentBuffers->corners[5] = glm::vec3(maxCoord[0], minCoord[1], maxCoord[2]);
+	currentBuffers->corners[6] = glm::vec3(maxCoord[0], maxCoord[1], minCoord[2]);
+	currentBuffers->corners[7] = glm::vec3(maxCoord[0], maxCoord[1], maxCoord[2]);
 }
 
 void Chunk::generate() {
@@ -208,7 +208,7 @@ size_t Chunk::draw() const {
 	return nbTriangles;
 }
 
-bool Chunk::theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const {
+bool Chunk::theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const {
   float dots[8];
 
   for (size_t i = 0 ; i < 8 ; i++) {
@@ -229,8 +229,8 @@ void Chunk::computeCulling() {
   float alpha = cam.getFov() * cam.getRatio() / 2.f;
 
   // Bottom of the view
-  sf::Vector3f norm = vu::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
-  sf::Vector3f pos = cam.getPos();
+  glm::vec3 norm = vu::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
+  glm::vec3 pos = cam.getPos();
 
   if (theCornersAreOutside(pos,norm)) {
     _visible = false;
@@ -284,8 +284,8 @@ void Chunk::setTrees(std::vector<igElement*> trees) {
 
 void Chunk::computeSubdivisionLevel() {
 	Camera& camera = Camera::getInstance();
-	sf::Vector3f centerOfChunk((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
-	    getHeight(sf::Vector2f((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
+	glm::vec3 centerOfChunk((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
+	    getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 
 	float distanceToChunk = vu::norm(camera.getPos()-centerOfChunk);
 
@@ -307,10 +307,10 @@ void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	}
 }
 
-float Chunk::getHeight(sf::Vector2f pos) const {
+float Chunk::getHeight(glm::vec2 pos) const {
   return _terrainGeometry.getHeight(pos, _currentSubdivLvl);
 }
 
-sf::Vector3f Chunk::getNorm(sf::Vector2f pos) const {
+glm::vec3 Chunk::getNorm(glm::vec2 pos) const {
 	return _terrainGeometry.getNorm(pos, _currentSubdivLvl);
 }

@@ -8,7 +8,7 @@ enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
 
 class Lion : public Controllable {
 public:
-	Lion(sf::Vector2f position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
+	Lion(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Lion() {}
 
 	virtual void update(sf::Time elapsed);
@@ -21,7 +21,7 @@ public:
 	void beginAttacking();
 	void beginChasing();
 
-	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim);
+	virtual void setTarget(glm::vec2 t, ANM_TYPE anim);
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 

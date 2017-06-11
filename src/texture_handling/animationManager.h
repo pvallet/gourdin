@@ -18,12 +18,12 @@ public:
 	inline void bindTexture() const {_texManager.bind();}
 	inline GLuint getTexID() const {return _texManager.getTexID();}
 
-	sf::FloatRect getCurrentSprite() const;
+	glm::vec4 getCurrentSpriteRect() const;
 	inline float getMaxHeightFactor() const {
-		return (float) _texManager.getMaxHeight() / (float) _animInfo.at(_currentAnim).spriteSize.y;
+		return (float) _texManager.getMaxHeight() / (float) _animInfo.at(_currentAnim).spriteAbsoluteSize.y;
 	}
 
-	inline sf::Vector2f getRawSize() const {return _animInfo.at(_currentAnim).spriteSize;}
+	inline glm::vec2 getRawSize() const {return _animInfo.at(_currentAnim).spriteAbsoluteSize;}
 	inline const AnimalParameters& getParameters() const {return _texManager.getParameters();}
 
 	sf::Time getAnimationTime(ANM_TYPE type) const;

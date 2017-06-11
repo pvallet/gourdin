@@ -75,7 +75,7 @@ std::string GameSandbox::getInfoText() const {
   return text.str();
 }
 
-void GameSandbox::select(sf::IntRect rect, bool add) {
+void GameSandbox::select(glm::ivec4 rect, bool add) {
   if (!add)
     _selection.clear();
 
@@ -85,20 +85,20 @@ void GameSandbox::select(sf::IntRect rect, bool add) {
     if (lion && !lion->isDead()) {
       // controllableElements[i] is not selected yet, we can bother to calculate
       if (_selection.find(lion) == _selection.end()) {
-        sf::IntRect SpriteRect = lion->getScreenCoord();
+        glm::ivec4 SpriteRect = lion->getScreenRect();
 
         int centerX, centerY;
 
-        centerX = SpriteRect.left + SpriteRect.width / 2;
-        centerY = SpriteRect.top + SpriteRect.height / 2;
+        centerX = SpriteRect.x + SpriteRect.z / 2;
+        centerY = SpriteRect.y + SpriteRect.w / 2;
 
-        if (rect.contains(centerX, centerY))
+        if (vu::contains(rect, glm::ivec2(centerX, centerY)))
           _selection.insert(lion);
 
-        else if (   SpriteRect.contains(rect.left, rect.top) ||
-                    SpriteRect.contains(rect.left + rect.width, rect.top) ||
-                    SpriteRect.contains(rect.left + rect.width, rect.top + rect.height) ||
-                    SpriteRect.contains(rect.left, rect.top + rect.height)  ) {
+        else if (   vu::contains(SpriteRect, glm::ivec2(rect.x, rect.y)) ||
+                    vu::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y)) ||
+                    vu::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y + rect.w)) ||
+                    vu::contains(SpriteRect, glm::ivec2(rect.x, rect.y + rect.w))  ) {
           _selection.insert(lion);
         }
       }
@@ -106,11 +106,11 @@ void GameSandbox::select(sf::IntRect rect, bool add) {
   }
 }
 
-void GameSandbox::moveSelection(sf::Vector2i screenTarget) {
+void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
   if (_selection.empty())
     _engine.addLion(screenTarget);
   else {
-    sf::Vector2f target = Engine::get2DCoord(screenTarget);
+    glm::vec2 target = Engine::get2DCoord(screenTarget);
 
     for(auto it = _selection.begin(); it != _selection.end(); ++it) {
       Controllable* ctrl = dynamic_cast<Controllable*>(*it);
@@ -123,7 +123,7 @@ void GameSandbox::moveSelection(sf::Vector2i screenTarget) {
 
 void GameSandbox::goBackToSelection() {
   if (!_selection.empty()) {
-    sf::Vector2f barycenter;
+    glm::vec2 barycenter;
     float nbSelected = 0;
 
     for (auto it = _selection.begin(); it != _selection.end(); ++it) {
@@ -165,7 +165,7 @@ void GameSandbox::clearLog() const {
 void GameSandbox::benchmark() {
   Camera& cam = Camera::getInstance();
 
-  cam.setPointedPos(sf::Vector2f(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
+  cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
   cam.setValues(5000, 225.f, INIT_PHI);
 
   sf::Time totalElapsed, elapsed;
@@ -174,7 +174,7 @@ void GameSandbox::benchmark() {
   for (size_t i = 0; i < 100; i++) {
     elapsed = frameClock.restart();
     totalElapsed += elapsed;
-    cam.setPointedPos(sf::Vector2f(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
+    cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
                                    CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
     update(elapsed);
     render();

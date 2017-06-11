@@ -25,7 +25,7 @@ private:
   void handleCamBoundsPOVMode(float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal
   void resetCamera(bool pov);
-  static float getPhiLimForGivenTheta(float theta, sf::Vector3f normal, float maxDotProduct);
+  static float getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct);
   static bool firstIsOnPositiveSideOfSecond(float first, float second);
 
   // Scalar product between terrain normal and (1,cam.theta,90)
@@ -38,7 +38,7 @@ private:
   bool _draggingCamera;
 
   sf::Clock _transferStart;
-  sf::Vector2f _previousFocusedPos;
+  glm::vec2 _previousFocusedPos;
 
   GameGame& _game;
 };

@@ -1,8 +1,9 @@
 #include "texArray.h"
-#include <iostream>
-#include <sstream>
 
 #include <SFML/Graphics.hpp>
+
+#include <iostream>
+#include <sstream>
 
 #define MIPMAP_LVLS 4
 
@@ -35,7 +36,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 
 			img[i].loadFromFile(convert.str());
 
-			texSizes[i] = sf::Vector2f(img[i].getSize().x, img[i].getSize().y);
+			texSizes[i] = glm::vec2(img[i].getSize().x, img[i].getSize().y);
 
 			if (texSizes[i].x > maxTexSize.x)
 				maxTexSize.x = texSizes[i].x;

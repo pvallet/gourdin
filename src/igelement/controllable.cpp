@@ -4,7 +4,7 @@
 #include "vecUtils.h"
 #include <iostream>
 
-Controllable::Controllable(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
  	igMovingElement(position, graphics, terrainGeometry),
   _target(position) {
 
@@ -21,7 +21,7 @@ void Controllable::update(sf::Time elapsed) {
   }
 }
 
-void Controllable::setTarget(sf::Vector2f t, ANM_TYPE anim) {
+void Controllable::setTarget(glm::vec2 t, ANM_TYPE anim) {
 	if (!_dead) {
 		_target = t;
 		setDirection(t-_pos);
@@ -34,15 +34,15 @@ void Controllable::stop() {
   igMovingElement::stop();
 }
 
-sf::IntRect Controllable::getScreenCoord() const {
+glm::ivec4 Controllable::getScreenRect() const {
 	Camera& cam = Camera::getInstance();
 
-	sf::IntRect res;
+	glm::ivec4 res;
 
-	res.left = (_projectedVertices[3] + 1.f) / 2.f * cam.getW();
-	res.top = -(_projectedVertices[1] + 1.f) / 2.f * cam.getH() + cam.getH();
-	res.width =  (_projectedVertices[0] - _projectedVertices[3]) / 2.f * cam.getW();
-	res.height = (_projectedVertices[1] - _projectedVertices[7]) / 2.f * cam.getH();
+	res.x =  (_projectedVertices[3] + 1.f) / 2.f * cam.getW();
+	res.y = -(_projectedVertices[1] + 1.f) / 2.f * cam.getH() + cam.getH();
+	res.z =  (_projectedVertices[0] - _projectedVertices[3]) / 2.f * cam.getW();
+	res.w =  (_projectedVertices[1] - _projectedVertices[7]) / 2.f * cam.getH();
 
 	return res;
 }

@@ -1,10 +1,9 @@
 #include "terrainTexManager.h"
-#include <iostream>
-#include <sstream>
 
 #include <SFML/Graphics.hpp>
+#include <sstream>
 
-sf::Vector2u TerrainTexManager::loadTexture(std::string folder) {
+glm::uvec2 TerrainTexManager::loadTexture(std::string folder) {
 	sf::Image img;
 
   img.loadFromFile(folder);
@@ -30,7 +29,7 @@ sf::Vector2u TerrainTexManager::loadTexture(std::string folder) {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return img.getSize();
+	return glm::uvec2(img.getSize().x, img.getSize().y);
 }
 
 void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {

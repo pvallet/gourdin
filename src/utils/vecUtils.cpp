@@ -1,33 +1,33 @@
 #include "vecUtils.h"
 
-float vu::norm(const sf::Vector2f& v) {
+float vu::norm(const glm::vec2& v) {
 	return sqrt(v.x*v.x + v.y*v.y);
 }
 
-float vu::norm(const sf::Vector2i& v) {
+float vu::norm(const glm::ivec2& v) {
 	return sqrt(v.x*v.x + v.y*v.y);
 }
 
-float vu::norm(const sf::Vector3f& v) {
+float vu::norm(const glm::vec3& v) {
   return sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 }
 
-float vu::dot(const sf::Vector2f& u, const sf::Vector2f& v) {
+float vu::dot(const glm::vec2& u, const glm::vec2& v) {
 	return u.x*v.x + u.y*v.y;
 }
 
-float vu::dot(const sf::Vector3f& u, const sf::Vector3f& v) {
+float vu::dot(const glm::vec3& u, const glm::vec3& v) {
   return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
-sf::Vector3f vu::cross(const sf::Vector3f& u, const sf::Vector3f& v) {
-  return sf::Vector3f(u.y * v.z - u.z * v.y,
+glm::vec3 vu::cross(const glm::vec3& u, const glm::vec3& v) {
+  return glm::vec3(u.y * v.z - u.z * v.y,
                       u.z * v.x - u.x * v.z,
                       u.x * v.y - u.y * v.x);
 }
 
-sf::Vector3f vu::carthesian(float r, float theta, float phi) {
-  sf::Vector3f u;
+glm::vec3 vu::carthesian(float r, float theta, float phi) {
+  glm::vec3 u;
 
   u.x = r*sin(phi*RAD)*cos(theta*RAD);
   u.y = r*sin(phi*RAD)*sin(theta*RAD);
@@ -36,8 +36,8 @@ sf::Vector3f vu::carthesian(float r, float theta, float phi) {
   return u;
 }
 
-sf::Vector3f vu::spherical(float x, float y, float z) {
-	sf::Vector3f u(0,0,0);
+glm::vec3 vu::spherical(float x, float y, float z) {
+	glm::vec3 u(0,0,0);
 	u.x = sqrt(x*x + y*y + z*z);
 	if (u.x != 0) {
 		u.y = atan2(y,x) / RAD;
@@ -50,17 +50,7 @@ sf::Vector3f vu::spherical(float x, float y, float z) {
 	return u;
 }
 
-sf::Vector3f vu::convertSFML(glm::vec3 u) {
-	sf::Vector3f res;
-
-	res.x = u.x;
-	res.y = u.y;
-	res.z = u.z;
-
-	return res;
-}
-
-glm::vec3 vu::convertGLM(sf::Vector3f u) {
+glm::vec3 vu::convertSFML(glm::vec3 u) {
 	glm::vec3 res;
 
 	res.x = u.x;
@@ -70,7 +60,17 @@ glm::vec3 vu::convertGLM(sf::Vector3f u) {
 	return res;
 }
 
-float vu::angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if one is the vector (0,0), else value in degrees
+glm::vec3 vu::convertGLM(glm::vec3 u) {
+	glm::vec3 res;
+
+	res.x = u.x;
+	res.y = u.y;
+	res.z = u.z;
+
+	return res;
+}
+
+float vu::angle(const glm::vec2& u, const glm::vec2& v) { // returns -1 if one is the vector (0,0), else value in degrees
 	int sign = u.x * v.y - u.y * v.x >= 0.f ? 1 : -1; // Cross >= 0
   float lengths = norm(u)*norm(v);
 
@@ -85,7 +85,7 @@ float vu::angle(const sf::Vector2f& u, const sf::Vector2f& v) { // returns -1 if
   }
 }
 
-float vu::absoluteAngle(const sf::Vector3f& u, const sf::Vector3f& v) {
+float vu::absoluteAngle(const glm::vec3& u, const glm::vec3& v) {
 	float lengths = norm(u)*norm(v);
 
   if (lengths == 0.f) {

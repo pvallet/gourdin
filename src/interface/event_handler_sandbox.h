@@ -19,7 +19,7 @@ private:
   bool _addSelect;
   float _scrollSpeed;
 
-  sf::IntRect _rectSelect;
+  glm::ivec4 _rectSelect;
 
   GameSandbox& _game;
 };

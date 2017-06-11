@@ -40,11 +40,11 @@ int main(int argc, char* argv[]) {
   sf::ContextSettings context(24, 8, 4, 3, 0);
 #endif
 
-#ifndef NDEBUG
+// #ifndef NDEBUG
   sf::RenderWindow window(sf::VideoMode(1366, 768), "OpenGL", sf::Style::Default, context);
-#else
-  sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
-#endif
+// #else
+//   sf::RenderWindow window(sf::VideoMode::getFullscreenModes().front(), "OpenGL", sf::Style::Fullscreen, context);
+// #endif
 
   window.setVerticalSyncEnabled(true);
   window.setKeyRepeatEnabled(false);

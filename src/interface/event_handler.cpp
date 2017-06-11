@@ -29,12 +29,12 @@ bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& current
 
   else if (event.type == sf::Event::MouseButtonPressed) {
     if (event.mouseButton.button == sf::Mouse::Left)
-      _beginDragLeft = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+      _beginDragLeft = glm::ivec2(event.mouseButton.x, event.mouseButton.y);
   }
 
   else if (event.type == sf::Event::MouseButtonReleased) {
     if (event.mouseButton.button == sf::Mouse::Left)
-      _beginDragLeft = sf::Vector2i(0,0);
+      _beginDragLeft = glm::ivec2(0,0);
   }
 
   return running;

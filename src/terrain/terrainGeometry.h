@@ -21,16 +21,16 @@ class Triangle {
 public:
   std::array<Vertex*,3> vertices;
   Biome biome;
-  sf::Vector3f normal;
+  glm::vec3 normal;
 
   // indice 0 corresponds to the point refPoint in tri, and the other indices are
   // the other vertices in clockwise order
-  std::array<size_t,3> sortIndices(sf::Vector3f refPoint) const;
+  std::array<size_t,3> sortIndices(glm::vec3 refPoint) const;
 
   // Returns the triangle containing the given pos, and stores the barycentric
   // coordinates in barCoord: barCoord[i] corresponds to vertices[]
   // barCoord is expected to be a float array of size 3
-  static const Triangle* getTriangleContaining(sf::Vector2f pos,
+  static const Triangle* getTriangleContaining(glm::vec2 pos,
     const std::list<const Triangle*>& triangles, float* barCoord = nullptr);
 };
 
@@ -38,13 +38,13 @@ class Vertex {
 public:
   Vertex(): _sorted(false) {}
 
-  sf::Vector3f pos;
-  sf::Vector3f normal;
+  glm::vec3 pos;
+  glm::vec3 normal;
 
   // If the triangles are not sorted yet, sorts them in clockwise order
   void sortTriangles();
   const Triangle* getNextTri(const Triangle* tri) const;
-  std::pair<sf::Vector3f,sf::Vector3f> getBorder() const;
+  std::pair<glm::vec3,glm::vec3> getBorder() const;
 
   void addAdjacentTriangle(const Triangle* tri);
   inline const std::list<const Triangle*>& getAdjacentTriangles() const {return _adjacentTriangles;}
@@ -55,7 +55,7 @@ private:
 };
 
 struct vertHashFunc{
-  size_t operator()(const sf::Vector3f &k) const {
+  size_t operator()(const glm::vec3 &k) const {
   size_t h1 = std::hash<float>()(k.x);
   size_t h2 = std::hash<float>()(k.y);
   size_t h3 = std::hash<float>()(k.z);
@@ -88,7 +88,7 @@ public:
     inline void goingToAddNPoints(size_t n) {_vertices.reserve(n);}
     // Insert the triangle to the structure and modify its points to take into account the relief generator
     // If the relief generator is nullptr, the points are not modified
-    void addTriangle(std::array<sf::Vector3f,3> p, Biome biome);
+    void addTriangle(std::array<glm::vec3,3> p, Biome biome);
     void subdivideTriangles(std::list<const Triangle*>& triangles);
     void computeNormals    (std::list<Vertex*>&   vertices);
     // Compute normals for every triangle
@@ -99,21 +99,21 @@ public:
     static std::list<Vertex*> getVertices(const std::list<const Triangle*> triangles);
 
     std::list<const Triangle*> getTrianglesInChunk(size_t x, size_t y) const;
-    std::list<const Triangle*> getTrianglesNearPos  (sf::Vector2f pos) const;
+    std::list<const Triangle*> getTrianglesNearPos  (glm::vec2 pos) const;
 
     std::list<const Triangle*> getTriangles() const;
 
-    bool isWater(sf::Vector2f pos) const;
-    float getHeight(sf::Vector2f pos) const;
-    Biome getBiome (sf::Vector2f pos) const;
-    sf::Vector3f getNorm(sf::Vector2f pos) const;
+    bool isWater(glm::vec2 pos) const;
+    float getHeight(glm::vec2 pos) const;
+    Biome getBiome (glm::vec2 pos) const;
+    glm::vec3 getNorm(glm::vec2 pos) const;
 
     // Returns the coordinates of the subchunk containing the position pos
-    static std::array<sf::Vector2u, 2> getSubChunkInfo(sf::Vector2f pos);
+    static std::array<glm::uvec2, 2> getSubChunkInfo(glm::vec2 pos);
 
   private:
 
-    std::unordered_map<sf::Vector3f, Vertex, vertHashFunc> _vertices;
+    std::unordered_map<glm::vec3, Vertex, vertHashFunc> _vertices;
     std::unordered_set<Triangle, triHashFunc> _triangles;
 
     // The triangles are sorted on a two level grid:
@@ -140,21 +140,21 @@ public:
 
   inline bool isOcean(size_t x, size_t y) const {return _subdivisionLevels[0]->isOcean(x,y);}
 
-  inline bool isWater(sf::Vector2f pos, size_t subdivLvl) const  {
+  inline bool isWater(glm::vec2 pos, size_t subdivLvl) const  {
     return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->isWater(pos);}
 
-  inline float getHeight(sf::Vector2f pos, size_t subdivLvl) const {
+  inline float getHeight(glm::vec2 pos, size_t subdivLvl) const {
     return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getHeight(pos);}
 
-  inline Biome getBiome(sf::Vector2f pos, size_t subdivLvl) const {
+  inline Biome getBiome(glm::vec2 pos, size_t subdivLvl) const {
     return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getBiome(pos);}
 
-  inline sf::Vector3f getNorm(sf::Vector2f pos, size_t subdivLvl) const {
+  inline glm::vec3 getNorm(glm::vec2 pos, size_t subdivLvl) const {
     return _subdivisionLevels[protectedSubdivLvl(pos, subdivLvl)]->getNorm(pos);}
 
 private:
   void subdivideChunk(int x, int y, size_t subdivLvl);
-  size_t protectedSubdivLvl(sf::Vector2f pos, size_t subdivLvl) const;
+  size_t protectedSubdivLvl(glm::vec2 pos, size_t subdivLvl) const;
 
   std::vector<std::unique_ptr<SubdivisionLevel> > _subdivisionLevels;
 

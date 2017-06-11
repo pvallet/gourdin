@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
 #include <list>
 
 #include "igMovingElement.h"
@@ -10,8 +8,8 @@ enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
 enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 struct BoidsInfo {
-	sf::Vector2f closestRep;
-	sf::Vector2f sumPosAttract, sumPosFlee, sumOfDirs;
+	glm::vec2 closestRep;
+	glm::vec2 sumPosAttract, sumPosFlee, sumOfDirs;
 	int nbDir = 0;
 	int nbAttract = 0;
 	int nbFlee = 0;
@@ -20,7 +18,7 @@ struct BoidsInfo {
 
 class Antilope : public igMovingElement {
 public:
-	Antilope(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
+	Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Antilope() {}
 
 	// React to the environment
@@ -33,7 +31,7 @@ public:
 	inline float getLineOfSight() const {return _lineOfSight;}
 
 protected:
-	void setDirection(sf::Vector2f direction);
+	void setDirection(glm::vec2 direction);
 
 private:
 	sf::Time generateTimePhase(sf::Time average) const;

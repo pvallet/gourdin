@@ -29,7 +29,7 @@ void MapInfoExtractor::convertMapData(size_t size) {
   #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < size; i++) {
     for (size_t j = 0; j < size; j++) {
-      sf::Vector2f pos(i * MAX_COORD / size, j * MAX_COORD / size);
+      glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       size_t index = i*size + j;
       _biomes[index] = smoother.getBiome(pos);
       _biomesMasks[_biomes[index]][index] = 1;
@@ -87,7 +87,7 @@ void MapInfoExtractor::computeLakesElevations(
   // Fill lake info
   for (size_t i = 0; i < size; i++) {
     for (size_t j = 0; j < size; j++) {
-      sf::Vector2f pos(i * MAX_COORD / size, j * MAX_COORD / size);
+      glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       Biome biome = smoother.getBiome(pos);
 
       if (biome == WATER || biome == LAKE || biome == MARSH || biome == RIVER) {

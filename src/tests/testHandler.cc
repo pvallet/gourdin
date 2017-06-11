@@ -129,9 +129,9 @@ void TestHandler::displayEngineGeneratedComponents(const Engine& engine) const {
 }
 
 void TestHandler::testVecUtils() const {
-  sf::Vector3f testVec(1,8,-2);
-  sf::Vector3f testVecSpherical = vu::spherical(testVec);
-  sf::Vector3f testVecBack = vu::carthesian(testVecSpherical);
+  glm::vec3 testVec(1,8,-2);
+  glm::vec3 testVecSpherical = vu::spherical(testVec);
+  glm::vec3 testVecBack = vu::carthesian(testVecSpherical);
 
   float precision = 0.00001;
 

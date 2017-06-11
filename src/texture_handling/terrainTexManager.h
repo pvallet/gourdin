@@ -5,7 +5,7 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <SFML/System.hpp>
+#include <glm/glm.hpp>
 
 class TerrainTexManager {
 public:
@@ -14,7 +14,7 @@ public:
 	TerrainTexManager(TerrainTexManager const&) = delete;
 	void operator=   (TerrainTexManager const&) = delete;
 
-	sf::Vector2u loadTexture(std::string path);
+	glm::uvec2 loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);
 
 	void bindTexture(size_t index) const {glBindTexture(GL_TEXTURE_2D, _texIDs[index]);}

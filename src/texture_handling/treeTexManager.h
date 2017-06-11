@@ -21,10 +21,10 @@ public:
 
 	void load(std::string path);
 
-	inline sf::Vector2f getSize(Biome biome, int index) const {
+	inline glm::vec2 getSize(Biome biome, int index) const {
 		return _flora[biome].texArray.texSizes[index] * _heightFactor;
 	}
-	inline sf::FloatRect getTexRectangle(Biome biome, int index) const {
+	inline glm::vec4 getTexRectangle(Biome biome, int index) const {
 		return _flora[biome].texArray.getTexRectangle(index);
 	}
 	inline void bind(Biome biome) const {

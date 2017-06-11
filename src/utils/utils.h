@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <SFML/System.hpp>
 
 #ifndef M_PI
@@ -30,7 +31,7 @@ enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
 			BIOME_NB_ITEMS
 		};
 
-sf::Vector2u convertToChunkCoords(sf::Vector2f pos);
+glm::uvec2 convertToChunkCoords(glm::vec2 pos);
 
 bool glCheckError(const char *file, int line);
 

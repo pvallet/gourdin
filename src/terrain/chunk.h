@@ -27,7 +27,7 @@ public:
 	std::vector<float> normals;
 	std::vector<float> coords;
 
-	sf::Vector3f corners[8]; // For frustum culling
+	glm::vec3 corners[8]; // For frustum culling
 
 	std::map<Biome, BiomeIndices> indicesInfo;
 };
@@ -48,8 +48,8 @@ public:
 	void computeSubdivisionLevel();
 	void setSubdivisionLevel(size_t newSubdLvl);
 
-	float getHeight(sf::Vector2f pos) const;
-	sf::Vector3f getNorm(sf::Vector2f pos) const;
+	float getHeight(glm::vec2 pos) const;
+	glm::vec3 getNorm(glm::vec2 pos) const;
 	inline bool isVisible() const {return _visible;}
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 
@@ -62,10 +62,10 @@ private:
 	void fillBufferData();
 	void generateBuffers();
 	void computeChunkBoundingBox();
-	bool theCornersAreOutside(sf::Vector3f cam, sf::Vector3f vec) const;
+	bool theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const;
 	void setTreesHeights();
 
-	sf::Vector2i _chunkPos;
+	glm::ivec2 _chunkPos;
 
 	bool _visible;
 	size_t _currentSubdivLvl;

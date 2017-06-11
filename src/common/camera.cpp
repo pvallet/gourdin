@@ -28,7 +28,7 @@ void Camera::resize(unsigned int W, unsigned int H) {
 }
 
 void Camera::apply() {
-  _pos = sf::Vector3f(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
+  _pos = glm::vec3(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
 
   _view = glm::lookAt (
 	  vu::convertGLM(_pos),
@@ -38,7 +38,7 @@ void Camera::apply() {
 
   _viewProjection = _projection * _view;
 
-  sf::Vector3f camDirection = vu::carthesian(1.f, _theta, _phi);
+  glm::vec3 camDirection = vu::carthesian(1.f, _theta, _phi);
 
   _skyboxView = glm::lookAt (
 	  vu::convertGLM(camDirection),

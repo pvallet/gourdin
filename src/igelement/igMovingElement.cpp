@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 
-igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
+igMovingElement::igMovingElement(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igElement(position),
 	_dead(false),
 	_graphics(graphics),
@@ -20,7 +20,7 @@ igMovingElement::igMovingElement(sf::Vector2f position, AnimationManager graphic
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
 	if (!_dead) {
-		sf::Vector2f oldSize = _size;
+		glm::vec2 oldSize = _size;
 
 		_size.x /= _graphics.getRawSize().x;
 		_size.y /= _graphics.getRawSize().y;
@@ -39,16 +39,16 @@ void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
 
 	if (!_dead) {
 		if (_direction.x != 0.f || _direction.y != 0.f) {
-			float ori = vu::angle(sf::Vector2f(1.0f,0.0f), _direction);
+			float ori = vu::angle(glm::vec2(1.0f,0.0f), _direction);
 			setOrientation(ori - _camOrientation);
 		}
 	}
 
-	setTexCoord(_graphics.getCurrentSprite());
+	setTexCoord(_graphics.getCurrentSpriteRect());
 }
 
 void igMovingElement::update(sf::Time elapsed) {
-	sf::Vector2f newPos = _pos + _direction * _speed * elapsed.asSeconds();
+	glm::vec2 newPos = _pos + _direction * _speed * elapsed.asSeconds();
 
 	if (_terrainGeometry.isWater(newPos, 0))
 		stop();
@@ -64,12 +64,12 @@ void igMovingElement::die() {
 
 void igMovingElement::stop() {
 	if (!_dead) {
-    setDirection(sf::Vector2f(0,0));
+    setDirection(glm::vec2(0,0));
     launchAnimation(WAIT);
   }
 }
 
-void igMovingElement::setDirection(sf::Vector2f direction) {
+void igMovingElement::setDirection(glm::vec2 direction) {
 	_direction = direction;
 	float norm = vu::norm(_direction);
 

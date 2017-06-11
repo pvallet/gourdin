@@ -1,24 +1,23 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <string>
 #include "igMovingElement.h"
 
 class Controllable : public igMovingElement {
 public:
-	Controllable(sf::Vector2f position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
+	Controllable(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Controllable() {}
 
 	virtual void update(sf::Time elapsed);
-	virtual void setTarget(sf::Vector2f t, ANM_TYPE anim = WALK);
+	virtual void setTarget(glm::vec2 t, ANM_TYPE anim = WALK);
 	virtual void stop();
 
 	inline void setProjectedVertices(std::array<float,12> nVertices) {_projectedVertices = nVertices;}
 
-	sf::IntRect getScreenCoord() const;
+	glm::ivec4 getScreenRect() const;
 
 protected:
-	sf::Vector2f _target;
+	glm::vec2 _target;
 
 	std::array<float, 12> _projectedVertices;
 };

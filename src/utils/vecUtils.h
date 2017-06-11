@@ -8,7 +8,7 @@
 #include <cmath>
 #include <map>
 
-inline bool operator < (const sf::Vector3f& lhs, const sf::Vector3f& rhs) {
+inline bool operator < (const glm::vec3& lhs, const glm::vec3& rhs) {
   if (lhs.x < rhs.x)
     return true;
   else if (lhs.x > rhs.x)
@@ -26,32 +26,42 @@ inline bool operator < (const sf::Vector3f& lhs, const sf::Vector3f& rhs) {
 namespace vu {
 
 struct compVec3f {
-  bool operator()(const sf::Vector3f& lhs, const sf::Vector3f& rhs) const {
+  bool operator()(const glm::vec3& lhs, const glm::vec3& rhs) const {
     return lhs < rhs;
   }
 };
 
-float norm(const sf::Vector2f& v);
-float norm(const sf::Vector2i& v);
-float norm(const sf::Vector3f& v);
+// Rectange a contains vector b
+template<typename valType >
+bool contains (glm::tvec4< valType > const &a, glm::tvec2< valType > const &b) {
+  if ((a.x - b.x) * (a.x + a.z - b.x) < 0 &&
+      (a.y - b.y) * (a.y + a.w - b.y) < 0)
+    return true;
 
-float dot(const sf::Vector2f& u, const sf::Vector2f& v);
-float dot(const sf::Vector3f& u, const sf::Vector3f& v);
+  return false;
+}
 
-sf::Vector3f cross(const sf::Vector3f& u, const sf::Vector3f& v);
+float norm(const glm::vec2& v);
+float norm(const glm::ivec2& v);
+float norm(const glm::vec3& v);
 
-sf::Vector3f carthesian(float r, float theta, float phi);
-sf::Vector3f spherical(float x, float y, float z);
+float dot(const glm::vec2& u, const glm::vec2& v);
+float dot(const glm::vec3& u, const glm::vec3& v);
 
-inline sf::Vector3f carthesian(sf::Vector3f u) {return carthesian(u.x,u.y,u.z);}
-inline sf::Vector3f spherical (sf::Vector3f u) {return spherical (u.x,u.y,u.z);}
+glm::vec3 cross(const glm::vec3& u, const glm::vec3& v);
 
-sf::Vector3f convertSFML(glm::vec3 u);
+glm::vec3 carthesian(float r, float theta, float phi);
+glm::vec3 spherical(float x, float y, float z);
 
-glm::vec3 convertGLM(sf::Vector3f u);
+inline glm::vec3 carthesian(glm::vec3 u) {return carthesian(u.x,u.y,u.z);}
+inline glm::vec3 spherical (glm::vec3 u) {return spherical (u.x,u.y,u.z);}
 
-float angle(const sf::Vector2f& u, const sf::Vector2f& v);
-float absoluteAngle(const sf::Vector3f& u, const sf::Vector3f& v);
+glm::vec3 convertSFML(glm::vec3 u);
+
+glm::vec3 convertGLM(glm::vec3 u);
+
+float angle(const glm::vec2& u, const glm::vec2& v);
+float absoluteAngle(const glm::vec3& u, const glm::vec3& v);
 
 class Mat3f {
 
@@ -72,14 +82,14 @@ public:
     m[8] = mm[8];
   };
 
-  inline sf::Vector3f multiply(const sf::Vector3f& v) const
+  inline glm::vec3 multiply(const glm::vec3& v) const
   {
-    return sf::Vector3f(m[0]*v.x + m[3]*v.y + m[6]*v.z,
+    return glm::vec3(m[0]*v.x + m[3]*v.y + m[6]*v.z,
                         m[1]*v.x + m[4]*v.y + m[7]*v.z,
                         m[2]*v.x + m[5]*v.y + m[8]*v.z);
   }
 
-  inline void rotation(sf::Vector3f n, float angle) {
+  inline void rotation(glm::vec3 n, float angle) {
     angle *= M_PI / 180.f;
     m[0]=1+(1-cos(angle))*(n.x*n.x-1);            m[3]=-n.z*sin(angle)+(1-cos(angle))*n.x*n.y; m[6]=n.y*sin(angle)+(1-cos(angle))*n.x*n.z;
     m[1]=n.z*sin(angle)+(1-cos(angle))*n.x*n.y;   m[4]=1+(1-cos(angle))*(n.y*n.y-1);           m[7]=-n.x*sin(angle)+(1-cos(angle))*n.y*n.z;

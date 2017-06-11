@@ -11,14 +11,14 @@ public:
   void render() const;
 
   bool genTribe();
-  void changeFocusInDirection(sf::Vector2f direction);
+  void changeFocusInDirection(glm::vec2 direction);
   // Changes the character to the one on which the player has clicked if so, otherwise returns focusedCharacter
-  void moveCharacter(sf::Vector2i screenTarget);
+  void moveCharacter(glm::ivec2 screenTarget);
 
-  inline sf::Vector2f getFocusedPos() const {return _focusedCharacter->getPos();}
+  inline glm::vec2 getFocusedPos() const {return _focusedCharacter->getPos();}
   inline float getCharacterHeight() const {return _focusedCharacter->getSize().y;}
 
-  inline void setTarget(sf::Vector2f target) {_focusedCharacter->setTarget(target);}
+  inline void setTarget(glm::vec2 target) {_focusedCharacter->setTarget(target);}
   inline void stopMoving() {_focusedCharacter->stop();}
 
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
