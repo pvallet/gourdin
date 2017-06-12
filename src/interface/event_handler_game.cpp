@@ -292,6 +292,8 @@ void EventHandlerGame::resetCamera(bool pov) {
 }
 
 bool EventHandlerGame::gainFocus() {
+  _game.deleteTribe();
+  
   if (!_game.genTribe())
     return false;
 

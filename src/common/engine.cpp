@@ -463,6 +463,21 @@ std::vector<Controllable*> Engine::genTribe(glm::vec2 pos) {
   return res;
 }
 
+void Engine::deleteElements(const std::vector<igMovingElement*>& elementsToDelete) {
+  for (auto elmt = _igMovingElements.begin(); elmt != _igMovingElements.end(); ) {
+    bool hasDeleted = false;
+    for (auto toDel = elementsToDelete.begin(); toDel != elementsToDelete.end(); toDel++) {
+      if ((*toDel) == elmt->get()) {
+        elmt = _igMovingElements.erase(elmt);
+        hasDeleted = true;
+      }
+    }
+
+    if (!hasDeleted)
+      elmt++;
+  }
+}
+
 glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
   Camera& cam = Camera::getInstance();
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates

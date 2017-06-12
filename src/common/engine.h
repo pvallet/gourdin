@@ -50,6 +50,7 @@ public:
 	void moveCamera(glm::vec2 newAimedPos);
 	void addLion(glm::ivec2 screenTarget);
 	std::vector<Controllable*> genTribe(glm::vec2 pos);
+	void deleteElements(const std::vector<igMovingElement*>& elementsToDelete);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
@@ -72,7 +73,7 @@ private:
 
 	bool _wireframe;
 
-  std::vector<std::unique_ptr<igMovingElement> > _igMovingElements;
+  std::list<std::unique_ptr<igMovingElement> > _igMovingElements;
 
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks

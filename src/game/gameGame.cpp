@@ -61,6 +61,19 @@ bool GameGame::genTribe() {
   return true;
 }
 
+void GameGame::deleteTribe() {
+  std::vector<igMovingElement*> tribe(_tribe.size());
+
+  #pragma omp parallel for
+  for (size_t i = 0; i < _tribe.size(); i++) {
+    tribe[i] = (igMovingElement*) _tribe[i];
+  }
+
+  _engine.deleteElements(tribe);
+  _tribe.clear();
+  _focusedCharacter = nullptr;
+}
+
 void GameGame::changeFocusInDirection(glm::vec2 direction) {
   Camera& cam = Camera::getInstance();
   float threshold = sqrt(2)/2.f;
@@ -107,5 +120,6 @@ void GameGame::moveCharacter(glm::ivec2 screenTarget) {
     }
   }
 
-  _focusedCharacter->setTarget(Engine::get2DCoord(screenTarget));
+  if (_focusedCharacter != nullptr)
+    _focusedCharacter->setTarget(Engine::get2DCoord(screenTarget));
 }

@@ -11,15 +11,18 @@ public:
   void render() const;
 
   bool genTribe();
+  void deleteTribe();
   void changeFocusInDirection(glm::vec2 direction);
   // Changes the character to the one on which the player has clicked if so, otherwise returns focusedCharacter
   void moveCharacter(glm::ivec2 screenTarget);
 
-  inline glm::vec2 getFocusedPos() const {return _focusedCharacter->getPos();}
-  inline float getCharacterHeight() const {return _focusedCharacter->getSize().y;}
+  inline glm::vec2 getFocusedPos() const {if (!_focusedCharacter) return glm::vec2(0,0);
+    return _focusedCharacter->getPos();}
+  inline float getCharacterHeight() const {if (!_focusedCharacter) return 0;
+    return _focusedCharacter->getSize().y;}
 
-  inline void setTarget(glm::vec2 target) {_focusedCharacter->setTarget(target);}
-  inline void stopMoving() {_focusedCharacter->stop();}
+  inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
+  inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}
 
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
   inline bool getPovCamera() const {return _povCamera;}
