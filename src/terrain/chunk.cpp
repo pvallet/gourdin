@@ -212,7 +212,7 @@ bool Chunk::theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const {
   float dots[8];
 
   for (size_t i = 0 ; i < 8 ; i++) {
-    dots[i] = vu::dot(_subdivisionLevels[_currentSubdivLvl]->corners[i]-cam, vec);
+    dots[i] = glm::dot(_subdivisionLevels[_currentSubdivLvl]->corners[i]-cam, vec);
 
 		if (dots[i] < 0.f)
 			return false;
@@ -287,7 +287,7 @@ void Chunk::computeSubdivisionLevel() {
 	glm::vec3 centerOfChunk((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
 	    getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 
-	float distanceToChunk = vu::norm(camera.getPos()-centerOfChunk);
+	float distanceToChunk = glm::length(camera.getPos()-centerOfChunk);
 
 	if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);

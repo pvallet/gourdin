@@ -135,7 +135,7 @@ void TestHandler::testVecUtils() const {
 
   float precision = 0.00001;
 
-  if (vu::norm(testVec - testVecBack) < precision)
+  if (glm::length(testVec - testVecBack) < precision)
     std::cout << "OK     - Conversion to spherical coordinates and back with precision " << precision << '\n';
   else {
     std::cout << "FAILED - Conversion to spherical coordinates and back with precision " << precision << '\n';

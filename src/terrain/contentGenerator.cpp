@@ -50,7 +50,7 @@ bool ContentGenerator::notTooCloseToOtherTrees(glm::vec2 pos, float distance) co
     for (auto it = _treesInChunk[i*NB_CHUNKS +j].begin();
              it != _treesInChunk[i*NB_CHUNKS +j].end(); it++) {
 
-      if (vu::norm(pos - (*it)) < distance)
+      if (glm::length(pos - (*it)) < distance)
         return false;
     }
   }

@@ -41,24 +41,11 @@ bool contains (glm::tvec4< valType > const &a, glm::tvec2< valType > const &b) {
   return false;
 }
 
-float norm(const glm::vec2& v);
-float norm(const glm::ivec2& v);
-float norm(const glm::vec3& v);
-
-float dot(const glm::vec2& u, const glm::vec2& v);
-float dot(const glm::vec3& u, const glm::vec3& v);
-
-glm::vec3 cross(const glm::vec3& u, const glm::vec3& v);
-
 glm::vec3 carthesian(float r, float theta, float phi);
 glm::vec3 spherical(float x, float y, float z);
 
 inline glm::vec3 carthesian(glm::vec3 u) {return carthesian(u.x,u.y,u.z);}
 inline glm::vec3 spherical (glm::vec3 u) {return spherical (u.x,u.y,u.z);}
-
-glm::vec3 convertSFML(glm::vec3 u);
-
-glm::vec3 convertGLM(glm::vec3 u);
 
 float angle(const glm::vec2& u, const glm::vec2& v);
 float absoluteAngle(const glm::vec3& u, const glm::vec3& v);

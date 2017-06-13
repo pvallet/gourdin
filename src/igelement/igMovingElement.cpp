@@ -71,8 +71,8 @@ void igMovingElement::stop() {
 
 void igMovingElement::setDirection(glm::vec2 direction) {
 	_direction = direction;
-	float norm = vu::norm(_direction);
+	float length = glm::length(_direction);
 
-	if (norm != 0)
-		_direction /= norm;
+	if (length != 0)
+		_direction /= length;
 }

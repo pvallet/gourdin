@@ -71,7 +71,7 @@ BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neig
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 		if ((*it) != this) {
 			if (dynamic_cast<Antilope*>(*it)) {
-				distance = vu::norm(_pos - (*it)->getPos());
+				distance = glm::length(_pos - (*it)->getPos());
 
 				if (distance < _repulsionRadius) {
 					if (distance < res.minRepDst) {
@@ -92,7 +92,7 @@ BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neig
 			}
 
 			else if (dynamic_cast<Lion*>((*it))) {
-				distance = vu::norm(_pos - (*it)->getPos());
+				distance = glm::length(_pos - (*it)->getPos());
 
 				if (distance < _lineOfSight) {
 					res.sumPosFlee += (*it)->getPos();
@@ -174,7 +174,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 		beginIdle();
 
 	else if (info.minRepDst != _repulsionRadius &&
-			(_bStatus == REPULSION || vu::norm(_pos-info.closestRep) < _repulsionRadius * 0.8) ) {
+			(_bStatus == REPULSION || glm::length(_pos-info.closestRep) < _repulsionRadius * 0.8) ) {
 		setDirection(_pos - info.closestRep);
 		_bStatus = REPULSION;
 	}
@@ -191,7 +191,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	}
 
 	else if (info.nbAttract != 0 &&
-			(_bStatus == ATTRACTION || vu::norm(info.sumPosAttract / (float) info.nbAttract - _pos) < _attractionRadius * 0.8) ) {
+			(_bStatus == ATTRACTION || glm::length(info.sumPosAttract / (float) info.nbAttract - _pos) < _attractionRadius * 0.8) ) {
 		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 		_bStatus = ATTRACTION;
 	}

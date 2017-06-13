@@ -190,11 +190,11 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
   // Add the triangle to the list of all triangles
   Triangle newTriangle;
   newTriangle.biome = biome;
-  glm::vec3 normal = vu::cross(p[1]-p[0],p[2]-p[0]);
-  newTriangle.normal = normal /= vu::norm(normal);
+  glm::vec3 normal = glm::cross(p[1]-p[0],p[2]-p[0]);
+  newTriangle.normal = normal /= glm::length(normal);
 
   // If the order of the vertices is wrong, fix it
-  if (vu::dot(normal, glm::vec3(0,0,1)) < 0) {
+  if (glm::dot(normal, glm::vec3(0,0,1)) < 0) {
     std::swap(p[1],p[2]);
     newTriangle.normal = - 1.f * newTriangle.normal;
   }

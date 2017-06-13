@@ -196,7 +196,7 @@ void Engine::compute2DCorners() {
 
     std::array<float,12> vertices;
 
-    if (!(*it)->isDead() && vu::norm(pos-cam.getPos()) > ELEMENT_NEAR_PLANE) {
+    if (!(*it)->isDead() && glm::length(pos-cam.getPos()) > ELEMENT_NEAR_PLANE) {
       // Calculate new corners
       glm::vec3 corners3[4];
       float width = (*it)->getSize().x;
@@ -391,15 +391,13 @@ void Engine::render() const {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
-  glm::vec3 camPos = vu::convertGLM(cam.getPos());
-
   glUseProgram(_igEShader.getProgramID());
   glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "VP"),
     1, GL_FALSE, &MVP[0][0]);
   glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MODEL"),
     1, GL_FALSE, &rotateElements[0][0]);
   glUniform3fv(glGetUniformLocation(_igEShader.getProgramID(), "camPos"),
-    1, &camPos[0]);
+    1, &cam.getPos()[0]);
 
   // Two passes to avoid artifacts due to alpha blending
 

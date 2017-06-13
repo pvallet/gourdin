@@ -87,10 +87,10 @@ void GameGame::changeFocusInDirection(glm::vec2 direction) {
 
   for (size_t i = 0; i < _tribe.size(); i++) {
     glm::vec2 toChar = _tribe[i]->getPos() - _focusedCharacter->getPos();
-    float distance = vu::norm(toChar);
+    float distance = glm::length(toChar);
 
     // Character is in the right direction, with +- M_PI/4 margin
-    if (vu::dot(toChar, direction)/distance > threshold) {
+    if (glm::dot(toChar, direction)/distance > threshold) {
 
       // Checks whether the character is visible on the screen
       glm::ivec4 screenRect = _tribe[i]->getScreenRect();

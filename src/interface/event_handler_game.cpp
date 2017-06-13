@@ -117,8 +117,9 @@ bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& cur
       }
 
       else {
-        glm::ivec2 newMousePos = glm::ivec2(event.mouseMove.x,event.mouseMove.y);
-        if (vu::norm(_beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
+        glm::vec2 newMousePos(event.mouseMove.x,event.mouseMove.y);
+        glm::vec2 beginDragLeft(_beginDragLeft);
+        if (glm::length(beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
           _draggingCamera = true;
 
         if (_draggingCamera) {
@@ -160,7 +161,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
 
   // We make the camera move only if the new theta is in the allowed zone
-  if (vu::dot(normal, vu::carthesian(1, theta, 90)) < actualMinScalarProduct) {
+  if (glm::dot(normal, vu::carthesian(1, theta, 90)) < actualMinScalarProduct) {
     // New theta with given phi
     std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
       normal.x, normal.y, actualMinScalarProduct);
@@ -180,7 +181,7 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
-  if (vu::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
+  if (glm::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
 
     float nPhi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
     float phiIsTooFarByAmount = nPhi - phi;

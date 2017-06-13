@@ -116,7 +116,7 @@ void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 		if (*it != this) {
 			Antilope *atlp = dynamic_cast<Antilope*>(*it);
 			if (atlp) {
-				distance = vu::norm(_pos - atlp->getPos());
+				distance = glm::length(_pos - atlp->getPos());
 
 				if (distance < _rangeChase) {
 					if (distance < nearestDist) {
