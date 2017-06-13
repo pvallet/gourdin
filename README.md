@@ -37,6 +37,7 @@ The controls of the sandbox mode are pretty much the same as a RTS game (see Pop
 ```
 Esc: Quit game
 M: Switch to Sandbox mode
+P: Pause
 Left-Right:  Rotate camera
 Up-Down:     Go forwards/backwards
 B: Launch benchmark
@@ -57,6 +58,7 @@ Lshift:  Make it run
 ```
 Esc: Quit game
 M: Switch to Sandbox mode
+P: Pause
 1: God camera
 2: POV camera
 A-E:  Rotate camera

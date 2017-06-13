@@ -103,6 +103,15 @@ void Interface::renderTextTopLeft(const std::string& string) const {
   _window.draw(info);
 }
 
+void Interface::renderTextCenter(const std::string& string) const {
+  sf::Text text(_log);
+  text.setString(string);
+  text.setCharacterSize(40);
+  text.setPosition(_window.getSize().x / 2 - text.getLocalBounds().width / 2,
+                   _window.getSize().y / 2 - text.getLocalBounds().height / 2);
+  _window.draw(text);
+}
+
 void Interface::renderRectSelect() const {
   _window.draw(_rectSelect);
 }

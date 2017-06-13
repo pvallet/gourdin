@@ -165,25 +165,25 @@ void TestHandler::testGeneratedImage() const {
   GeneratedImage boxFilter = testCircle;
   Clock boxFilterTime;
   boxFilter.applyConvolutionFilter(GeneratedImage::generateBoxFilter(20));
-  std::cout << "Box filter time (20): " << boxFilterTime.getElapsedTime().asMilliseconds() << '\n';
+  std::cout << "Box filter time (20): " << boxFilterTime.getElapsedTime() << '\n';
   saveToImage(boxFilter.getPixels(), "test_circle_box_filter.png");
 
   GeneratedImage gaussianFilter = testCircle;
   Clock gaussianFilterTime;
   gaussianFilter.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20, 1/5.f));
-  std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
+  std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime() << '\n';
   saveToImage(gaussianFilter.getPixels(), "test_circle_gaussian_filter.png");
 
   GeneratedImage smoothDilatation = testCircle;
   Clock smoothDilatationTime;
   smoothDilatation.smoothBlackDilatation(20);
-  std::cout << "Smooth dilatation time (20): " << smoothDilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  std::cout << "Smooth dilatation time (20): " << smoothDilatationTime.getElapsedTime() << '\n';
   saveToImage(smoothDilatation.getPixels(), "test_circle_smooth_dilatation.png");
 
   GeneratedImage dilatation = testCircle;
   Clock dilatationTime;
   dilatation.dilatation(20, [](float pixel) {return pixel != 1;});
-  std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
+  std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime() << '\n';
   saveToImage(dilatation.getPixels(), "test_circle_dilatation.png");
 
   // Operators
@@ -250,7 +250,7 @@ void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) con
 }
 
 void TestHandler::runTests(const Controller& controller) const {
-  std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime().asMilliseconds() << '\n';
+  std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime() << '\n';
   // displayGameGeneratedComponents(controller._game);
   testVecUtils();
   // testPerlin();

@@ -4,6 +4,7 @@
 
 GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& interface):
   _displayLog(true),
+  _paused(false),
   _window(window),
   _engine(engine),
   _interface(interface) {}
@@ -43,6 +44,9 @@ void GameSandbox::render() const {
     logText.clear();
   }
 
+  if (_paused)
+    _interface.renderTextCenter("PAUSED");
+
   _window.popGLStates();
 #endif
 
@@ -54,6 +58,7 @@ std::string GameSandbox::getInfoText() const {
 
   text << "Esc: " << "Quit engine" << std::endl
        << "M: " << "Switch to Game mode" << std::endl
+       << "P: " << "Pause" << std::endl
        << "Left-Right: " << "Rotate camera" << std::endl
        << "Up-Down:    " << "Go forwards/backwards" << std::endl
        << "B: " << "Launch benchmark" << std::endl
@@ -170,7 +175,7 @@ void GameSandbox::benchmark() {
 
   int msTotalElapsed = 0;
   int msElapsed = 0;
-  Clock frameClock;
+  Clock frameClock(INDEPENDENT);
 
   for (size_t i = 0; i < 100; i++) {
     msElapsed = frameClock.restart();

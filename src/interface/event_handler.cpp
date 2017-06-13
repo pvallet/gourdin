@@ -1,5 +1,6 @@
 #include "event_handler.h"
 #include "camera.h"
+#include "clock.h"
 
 bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
   bool running = true;
@@ -23,6 +24,15 @@ bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& current
           currentHandler = HDLR_SANDBOX;
         else
           currentHandler = HDLR_GAME;
+        break;
+
+      case sf::Keyboard::P:
+        if (_paused)
+          Clock::resumeGlobalTimer();
+        else
+          Clock::pauseGlobalTimer();
+        switchPause();
+        _paused = !_paused;
         break;
     }
   }

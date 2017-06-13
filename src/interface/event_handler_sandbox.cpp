@@ -151,3 +151,7 @@ bool EventHandlerSandbox::gainFocus() {
 
   return true;
 }
+
+void EventHandlerSandbox::switchPause() {
+  _game.switchPause();
+}

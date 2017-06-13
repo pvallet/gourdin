@@ -347,3 +347,7 @@ bool EventHandlerGame::firstIsOnPositiveSideOfSecond(float first, float second) 
 float EventHandlerGame::absDistBetweenAngles(float a, float b) {
   return std::min(std::abs(a-b),std::abs(std::abs(a-b)-360));
 }
+
+void EventHandlerGame::switchPause() {
+  _game.switchPause();
+}

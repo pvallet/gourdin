@@ -12,6 +12,8 @@ public:
 
   bool gainFocus();
 
+  void switchPause();
+
 private:
   void handleClick(const sf::Event& event);
   void handleKeyPressed(const sf::Event& event);

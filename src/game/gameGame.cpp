@@ -3,6 +3,7 @@
 #include "camera.h"
 
 GameGame::GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface):
+  _paused(false),
   _window(window),
   _engine(engine),
   _interface(interface) {}
@@ -19,6 +20,9 @@ void GameGame::render() const {
 
   _interface.renderTextTopLeft(getInfoText());
 
+  if (_paused)
+    _interface.renderTextCenter("PAUSED");
+
   _window.popGLStates();
 #endif
 
@@ -30,6 +34,7 @@ std::string GameGame::getInfoText() const {
 
   text << "Esc: " << "Quit engine" << std::endl
        << "M: " << "Switch to Sandbox mode" << std::endl
+       << "P: " << "Pause" << std::endl
        << "1: " << "God camera" << std::endl
        << "2: " << "POV camera" << std::endl;
   if (_povCamera)

@@ -16,6 +16,7 @@ public:
   void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
   void renderTextTopLeft(const std::string& string) const;
   void renderTextTopRight(const std::string& string) const;
+  void renderTextCenter(const std::string& string) const;
   void renderRectSelect() const;
   void renderLifeBars(std::set<Lion*> selection) const;
 
