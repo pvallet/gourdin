@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "camera.h"
+#include "clock.h"
 #include "lion.h"
 #include "utils.h"
 
@@ -33,11 +34,11 @@ void Controller::init() {
 }
 
 void Controller::run() {
-  sf::Clock frameClock;
+  Clock frameClock;
 
   while (_running) {
     sf::Event event;
-    _elapsed = frameClock.restart();
+    _msElapsed = frameClock.restart();
 
     while (_window.pollEvent(event)) {
       EventHandlerType lastHandlerType = _currentHandlerType;
@@ -62,13 +63,13 @@ void Controller::run() {
     }
 
     if (_currentHandlerType == HDLR_GAME) {
-      _eHandlerGame.onGoingEvents(_elapsed);
-      _gameGame.update(_elapsed);
+      _eHandlerGame.onGoingEvents(_msElapsed);
+      _gameGame.update(_msElapsed);
       _gameGame.render();
     }
     else {
-      _eHandlerSandbox.onGoingEvents(_elapsed);
-      _gameSandbox.update(_elapsed);
+      _eHandlerSandbox.onGoingEvents(_msElapsed);
+      _gameSandbox.update(_msElapsed);
       _gameSandbox.render();
     }
   }

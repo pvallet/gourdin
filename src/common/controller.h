@@ -36,7 +36,7 @@ private:
 	void benchmark();
 
 	bool _running;
-	sf::Time _elapsed;
+	int _msElapsed;
 
 	Interface _interface;
 	Engine _engine;

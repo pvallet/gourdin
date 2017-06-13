@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
 #include <map>
 #include <string>
 #include <vector>
@@ -13,7 +11,7 @@ public:
 	AnimationManager(const AnimationManagerInitializer& init);
 
 	size_t launchAnimation(ANM_TYPE type); // returns the layer index
-	void update(sf::Time elapsed, float nOrientation);
+	void update(int msElapsed, float nOrientation);
 
 	inline void bindTexture() const {_texManager.bind();}
 	inline GLuint getTexID() const {return _texManager.getTexID();}
@@ -26,18 +24,18 @@ public:
 	inline glm::vec2 getRawSize() const {return _animInfo.at(_currentAnim).spriteAbsoluteSize;}
 	inline const AnimalParameters& getParameters() const {return _texManager.getParameters();}
 
-	sf::Time getAnimationTime(ANM_TYPE type) const;
+	int getAnimationTime(ANM_TYPE type) const;
 
 private:
 	size_t getClosestOrient(float orientation) const;
-	inline size_t getNextSprite(size_t currentSprite, sf::Time elapsed) const {
-		return currentSprite + elapsed.asMilliseconds() / _animInfo.at(_currentAnim).duration.asMilliseconds();}
+	inline size_t getNextSprite(size_t currentSprite, int msElapsed) const {
+		return currentSprite + msElapsed / _animInfo.at(_currentAnim).msDuration;}
 
 	ANM_TYPE _currentAnim;
 	size_t _currentOrient;
 	size_t _currentSprite;
 
-	sf::Time _alreadyElapsed;
+	int _msAlreadyElapsed;
 	std::map<ANM_TYPE, AnimInfo> _animInfo;
 
 	const AnimationManagerInitializer& _texManager;

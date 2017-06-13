@@ -17,12 +17,12 @@ Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry&
 	_status(WAITING) {
 
 	_speed = _speedWalking;
-	_animAttack = 2.f * graphics.getAnimationTime(ATTACK);
+	_msAnimAttack = 2.f * graphics.getAnimationTime(ATTACK);
 }
 
-void Lion::update(sf::Time elapsed) {
+void Lion::update(int msElapsed) {
 	if (_status == RUNNING || _status == CHASING) {
-		_stamina -= elapsed.asSeconds() * _loseBreathSpeed;
+		_stamina -= msElapsed * _loseBreathSpeed / 1000.f;
 		if (_stamina <= 0.f) {
 			_stamina = 0.f;
 			beginWalking();
@@ -40,19 +40,19 @@ void Lion::update(sf::Time elapsed) {
 
 		_speed = _prey->getSpeed() * 0.8f;
 
-		if (_beginAttack.getElapsedTime() >= _animAttack) {
+		if (_beginAttack.getElapsedTime() >= _msAnimAttack) {
 			_prey->die();
 			stop();
 		}
 	}
 
 	else {
-		_stamina += elapsed.asSeconds() * _catchBreathSpeed;
+		_stamina += msElapsed * _catchBreathSpeed / 1000.f;
 		if (_stamina >= 100.f)
 			_stamina = 100.f;
 	}
 
-	Controllable::update(elapsed);
+	Controllable::update(msElapsed);
 }
 
 void Lion::stop() {

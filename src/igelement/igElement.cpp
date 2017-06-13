@@ -15,12 +15,12 @@ igElement::igElement(glm::vec2 position) :
 	_orientation = RANDOMF * 360.f;
 }
 
-void igElement::updateDisplay(sf::Time elapsed, float theta) {
+void igElement::updateDisplay(int msElapsed, float theta) {
 	setOrientation(_orientation + _camOrientation - theta); // Orientation moves opposite to the camera
 
 	_camOrientation = theta;
 
-	(void) elapsed;
+	(void) msElapsed;
 }
 
 void igElement::setVertices() {

@@ -11,8 +11,8 @@ enum ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
 struct AnimInfo {
 	int steps;
 	int orientations;
-	sf::Time duration; 	// of each frame
-	sf::Time pause; 	// Before starting the anim over
+	int msDuration; // of each frame
+	int msPause; 	  // Before starting the anim over
 	bool loop; 			// If false, pause is infinite
 
 	glm::vec2 spriteAbsoluteSize;

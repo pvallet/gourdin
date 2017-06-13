@@ -52,9 +52,9 @@ bool glCheckError(const char *file, int line) {
   return isError;
 }
 
-void LogText::addFPSandCamInfo(sf::Time elapsed) {
+void LogText::addFPSandCamInfo(int msElapsed) {
   Camera& cam = Camera::getInstance();
-  int fps = 1.f / elapsed.asSeconds();
+  int fps = 1.f / msElapsed * 1000;
 
   _text << "X: " << cam.getPointedPos().x << "\n"
   << "Y: " << cam.getPointedPos().y << std::endl;

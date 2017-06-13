@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#define ROTATION_ANGLE_PS 60.f // PS = per second
-#define TRANSLATION_VALUE_PS 0.7f
+#define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
+#define TRANSLATION_VALUE_PMS 0.0007f
 #define SCROLL_SPEED_SLOW 30.f
 #define SCROLL_SPEED_FAST 250.f
 
@@ -113,17 +113,16 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
   return EventHandler::handleEvent(event, currentHandler);
 }
 
-void EventHandlerSandbox::onGoingEvents(const sf::Time& elapsed) {
+void EventHandlerSandbox::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
 
-  float realTranslationValue = TRANSLATION_VALUE_PS * elapsed.asSeconds() *
-    cam.getZoom();
+  float realTranslationValue = TRANSLATION_VALUE_PMS * msElapsed * cam.getZoom();
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-    cam.rotate(ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+    cam.rotate(ROTATION_ANGLE_PMS * msElapsed, 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-    cam.rotate(- ROTATION_ANGLE_PS * elapsed.asSeconds(), 0.f);
+    cam.rotate(- ROTATION_ANGLE_PMS * msElapsed, 0.f);
 
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     cam.translate(0.f, - realTranslationValue);

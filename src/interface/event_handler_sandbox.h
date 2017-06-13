@@ -8,7 +8,7 @@ public:
   EventHandlerSandbox(GameSandbox& game);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
-  void onGoingEvents(const sf::Time& elapsed);
+  void onGoingEvents(int msElapsed);
 
   bool gainFocus();
 

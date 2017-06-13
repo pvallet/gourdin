@@ -3,6 +3,7 @@
 #include <list>
 
 #include "controllable.h"
+#include "clock.h"
 
 enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
 
@@ -11,7 +12,7 @@ public:
 	Lion(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 	virtual ~Lion() {}
 
-	virtual void update(sf::Time elapsed);
+	virtual void update(int msElapsed);
 	// React to the environment
 	virtual void updateState(const std::list<igMovingElement*>& neighbors);
 
@@ -37,6 +38,6 @@ private:
 	LionStatus _status;
 
 	igMovingElement* _prey;
-	sf::Clock _beginAttack;
-	sf::Time _animAttack;
+	Clock _beginAttack;
+	int _msAnimAttack;
 };

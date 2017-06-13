@@ -6,7 +6,7 @@
 AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
 	_currentAnim(WAIT),
   _currentSprite(0),
-  _alreadyElapsed(sf::Time::Zero),
+  _msAlreadyElapsed(0),
 	_texManager(init) {
 
 	_animInfo = _texManager.getAnimInfo();
@@ -16,25 +16,25 @@ size_t AnimationManager::launchAnimation(ANM_TYPE type) {
   if (_currentAnim != type) {
     _currentAnim = type;
     _currentSprite = 0;
-		_alreadyElapsed = sf::Time::Zero;
+		_msAlreadyElapsed = 0;
   }
 
 	return _animInfo[type].texLayer;
 }
 
-void AnimationManager::update(sf::Time elapsed, float nOrientation) {
+void AnimationManager::update(int msElapsed, float nOrientation) {
 	AnimInfo curAnm = _animInfo.at(_currentAnim);
-  _alreadyElapsed += elapsed;
+  _msAlreadyElapsed += msElapsed;
 
 	// We make sure that the elapsed time does not extend one loop
-	sf::Time totalAnimDuration = getAnimationTime(_currentAnim);
-	_alreadyElapsed = sf::milliseconds(_alreadyElapsed.asMilliseconds() % totalAnimDuration.asMilliseconds());
+	int msTotalAnimDuration = getAnimationTime(_currentAnim);
+	_msAlreadyElapsed = _msAlreadyElapsed % msTotalAnimDuration;
 
-	size_t nextSprite = getNextSprite(_currentSprite, _alreadyElapsed);
+	size_t nextSprite = getNextSprite(_currentSprite, _msAlreadyElapsed);
 
 	// Simple case, no restart to handle
 	if (nextSprite < curAnm.steps) {
-		_alreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.duration;
+		_msAlreadyElapsed -= (float) (nextSprite - _currentSprite) * curAnm.msDuration;
 		_currentSprite = nextSprite;
 	}
 
@@ -43,17 +43,17 @@ void AnimationManager::update(sf::Time elapsed, float nOrientation) {
 			_currentSprite = curAnm.steps-1;
 
 		else {
-			_alreadyElapsed -= (float) (curAnm.steps-1 - _currentSprite) * curAnm.duration;
+			_msAlreadyElapsed -= (float) (curAnm.steps-1 - _currentSprite) * curAnm.msDuration;
 
 			// The sprite is in the pause
-			if (_alreadyElapsed < curAnm.pause)
+			if (_msAlreadyElapsed < curAnm.msPause)
 				_currentSprite = curAnm.steps-1;
 
 			// The sprite has started a new loop
 			else {
-				_alreadyElapsed -= curAnm.pause;
-				nextSprite = getNextSprite(0, _alreadyElapsed);
-				_alreadyElapsed -= (float) nextSprite * curAnm.duration;
+				_msAlreadyElapsed -= curAnm.msPause;
+				nextSprite = getNextSprite(0, _msAlreadyElapsed);
+				_msAlreadyElapsed -= (float) nextSprite * curAnm.msDuration;
 				_currentSprite = nextSprite;
 			}
 		}
@@ -71,9 +71,9 @@ glm::vec4 AnimationManager::getCurrentSpriteRect() const {
   return spriteRect;
 }
 
-sf::Time AnimationManager::getAnimationTime(ANM_TYPE type) const {
-  return (float) _animInfo.at(type).steps * _animInfo.at(type).duration
-			         + _animInfo.at(type).pause;
+int AnimationManager::getAnimationTime(ANM_TYPE type) const {
+  return (float) _animInfo.at(type).steps * _animInfo.at(type).msDuration
+			         + _animInfo.at(type).msPause;
 }
 
 size_t AnimationManager::getClosestOrient(float orientation) const {

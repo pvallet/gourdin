@@ -7,7 +7,7 @@ class GameGame {
 public:
   GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface);
 
-  void update(sf::Time elapsed);
+  void update(int msElapsed);
   void render() const;
 
   bool genTribe();

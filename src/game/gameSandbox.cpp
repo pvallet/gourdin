@@ -8,9 +8,9 @@ GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& i
   _engine(engine),
   _interface(interface) {}
 
-void GameSandbox::update(sf::Time elapsed) {
+void GameSandbox::update(int msElapsed) {
   LogText& logText = LogText::getInstance();
-  logText.addFPSandCamInfo(elapsed);
+  logText.addFPSandCamInfo(msElapsed);
 
   // Remove the dead elements from the selected elements
   std::vector<Lion*> toDelete;
@@ -22,7 +22,7 @@ void GameSandbox::update(sf::Time elapsed) {
    _selection.erase(toDelete[i]);
   }
 
-  _engine.update(elapsed);
+  _engine.update(msElapsed);
 }
 
 void GameSandbox::render() const {
@@ -168,20 +168,21 @@ void GameSandbox::benchmark() {
   cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
   cam.setValues(5000, 225.f, INIT_PHI);
 
-  sf::Time totalElapsed, elapsed;
-  sf::Clock frameClock;
+  int msTotalElapsed = 0;
+  int msElapsed = 0;
+  Clock frameClock;
 
   for (size_t i = 0; i < 100; i++) {
-    elapsed = frameClock.restart();
-    totalElapsed += elapsed;
+    msElapsed = frameClock.restart();
+    msTotalElapsed += msElapsed;
     cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
                                    CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
-    update(elapsed);
+    update(msElapsed);
     render();
   }
 
-  std::cout << "Rendered " << 100 << " frames in " << totalElapsed.asMilliseconds() << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / totalElapsed.asSeconds() * 100 << std::endl;
+  std::cout << "Rendered " << 100 << " frames in " << msTotalElapsed << " milliseconds." << std::endl;
+  std::cout << "Average FPS: " << 1.f / msTotalElapsed * 100 * 1000 << std::endl;
 
   _engine.resetCamera();
 }

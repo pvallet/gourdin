@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
 #include <iostream>
 #include <memory>
 #include <string>

@@ -11,7 +11,7 @@
 
 #define DELETE_LIST_NAME "to_delete"
 
-TestHandler::TestHandler (const sf::Clock& beginningOfProg) :
+TestHandler::TestHandler (const Clock& beginningOfProg) :
   _beginningOfProg(beginningOfProg) {}
 
 void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) const {
@@ -163,25 +163,25 @@ void TestHandler::testGeneratedImage() const {
 
   // Filters
   GeneratedImage boxFilter = testCircle;
-  sf::Clock boxFilterTime;
+  Clock boxFilterTime;
   boxFilter.applyConvolutionFilter(GeneratedImage::generateBoxFilter(20));
   std::cout << "Box filter time (20): " << boxFilterTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(boxFilter.getPixels(), "test_circle_box_filter.png");
 
   GeneratedImage gaussianFilter = testCircle;
-  sf::Clock gaussianFilterTime;
+  Clock gaussianFilterTime;
   gaussianFilter.applyConvolutionFilter(GeneratedImage::generateGaussianFilter(20, 1/5.f));
   std::cout << "Gaussian filter time (20): " << gaussianFilterTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(gaussianFilter.getPixels(), "test_circle_gaussian_filter.png");
 
   GeneratedImage smoothDilatation = testCircle;
-  sf::Clock smoothDilatationTime;
+  Clock smoothDilatationTime;
   smoothDilatation.smoothBlackDilatation(20);
   std::cout << "Smooth dilatation time (20): " << smoothDilatationTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(smoothDilatation.getPixels(), "test_circle_smooth_dilatation.png");
 
   GeneratedImage dilatation = testCircle;
-  sf::Clock dilatationTime;
+  Clock dilatationTime;
   dilatation.dilatation(20, [](float pixel) {return pixel != 1;});
   std::cout << "Dilatation time (20): " << dilatationTime.getElapsedTime().asMilliseconds() << '\n';
   saveToImage(dilatation.getPixels(), "test_circle_dilatation.png");

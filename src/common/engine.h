@@ -44,7 +44,7 @@ public:
 	void resetCamera();
   void init();
 
-	void update(sf::Time elapsed);
+	void update(int msElapsed);
 	void render() const;
 	void moveSelection(glm::ivec2 screenTarget);
 	void moveCamera(glm::vec2 newAimedPos);

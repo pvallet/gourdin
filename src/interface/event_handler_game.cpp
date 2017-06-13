@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "vecUtils.h"
 
-#define ROTATION_ANGLE_PS 60.f // PS = per second
+#define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define ROTATION_ANGLE_MOUSE 0.1f
 #define TIME_TRANSFER_MS 100
 #define MIN_DIST_TO_DEFINE_DRAG 40
@@ -209,10 +209,10 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
     phi = 180;
 }
 
-void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
+void EventHandlerGame::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
 
-  float transferProgress = _transferStart.getElapsedTime().asMilliseconds() / (float) TIME_TRANSFER_MS;
+  float transferProgress = _transferStart.getElapsedTime() / (float) TIME_TRANSFER_MS;
 
   if (transferProgress > 1)
     cam.setPointedPos(_game.getFocusedPos());
@@ -228,16 +228,16 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
       _oldPhi = phi; _oldTheta = theta;
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-        theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+        theta += ROTATION_ANGLE_PMS * msElapsed;
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-        theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+        theta -= ROTATION_ANGLE_PMS * msElapsed;
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-        phi += ROTATION_ANGLE_PS * elapsed.asSeconds();
+        phi += ROTATION_ANGLE_PMS * msElapsed;
 
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-        phi -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+        phi -= ROTATION_ANGLE_PMS * msElapsed;
     }
 
     handleCamBoundsPOVMode(theta, phi);
@@ -245,10 +245,10 @@ void EventHandlerGame::onGoingEvents(const sf::Time& elapsed) {
 
   else {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-      theta += ROTATION_ANGLE_PS * elapsed.asSeconds();
+      theta += ROTATION_ANGLE_PMS * msElapsed;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-      theta -= ROTATION_ANGLE_PS * elapsed.asSeconds();
+      theta -= ROTATION_ANGLE_PMS * msElapsed;
 
     handleCamBoundsGodMode(theta);
   }
@@ -293,7 +293,7 @@ void EventHandlerGame::resetCamera(bool pov) {
 
 bool EventHandlerGame::gainFocus() {
   _game.deleteTribe();
-  
+
   if (!_game.genTribe())
     return false;
 

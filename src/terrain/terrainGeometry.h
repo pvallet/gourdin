@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
 #include <utils.h>
 #include <vecUtils.h>
 

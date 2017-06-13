@@ -1,12 +1,12 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <glm/glm.hpp>
 
 #include "utils.h"
 
 #include <cmath>
 #include <map>
+#include <memory>
 
 inline bool operator < (const glm::vec3& lhs, const glm::vec3& rhs) {
   if (lhs.x < rhs.x)

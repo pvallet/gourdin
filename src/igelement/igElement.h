@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SFML/System.hpp>
 #include <glm/glm.hpp>
 
 #include <array>
@@ -12,7 +11,7 @@ class igElement {
 public:
 	igElement(glm::vec2 position);
 
-	virtual void updateDisplay(sf::Time elapsed, float theta);
+	virtual void updateDisplay(int msElapsed, float theta);
 	inline void setHeight(float height) {_height = height; setPosArray();}
 
 	// Getters

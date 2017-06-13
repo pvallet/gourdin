@@ -13,8 +13,8 @@ public:
 	virtual ~igMovingElement() {}
 
 	void launchAnimation (ANM_TYPE type);
-	virtual void updateDisplay(sf::Time elapsed, float theta); // Update sprite
-	virtual void update(sf::Time elapsed); // Update pos and inner statuses
+	virtual void updateDisplay(int msElapsed, float theta); // Update sprite
+	virtual void update(int msElapsed); // Update pos and inner statuses
 	// React to the environment
 	virtual void updateState(const std::list<igMovingElement*>& neighbors) {(void) neighbors;}
 	virtual void die();

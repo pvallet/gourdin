@@ -238,7 +238,7 @@ void Engine::compute2DCorners() {
   }
 }
 
-void Engine::update(sf::Time elapsed) {
+void Engine::update(int msElapsed) {
   Camera& cam = Camera::getInstance();
   glm::uvec2 camPos = convertToChunkCoords(cam.getPointedPos());
 
@@ -280,7 +280,7 @@ void Engine::update(sf::Time elapsed) {
 
   // Update positions of igMovingElement regardless of them being visible
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    (*it)->update(elapsed);
+    (*it)->update(msElapsed);
   }
 
   // Fill the visible elements
@@ -306,7 +306,7 @@ void Engine::update(sf::Time elapsed) {
       float height = _terrain[chunkPos.x][chunkPos.y]->getHeight((*it)->getPos());
 
       (*it)->setHeight(height);
-      (*it)->updateDisplay(elapsed, cam.getTheta());
+      (*it)->updateDisplay(msElapsed, cam.getTheta());
 
       visibleElmts.push_back(it->get());
     }

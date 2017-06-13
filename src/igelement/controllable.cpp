@@ -10,9 +10,9 @@ Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const 
 
 }
 
-void Controllable::update(sf::Time elapsed) {
+void Controllable::update(int msElapsed) {
   if (!_dead) {
-    igMovingElement::update(elapsed);
+    igMovingElement::update(msElapsed);
     // The element has gone too far
     if (vu::dot((_target - _pos), getDirection()) < 0) {
       _pos = _target;

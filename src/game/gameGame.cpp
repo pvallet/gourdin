@@ -7,8 +7,8 @@ GameGame::GameGame (sf::RenderWindow& window, Engine& engine, Interface& interfa
   _engine(engine),
   _interface(interface) {}
 
-void GameGame::update(sf::Time elapsed) {
-  _engine.update(elapsed);
+void GameGame::update(int msElapsed) {
+  _engine.update(msElapsed);
 }
 
 void GameGame::render() const {

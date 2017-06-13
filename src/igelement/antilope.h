@@ -2,6 +2,7 @@
 
 #include <list>
 
+#include "clock.h"
 #include "igMovingElement.h"
 
 enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
@@ -34,7 +35,7 @@ protected:
 	void setDirection(glm::vec2 direction);
 
 private:
-	sf::Time generateTimePhase(sf::Time average) const;
+	int generateTimePhase(int msAverage) const;
 
 	BoidsInfo getInfoFromNeighbors(const std::list<igMovingElement*>& neighbors) const;
 	void reactWhenIdle      (const BoidsInfo& info);
@@ -55,13 +56,13 @@ private:
 	BoidStatus _bStatus; // To control hysteresis
 	bool _moving;
 
-	const sf::Time _averageRecovering;
-	const sf::Time _averageEating;
-	const sf::Time _averageFindingFood;
-	sf::Time _timePhase;
-	sf::Clock _beginPhase;
+	const int _msAverageRecovering;
+	const int _msAverageEating;
+	const int _msAverageFindingFood;
+	int _msTimePhase;
+	Clock _beginPhase;
 
-	sf::Clock _lastDirectionChange;
-	const sf::Time _averageTimeBeforeChangingDir;
-	sf::Time _timeBeforeChangingDir;
+	Clock _lastDirectionChange;
+	const int _msAverageTimeBeforeChangingDir;
+	int _msTimeBeforeChangingDir;
 };

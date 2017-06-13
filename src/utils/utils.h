@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <SFML/System.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -57,7 +56,7 @@ public:
 
 	inline void clear() {_text.str("");}
 	inline void addLine(std::string newLine) { _text << newLine;}
-	void addFPSandCamInfo(sf::Time elapsed);
+	void addFPSandCamInfo(int msElapsed);
 	inline std::string getText() const {return _text.str();}
 
 

@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
 #ifndef NDEBUG
   bool tests = false;
-  sf::Clock beginningOfProg;
+  Clock beginningOfProg;
   TestHandler testHandler(beginningOfProg);
 
   if (argc > 1) {

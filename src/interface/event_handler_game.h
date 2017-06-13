@@ -8,7 +8,7 @@ public:
   EventHandlerGame(GameGame& game);
 
   bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
-  void onGoingEvents(const sf::Time& elapsed);
+  void onGoingEvents(int msElapsed);
 
   bool gainFocus();
 
@@ -37,7 +37,7 @@ private:
 
   bool _draggingCamera;
 
-  sf::Clock _transferStart;
+  Clock _transferStart;
   glm::vec2 _previousFocusedPos;
 
   GameGame& _game;

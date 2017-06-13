@@ -39,22 +39,18 @@ void AnimationManagerInitializer::load(std::string folderPath) {
     elem->QueryIntAttribute("steps", &anm.steps);
     elem->QueryIntAttribute("nbOri", &anm.orientations);
 
-    int durationms, pausems, type;
-    elem->QueryIntAttribute("duration", &durationms);
-    elem->QueryIntAttribute("pause", &pausems);
+    int type;
+    elem->QueryIntAttribute("duration", &anm.msDuration);
+    elem->QueryIntAttribute("pause", &anm.msPause);
     elem->QueryIntAttribute("type", &type);
 
-    anm.duration = sf::milliseconds(durationms);
-
-    if (pausems == -1) {
+    if (anm.msPause == -1) {
       anm.loop = false;
-      anm.pause = sf::Time::Zero;
+      anm.msPause = 0;
     }
 
-    else {
+    else
       anm.loop = true;
-      anm.pause = sf::milliseconds(pausems);
-    }
 
     anm.texLayer = i;
 

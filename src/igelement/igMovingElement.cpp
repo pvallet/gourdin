@@ -33,9 +33,9 @@ void igMovingElement::launchAnimation(ANM_TYPE type) {
 	}
 }
 
-void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
-	igElement::updateDisplay(elapsed, theta);
-	_graphics.update(elapsed, getOrientation());
+void igMovingElement::updateDisplay(int msElapsed, float theta) {
+	igElement::updateDisplay(msElapsed, theta);
+	_graphics.update(msElapsed, getOrientation());
 
 	if (!_dead) {
 		if (_direction.x != 0.f || _direction.y != 0.f) {
@@ -47,8 +47,8 @@ void igMovingElement::updateDisplay(sf::Time elapsed, float theta) {
 	setTexCoord(_graphics.getCurrentSpriteRect());
 }
 
-void igMovingElement::update(sf::Time elapsed) {
-	glm::vec2 newPos = _pos + _direction * _speed * elapsed.asSeconds();
+void igMovingElement::update(int msElapsed) {
+	glm::vec2 newPos = _pos + _direction * _speed * (msElapsed / 1000.f);
 
 	if (_terrainGeometry.isWater(newPos, 0))
 		stop();
