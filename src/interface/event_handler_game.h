@@ -18,8 +18,6 @@ public:
   // Returns the distance between two angles in degrees mod 360
   static float absDistBetweenAngles(float a, float b);
 
-  void switchPause();
-
 private:
   void handleKeyPressed(const sf::Event& event);
   void handleKeyReleased(const sf::Event& event);

@@ -4,7 +4,6 @@
 
 GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& interface):
   _displayLog(true),
-  _paused(false),
   _window(window),
   _engine(engine),
   _interface(interface) {}
@@ -44,7 +43,7 @@ void GameSandbox::render() const {
     logText.clear();
   }
 
-  if (_paused)
+  if (Clock::isGlobalTimerPaused())
     _interface.renderTextCenter("PAUSED");
 
   _window.popGLStates();
@@ -173,18 +172,16 @@ void GameSandbox::benchmark() {
   cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
   cam.setValues(5000, 225.f, INIT_PHI);
 
-  int msTotalElapsed = 0;
-  int msElapsed = 0;
   Clock frameClock(INDEPENDENT);
 
   for (size_t i = 0; i < 100; i++) {
-    msElapsed = frameClock.restart();
-    msTotalElapsed += msElapsed;
     cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
                                    CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
-    update(msElapsed);
+    update(0);
     render();
   }
+
+  int msTotalElapsed = frameClock.getElapsedTime();
 
   std::cout << "Rendered " << 100 << " frames in " << msTotalElapsed << " milliseconds." << std::endl;
   std::cout << "Average FPS: " << 1.f / msTotalElapsed * 100 * 1000 << std::endl;

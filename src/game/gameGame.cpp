@@ -3,7 +3,6 @@
 #include "camera.h"
 
 GameGame::GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface):
-  _paused(false),
   _window(window),
   _engine(engine),
   _interface(interface) {}
@@ -20,7 +19,7 @@ void GameGame::render() const {
 
   _interface.renderTextTopLeft(getInfoText());
 
-  if (_paused)
+  if (Clock::isGlobalTimerPaused())
     _interface.renderTextCenter("PAUSED");
 
   _window.popGLStates();

@@ -11,12 +11,12 @@ public:
   int getElapsedTime() const;
   int restart();
 
+  static bool isGlobalTimerPaused() {return _msGlobalInitialTime != _msGlobalPauseTime;}
   static void pauseGlobalTimer();
   static void resumeGlobalTimer();
 
 private:
   static const sf::Clock _globalTimer;
-  // if _msGlobalInitialTime == _msGlobalPauseTime then it means the global timer is not paused
   static int _msGlobalInitialTime;
   static int _msGlobalPauseTime;
 

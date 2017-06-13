@@ -28,10 +28,10 @@ void Clock::resumeGlobalTimer() {
 }
 
 int Clock::getRelativeTicks() {
-  if (_msGlobalPauseTime == _msGlobalInitialTime)
-    return _globalTimer.getElapsedTime().asMilliseconds() - _msGlobalInitialTime;
-  else
+  if (isGlobalTimerPaused())
     return _msGlobalPauseTime - _msGlobalInitialTime;
+  else
+    return _globalTimer.getElapsedTime().asMilliseconds() - _msGlobalInitialTime;
 }
 
 int Clock::getTicks() const {

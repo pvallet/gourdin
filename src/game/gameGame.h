@@ -26,7 +26,6 @@ public:
 
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
   inline bool getPovCamera() const {return _povCamera;}
-  inline void switchPause() {_paused = !_paused;}
 
   inline const Engine& getEngine() const {return _engine;}
 
@@ -37,7 +36,6 @@ private:
   std::vector<Controllable*> _tribe;
 
   bool _povCamera;
-  bool _paused;
 
   sf::RenderWindow& _window;
   Engine& _engine;

@@ -27,12 +27,10 @@ bool EventHandler::handleEvent(const sf::Event& event, EventHandlerType& current
         break;
 
       case sf::Keyboard::P:
-        if (_paused)
+        if (Clock::isGlobalTimerPaused())
           Clock::resumeGlobalTimer();
         else
           Clock::pauseGlobalTimer();
-        switchPause();
-        _paused = !_paused;
         break;
     }
   }
