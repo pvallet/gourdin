@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include "antilope.h"
-#include "vecUtils.h"
 
 Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	Controllable(position, graphics, terrainGeometry),

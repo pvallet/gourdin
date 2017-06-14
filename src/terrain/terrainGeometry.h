@@ -1,15 +1,16 @@
 #pragma once
 
-#include <utils.h>
-#include <vecUtils.h>
+#include <glm/gtx/hash.hpp>
 
 #include <array>
 #include <list>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "generatedImage.h"
+#include "utils.h"
 
 #define MAX_SUBDIV_LVL 4
 
@@ -52,20 +53,11 @@ private:
   std::list<const Triangle*> _adjacentTriangles;
 };
 
-struct vertHashFunc{
-  size_t operator()(const glm::vec3 &k) const {
-  size_t h1 = std::hash<float>()(k.x);
-  size_t h2 = std::hash<float>()(k.y);
-  size_t h3 = std::hash<float>()(k.z);
-  return (h1 ^ (h2 << 1)) ^ h3;
-  }
-};
-
 struct triHashFunc{
   size_t operator()(const Triangle& t) const {
-  size_t h1 = vertHashFunc()(t.vertices[0]->pos);
-  size_t h2 = vertHashFunc()(t.vertices[1]->pos);
-  size_t h3 = vertHashFunc()(t.vertices[2]->pos);
+  size_t h1 = std::hash<glm::vec3>()(t.vertices[0]->pos);
+  size_t h2 = std::hash<glm::vec3>()(t.vertices[1]->pos);
+  size_t h3 = std::hash<glm::vec3>()(t.vertices[2]->pos);
   return (h1 ^ (h2 << 1)) ^ h3;
   }
 };
@@ -111,7 +103,7 @@ public:
 
   private:
 
-    std::unordered_map<glm::vec3, Vertex, vertHashFunc> _vertices;
+    std::unordered_map<glm::vec3, Vertex> _vertices;
     std::unordered_set<Triangle, triHashFunc> _triangles;
 
     // The triangles are sorted on a two level grid:

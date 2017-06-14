@@ -1,7 +1,6 @@
 #include "controllable.h"
 
 #include "camera.h"
-#include "vecUtils.h"
 #include <iostream>
 
 Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :

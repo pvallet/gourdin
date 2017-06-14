@@ -7,7 +7,6 @@
 
 #include "generatedImage.h"
 #include "reliefGenerator.h"
-#include "vecUtils.h"
 
 #define DELETE_LIST_NAME "to_delete"
 
@@ -130,8 +129,8 @@ void TestHandler::displayEngineGeneratedComponents(const Engine& engine) const {
 
 void TestHandler::testVecUtils() const {
   glm::vec3 testVec(1,8,-2);
-  glm::vec3 testVecSpherical = vu::spherical(testVec);
-  glm::vec3 testVecBack = vu::carthesian(testVecSpherical);
+  glm::vec3 testVecSpherical = ut::spherical(testVec);
+  glm::vec3 testVecBack = ut::carthesian(testVecSpherical);
 
   float precision = 0.00001;
 

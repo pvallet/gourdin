@@ -8,7 +8,6 @@
 #include "terrainGeometry.h"
 
 #include "utils.h"
-#include "vecUtils.h"
 
 class TiXmlHandle;
 

@@ -1,5 +1,5 @@
 #include "ocean.h"
-#include "vecUtils.h"
+#include "utils.h"
 
 Ocean::Ocean(float oversizeFactor) :
 	_vertices{

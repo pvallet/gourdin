@@ -118,7 +118,7 @@ void GameGame::moveCharacter(glm::ivec2 screenTarget) {
   for (size_t i = 0; i < _tribe.size(); i++) {
     glm::ivec4 spriteRect = _tribe[i]->getScreenRect();
 
-    if (vu::contains(spriteRect,screenTarget)) {
+    if (ut::contains(spriteRect,screenTarget)) {
       _focusedCharacter = _tribe[i];
       return;
     }

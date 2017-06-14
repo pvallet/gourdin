@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-glm::uvec2 convertToChunkCoords(glm::vec2 pos) {
+glm::uvec2 ut::convertToChunkCoords(glm::vec2 pos) {
   glm::uvec2 chunkPos;
   if (pos.x < 0)
     pos.x = 0;
@@ -24,6 +24,30 @@ glm::uvec2 convertToChunkCoords(glm::vec2 pos) {
     chunkPos.y = NB_CHUNKS-1;
 
   return chunkPos;
+}
+
+glm::vec3 ut::carthesian(float r, float theta, float phi) {
+  glm::vec3 u;
+
+  u.x = r*sin(phi*RAD)*cos(theta*RAD);
+  u.y = r*sin(phi*RAD)*sin(theta*RAD);
+  u.z = r*cos(phi*RAD);
+
+  return u;
+}
+
+glm::vec3 ut::spherical(float x, float y, float z) {
+	glm::vec3 u(0,0,0);
+	u.x = sqrt(x*x + y*y + z*z);
+	if (u.x != 0) {
+		u.y = atan2(y,x) / RAD;
+		if (u.y < 0)
+			u.y += 360;
+
+		u.z = acos(z/u.x) / RAD;
+	}
+
+	return u;
 }
 
 bool glCheckError(const char *file, int line) {
@@ -55,7 +79,7 @@ bool glCheckError(const char *file, int line) {
 void LogText::addFPSandCamInfo(int msElapsed) {
   Camera& cam = Camera::getInstance();
   int fps = 0;
-  
+
   if (msElapsed != 0)
     fps = 1.f / msElapsed * 1000;
 

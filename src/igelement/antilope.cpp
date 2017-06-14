@@ -5,7 +5,6 @@
 
 #include "lion.h"
 #include "utils.h"
-#include "vecUtils.h"
 
 Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igMovingElement(position, graphics, terrainGeometry),

@@ -6,7 +6,6 @@
 
 #include "camera.h"
 #include "utils.h"
-#include "vecUtils.h"
 
 igElement::igElement(glm::vec2 position) :
 	_pos(position),

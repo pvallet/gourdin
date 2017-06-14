@@ -1,7 +1,6 @@
 #include "terrainGeometry.h"
 
-#include "vecUtils.h"
-
+#include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <iostream>
 #include <unordered_set>
@@ -21,22 +20,22 @@ struct compTriClockwiseOrder {
 
     glm::vec2 refVector(0,1);
     // Angle between first edge of the triangle and vec(0,1)
-    float lhsAngle = vu::angle(
+    float lhsAngle = glm::orientedAngle(
       refVector,
-      glm::vec2(lhs->vertices[srtL[1]]->pos.x - lhs->vertices[srtL[0]]->pos.x,
-        lhs->vertices[srtL[1]]->pos.y - lhs->vertices[srtL[0]]->pos.y)
+      glm::normalize(glm::vec2(lhs->vertices[srtL[1]]->pos.x - lhs->vertices[srtL[0]]->pos.x,
+                               lhs->vertices[srtL[1]]->pos.y - lhs->vertices[srtL[0]]->pos.y))
     );
 
-    float rhsAngle = vu::angle(
+    float rhsAngle = glm::orientedAngle(
       refVector,
-      glm::vec2(rhs->vertices[srtR[1]]->pos.x - rhs->vertices[srtR[0]]->pos.x,
-        rhs->vertices[srtR[1]]->pos.y - rhs->vertices[srtR[0]]->pos.y)
+      glm::normalize(glm::vec2(rhs->vertices[srtR[1]]->pos.x - rhs->vertices[srtR[0]]->pos.x,
+                               rhs->vertices[srtR[1]]->pos.y - rhs->vertices[srtR[0]]->pos.y))
     );
 
     if (lhsAngle < 0)
-      lhsAngle += 360;
+      lhsAngle += 2*M_PI;
     if (rhsAngle < 0)
-      rhsAngle += 360;
+      rhsAngle += 2*M_PI;
 
     return lhsAngle < rhsAngle;
   }
@@ -250,7 +249,7 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
 void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Triangle*>& triangles) {
 
   // Contains the modified vertices from the previous mesh (not the ones added on the edges)
-  std::unordered_map<glm::vec3, glm::vec3, vertHashFunc> tmpProcessedVertices;
+  std::unordered_map<glm::vec3, glm::vec3> tmpProcessedVertices;
 
   for (std::list<const Triangle*>::iterator t = triangles.begin(); t != triangles.end(); t++) {
 
@@ -338,8 +337,8 @@ void TerrainGeometry::SubdivisionLevel::computeNormals(std::list<Vertex*>& verti
 
       std::array<size_t,3> srt = (*t)->sortIndices((*p)->pos);
 
-      weight = vu::absoluteAngle((*t)->vertices[srt[1]]->pos-(*t)->vertices[srt[0]]->pos,
-                                 (*t)->vertices[srt[2]]->pos-(*t)->vertices[srt[0]]->pos);
+      weight = glm::angle(glm::normalize((*t)->vertices[srt[1]]->pos-(*t)->vertices[srt[0]]->pos),
+                          glm::normalize((*t)->vertices[srt[2]]->pos-(*t)->vertices[srt[0]]->pos));
 
       normal += weight * (*t)->normal;
       totalWeight += weight;

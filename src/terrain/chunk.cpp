@@ -3,7 +3,8 @@
 #include <iostream>
 
 #include "camera.h"
-#include "vecUtils.h"
+
+#include <glm/gtx/rotate_vector.hpp>
 
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                                     TerrainGeometry&   terrainGeometry) :
@@ -229,40 +230,37 @@ void Chunk::computeCulling() {
   float alpha = cam.getFov() * cam.getRatio() / 2.f;
 
   // Bottom of the view
-  glm::vec3 norm = vu::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
+  glm::vec3 normal = ut::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
   glm::vec3 pos = cam.getPos();
 
-  if (theCornersAreOutside(pos,norm)) {
+  if (theCornersAreOutside(pos,normal)) {
     _visible = false;
     return;
   }
 
   // Top
-  norm = vu::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f);
-  norm *= -1.f;
+  normal = ut::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f);
+  normal *= -1.f;
 
-  if (theCornersAreOutside(pos,norm)) {
+  if (theCornersAreOutside(pos,normal)) {
     _visible = false;
     return;
   }
 
   // Right
-  norm = vu::carthesian(1.f, theta + 90.f, 90.f);
-  vu::Mat3f rot;
-  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), - alpha);
-  norm = rot.multiply(norm);
+  normal = ut::carthesian(1.f, theta + 90.f, 90.f);
+  normal = glm::rotate(normal, (float) (- alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi));
 
-  if (theCornersAreOutside(pos,norm)) {
+  if (theCornersAreOutside(pos,normal)) {
     _visible = false;
     return;
   }
 
   // Left
-  norm = vu::carthesian(1.f, theta - 90.f, 90.f);
-  rot.rotation(vu::carthesian(1.f, theta + 180.f, 90.f - phi), alpha);
-  norm = rot.multiply(norm);
+  normal = ut::carthesian(1.f, theta - 90.f, 90.f);
+  normal = glm::rotate(normal, (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi));
 
-  if (theCornersAreOutside(pos,norm)) {
+  if (theCornersAreOutside(pos,normal)) {
     _visible = false;
     return;
   }

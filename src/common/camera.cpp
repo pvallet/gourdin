@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "vecUtils.h"
 
 Camera::Camera() :
   _fovAngle(45),
@@ -28,22 +27,22 @@ void Camera::resize(unsigned int W, unsigned int H) {
 }
 
 void Camera::apply() {
-  _pos = glm::vec3(_x,_y,_height) + vu::carthesian(_r, _theta, _phi);
+  _pos = glm::vec3(_x,_y,_height) + ut::carthesian(_r, _theta, _phi);
 
   _view = glm::lookAt (
 	  _pos,
     glm::vec3(_x, _y, _height),
-    vu::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f)
+    ut::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f)
   );
 
   _viewProjection = _projection * _view;
 
-  glm::vec3 camDirection = vu::carthesian(1.f, _theta, _phi);
+  glm::vec3 camDirection = ut::carthesian(1.f, _theta, _phi);
 
   _skyboxView = glm::lookAt (
 	  camDirection,
     glm::vec3(0, 0, 0),
-    vu::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f)
+    ut::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f)
   );
 
   _skyboxViewProjection = _projection * _skyboxView;

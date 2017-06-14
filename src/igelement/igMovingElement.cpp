@@ -1,7 +1,7 @@
 #include "igMovingElement.h"
-#include "vecUtils.h"
 #include "utils.h"
 
+#include <glm/gtx/vector_angle.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -39,7 +39,7 @@ void igMovingElement::updateDisplay(int msElapsed, float theta) {
 
 	if (!_dead) {
 		if (_direction.x != 0.f || _direction.y != 0.f) {
-			float ori = vu::angle(glm::vec2(1.0f,0.0f), _direction);
+			float ori = glm::orientedAngle(glm::vec2(1.0f,0.0f), _direction) / RAD;
 			setOrientation(ori - _camOrientation);
 		}
 	}

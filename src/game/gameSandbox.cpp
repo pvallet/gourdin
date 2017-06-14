@@ -96,13 +96,13 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
         centerX = SpriteRect.x + SpriteRect.z / 2;
         centerY = SpriteRect.y + SpriteRect.w / 2;
 
-        if (vu::contains(rect, glm::ivec2(centerX, centerY)))
+        if (ut::contains(rect, glm::ivec2(centerX, centerY)))
           _selection.insert(lion);
 
-        else if (   vu::contains(SpriteRect, glm::ivec2(rect.x, rect.y)) ||
-                    vu::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y)) ||
-                    vu::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y + rect.w)) ||
-                    vu::contains(SpriteRect, glm::ivec2(rect.x, rect.y + rect.w))  ) {
+        else if (   ut::contains(SpriteRect, glm::ivec2(rect.x, rect.y)) ||
+                    ut::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y)) ||
+                    ut::contains(SpriteRect, glm::ivec2(rect.x + rect.z, rect.y + rect.w)) ||
+                    ut::contains(SpriteRect, glm::ivec2(rect.x, rect.y + rect.w))  ) {
           _selection.insert(lion);
         }
       }

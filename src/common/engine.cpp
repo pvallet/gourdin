@@ -240,7 +240,7 @@ void Engine::compute2DCorners() {
 
 void Engine::update(int msElapsed) {
   Camera& cam = Camera::getInstance();
-  glm::uvec2 camPos = convertToChunkCoords(cam.getPointedPos());
+  glm::uvec2 camPos = ut::convertToChunkCoords(cam.getPointedPos());
 
   // Update camera
   if (_chunkStatus[camPos.x][camPos.y] == NOT_GENERATED)
@@ -289,7 +289,7 @@ void Engine::update(int msElapsed) {
   std::vector<std::list<igMovingElement*> > sortedElements(NB_CHUNKS*NB_CHUNKS);
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    glm::uvec2 chunkPos = convertToChunkCoords((*it)->getPos());
+    glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
 
     if (!(*it)->isDead())
       sortedElements[chunkPos.x * NB_CHUNKS + chunkPos.y].push_back(it->get());
@@ -299,7 +299,7 @@ void Engine::update(int msElapsed) {
 
   // Update graphics of visible elements
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    glm::uvec2 chunkPos = convertToChunkCoords((*it)->getPos());
+    glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
 
     if (_chunkStatus[chunkPos.x][chunkPos.y] == VISIBLE) {
       // No test yet to see if the element can move to its new pos (no collision)
@@ -492,7 +492,7 @@ glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
 
 glm::vec3 Engine::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
-  glm::uvec2 chunkPos = convertToChunkCoords(cam.getPointedPos());
+  glm::uvec2 chunkPos = ut::convertToChunkCoords(cam.getPointedPos());
 
   return _terrain[chunkPos.x][chunkPos.y]->getNorm(cam.getPointedPos());
 }

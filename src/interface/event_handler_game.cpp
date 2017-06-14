@@ -1,7 +1,6 @@
 #include "event_handler_game.h"
 
 #include "camera.h"
-#include "vecUtils.h"
 
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define ROTATION_ANGLE_MOUSE 0.1f
@@ -161,7 +160,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
 
   // We make the camera move only if the new theta is in the allowed zone
-  if (glm::dot(normal, vu::carthesian(1, theta, 90)) < actualMinScalarProduct) {
+  if (glm::dot(normal, ut::carthesian(1, theta, 90)) < actualMinScalarProduct) {
     // New theta with given phi
     std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
       normal.x, normal.y, actualMinScalarProduct);
@@ -181,13 +180,13 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
-  if (glm::dot(normal, vu::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
+  if (glm::dot(normal, ut::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
 
     float nPhi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
     float phiIsTooFarByAmount = nPhi - phi;
 
     if (phiIsTooFarByAmount > 0) {
-      float normalTheta = vu::spherical(normal).y;
+      float normalTheta = ut::spherical(normal).y;
 
       if (firstIsOnPositiveSideOfSecond(theta, normalTheta))
         theta += phiIsTooFarByAmount;
@@ -279,7 +278,7 @@ void EventHandlerGame::resetCamera(bool pov) {
 
   _game.setPovCamera(pov);
 
-  glm::vec3 terrainNormal = vu::spherical(_game.getEngine().getNormalOnCameraPointedPos());
+  glm::vec3 terrainNormal = ut::spherical(_game.getEngine().getNormalOnCameraPointedPos());
 
   if (pov) {
     cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);

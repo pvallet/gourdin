@@ -2,8 +2,8 @@
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <SFML/System.hpp>
 
+#include <map>
 #include <vector>
 
 #include "terrainGeometry.h"
