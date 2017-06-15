@@ -4,6 +4,11 @@
 
 GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& interface):
   _displayLog(true),
+  _huntHasStarted(false),
+  _maxSimultaneousLions(5),
+  _nbLions(0),
+  _bestScore(0),
+  _msHuntDuration(120000),
   _window(window),
   _engine(engine),
   _interface(interface) {}
@@ -22,6 +27,15 @@ void GameSandbox::update(int msElapsed) {
    _selection.erase(toDelete[i]);
   }
 
+  // Check if the hunt has ended
+  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration) {
+    _huntHasStarted = false;
+    if (Lion::getNbKilled() > _bestScore)
+      _bestScore = Lion::getNbKilled();
+    Lion::resetNbKilled();
+    logText.clear();
+  }
+
   _engine.update(msElapsed);
 }
 
@@ -37,7 +51,14 @@ void GameSandbox::render() const {
 
   _interface.renderTextTopLeft(getInfoText());
 
-  if (_displayLog) {
+  std::ostringstream bestScoreText;
+  bestScoreText << "Best score: " << _bestScore;
+  _interface.renderTextTopCenter(bestScoreText.str());
+
+  if (_huntHasStarted)
+    _interface.renderTextTopRight(getHuntText());
+
+  else if (_displayLog) {
     LogText& logText = LogText::getInstance();
     _interface.renderTextTopRight(logText.getText());
     logText.clear();
@@ -50,6 +71,16 @@ void GameSandbox::render() const {
 #endif
 
   _window.display();
+}
+
+std::string GameSandbox::getHuntText() const {
+  std::ostringstream text;
+
+  text << "Predators: " << _nbLions << "/" << _maxSimultaneousLions << std::endl
+       << "Kills: " << Lion::getNbKilled() << std::endl
+       << "Time left: " << (_msHuntDuration - _huntStart.getElapsedTime()) / 1000 << std::endl;
+
+  return text.str();
 }
 
 std::string GameSandbox::getInfoText() const {
@@ -111,8 +142,17 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
 }
 
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
-  if (_selection.empty())
-    _engine.addLion(screenTarget);
+  if (_selection.empty()) {
+    if (_nbLions < _maxSimultaneousLions) {
+      _engine.addLion(screenTarget);
+      _nbLions++;
+    }
+
+    if (!_huntHasStarted) {
+      _huntHasStarted = true;
+      _huntStart.restart();
+    }
+  }
   else {
     glm::vec2 target = Engine::get2DCoord(screenTarget);
 
@@ -157,8 +197,10 @@ void GameSandbox::makeLionsRun() {
 }
 
 void GameSandbox::killLion() {
-  if (!_selection.empty())
+  if (!_selection.empty()) {
     (*_selection.begin())->die();
+    _nbLions--;
+  }
 }
 
 void GameSandbox::clearLog() const {

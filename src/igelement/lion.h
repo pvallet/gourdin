@@ -26,7 +26,12 @@ public:
 	inline float getStamina() const {return _stamina;}
 	inline bool isRunning() const {return _status == RUNNING;}
 
+	inline static size_t getNbKilled() {return _nbKilled;}
+	inline static void resetNbKilled() {_nbKilled = 0;}
+
 private:
+	static size_t _nbKilled;
+
 	float _stamina; // Percentage
 	float _catchBreathSpeed; // Percents per second
 	float _loseBreathSpeed;

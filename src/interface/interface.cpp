@@ -98,9 +98,16 @@ void Interface::renderTextTopRight(const std::string& string) const {
 }
 
 void Interface::renderTextTopLeft(const std::string& string) const {
-  sf::Text info(_log);
-  info.setString(string);
-  _window.draw(info);
+  sf::Text text(_log);
+  text.setString(string);
+  _window.draw(text);
+}
+
+void Interface::renderTextTopCenter(const std::string& string) const {
+  sf::Text text(_log);
+  text.setString(string);
+  text.setPosition(_window.getSize().x / 2 - text.getLocalBounds().width / 2, 0);
+  _window.draw(text);
 }
 
 void Interface::renderTextCenter(const std::string& string) const {

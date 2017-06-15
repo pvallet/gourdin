@@ -4,6 +4,8 @@
 
 #include "antilope.h"
 
+size_t Lion::_nbKilled = 0;
+
 Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	Controllable(position, graphics, terrainGeometry),
 	_stamina(100),
@@ -42,6 +44,7 @@ void Lion::update(int msElapsed) {
 		if (_beginAttack.getElapsedTime() >= _msAnimAttack) {
 			_prey->die();
 			stop();
+			_nbKilled++;
 		}
 	}
 

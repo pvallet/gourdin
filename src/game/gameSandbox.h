@@ -27,10 +27,19 @@ public:
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
 
 private:
+  std::string getHuntText() const;
   std::string getInfoText() const;
 
   bool _displayLog;
   bool _scrollSpeedSlow;
+
+  bool _huntHasStarted;
+  const size_t _maxSimultaneousLions;
+  size_t _nbLions;
+  size_t _bestScore;
+  int _msHuntDuration;
+
+  Clock _huntStart;
 
   std::set<Lion*> _selection;
 
