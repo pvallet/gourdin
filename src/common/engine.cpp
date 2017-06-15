@@ -494,5 +494,8 @@ glm::vec3 Engine::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
   glm::uvec2 chunkPos = ut::convertToChunkCoords(cam.getPointedPos());
 
-  return _terrain[chunkPos.x][chunkPos.y]->getNorm(cam.getPointedPos());
+  if (_chunkStatus[chunkPos.x][chunkPos.y] == NOT_GENERATED)
+    return glm::vec3(0,0,1);
+  else
+    return _terrain[chunkPos.x][chunkPos.y]->getNorm(cam.getPointedPos());
 }

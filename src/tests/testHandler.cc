@@ -222,8 +222,8 @@ void TestHandler::testGeneratedImage() const {
   remove("testSave.png");
 }
 
-void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) const {
-  std::pair<float,float> solutions = eHandlerGame.solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
+void TestHandler::testEventHandler() const {
+  std::pair<float,float> solutions = EventHandler::solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
 
   if (solutions.first == 11*M_PI/12.f/RAD && solutions.second == 17*M_PI/12.f/RAD)
     std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c" << '\n';
@@ -237,13 +237,13 @@ void TestHandler::testEventHandlerGame(const EventHandlerGame& eHandlerGame) con
   float angle1 = 350;
   float angle2 = 20;
 
-  if (eHandlerGame.absDistBetweenAngles(angle1, angle2) == 30 &&
-      eHandlerGame.absDistBetweenAngles(angle2, angle1) == 30)
+  if (EventHandler::absDistBetweenAngles(angle1, angle2) == 30 &&
+      EventHandler::absDistBetweenAngles(angle2, angle1) == 30)
     std::cout << "OK     - Absolute distance between two angles mod 360" << '\n';
 
   else {
     std::cout << "FAILED - Absolute distance between two angles mod 360" << '\n';
-    std::cout << "         Distance is " << eHandlerGame.absDistBetweenAngles(angle1,angle2)
+    std::cout << "         Distance is " << EventHandler::absDistBetweenAngles(angle1,angle2)
               << ", should be " << 30 << '\n';
   }
 }
@@ -254,7 +254,7 @@ void TestHandler::runTests(const Controller& controller) const {
   testVecUtils();
   // testPerlin();
   // testGeneratedImage();
-  testEventHandlerGame(controller._eHandlerGame);
+  testEventHandler();
 }
 
 void TestHandler::clean() const {

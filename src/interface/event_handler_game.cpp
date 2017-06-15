@@ -159,21 +159,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
   // The steeper the slope, the less the user can move around
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
 
-  // We make the camera move only if the new theta is in the allowed zone
-  if (glm::dot(normal, ut::carthesian(1, theta, 90)) < actualMinScalarProduct) {
-    // New theta with given phi
-    std::pair<float,float> thetasLim = solveAcosXplusBsinXequalC(
-      normal.x, normal.y, actualMinScalarProduct);
-
-    std::pair<float,float> distsToThetasLim;
-    distsToThetasLim.first  = absDistBetweenAngles(theta, thetasLim.first);
-    distsToThetasLim.second = absDistBetweenAngles(theta, thetasLim.second);
-
-    if (distsToThetasLim.first < distsToThetasLim.second)
-      theta = thetasLim.first;
-    else
-      theta = thetasLim.second;
-  }
+  makeThetaFitInAllowedZone(theta, normal, actualMinScalarProduct);
 }
 
 void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
@@ -302,36 +288,6 @@ bool EventHandlerGame::gainFocus() {
   return true;
 }
 
-std::pair<float, float> EventHandlerGame::solveAcosXplusBsinXequalC(float a, float b, float c) {
-  // The code is a transcription of Wolfram Alpha solution
-  std::pair<float,float> res(0,0);
-
-  if (a == -c) {
-    res.first = 180;
-    res.second = 180;
-  }
-
-  else {
-    float underRoot = a*a + b*b - c*c;
-    if (underRoot >= 0) {
-      res.first  = 2 * atan((b - sqrt(underRoot)) / (a + c)) / RAD;
-      res.second = 2 * atan((b + sqrt(underRoot)) / (a + c)) / RAD;
-
-      // Results are in range (-180, 180], make them in range [0,360)
-      if (res.first < 0)
-        res.first += 360;
-      if (res.second < 0)
-        res.second += 360;
-    }
-
-    // Ensure the ascending order
-    if (res.second < res.first)
-      std::swap(res.first,res.second);
-
-    }
-  return res;
-}
-
 float EventHandlerGame::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
   return solveAcosXplusBsinXequalC(
     normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
@@ -342,8 +298,4 @@ bool EventHandlerGame::firstIsOnPositiveSideOfSecond(float first, float second) 
   if (secondAnglePlus90 > 360)
     secondAnglePlus90 -= 360;
   return absDistBetweenAngles(first, secondAnglePlus90) < 90;
-}
-
-float EventHandlerGame::absDistBetweenAngles(float a, float b) {
-  return std::min(std::abs(a-b),std::abs(std::abs(a-b)-360));
 }

@@ -23,7 +23,7 @@ private:
   void testVecUtils() const;
   void testPerlin() const;
   void testGeneratedImage() const;
-  void testEventHandlerGame(const EventHandlerGame& eHandlerGame) const;
+  void testEventHandler() const;
 
   const Clock& _beginningOfProg;
 };

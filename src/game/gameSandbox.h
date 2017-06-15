@@ -26,6 +26,8 @@ public:
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
 
+  inline const Engine& getEngine() const {return _engine;}
+
 private:
   std::string getHuntText() const;
   std::string getInfoText() const;

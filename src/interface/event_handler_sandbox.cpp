@@ -117,13 +117,6 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PMS * msElapsed * cam.getZoom();
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-    cam.rotate(ROTATION_ANGLE_PMS * msElapsed, 0.f);
-
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-    cam.rotate(- ROTATION_ANGLE_PMS * msElapsed, 0.f);
-
   if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     cam.translate(0.f, - realTranslationValue);
 
@@ -141,6 +134,17 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
 
   if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
     cam.translate(0.f, realTranslationValue);
+
+  float theta = cam.getTheta();
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    theta += ROTATION_ANGLE_PMS * msElapsed;
+
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    theta -= ROTATION_ANGLE_PMS * msElapsed;
+
+  glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
+  makeThetaFitInAllowedZone(theta, normal, -cos((cam.getPhi()+20)*RAD));
+  cam.setTheta(theta);
 }
 
 bool EventHandlerSandbox::gainFocus() {
