@@ -28,13 +28,8 @@ void GameSandbox::update(int msElapsed) {
   }
 
   // Check if the hunt has ended
-  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration) {
-    _huntHasStarted = false;
-    if (Lion::getNbKilled() > _bestScore)
-      _bestScore = Lion::getNbKilled();
-    Lion::resetNbKilled();
-    logText.clear();
-  }
+  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
+    interruptHunt();
 
   _engine.update(msElapsed);
 }
@@ -91,8 +86,12 @@ std::string GameSandbox::getInfoText() const {
        << "P: " << "Pause" << std::endl
        << "Left-Right: " << "Rotate camera" << std::endl
        << "Up-Down:    " << "Go forwards/backwards" << std::endl
-       << "B: " << "Launch benchmark" << std::endl
-       << "L: " << "Hide/Display log" << std::endl;
+       << "B: " << "Launch benchmark" << std::endl;
+  if (!_huntHasStarted)
+    text << "H: " << "Start new hunt!" << std::endl;
+  else
+    text << "H: " << "Interrupt current hunt" << std::endl;
+  text << "L: " << "Hide/Display log" << std::endl;
   if (_scrollSpeedSlow)
     text << "S: " << "Set scroll speed to 'fast'" << std::endl;
   else
@@ -146,11 +145,6 @@ void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
     if (_nbLions < _maxSimultaneousLions) {
       _engine.addLion(screenTarget);
       _nbLions++;
-    }
-
-    if (!_huntHasStarted) {
-      _huntHasStarted = true;
-      _huntStart.restart();
     }
   }
   else {
@@ -218,7 +212,7 @@ void GameSandbox::benchmark() {
 
   for (size_t i = 0; i < 100; i++) {
     cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
-                                   CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
+                                CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
     update(0);
     render();
   }
@@ -229,4 +223,40 @@ void GameSandbox::benchmark() {
   std::cout << "Average FPS: " << 1.f / msTotalElapsed * 100 * 1000 << std::endl;
 
   _engine.resetCamera();
+}
+
+void GameSandbox::interruptHunt() {
+  if (_huntHasStarted) {
+    _huntHasStarted = false;
+    if (Lion::getNbKilled() > _bestScore)
+      _bestScore = Lion::getNbKilled();
+    Lion::resetNbKilled();
+
+    LogText& logText = LogText::getInstance();
+    logText.clear();
+  }
+}
+
+void GameSandbox::startNewHunt() {
+  if (!_huntHasStarted) {
+    std::vector<igMovingElement*> toDelete;
+
+    const std::set<Controllable*>& lions = _engine.getControllableElements();
+    for (auto it = lions.begin(); it != lions.end(); it++) {
+      if (dynamic_cast<Lion*>(*it))
+        toDelete.push_back(*it);
+    }
+
+    const std::set<Controllable*>& deadLions = _engine.getDeadControllableElements();
+    for (auto it = deadLions.begin(); it != deadLions.end(); it++) {
+      if (dynamic_cast<Lion*>(*it))
+        toDelete.push_back(*it);
+    }
+
+    _engine.deleteElements(toDelete);
+    _selection.clear();
+    _nbLions = 0;
+    _huntHasStarted = true;
+    _huntStart.restart();
+  }
 }

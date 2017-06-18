@@ -83,7 +83,7 @@ void Engine::init() {
 
   appendNewElements(_contentGenerator.genHerd(
                     glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
+                              CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
   appendNewElements(_contentGenerator.genHerds());
 }
@@ -321,7 +321,8 @@ void Engine::update(int msElapsed) {
      toDelete.push_back(*it);
   }
   for (size_t i = 0; i < toDelete.size(); i++) {
-   _controllableElements.erase(toDelete[i]);
+    _controllableElements.erase(toDelete[i]);
+    _deadControllableElements.insert(toDelete[i]);
   }
 
   compute2DCorners();
@@ -467,6 +468,32 @@ void Engine::deleteElements(const std::vector<igMovingElement*>& elementsToDelet
     for (auto toDel = elementsToDelete.begin(); toDel != elementsToDelete.end(); toDel++) {
       if ((*toDel) == elmt->get()) {
         elmt = _igMovingElements.erase(elmt);
+        hasDeleted = true;
+      }
+    }
+
+    if (!hasDeleted)
+      elmt++;
+  }
+
+  for (auto elmt = _controllableElements.begin(); elmt != _controllableElements.end(); ) {
+    bool hasDeleted = false;
+    for (auto toDel = elementsToDelete.begin(); toDel != elementsToDelete.end(); toDel++) {
+      if (*toDel == *elmt) {
+        elmt = _controllableElements.erase(elmt);
+        hasDeleted = true;
+      }
+    }
+
+    if (!hasDeleted)
+      elmt++;
+  }
+
+  for (auto elmt = _deadControllableElements.begin(); elmt != _deadControllableElements.end(); ) {
+    bool hasDeleted = false;
+    for (auto toDel = elementsToDelete.begin(); toDel != elementsToDelete.end(); toDel++) {
+      if (*toDel == *elmt) {
+        elmt = _deadControllableElements.erase(elmt);
         hasDeleted = true;
       }
     }

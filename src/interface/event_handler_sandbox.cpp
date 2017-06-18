@@ -61,6 +61,13 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       _game.benchmark();
       break;
 
+    case sf::Keyboard::H:
+      if (_game.huntHasStarted())
+        _game.interruptHunt();
+      else
+        _game.startNewHunt();
+      break;
+
     case sf::Keyboard::L:
       _game.switchLog();
       break;

@@ -57,6 +57,7 @@ public:
 	glm::vec3 getNormalOnCameraPointedPos() const;
 
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
+	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 
 	static glm::vec2 get2DCoord(glm::ivec2 screenTarget);
@@ -78,6 +79,7 @@ private:
   // Raw pointers because the ownership is in _igMovingElements
 	// Static elements are stored in chunks
   std::set<Controllable*> _controllableElements;
+	std::set<Controllable*> _deadControllableElements;
 
 	igElementDisplay _igElementDisplay;
   ContentGenerator _contentGenerator;

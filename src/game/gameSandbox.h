@@ -17,6 +17,8 @@ public:
   void killLion();
   void clearLog() const;
   void benchmark();
+  void interruptHunt();
+  void startNewHunt();
 
   inline Interface& getInterface() const {return _interface;}
 
@@ -25,6 +27,7 @@ public:
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
+  inline bool huntHasStarted() const {return _huntHasStarted;}
 
   inline const Engine& getEngine() const {return _engine;}
 

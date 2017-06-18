@@ -41,6 +41,7 @@ P: Pause
 Left-Right:  Rotate camera
 Up-Down:     Go forwards/backwards
 B: Launch benchmark
+H: Start/stop hunting session
 L: Hide/Display log
 S: Switch scroll speed to fast/slow
 W: Switch to wireframe display
