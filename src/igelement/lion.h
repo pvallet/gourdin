@@ -44,5 +44,5 @@ private:
 
 	igMovingElement* _prey;
 	Clock _beginAttack;
-	int _msAnimAttack;
+	const int _msAnimAttack;
 };

@@ -10,6 +10,7 @@ public:
 
   inline int getRemainingTime() const {
     return std::max(0,_msTime - _clock.getElapsedTime());}
+  inline int getElapsedTime() const {return _clock.getElapsedTime();}
 
   inline bool isStillRunning() const {return _alwaysRunning || getRemainingTime() != 0;}
 

@@ -20,13 +20,11 @@ Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainG
 	_msAverageRecovering(3000),
 	_msAverageEating(7000),
 	_msAverageFindingFood(2000),
-	_msAverageTimeBeforeChangingDir(500),
-	_msTimeBeforeChangingDir(0) {
+	_msAverageTimeBeforeChangingDir(500) {
 
 	_lineOfSight = _lineOfSightStandard;
 
-	_msTimePhase = generateTimePhase(_msAverageEating);
-	_beginPhase.restart();
+	_currentPhase.reset(generateTimePhase(_msAverageEating));
 }
 
 
@@ -36,7 +34,6 @@ void Antilope::beginIdle() {
 	_speed = 0.f;
 	_moving = false;
 	launchAnimation(WAIT);
-	_beginPhase.restart();
 }
 
 void Antilope::beginFleeing() {
@@ -45,7 +42,6 @@ void Antilope::beginFleeing() {
 	_speed = _speedRunning;
 	_moving = true;
 	launchAnimation(RUN);
-	_beginPhase.restart();
 }
 
 void Antilope::beginRecovering() {
@@ -54,8 +50,7 @@ void Antilope::beginRecovering() {
 	_speed = _speedWalking;
 	_moving = true;
 	launchAnimation(WALK);
-	_msTimePhase = generateTimePhase(_msAverageRecovering);
-	_beginPhase.restart();
+	_currentPhase.reset(generateTimePhase(_msAverageRecovering));
 }
 
 int Antilope::generateTimePhase(int msAverage) const {
@@ -111,13 +106,12 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 	if (info.nbAttract != 0 && info.nbAttract <= 2)
 		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 
-	else if (_beginPhase.getElapsedTime() > _msTimePhase) {
+	else if (!_currentPhase.isStillRunning()) {
 		if (_moving) {
 			_speed = 0.f;
 			_moving = false;
 			launchAnimation(WAIT);
-			_msTimePhase = generateTimePhase(_msAverageEating);
-			_beginPhase.restart();
+			_currentPhase.reset(generateTimePhase(_msAverageEating));
 		}
 
 		else {
@@ -132,8 +126,7 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 			_speed = _speedWalking;
 			_moving = true;
 			launchAnimation(WALK);
-			_msTimePhase = generateTimePhase(_msAverageFindingFood);
-			_beginPhase.restart();
+			_currentPhase.reset(generateTimePhase(_msAverageFindingFood));
 		}
 	}
 }
@@ -169,7 +162,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	if (info.nbFlee != 0)
 		beginFleeing();
 
-	else if (_beginPhase.getElapsedTime() > _msTimePhase)
+	else if (!_currentPhase.isStillRunning())
 		beginIdle();
 
 	else if (info.minRepDst != _repulsionRadius &&
@@ -215,14 +208,15 @@ void Antilope::updateState(const std::list<igMovingElement*>& neighbors) {
 }
 
 void Antilope::setDirection(glm::vec2 direction) {
-	if (_lastDirectionChange.getElapsedTime() > _msTimeBeforeChangingDir) {
+	if (!_noDirectionChange.isStillRunning()) {
 		igMovingElement::setDirection(direction);
-		_lastDirectionChange.restart();
-		_msTimeBeforeChangingDir = generateTimePhase(_msAverageTimeBeforeChangingDir);
+		int msTimeBeforeChangingDir = generateTimePhase(_msAverageTimeBeforeChangingDir);
 
 		// if the antilope has been fleeing for a long time, it will try its luck
 		// by going for a longer time towards the same direction
 		if (_aStatus == FLEEING)
-			_msTimeBeforeChangingDir += 0.5f * _beginPhase.getElapsedTime();
+			msTimeBeforeChangingDir += 0.5f * _currentPhase.getElapsedTime();
+
+		_noDirectionChange.reset(msTimeBeforeChangingDir);
 	}
 }

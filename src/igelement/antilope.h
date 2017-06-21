@@ -2,7 +2,7 @@
 
 #include <list>
 
-#include "clock.h"
+#include "chronometer.h"
 #include "igMovingElement.h"
 
 enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
@@ -59,10 +59,8 @@ private:
 	const int _msAverageRecovering;
 	const int _msAverageEating;
 	const int _msAverageFindingFood;
-	int _msTimePhase;
-	Clock _beginPhase;
+	Chronometer _currentPhase;
 
-	Clock _lastDirectionChange;
+	Chronometer _noDirectionChange;
 	const int _msAverageTimeBeforeChangingDir;
-	int _msTimeBeforeChangingDir;
 };

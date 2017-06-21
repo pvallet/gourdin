@@ -15,10 +15,10 @@ Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry&
 	_speedRunning(18.f),
 	_rangeAttack(8.f),
 	_rangeChase(13.f),
-	_status(WAITING) {
+	_status(WAITING),
+	_msAnimAttack(2.f * graphics.getAnimationTime(ATTACK)) {
 
 	_speed = _speedWalking;
-	_msAnimAttack = 2.f * graphics.getAnimationTime(ATTACK);
 }
 
 void Lion::update(int msElapsed) {
