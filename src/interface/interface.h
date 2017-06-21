@@ -24,6 +24,7 @@ public:
   void setTextTopRight(const std::string& string);
   void setTextTopCenter(const std::string& string);
   void setTextCenter(const std::string& string, int msDuration = -1);
+  void setTextBottomCenter(const std::string& string, int msDuration = -1);
   void clearText();
 
   void setRectSelect(glm::ivec4 rect);
@@ -35,10 +36,12 @@ private:
   sf::Text _textTopRight;
   sf::Text _textTopCenter;
   sf::Text _textCenter;
+  sf::Text _textBottomCenter;
   sf::Sprite _minimapSprite;
   sf::Texture _minimapTexture;
 
   Chronometer _textCenterChrono;
+  Chronometer _textBottomCenterChrono;
 
   sf::RenderWindow& _window;
 };

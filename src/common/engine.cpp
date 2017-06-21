@@ -446,15 +446,19 @@ void Engine::moveCamera(glm::vec2 newAimedPos) {
 }
 
 
-bool Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
+void Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
   glm::vec2 lionPos = get2DCoord(screenTarget);
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     Antilope* atlp = dynamic_cast<Antilope*>(it->get());
-    if (atlp && glm::length(atlp->getPos() - lionPos) < minDistToAntilopes)
-      return false;
+    if (atlp && !atlp->isDead() && glm::length(atlp->getPos() - lionPos) < minDistToAntilopes)
+      throw std::runtime_error("Can't spawn a predator here, too close to its preys");
   }
-  appendNewElements(_contentGenerator.genLion(lionPos));
-  return true;
+  std::vector<igMovingElement*> newLion = _contentGenerator.genLion(lionPos);
+
+  if (newLion.size() == 0)
+    throw std::runtime_error("Can't spawn a predator on this biome");
+
+  appendNewElements(newLion);
 }
 
 std::vector<Controllable*> Engine::genTribe(glm::vec2 pos) {

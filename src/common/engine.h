@@ -48,7 +48,7 @@ public:
 	void render() const;
 	void moveSelection(glm::ivec2 screenTarget);
 	void moveCamera(glm::vec2 newAimedPos);
-	bool addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
+	void addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
 	std::vector<Controllable*> genTribe(glm::vec2 pos);
 	void deleteElements(const std::vector<igMovingElement*>& elementsToDelete);
 

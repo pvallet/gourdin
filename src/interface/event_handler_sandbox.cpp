@@ -37,10 +37,14 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
 
     // Move selection
     if (event.mouseButton.button == sf::Mouse::Right) {
-      _game.moveSelection(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
-          sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
-        _game.makeLionsRun();
+      if (_game.isSelectionEmpty())
+        _game.createLion(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+      else {
+        _game.moveSelection(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
+          _game.makeLionsRun();
+      }
     }
   }
 }
@@ -163,7 +167,6 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
       sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
-  glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
   cam.setTheta(theta);
 }
 

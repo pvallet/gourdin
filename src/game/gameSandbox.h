@@ -14,6 +14,7 @@ public:
 
   void select(glm::ivec4 rect, bool add);
   void selectAllLions();
+  void createLion(glm::ivec2 screenTarget);
   void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
   void makeLionsRun();
@@ -33,6 +34,7 @@ public:
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
   inline bool huntHasStarted() const {return _huntHasStarted;}
+  inline bool isSelectionEmpty() const {return _selection.size() == 0;}
 
   inline const Engine& getEngine() const {return _engine;}
 

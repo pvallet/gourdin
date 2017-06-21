@@ -153,24 +153,30 @@ void GameSandbox::selectAllLions() {
   }
 }
 
-void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
-  if (_selection.empty()) {
+void GameSandbox::createLion(glm::ivec2 screenTarget) {
+  try {
     if (!_huntHasStarted)
       _engine.addLion(screenTarget);
-    else if (_nbLions < _maxSimultaneousLions) {
-      bool addedLion = _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
-      if (addedLion)
-        _nbLions++;
-    }
-  }
-  else {
-    glm::vec2 target = Engine::get2DCoord(screenTarget);
 
-    for(auto it = _selection.begin(); it != _selection.end(); ++it) {
-      Controllable* ctrl = dynamic_cast<Controllable*>(*it);
-      if (ctrl) {
-        ctrl->setTarget(target);
-      }
+    else {
+      if (_nbLions >= _maxSimultaneousLions)
+        throw std::runtime_error("Maximum number of predators reached");
+
+      _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
+      _nbLions++;
+    }
+  } catch (const std::runtime_error& e) {
+    _interface.setTextBottomCenter(e.what(), _msCenterTextDisplayDuration);
+  }
+}
+
+void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
+  glm::vec2 target = Engine::get2DCoord(screenTarget);
+
+  for(auto it = _selection.begin(); it != _selection.end(); ++it) {
+    Controllable* ctrl = dynamic_cast<Controllable*>(*it);
+    if (ctrl) {
+      ctrl->setTarget(target);
     }
   }
 }

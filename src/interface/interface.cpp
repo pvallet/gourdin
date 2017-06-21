@@ -17,6 +17,8 @@ void Interface::init() {
   _textTopCenter = sf::Text(_textTopLeft);
   _textCenter    = sf::Text(_textTopLeft);
   _textCenter.setCharacterSize(40);
+  _textBottomCenter = sf::Text(_textTopLeft);
+  _textBottomCenter.setCharacterSize(15);
 
   // Selection rectangle
   _rectSelect.setFillColor(sf::Color::Transparent);
@@ -101,6 +103,9 @@ void Interface::renderText() const {
 
   if (_textCenterChrono.isStillRunning())
     _window.draw(_textCenter);
+
+  if (_textBottomCenterChrono.isStillRunning())
+    _window.draw(_textBottomCenter);
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
@@ -122,6 +127,13 @@ void Interface::setTextCenter(const std::string& string, int msDuration) {
   _textCenter.setPosition(_window.getSize().x / 2 - _textCenter.getLocalBounds().width / 2,
                           _window.getSize().y / 2 - _textCenter.getLocalBounds().height / 2);
   _textCenterChrono.reset(msDuration);
+}
+
+void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
+  _textBottomCenter.setString(string);
+  _textBottomCenter.setPosition(_window.getSize().x / 2 - _textBottomCenter.getLocalBounds().width / 2,
+                                _window.getSize().y - _textBottomCenter.getLocalBounds().height*2);
+  _textBottomCenterChrono.reset(msDuration);
 }
 
 void Interface::renderRectSelect() const {
