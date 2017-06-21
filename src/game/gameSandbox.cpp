@@ -85,22 +85,24 @@ std::string GameSandbox::getInfoText() const {
   text << "Esc: " << "Quit engine" << std::endl
        << "M: " << "Switch to Game mode" << std::endl
        << "P: " << "Pause" << std::endl
-       << "Left-Right: " << "Rotate camera" << std::endl
-       << "Up-Down:    " << "Go forwards/backwards" << std::endl
-       << "B: " << "Launch benchmark" << std::endl;
+       << "Left-Right / Q-D: " << "Rotate camera" << std::endl
+       << "Up-Down    / Z-S: " << "Go forwards/backwards" << std::endl
+       << "A/Return: " << "Select all lions" << std::endl
+       << "B: " << "Launch benchmark" << std::endl
+       << "E: " << "Change scroll speed" << std::endl;
   if (!_huntHasStarted)
     text << "H: " << "Start new hunt!" << std::endl;
   else
     text << "H: " << "Interrupt current hunt" << std::endl;
   text << "L: " << "Hide/Display log" << std::endl
-       << "S: " << "Change scroll speed" << std::endl
        << "W: " << "Switch to wireframe display" << std::endl
        << std::endl
        << "Click on the minimap to jump there" << std::endl
        << "Right-click to make a lion appear" << std::endl
        << "Select it with the left mouse button" << std::endl
        << "Move it around with the right button" << std::endl
-       << "Lshift: " << "Make it run" << std::endl
+       << "Lshift/Rshift: " << "Make it run" << std::endl
+       << "Delete: " << "Kill selected lion" << std::endl
        << std::endl
        << "Go hunt them juicy antilopes!" << std::endl;
 
@@ -138,6 +140,21 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
   }
 }
 
+void GameSandbox::selectAllLions() {
+  size_t oldSize = _selection.size();
+  _selection.clear();
+  const std::set<Controllable*> controllableElements = _engine.getControllableElements();
+  for (auto it = controllableElements.begin(); it != controllableElements.end(); it++) {
+    Lion *lion = dynamic_cast<Lion*>(*it);
+    if (lion && !lion->isDead()) {
+      _selection.insert(lion);
+    }
+  }
+
+  if (_selection.size() == oldSize)
+    _selection.clear();
+}
+
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
   if (_selection.empty()) {
     if (!_huntHasStarted || _nbLions < _maxSimultaneousLions) {
@@ -172,6 +189,12 @@ void GameSandbox::goBackToSelection() {
 }
 
 void GameSandbox::makeLionsRun() {
+  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
+    (*it)->beginRunning();
+  }
+}
+
+void GameSandbox::switchLionsRun() {
   bool makeThemAllRun = false;
   bool generalStrategyChosen = false;
   for (auto it = _selection.begin(); it != _selection.end(); ++it) {

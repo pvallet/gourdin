@@ -13,9 +13,9 @@ Two modes are featured in gourdin, a Sandbox mode and a Game mode.
 
 The **Sandbox** mode is made to be able to see the whole structure of the island and navigate through the different biomes easily. This is still a work in progress so there is still obvious work to be done on texture transitions and forests structure.
 
-There are some antilope and deer herds scattered over the island, and appear only on certain biomes. The antilopes appear only on the biome with small plants with big leaves (making the environment more consistent is on the TO-DO list). The deers are easier to find.
+There are some antilope and deer herds scattered over the island, which appear only on certain biomes. The antilopes appear only on the biome with small plants with big leaves (making the environment more consistent is on the TO-DO list). The deers are easier to find.
 
-As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;)
+As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;) You can launch a hunt session where your number of kills will be recorded. In this mode you cannot spawn predators too close to the deers.
 
 Any feedback on the structure of the island and the environment is much appreciated (the controls of the predators is not the main purpose of this mode).
 
@@ -38,19 +38,21 @@ The controls of the sandbox mode are pretty much the same as a RTS game (see Pop
 Esc: Quit game
 M: Switch to Sandbox mode
 P: Pause
-Left-Right:  Rotate camera
-Up-Down:     Go forwards/backwards
+Left-Right / Q-D:  Rotate camera
+Up-Down    / Z-S:  Go forwards/backwards
+A/Return: Select all lions
 B: Launch benchmark
+E: Switch scroll speed to fast/slow
 H: Start/stop hunting session
 L: Hide/Display log
-S: Switch scroll speed to fast/slow
 W: Switch to wireframe display
 
 Click on the minimap to jump there
 Right-click to make a lion appear
 Select it with the left mouse button
 Move it around with the right button
-Lshift:  Make it run
+Lshift/Rshift:  Make it run
+Delete: Kill selected lion
 ```
 
 #### 2. Game mode

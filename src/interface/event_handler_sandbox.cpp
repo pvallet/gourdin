@@ -38,6 +38,9 @@ void EventHandlerSandbox::handleClick(const sf::Event& event) {
     // Move selection
     if (event.mouseButton.button == sf::Mouse::Right) {
       _game.moveSelection(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
+          sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
+        _game.makeLionsRun();
     }
   }
 }
@@ -49,12 +52,18 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       break;
 
     case sf::Keyboard::LShift:
-      _game.makeLionsRun();
+    case sf::Keyboard::RShift:
+      _game.switchLionsRun();
       break;
 
     // Delete first selected lion
     case sf::Keyboard::Delete:
       _game.killLion();
+      break;
+
+    case sf::Keyboard::A:
+    case sf::Keyboard::Return:
+      _game.selectAllLions();
       break;
 
     case sf::Keyboard::B:
@@ -72,7 +81,7 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       _game.switchLog();
       break;
 
-    case sf::Keyboard::S:
+    case sf::Keyboard::E:
       if (_game.getScrollSpeedSlow()) {
         _scrollSpeed = SCROLL_SPEED_FAST;
         _game.setScrollSpeedToSlow(false);
@@ -125,10 +134,12 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
 
   float realTranslationValue = TRANSLATION_VALUE_PMS * msElapsed * cam.getZoom();
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
+      sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
     cam.translate(0.f, - realTranslationValue);
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+      sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     cam.translate(0.f, realTranslationValue);
 
   if (sf::Mouse::getPosition().x == 0)
@@ -144,10 +155,12 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
     cam.translate(0.f, realTranslationValue);
 
   float theta = cam.getTheta();
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+      sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     theta += ROTATION_ANGLE_PMS * msElapsed;
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+      sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();

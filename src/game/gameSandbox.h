@@ -13,9 +13,11 @@ public:
   void render() const;
 
   void select(glm::ivec4 rect, bool add);
+  void selectAllLions();
   void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
   void makeLionsRun();
+  void switchLionsRun();
   void killLion();
   void clearLog() const;
   void benchmark();
