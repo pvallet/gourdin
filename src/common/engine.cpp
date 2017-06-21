@@ -446,8 +446,15 @@ void Engine::moveCamera(glm::vec2 newAimedPos) {
 }
 
 
-void Engine::addLion(glm::ivec2 screenTarget) {
-  appendNewElements(_contentGenerator.genLion(get2DCoord(screenTarget)));
+bool Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
+  glm::vec2 lionPos = get2DCoord(screenTarget);
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    Antilope* atlp = dynamic_cast<Antilope*>(it->get());
+    if (atlp && glm::length(atlp->getPos() - lionPos) < minDistToAntilopes)
+      return false;
+  }
+  appendNewElements(_contentGenerator.genLion(lionPos));
+  return true;
 }
 
 std::vector<Controllable*> Engine::genTribe(glm::vec2 pos) {

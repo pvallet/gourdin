@@ -2,6 +2,8 @@
 
 #include "camera.h"
 
+#define LION_MIN_SPAWN_DIST 20
+
 GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine):
   _displayLog(true),
   _huntHasStarted(false),
@@ -141,7 +143,6 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
 }
 
 void GameSandbox::selectAllLions() {
-  size_t oldSize = _selection.size();
   _selection.clear();
   const std::set<Controllable*> controllableElements = _engine.getControllableElements();
   for (auto it = controllableElements.begin(); it != controllableElements.end(); it++) {
@@ -150,16 +151,16 @@ void GameSandbox::selectAllLions() {
       _selection.insert(lion);
     }
   }
-
-  if (_selection.size() == oldSize)
-    _selection.clear();
 }
 
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
   if (_selection.empty()) {
-    if (!_huntHasStarted || _nbLions < _maxSimultaneousLions) {
+    if (!_huntHasStarted)
       _engine.addLion(screenTarget);
-      _nbLions++;
+    else if (_nbLions < _maxSimultaneousLions) {
+      bool addedLion = _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
+      if (addedLion)
+        _nbLions++;
     }
   }
   else {
