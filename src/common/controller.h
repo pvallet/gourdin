@@ -7,7 +7,6 @@
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"
 #include "engine.h"
-#include "interface.h"
 #include "gameGame.h"
 #include "gameSandbox.h"
 
@@ -38,7 +37,6 @@ private:
 	bool _running;
 	int _msElapsed;
 
-	Interface _interface;
 	Engine _engine;
 	GameGame _gameGame;
 	GameSandbox _gameSandbox;

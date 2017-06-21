@@ -15,9 +15,7 @@ EventHandlerGame::EventHandlerGame(GameGame& game) :
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _draggingCamera(false),
-  _game(game) {
-  _game.setPovCamera(false);
-}
+  _game(game) {}
 
 void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   Camera& cam = Camera::getInstance();

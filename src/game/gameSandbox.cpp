@@ -2,16 +2,23 @@
 
 #include "camera.h"
 
-GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& interface):
+GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine):
   _displayLog(true),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
   _bestScore(0),
   _msHuntDuration(120000),
+  _msCenterTextDisplayDuration(1000),
   _window(window),
   _engine(engine),
-  _interface(interface) {}
+  _interface(window) {}
+
+void GameSandbox::init() {
+  _interface.init();
+  _interface.setTextTopLeft(getInfoText());
+  _interface.setTextTopCenter("Best score: 0");
+}
 
 void GameSandbox::update(int msElapsed) {
   LogText& logText = LogText::getInstance();
@@ -31,6 +38,17 @@ void GameSandbox::update(int msElapsed) {
   if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
     interruptHunt();
 
+  if (_huntHasStarted)
+    _interface.setTextTopRight(getHuntText());
+  else if (_displayLog)
+    _interface.setTextTopRight(logText.getText());
+  else
+    _interface.setTextTopRight("");
+
+  if (Clock::isGlobalTimerPaused())
+    _interface.setTextCenter("PAUSED", 1);
+
+  logText.clear();
   _engine.update(msElapsed);
 }
 
@@ -44,24 +62,7 @@ void GameSandbox::render() const {
   _interface.renderRectSelect();
   _interface.renderMinimap(_engine.getChunkStatus());
 
-  _interface.renderTextTopLeft(getInfoText());
-
-  std::ostringstream bestScoreText;
-  bestScoreText << "Best score: " << _bestScore;
-  _interface.renderTextTopCenter(bestScoreText.str());
-
-  if (_huntHasStarted)
-    _interface.renderTextTopRight(getHuntText());
-
-  else if (_displayLog) {
-    LogText& logText = LogText::getInstance();
-    _interface.renderTextTopRight(logText.getText());
-    logText.clear();
-  }
-
-  if (Clock::isGlobalTimerPaused())
-    _interface.renderTextCenter("PAUSED");
-
+  _interface.renderText();
   _window.popGLStates();
 #endif
 
@@ -91,20 +92,17 @@ std::string GameSandbox::getInfoText() const {
     text << "H: " << "Start new hunt!" << std::endl;
   else
     text << "H: " << "Interrupt current hunt" << std::endl;
-  text << "L: " << "Hide/Display log" << std::endl;
-  if (_scrollSpeedSlow)
-    text << "S: " << "Set scroll speed to 'fast'" << std::endl;
-  else
-    text << "S: " << "Set scroll speed to 'slow'" << std::endl;
-  text << "W: " << "Switch to wireframe display" << std::endl
-      << std::endl
-      << "Click on the minimap to jump there" << std::endl
-      << "Right-click to make a lion appear" << std::endl
-      << "Select it with the left mouse button" << std::endl
-      << "Move it around with the right button" << std::endl
-      << "Lshift: " << "Make it run" << std::endl
-      << std::endl
-      << "Go hunt them juicy antilopes!" << std::endl;
+  text << "L: " << "Hide/Display log" << std::endl
+       << "S: " << "Change scroll speed" << std::endl
+       << "W: " << "Switch to wireframe display" << std::endl
+       << std::endl
+       << "Click on the minimap to jump there" << std::endl
+       << "Right-click to make a lion appear" << std::endl
+       << "Select it with the left mouse button" << std::endl
+       << "Move it around with the right button" << std::endl
+       << "Lshift: " << "Make it run" << std::endl
+       << std::endl
+       << "Go hunt them juicy antilopes!" << std::endl;
 
   return text.str();
 }
@@ -234,6 +232,17 @@ void GameSandbox::interruptHunt() {
 
     LogText& logText = LogText::getInstance();
     logText.clear();
+
+    std::ostringstream bestScoreText;
+    bestScoreText << "Best score: " << _bestScore;
+    _interface.setTextTopCenter(bestScoreText.str());
+
+    _interface.setTextTopRight("");
+    _interface.setTextTopLeft(getInfoText());
+
+    std::ostringstream scoreText;
+    scoreText << "Kills: " << _bestScore;
+    _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
   }
 }
 
@@ -258,5 +267,8 @@ void GameSandbox::startNewHunt() {
     _nbLions = 0;
     _huntHasStarted = true;
     _huntStart.restart();
+
+    _interface.setTextTopLeft(getInfoText());
+    _interface.setTextCenter("Hunt Starts!", _msCenterTextDisplayDuration);
   }
 }

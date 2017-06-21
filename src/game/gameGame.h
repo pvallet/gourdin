@@ -5,7 +5,9 @@
 
 class GameGame {
 public:
-  GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface);
+  GameGame (sf::RenderWindow& window, Engine& engine);
+
+  void init();
 
   void update(int msElapsed);
   void render() const;
@@ -24,7 +26,7 @@ public:
   inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
   inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}
 
-  inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}
+  inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoText());}
   inline bool getPovCamera() const {return _povCamera;}
 
   inline const Engine& getEngine() const {return _engine;}
@@ -39,5 +41,5 @@ private:
 
   sf::RenderWindow& _window;
   Engine& _engine;
-  Interface& _interface;
+  Interface _interface;
 };

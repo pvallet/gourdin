@@ -11,10 +11,9 @@
 
 Controller::Controller(sf::RenderWindow& window) :
   _running(true),
-  _interface(window),
   _engine(),
-  _gameGame(window,_engine,_interface),
-  _gameSandbox(window,_engine,_interface),
+  _gameGame(window,_engine),
+  _gameSandbox(window,_engine),
   _eHandlerGame(_gameGame),
   _eHandlerSandbox(_gameSandbox),
   _currentHandlerType(HDLR_SANDBOX),
@@ -27,7 +26,8 @@ Controller::Controller(sf::RenderWindow& window) :
 void Controller::init() {
 
 #ifndef CORE_PROFILE
-  _interface.init();
+  _gameGame.init();
+  _gameSandbox.init();
 #endif
 
   _engine.init();

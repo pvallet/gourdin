@@ -115,7 +115,8 @@ bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& 
   }
 
   else if (event.type == sf::Event::KeyPressed)
-    handleKeyPressed(event);
+    if (!Clock::isGlobalTimerPaused())
+      handleKeyPressed(event);
 
   return EventHandler::handleEvent(event, currentHandler);
 }

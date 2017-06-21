@@ -5,7 +5,9 @@
 
 class GameSandbox {
 public:
-  GameSandbox (sf::RenderWindow& window, Engine& engine, Interface& interface);
+  GameSandbox (sf::RenderWindow& window, Engine& engine);
+
+  void init();
 
   void update(int msElapsed);
   void render() const;
@@ -20,7 +22,8 @@ public:
   void interruptHunt();
   void startNewHunt();
 
-  inline Interface& getInterface() const {return _interface;}
+  inline       Interface& getInterface()       {return _interface;}
+  inline const Interface& getInterface() const {return _interface;}
 
   inline void moveCamera(glm::vec2 newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
@@ -43,6 +46,7 @@ private:
   size_t _nbLions;
   size_t _bestScore;
   int _msHuntDuration;
+  int _msCenterTextDisplayDuration;
 
   Clock _huntStart;
 
@@ -50,5 +54,5 @@ private:
 
   sf::RenderWindow& _window;
   Engine& _engine;
-  Interface& _interface;
+  Interface _interface;
 };

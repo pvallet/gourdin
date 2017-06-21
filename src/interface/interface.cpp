@@ -8,11 +8,15 @@ Interface::Interface(sf::RenderWindow& window):
   _window(window) {}
 
 void Interface::init() {
-  // Log
-  _logFont.loadFromFile("res/FiraMono-Regular.otf");
-  _log.setFont(_logFont);
-  _log.setCharacterSize(10);
-  _log.setFillColor(sf::Color::White);
+  // Text
+  _textFont.loadFromFile("res/FiraMono-Regular.otf");
+  _textTopLeft.setFont(_textFont);
+  _textTopLeft.setCharacterSize(10);
+  _textTopLeft.setFillColor(sf::Color::White);
+  _textTopRight  = sf::Text(_textTopLeft);
+  _textTopCenter = sf::Text(_textTopLeft);
+  _textCenter    = sf::Text(_textTopLeft);
+  _textCenter.setCharacterSize(40);
 
   // Selection rectangle
   _rectSelect.setFillColor(sf::Color::Transparent);
@@ -90,33 +94,34 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
   }
 }
 
-void Interface::renderTextTopRight(const std::string& string) const {
-  sf::Text text(_log);
-  text.setString(string);
-  text.setPosition(_window.getSize().x - text.getLocalBounds().width, 0);
-  _window.draw(text);
+void Interface::renderText() const {
+  _window.draw(_textTopLeft);
+  _window.draw(_textTopRight);
+  _window.draw(_textTopCenter);
+
+  if (_textCenterChrono.isStillRunning())
+    _window.draw(_textCenter);
 }
 
-void Interface::renderTextTopLeft(const std::string& string) const {
-  sf::Text text(_log);
-  text.setString(string);
-  _window.draw(text);
+void Interface::setTextTopLeft(const std::string& string) {
+  _textTopLeft.setString(string);
 }
 
-void Interface::renderTextTopCenter(const std::string& string) const {
-  sf::Text text(_log);
-  text.setString(string);
-  text.setPosition(_window.getSize().x / 2 - text.getLocalBounds().width / 2, 0);
-  _window.draw(text);
+void Interface::setTextTopRight(const std::string& string) {
+  _textTopRight.setString(string);
+  _textTopRight.setPosition(_window.getSize().x - _textTopRight.getLocalBounds().width, 0);
 }
 
-void Interface::renderTextCenter(const std::string& string) const {
-  sf::Text text(_log);
-  text.setString(string);
-  text.setCharacterSize(40);
-  text.setPosition(_window.getSize().x / 2 - text.getLocalBounds().width / 2,
-                   _window.getSize().y / 2 - text.getLocalBounds().height / 2);
-  _window.draw(text);
+void Interface::setTextTopCenter(const std::string& string) {
+  _textTopCenter.setString(string);
+  _textTopCenter.setPosition(_window.getSize().x / 2 - _textTopCenter.getLocalBounds().width / 2, 0);
+}
+
+void Interface::setTextCenter(const std::string& string, int msDuration) {
+  _textCenter.setString(string);
+  _textCenter.setPosition(_window.getSize().x / 2 - _textCenter.getLocalBounds().width / 2,
+                          _window.getSize().y / 2 - _textCenter.getLocalBounds().height / 2);
+  _textCenterChrono.reset(msDuration);
 }
 
 void Interface::renderRectSelect() const {

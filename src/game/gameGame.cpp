@@ -2,12 +2,20 @@
 
 #include "camera.h"
 
-GameGame::GameGame (sf::RenderWindow& window, Engine& engine, Interface& interface):
+GameGame::GameGame (sf::RenderWindow& window, Engine& engine):
   _window(window),
   _engine(engine),
-  _interface(interface) {}
+  _interface(window),
+  _povCamera(false) {}
+
+void GameGame::init() {
+  _interface.init();
+  _interface.setTextTopLeft(getInfoText());
+}
 
 void GameGame::update(int msElapsed) {
+  if (Clock::isGlobalTimerPaused())
+    _interface.setTextCenter("PAUSED", 1);
   _engine.update(msElapsed);
 }
 
@@ -17,10 +25,7 @@ void GameGame::render() const {
 #ifndef CORE_PROFILE
   _window.pushGLStates();
 
-  _interface.renderTextTopLeft(getInfoText());
-
-  if (Clock::isGlobalTimerPaused())
-    _interface.renderTextCenter("PAUSED");
+  _interface.renderText();
 
   _window.popGLStates();
 #endif
