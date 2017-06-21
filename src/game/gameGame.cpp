@@ -3,10 +3,10 @@
 #include "camera.h"
 
 GameGame::GameGame (sf::RenderWindow& window, Engine& engine):
+  _povCamera(false),
   _window(window),
   _engine(engine),
-  _interface(window),
-  _povCamera(false) {}
+  _interface(window) {}
 
 void GameGame::init() {
   _interface.init();

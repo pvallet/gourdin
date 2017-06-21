@@ -140,7 +140,7 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
 
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
   if (_selection.empty()) {
-    if (_nbLions < _maxSimultaneousLions) {
+    if (!_huntHasStarted || _nbLions < _maxSimultaneousLions) {
       _engine.addLion(screenTarget);
       _nbLions++;
     }
