@@ -58,9 +58,11 @@ void Lion::update(int msElapsed) {
 }
 
 void Lion::stop() {
-	_speed = _speedWalking;
-	_status = WAITING;
-	Controllable::stop();
+	if (_status != ATTACKING) {
+		_speed = _speedWalking;
+		_status = WAITING;
+		Controllable::stop();
+	}
 }
 
 void Lion::beginRunning() {
