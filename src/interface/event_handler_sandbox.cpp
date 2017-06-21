@@ -151,7 +151,6 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
-  makeThetaFitInAllowedZone(theta, normal, -cos((cam.getPhi()+20)*RAD));
   cam.setTheta(theta);
 }
 
