@@ -98,15 +98,14 @@ void Lion::beginChasing() {
 
 void Lion::setTarget(glm::vec2 t, ANM_TYPE anim) {
 	(void) anim;
-	if (_status == RUNNING || _status == ATTACKING || _status == CHASING)
+	if (_status == RUNNING || _status == CHASING)
 		Controllable::setTarget(t, RUN);
-	else {
+	else if (_status == WAITING) {
 		Controllable::setTarget(t, WALK);
-
-		if (_status == WAITING) {
-			beginWalking();
-		}
+		beginWalking();
 	}
+	else if (_status == WALKING)
+		Controllable::setTarget(t,WALK);
 }
 
 void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
