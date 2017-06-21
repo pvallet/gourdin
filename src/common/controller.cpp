@@ -54,8 +54,10 @@ void Controller::run() {
       if (_currentHandlerType != lastHandlerType) {
         if (_currentHandlerType == HDLR_GAME) {
           // If we can spawn a tribe we go back to sandbox mode
-          if (!_eHandlerGame.gainFocus())
+          if (!_eHandlerGame.gainFocus()) {
             _currentHandlerType = HDLR_SANDBOX;
+            _gameSandbox.displayError("Can't spawn a tribe here");
+          }
         }
         else
           _eHandlerSandbox.gainFocus();

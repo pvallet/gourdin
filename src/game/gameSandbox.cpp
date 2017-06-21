@@ -166,7 +166,7 @@ void GameSandbox::createLion(glm::ivec2 screenTarget) {
       _nbLions++;
     }
   } catch (const std::runtime_error& e) {
-    _interface.setTextBottomCenter(e.what(), _msCenterTextDisplayDuration);
+    displayError(e.what());
   }
 }
 

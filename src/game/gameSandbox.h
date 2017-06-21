@@ -35,6 +35,7 @@ public:
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
   inline bool huntHasStarted() const {return _huntHasStarted;}
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
+  inline void displayError(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
   inline const Engine& getEngine() const {return _engine;}
 
