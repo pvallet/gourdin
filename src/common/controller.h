@@ -1,8 +1,9 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL.h>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Graphics.hpp>
 
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"
@@ -22,7 +23,7 @@
  */
 class Controller {
 public:
-	Controller(sf::RenderWindow& window);
+	Controller(SDL_Window* window);
 
 	void init();
 	void run();
@@ -38,12 +39,12 @@ private:
 	int _msElapsed;
 
 	Engine _engine;
-	GameGame _gameGame;
-	GameSandbox _gameSandbox;
+	// GameGame _gameGame;
+	// GameSandbox _gameSandbox;
 
-	EventHandlerGame    _eHandlerGame;
-	EventHandlerSandbox _eHandlerSandbox;
+	// EventHandlerGame    _eHandlerGame;
+	// EventHandlerSandbox _eHandlerSandbox;
 	EventHandlerType    _currentHandlerType;
 
-	sf::RenderWindow& _window;
+	SDL_Window* _window;
 };

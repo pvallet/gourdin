@@ -38,16 +38,17 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
 set(GLM_ROOT_DIR   external/glm)
-set(SFML_ROOT      external/SFML)
 set(GLEW_LOCATION  external/glew)
+set(SFML_ROOT      external/SFML)
 
 find_package(OpenGL)
 find_package(GLM)
-find_package(SFML 2.4.1 COMPONENTS system window graphics)
 find_package(GLEW)
+find_package(SFML 2.4.1 COMPONENTS system window graphics)
+find_package(SDL2)
 
 # If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SFML_FOUND AND GLEW_FOUND))
+if ( NOT(OPENGL_FOUND AND GLM_FOUND AND GLEW_FOUND AND SFML_FOUND AND SDL2_FOUND))
 
   message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
 
@@ -56,8 +57,9 @@ endif()
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
-  ${SFML_INCLUDE_DIR}
   ${GLEW_INCLUDE_DIRS}
+  ${SFML_INCLUDE_DIR}
+  ${SDL2_INCLUDE_DIR}
 )
 
 # Find sources recursively
@@ -103,8 +105,9 @@ add_executable(out ${SOURCE_FILES})
 
 target_link_libraries(out
   ${OPENGL_LIBRARIES}
-  ${SFML_LIBRARIES}
   ${GLEW_LIBRARIES}
+  ${SFML_LIBRARIES}
+  ${SDL2_LIBRARIES}
 )
 
 # If we compile the dependencies ourselves, we need to copy the dlls into the
