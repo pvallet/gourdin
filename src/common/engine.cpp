@@ -25,7 +25,7 @@ Engine::Engine() :
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+                              CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 }

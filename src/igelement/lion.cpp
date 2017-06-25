@@ -16,7 +16,7 @@ Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry&
 	_rangeAttack(8.f),
 	_rangeChase(13.f),
 	_status(WAITING),
-	_msAnimAttack(2.f * graphics.getAnimationTime(ATTACK)) {
+	_msAnimAttack(2.0f * graphics.getAnimationTime(ATTACK)-150) {
 
 	_speed = _speedWalking;
 }
@@ -58,11 +58,9 @@ void Lion::update(int msElapsed) {
 }
 
 void Lion::stop() {
-	if (_status != ATTACKING) {
-		_speed = _speedWalking;
-		_status = WAITING;
-		Controllable::stop();
-	}
+	_speed = _speedWalking;
+	_status = WAITING;
+	Controllable::stop();
 }
 
 void Lion::beginRunning() {

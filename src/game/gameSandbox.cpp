@@ -271,7 +271,7 @@ void GameSandbox::interruptHunt() {
     _interface.setTextTopLeft(getInfoText());
 
     std::ostringstream scoreText;
-    scoreText << "Kills: " << _bestScore;
+    scoreText << "Kills: " << Lion::getNbKilled();
     _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
   }
 }
