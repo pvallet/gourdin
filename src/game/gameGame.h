@@ -1,11 +1,13 @@
 #pragma once
 
+#include <SDL2/SDL.h>
+
 #include "engine.h"
 #include "interface.h"
 
 class GameGame {
 public:
-  GameGame (sf::RenderWindow& window, Engine& engine);
+  GameGame (SDL_Window* window, Engine& engine);
 
   void init();
 
@@ -26,7 +28,7 @@ public:
   inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
   inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}
 
-  inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoText());}
+  inline void setPovCamera(bool povCamera) {_povCamera = povCamera;}// _interface.setTextTopLeft(getInfoText());}
   inline bool getPovCamera() const {return _povCamera;}
 
   inline const Engine& getEngine() const {return _engine;}
@@ -39,7 +41,7 @@ private:
 
   bool _povCamera;
 
-  sf::RenderWindow& _window;
+  SDL_Window* _window;
   Engine& _engine;
-  Interface _interface;
+  // Interface _interface;
 };

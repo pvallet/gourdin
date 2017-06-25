@@ -17,43 +17,44 @@ EventHandlerGame::EventHandlerGame(GameGame& game) :
   _draggingCamera(false),
   _game(game) {}
 
-void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
+void EventHandlerGame::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
   glm::vec2 moveFocused = _game.getFocusedPos();
   float theta = cam.getTheta()*M_PI/180.f;
 
-  switch(event.key.code) {
-    case sf::Keyboard::Num1:
+  switch(event.key.keysym.scancode) {
+    case SDL_SCANCODE_1:
       if (_game.getPovCamera())
         resetCamera(false);
       break;
 
-    case sf::Keyboard::Num2:
+    case SDL_SCANCODE_2:
       if (!_game.getPovCamera())
         resetCamera(true);
       break;
 
-    case sf::Keyboard::S:
+    case SDL_SCANCODE_S:
       moveFocused += glm::vec2(cos(theta), sin(theta));
       break;
 
-    case sf::Keyboard::D:
+    case SDL_SCANCODE_D:
       moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
       break;
 
-    case sf::Keyboard::Z:
+    case SDL_SCANCODE_W:
       moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
       break;
 
-    case sf::Keyboard::Q:
+    case SDL_SCANCODE_A:
       moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
       break;
 
   }
 
   // Switch selection to closest character in the direction given by moveFocused
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) &&
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+  if (keyboardState[SDL_SCANCODE_LSHIFT] &&
       moveFocused != _game.getFocusedPos()) {
 
     _previousFocusedPos = _game.getFocusedPos();
@@ -62,91 +63,96 @@ void EventHandlerGame::handleKeyPressed(const sf::Event& event) {
   }
 }
 
-void EventHandlerGame::handleKeyReleased(const sf::Event& event) {
-  switch(event.key.code) {
-    case sf::Keyboard::Z:
-    case sf::Keyboard::Q:
-    case sf::Keyboard::S:
-    case sf::Keyboard::D:
+void EventHandlerGame::handleKeyReleased(const SDL_Event& event) {
+  switch(event.key.keysym.scancode) {
+    case SDL_SCANCODE_Z:
+    case SDL_SCANCODE_Q:
+    case SDL_SCANCODE_S:
+    case SDL_SCANCODE_D:
     // The user is not moving the character any more
-      if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Z) &&
-          !sf::Keyboard::isKeyPressed(sf::Keyboard::Q) &&
-          !sf::Keyboard::isKeyPressed(sf::Keyboard::S) &&
-          !sf::Keyboard::isKeyPressed(sf::Keyboard::D) &&
-          !sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+      if (!keyboardState[SDL_SCANCODE_Z] &&
+          !keyboardState[SDL_SCANCODE_Q] &&
+          !keyboardState[SDL_SCANCODE_S] &&
+          !keyboardState[SDL_SCANCODE_D] &&
+          !keyboardState[SDL_SCANCODE_LSHIFT])
         _game.stopMoving();
       break;
   }
 }
 
-bool EventHandlerGame::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
+bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
-  if (event.type == sf::Event::MouseButtonPressed) {
-    _oldPhi = cam.getPhi();
-    _oldTheta = cam.getTheta();
-  }
+  switch (event.type) {
+    case SDL_MOUSEBUTTONDOWN:
+      _oldPhi = cam.getPhi();
+      _oldTheta = cam.getTheta();
+    break;
 
-  else if (event.type == sf::Event::MouseButtonReleased) {
-    if (!_draggingCamera) {
-      glm::vec2 previousPos = _game.getFocusedPos();
-      _game.moveCharacter(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+    case SDL_MOUSEBUTTONUP:
+      if (!_draggingCamera) {
+        glm::vec2 previousPos = _game.getFocusedPos();
+        _game.moveCharacter(glm::ivec2(event.button.x, event.button.y));
 
-      if (previousPos != _game.getFocusedPos()) {
-        _transferStart.restart();
-        _previousFocusedPos = previousPos;
-      }
-    }
-
-    _draggingCamera = false;
-  }
-
-  else if (event.type == sf::Event::MouseMoved) {
-    if (_beginDragLeft != glm::ivec2(0,0)) {
-      if (_game.getPovCamera()) {
-        _oldTheta = cam.getTheta();
-        _oldPhi = cam.getPhi();
-        cam.setTheta(_oldTheta + (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
-        cam.setPhi(_oldPhi + (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
-        _beginDragLeft.x = event.mouseMove.x;
-        _beginDragLeft.y = event.mouseMove.y;
-        _draggingCamera = true;
-      }
-
-      else {
-        glm::vec2 newMousePos(event.mouseMove.x,event.mouseMove.y);
-        glm::vec2 beginDragLeft(_beginDragLeft);
-        if (glm::length(beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
-          _draggingCamera = true;
-
-        if (_draggingCamera) {
-          cam.setTheta(_oldTheta);
-
-          // Dragging the camera must be coherent when the mouse goes around the central character
-          // The sense of rotation depends inwhich quarter of the screen the cursor is
-          // If the quarter changes, we reset the origin of the dragging
-          if (_beginDragLeft.x > cam.getW() / 2.f)
-              cam.rotate( (event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
-          else
-              cam.rotate(-(event.mouseMove.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
-
-          if (_beginDragLeft.y < cam.getH() / 2.f)
-              cam.rotate( (event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
-          else
-              cam.rotate(-(event.mouseMove.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
-
-          _beginDragLeft = newMousePos;
-          _oldTheta = cam.getTheta();
+        if (previousPos != _game.getFocusedPos()) {
+          _transferStart.restart();
+          _previousFocusedPos = previousPos;
         }
       }
-    }
+
+      _draggingCamera = false;
+    break;
+
+    case SDL_MOUSEMOTION:
+      if (_beginDragLeft != glm::ivec2(0,0)) {
+        if (_game.getPovCamera()) {
+          _oldTheta = cam.getTheta();
+          _oldPhi = cam.getPhi();
+          cam.setTheta(_oldTheta + (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
+          cam.setPhi(_oldPhi + (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+          _beginDragLeft.x = event.motion.x;
+          _beginDragLeft.y = event.motion.y;
+          _draggingCamera = true;
+        }
+
+        else {
+          glm::vec2 newMousePos(event.motion.x,event.motion.y);
+          glm::vec2 beginDragLeft(_beginDragLeft);
+          if (glm::length(beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
+            _draggingCamera = true;
+
+          if (_draggingCamera) {
+            cam.setTheta(_oldTheta);
+
+            // Dragging the camera must be coherent when the mouse goes around the central character
+            // The sense of rotation depends inwhich quarter of the screen the cursor is
+            // If the quarter changes, we reset the origin of the dragging
+            if (_beginDragLeft.x > cam.getW() / 2.f)
+                cam.rotate( (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+            else
+                cam.rotate(-(event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+
+            if (_beginDragLeft.y < cam.getH() / 2.f)
+                cam.rotate( (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+            else
+                cam.rotate(-(event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+
+            _beginDragLeft = newMousePos;
+            _oldTheta = cam.getTheta();
+          }
+        }
+      }
+    break;
+
+    case SDL_KEYDOWN:
+      handleKeyPressed(event);
+      break;
+
+    case SDL_KEYUP:
+      handleKeyReleased(event);
+      break;
   }
-
-  else if (event.type == sf::Event::KeyPressed)
-    handleKeyPressed(event);
-
-  else if (event.type == sf::Event::KeyReleased)
-    handleKeyReleased(event);
 
   return EventHandler::handleEvent(event, currentHandler);
 }
@@ -195,6 +201,7 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
 
 void EventHandlerGame::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
 
   float transferProgress = _transferStart.getElapsedTime() / (float) TIME_TRANSFER_MS;
 
@@ -211,16 +218,16 @@ void EventHandlerGame::onGoingEvents(int msElapsed) {
     if (!_draggingCamera) {
       _oldPhi = phi; _oldTheta = theta;
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+      if (keyboardState[SDL_SCANCODE_LEFT])
         theta += ROTATION_ANGLE_PMS * msElapsed;
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+      if (keyboardState[SDL_SCANCODE_RIGHT])
         theta -= ROTATION_ANGLE_PMS * msElapsed;
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+      if (keyboardState[SDL_SCANCODE_UP])
         phi += ROTATION_ANGLE_PMS * msElapsed;
 
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+      if (keyboardState[SDL_SCANCODE_DOWN])
         phi -= ROTATION_ANGLE_PMS * msElapsed;
     }
 
@@ -228,10 +235,10 @@ void EventHandlerGame::onGoingEvents(int msElapsed) {
   }
 
   else {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+    if (keyboardState[SDL_SCANCODE_E])
       theta += ROTATION_ANGLE_PMS * msElapsed;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+    if (keyboardState[SDL_SCANCODE_Q])
       theta -= ROTATION_ANGLE_PMS * msElapsed;
 
     handleCamBoundsGodMode(theta);
@@ -239,17 +246,17 @@ void EventHandlerGame::onGoingEvents(int msElapsed) {
 
   cam.setValues(cam.getZoom(), theta, phi);
 
-  if (!sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) {
+  if (!keyboardState[SDL_SCANCODE_LSHIFT]) {
     glm::vec2 moveFocused = _game.getFocusedPos();
     float theta = cam.getTheta()*M_PI/180.f;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+    if (keyboardState[SDL_SCANCODE_S])
       moveFocused += glm::vec2(cos(theta), sin(theta));
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+    if (keyboardState[SDL_SCANCODE_D])
       moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+    if (keyboardState[SDL_SCANCODE_W])
       moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+    if (keyboardState[SDL_SCANCODE_A])
       moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
 
     if (moveFocused != _game.getFocusedPos())

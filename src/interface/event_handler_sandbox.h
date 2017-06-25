@@ -7,14 +7,14 @@ class EventHandlerSandbox : public EventHandler {
 public:
   EventHandlerSandbox(GameSandbox& game);
 
-  bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
+  bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(int msElapsed);
 
   bool gainFocus();
 
 private:
-  void handleClick(const sf::Event& event);
-  void handleKeyPressed(const sf::Event& event);
+  void handleClick(const SDL_Event& event);
+  void handleKeyPressed(const SDL_Event& event);
 
   bool _addSelect;
   float _scrollSpeed;

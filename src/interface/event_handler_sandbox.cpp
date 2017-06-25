@@ -16,76 +16,76 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
   _game.setScrollSpeedToSlow(true);
 }
 
-void EventHandlerSandbox::handleClick(const sf::Event& event) {
-  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.mouseButton.x, event.mouseButton.y);
+void EventHandlerSandbox::handleClick(const SDL_Event& event) {
+  // glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.button.x, event.button.y);
 
-  if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-    _game.moveCamera(MAX_COORD * minimapCoord);
-  }
-
-  else {
+  // if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
+  //   _game.moveCamera(MAX_COORD * minimapCoord);
+  // }
+  //
+  // else {
     // Begin selection
-    if (event.mouseButton.button == sf::Mouse::Left) {
+    if (event.button.button == SDL_BUTTON_LEFT) {
       if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
           _addSelect = true;
       else
           _addSelect = false;
 
-      _rectSelect = glm::ivec4(event.mouseButton.x, event.mouseButton.y,0,0);
-      _game.getInterface().setRectSelect(_rectSelect);
+      _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
+      // _game.getInterface().setRectSelect(_rectSelect);
     }
 
     // Move selection
-    if (event.mouseButton.button == sf::Mouse::Right) {
+    if (event.button.button == SDL_BUTTON_RIGHT) {
       if (_game.isSelectionEmpty())
-        _game.createLion(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+        _game.createLion(glm::ivec2(event.button.x, event.button.y));
       else {
-        _game.moveSelection(glm::ivec2(event.mouseButton.x, event.mouseButton.y));
+        _game.moveSelection(glm::ivec2(event.button.x, event.button.y));
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
             sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
           _game.makeLionsRun();
       }
     }
-  }
+  // }
 }
 
-void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
-  switch(event.key.code) {
-    case sf::Keyboard::Space:
+void EventHandlerSandbox::handleKeyPressed(const SDL_Event& event) {
+  switch(event.key.keysym.scancode) {
+    case SDL_SCANCODE_SPACE:
       _game.goBackToSelection();
       break;
 
-    case sf::Keyboard::LShift:
-    case sf::Keyboard::RShift:
+    case SDL_SCANCODE_LSHIFT:
+    case SDL_SCANCODE_RSHIFT:
       _game.switchLionsRun();
       break;
 
     // Delete first selected lion
-    case sf::Keyboard::Delete:
+    case SDL_SCANCODE_DELETE:
       _game.killLion();
       break;
 
-    case sf::Keyboard::A:
-    case sf::Keyboard::Return:
+    case SDL_SCANCODE_Q:
+    case SDL_SCANCODE_RETURN:
       _game.selectAllLions();
       break;
 
-    case sf::Keyboard::B:
+    case SDL_SCANCODE_B:
       _game.benchmark();
       break;
 
-    case sf::Keyboard::H:
+    case SDL_SCANCODE_H:
       if (_game.huntHasStarted())
         _game.interruptHunt();
       else
         _game.startNewHunt();
       break;
 
-    case sf::Keyboard::L:
+    case SDL_SCANCODE_L:
       _game.switchLog();
       break;
 
-    case sf::Keyboard::E:
+    case SDL_SCANCODE_E:
       if (_game.getScrollSpeedSlow()) {
         _scrollSpeed = SCROLL_SPEED_FAST;
         _game.setScrollSpeedToSlow(false);
@@ -96,75 +96,83 @@ void EventHandlerSandbox::handleKeyPressed(const sf::Event& event) {
       }
       break;
 
-    case sf::Keyboard::W:
+    case SDL_SCANCODE_Z:
       _game.switchWireframe();
       break;
   }
 }
 
-bool EventHandlerSandbox::handleEvent(const sf::Event& event, EventHandlerType& currentHandler) {
+bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
-  if (event.type == sf::Event::MouseWheelMoved)
-    cam.zoom(- _scrollSpeed * event.mouseWheel.delta);
+  switch (event.type) {
+    case SDL_MOUSEWHEEL:
+      cam.zoom(- _scrollSpeed * event.wheel.y);
+      break;
 
-  else if (event.type == sf::Event::MouseButtonPressed)
-    handleClick(event);
+    case SDL_MOUSEBUTTONDOWN:
+      handleClick(event);
+      break;
 
-  else if (event.type == sf::Event::MouseButtonReleased) {
-    if (event.mouseButton.button == sf::Mouse::Left) {
-      _game.select(_rectSelect, _addSelect);
-      _rectSelect = glm::ivec4(event.mouseButton.x, event.mouseButton.y,0,0);
-      _game.getInterface().setRectSelect(_rectSelect);
-    }
+    case SDL_MOUSEBUTTONUP:
+      if (event.button.button == SDL_BUTTON_LEFT) {
+        _game.select(_rectSelect, _addSelect);
+        _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
+        // _game.getInterface().setRectSelect(_rectSelect);
+      }
+      break;
+
+    case SDL_MOUSEMOTION:
+      if (_beginDragLeft != glm::ivec2(0,0)) {
+        _rectSelect.z = event.motion.x - _rectSelect.x;
+        _rectSelect.w = event.motion.y - _rectSelect.y;
+        // _game.getInterface().setRectSelect(_rectSelect);
+      }
+      break;
+
+    case SDL_KEYDOWN:
+      if (!Clock::isGlobalTimerPaused())
+        handleKeyPressed(event);
+      break;
   }
-
-  else if (event.type == sf::Event::MouseMoved) {
-    if (_beginDragLeft != glm::ivec2(0,0)) {
-      _rectSelect.z = event.mouseMove.x - _rectSelect.x;
-      _rectSelect.w = event.mouseMove.y - _rectSelect.y;
-      _game.getInterface().setRectSelect(_rectSelect);
-    }
-  }
-
-  else if (event.type == sf::Event::KeyPressed)
-    if (!Clock::isGlobalTimerPaused())
-      handleKeyPressed(event);
 
   return EventHandler::handleEvent(event, currentHandler);
 }
 
 void EventHandlerSandbox::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+  int mousePosX, mousePosY;
+  SDL_GetMouseState(&mousePosX, &mousePosY);
 
   float realTranslationValue = TRANSLATION_VALUE_PMS * msElapsed * cam.getZoom();
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
-      sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+  if (keyboardState[SDL_SCANCODE_UP] ||
+      keyboardState[SDL_SCANCODE_W])
     cam.translate(0.f, - realTranslationValue);
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-      sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+  if (keyboardState[SDL_SCANCODE_DOWN] ||
+      keyboardState[SDL_SCANCODE_S])
     cam.translate(0.f, realTranslationValue);
 
-  if (sf::Mouse::getPosition().x == 0)
+  if (mousePosX == 0)
     cam.translate(- realTranslationValue, 0.f);
 
-  if (sf::Mouse::getPosition().y == 0)
+  if (mousePosY == 0)
     cam.translate(0.f, - realTranslationValue);
 
-  if ((int) sf::Mouse::getPosition().x == (int) cam.getW() - 1)
+  if (mousePosX == (int) cam.getW() - 1)
     cam.translate(realTranslationValue, 0.f);
 
-  if ((int) sf::Mouse::getPosition().y == (int) cam.getH() - 1)
+  if (mousePosY == (int) cam.getH() - 1)
     cam.translate(0.f, realTranslationValue);
 
   float theta = cam.getTheta();
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-      sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+  if (keyboardState[SDL_SCANCODE_RIGHT] ||
+      keyboardState[SDL_SCANCODE_D])
     theta += ROTATION_ANGLE_PMS * msElapsed;
 
-  if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
-      sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+  if (keyboardState[SDL_SCANCODE_LEFT] ||
+      keyboardState[SDL_SCANCODE_A])
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
   cam.setTheta(theta);

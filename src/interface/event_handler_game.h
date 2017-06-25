@@ -7,14 +7,14 @@ class EventHandlerGame : public EventHandler {
 public:
   EventHandlerGame(GameGame& game);
 
-  bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
+  bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
   void onGoingEvents(int msElapsed);
 
   bool gainFocus();
 
 private:
-  void handleKeyPressed(const sf::Event& event);
-  void handleKeyReleased(const sf::Event& event);
+  void handleKeyPressed(const SDL_Event& event);
+  void handleKeyReleased(const SDL_Event& event);
   void handleCamBoundsGodMode(float& theta) const;
   void handleCamBoundsPOVMode(float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal

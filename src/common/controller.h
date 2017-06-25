@@ -3,17 +3,12 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
 #include <SFML/OpenGL.hpp>
-#include <SFML/Graphics.hpp>
 
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"
 #include "engine.h"
 #include "gameGame.h"
 #include "gameSandbox.h"
-
-#ifdef __APPLE__
-#define CORE_PROFILE
-#endif
 
 #ifndef NDEBUG
 	class TestHandler;
@@ -39,11 +34,11 @@ private:
 	int _msElapsed;
 
 	Engine _engine;
-	// GameGame _gameGame;
-	// GameSandbox _gameSandbox;
+	GameGame _gameGame;
+	GameSandbox _gameSandbox;
 
-	// EventHandlerGame    _eHandlerGame;
-	// EventHandlerSandbox _eHandlerSandbox;
+	EventHandlerGame    _eHandlerGame;
+	EventHandlerSandbox _eHandlerSandbox;
 	EventHandlerType    _currentHandlerType;
 
 	SDL_Window* _window;

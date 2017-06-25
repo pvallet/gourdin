@@ -1,7 +1,9 @@
 #pragma once
 
-#include <SFML/Window.hpp>
+#include <SDL2/SDL.h>
 #include <glm/glm.hpp>
+
+#include <map>
 
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
@@ -10,7 +12,7 @@ public:
   EventHandler() {}
 
   // Returns whether the engine will stop or not
-  virtual bool handleEvent(const sf::Event& event, EventHandlerType& currentHandler);
+  virtual bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
   virtual void onGoingEvents(int msElapsed) = 0;
 
   virtual bool gainFocus() = 0;
