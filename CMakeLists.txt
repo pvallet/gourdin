@@ -46,9 +46,10 @@ find_package(GLM)
 find_package(GLEW)
 find_package(SFML 2.4.1 COMPONENTS system window graphics)
 find_package(SDL2)
+find_package(SDL2_image)
 
 # If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND GLM_FOUND AND GLEW_FOUND AND SFML_FOUND AND SDL2_FOUND))
+if ( NOT(OPENGL_FOUND AND GLM_FOUND AND GLEW_FOUND AND SFML_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
 
   message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
 
@@ -60,6 +61,7 @@ set(INCLUDE_DIRS
   ${GLEW_INCLUDE_DIRS}
   ${SFML_INCLUDE_DIR}
   ${SDL2_INCLUDE_DIR}
+  ${SDL2_IMAGE_INCLUDE_DIRS}
 )
 
 # Find sources recursively
@@ -107,7 +109,8 @@ target_link_libraries(out
   ${OPENGL_LIBRARIES}
   ${GLEW_LIBRARIES}
   ${SFML_LIBRARIES}
-  ${SDL2_LIBRARIES}
+  ${SDL2_LIBRARY}
+  ${SDL2_IMAGE_LIBRARIES}
 )
 
 # If we compile the dependencies ourselves, we need to copy the dlls into the

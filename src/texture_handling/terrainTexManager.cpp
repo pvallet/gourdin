@@ -1,35 +1,49 @@
 #include "terrainTexManager.h"
 
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL_image.h>
+#include <iostream>
 #include <sstream>
 
-glm::uvec2 TerrainTexManager::loadTexture(std::string folder) {
-	sf::Image img;
+glm::uvec2 TerrainTexManager::loadTexture(std::string path) {
+	SDL_Surface* img = nullptr;
+  img = IMG_Load(path.c_str());
 
-  img.loadFromFile(folder);
+	if (img) {
+	  _texIDs.push_back(0);
 
-  _texIDs.push_back(0);
+		glm::uvec2 imgSize(img->w, img->h);
 
-	glGenTextures(1, &_texIDs.back());
+		if (img->format->BytesPerPixel == 4)
+			std::cerr << "Error: image " << path << " has an alpha channel and should not." << '\n';
 
-  glBindTexture(GL_TEXTURE_2D, _texIDs.back());
+		glGenTextures(1, &_texIDs.back());
 
-  glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGBA,
-                  img.getSize().x, img.getSize().y,
-                  0,
-                  GL_RGBA, GL_UNSIGNED_BYTE, img.getPixelsPtr()
-  );
+	  glBindTexture(GL_TEXTURE_2D, _texIDs.back());
 
-  glGenerateMipmap(GL_TEXTURE_2D);
+	  glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGB,
+	                  imgSize.x, imgSize.y,
+	                  0,
+	                  GL_RGB, GL_UNSIGNED_BYTE, img->pixels
+	  );
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	  glGenerateMipmap(GL_TEXTURE_2D);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	return glm::uvec2(img.getSize().x, img.getSize().y);
+	  glBindTexture(GL_TEXTURE_2D, 0);
+
+		SDL_FreeSurface(img);
+
+		return imgSize;
+	}
+
+	else {
+		std::cerr << "Unable to load texture: " << path << ", " << SDL_GetError() << std::endl;
+		return glm::uvec2(0,0);
+	}
 }
 
 void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {
