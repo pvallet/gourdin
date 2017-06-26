@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"

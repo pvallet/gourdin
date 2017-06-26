@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 #include <glm/glm.hpp>
 
 class TerrainTexManager {
