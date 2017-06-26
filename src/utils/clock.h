@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/System.hpp>
+#include <SDL2/SDL.h>
 
 enum ClockType {ATTACHED_TO_GLOBAL_TIMER, INDEPENDENT};
 
@@ -16,7 +16,6 @@ public:
   static void resumeGlobalTimer();
 
 private:
-  static const sf::Clock _globalTimer;
   static int _msGlobalInitialTime;
   static int _msGlobalPauseTime;
 

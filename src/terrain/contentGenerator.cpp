@@ -1,5 +1,6 @@
 #include "contentGenerator.h"
 
+#include <algorithm>
 #include <cstdlib>
 
 #include "antilope.h"
