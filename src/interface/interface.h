@@ -2,7 +2,7 @@
 
 #include <GL/glew.h>
 #include <SFML/Graphics.hpp>
-#include "opengl.h"
+#include <SDL2/SDL_opengl.h>
 
 #include <set>
 
