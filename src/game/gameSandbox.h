@@ -27,8 +27,8 @@ public:
   void interruptHunt();
   void startNewHunt();
 
-  // inline       Interface& getInterface()       {return _interface;}
-  // inline const Interface& getInterface() const {return _interface;}
+  inline       Interface& getInterface()       {return _interface;}
+  inline const Interface& getInterface() const {return _interface;}
 
   inline void moveCamera(glm::vec2 newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
@@ -37,7 +37,7 @@ public:
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
   inline bool huntHasStarted() const {return _huntHasStarted;}
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
-  inline void displayError(const std::string& error) {}//_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
+  inline void displayError(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
   inline const Engine& getEngine() const {return _engine;}
 
@@ -61,5 +61,5 @@ private:
 
   SDL_Window* _window;
   Engine& _engine;
-  // Interface _interface;
+  Interface _interface;
 };

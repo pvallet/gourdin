@@ -17,22 +17,24 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
 }
 
 void EventHandlerSandbox::handleClick(const SDL_Event& event) {
-  // glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.button.x, event.button.y);
+  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.button.x, event.button.y);
 
-  // if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-  //   _game.moveCamera(MAX_COORD * minimapCoord);
-  // }
-  //
-  // else {
+  if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
+    _game.moveCamera(MAX_COORD * minimapCoord);
+  }
+
+  else {
+    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+
     // Begin selection
     if (event.button.button == SDL_BUTTON_LEFT) {
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+      if (keyboardState[SDL_SCANCODE_LSHIFT])
           _addSelect = true;
       else
           _addSelect = false;
 
       _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
-      // _game.getInterface().setRectSelect(_rectSelect);
+      _game.getInterface().setRectSelect(_rectSelect);
     }
 
     // Move selection
@@ -41,12 +43,12 @@ void EventHandlerSandbox::handleClick(const SDL_Event& event) {
         _game.createLion(glm::ivec2(event.button.x, event.button.y));
       else {
         _game.moveSelection(glm::ivec2(event.button.x, event.button.y));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::RShift))
+        if (keyboardState[SDL_SCANCODE_LSHIFT] ||
+            keyboardState[SDL_SCANCODE_RSHIFT])
           _game.makeLionsRun();
       }
     }
-  // }
+  }
 }
 
 void EventHandlerSandbox::handleKeyPressed(const SDL_Event& event) {
@@ -118,7 +120,7 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
       if (event.button.button == SDL_BUTTON_LEFT) {
         _game.select(_rectSelect, _addSelect);
         _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
-        // _game.getInterface().setRectSelect(_rectSelect);
+        _game.getInterface().setRectSelect(_rectSelect);
       }
       break;
 
@@ -126,7 +128,7 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
       if (_beginDragLeft != glm::ivec2(0,0)) {
         _rectSelect.z = event.motion.x - _rectSelect.x;
         _rectSelect.w = event.motion.y - _rectSelect.y;
-        // _game.getInterface().setRectSelect(_rectSelect);
+        _game.getInterface().setRectSelect(_rectSelect);
       }
       break;
 

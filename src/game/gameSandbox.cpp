@@ -13,13 +13,13 @@ GameSandbox::GameSandbox (SDL_Window* window, Engine& engine):
   _msHuntDuration(120000),
   _msCenterTextDisplayDuration(1000),
   _window(window),
-  _engine(engine) {}
-  // _interface(window) {}
+  _engine(engine),
+  _interface(window) {}
 
 void GameSandbox::init() {
-  // _interface.init();
-  // _interface.setTextTopLeft(getInfoText());
-  // _interface.setTextTopCenter("Best score: 0");
+  _interface.init();
+  _interface.setTextTopLeft(getInfoText());
+  _interface.setTextTopCenter("Best score: 0");
 }
 
 void GameSandbox::update(int msElapsed) {
@@ -40,15 +40,15 @@ void GameSandbox::update(int msElapsed) {
   if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
     interruptHunt();
 
-  // if (_huntHasStarted)
-  //   _interface.setTextTopRight(getHuntText());
-  // else if (_displayLog)
-  //   _interface.setTextTopRight(logText.getText());
-  // else
-  //   _interface.setTextTopRight("");
-  //
-  // if (Clock::isGlobalTimerPaused())
-  //   _interface.setTextCenter("PAUSED", 1);
+  if (_huntHasStarted)
+    _interface.setTextTopRight(getHuntText());
+  else if (_displayLog)
+    _interface.setTextTopRight(logText.getText());
+  else
+    _interface.setTextTopRight("");
+
+  if (Clock::isGlobalTimerPaused())
+    _interface.setTextCenter("PAUSED", 1);
 
   logText.clear();
   _engine.update(msElapsed);
@@ -57,10 +57,10 @@ void GameSandbox::update(int msElapsed) {
 void GameSandbox::render() const {
   _engine.render();
 
-  // _interface.renderLifeBars(_selection);
-  // _interface.renderRectSelect();
-  // _interface.renderMinimap(_engine.getChunkStatus());
-  // _interface.renderText();
+  _interface.renderLifeBars(_selection);
+  _interface.renderRectSelect();
+  _interface.renderMinimap(_engine.getChunkStatus());
+  _interface.renderText();
 
   SDL_GL_SwapWindow(_window);
 }
@@ -259,14 +259,14 @@ void GameSandbox::interruptHunt() {
 
     std::ostringstream bestScoreText;
     bestScoreText << "Best score: " << _bestScore;
-    // _interface.setTextTopCenter(bestScoreText.str());
+    _interface.setTextTopCenter(bestScoreText.str());
 
-    // _interface.setTextTopRight("");
-    // _interface.setTextTopLeft(getInfoText());
+    _interface.setTextTopRight("");
+    _interface.setTextTopLeft(getInfoText());
 
     std::ostringstream scoreText;
     scoreText << "Kills: " << _bestScore;
-    // _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
+    _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
   }
 }
 
@@ -292,7 +292,7 @@ void GameSandbox::startNewHunt() {
     _huntHasStarted = true;
     _huntStart.restart();
 
-    // _interface.setTextTopLeft(getInfoText());
-    // _interface.setTextCenter("Hunt Starts!", _msCenterTextDisplayDuration);
+    _interface.setTextTopLeft(getInfoText());
+    _interface.setTextCenter("Hunt Starts!", _msCenterTextDisplayDuration);
   }
 }

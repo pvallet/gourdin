@@ -1,8 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SDL2/SDL_opengl.h>
+#include <SDL2/SDL.h>
 
 #include <set>
 
@@ -11,7 +10,7 @@
 
 class Interface {
 public:
-  Interface(sf::RenderWindow& window);
+  Interface(SDL_Window* window);
   void init();
 
   void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
@@ -30,18 +29,18 @@ public:
   void setRectSelect(glm::ivec4 rect);
 
 private:
-  sf::RectangleShape _rectSelect;
-  sf::Font _textFont;
-  sf::Text _textTopLeft;
-  sf::Text _textTopRight;
-  sf::Text _textTopCenter;
-  sf::Text _textCenter;
-  sf::Text _textBottomCenter;
-  sf::Sprite _minimapSprite;
-  sf::Texture _minimapTexture;
+  // sf::RectangleShape _rectSelect;
+  // sf::Font _textFont;
+  // sf::Text _textTopLeft;
+  // sf::Text _textTopRight;
+  // sf::Text _textTopCenter;
+  // sf::Text _textCenter;
+  // sf::Text _textBottomCenter;
+  // sf::Sprite _minimapSprite;
+  // sf::Texture _minimapTexture;
 
   Chronometer _textCenterChrono;
   Chronometer _textBottomCenterChrono;
 
-  sf::RenderWindow& _window;
+  SDL_Window* _window;
 };

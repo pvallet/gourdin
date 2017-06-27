@@ -5,24 +5,24 @@
 GameGame::GameGame (SDL_Window* window, Engine& engine):
   _povCamera(false),
   _window(window),
-  _engine(engine) {}
-  // _interface(window) {}
+  _engine(engine),
+  _interface(window) {}
 
 void GameGame::init() {
-  // _interface.init();
-  // _interface.setTextTopLeft(getInfoText());
+  _interface.init();
+  _interface.setTextTopLeft(getInfoText());
 }
 
 void GameGame::update(int msElapsed) {
-  // if (Clock::isGlobalTimerPaused())
-  //   _interface.setTextCenter("PAUSED", 1);
+  if (Clock::isGlobalTimerPaused())
+    _interface.setTextCenter("PAUSED", 1);
   _engine.update(msElapsed);
 }
 
 void GameGame::render() const {
   _engine.render();
 
-  // _interface.renderText();
+  _interface.renderText();
 
   SDL_GL_SwapWindow(_window);
 }
