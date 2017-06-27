@@ -1,7 +1,8 @@
 #include "generatedImage.h"
 
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL_image.h>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -29,21 +30,25 @@ void GeneratedImage::setPixels(const std::vector<float>& pixels) {
 
 union ConvertFloat {
   float f;
-  sf::Uint8 uc[4];
+  uint8_t uc[4];
 };
 
 bool GeneratedImage::loadFromFile(std::string filename) {
-  sf::Image img;
-  if (!img.loadFromFile(filename))
-    return false;
+  SDL_Surface* img = nullptr;
+  img = IMG_Load(filename.c_str());
 
-  if (img.getSize().x != img.getSize().y) {
+  if (!img) {
+    std::cerr << "Unable to load image: " << filename << ", " << SDL_GetError() << std::endl;
+    return false;
+  }
+
+  if (img->w != img->h) {
     std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
     return false;
   }
 
-  const sf::Uint8* imgPixels = img.getPixelsPtr();
-  _size = img.getSize().x;
+  const uint8_t* imgPixels = (const uint8_t*) img->pixels;
+  _size = img->w;
   _pixels.resize(_size*_size, 0);
 
   #pragma omp parallel for
@@ -55,11 +60,13 @@ bool GeneratedImage::loadFromFile(std::string filename) {
     _pixels[i] = convert.f;
   }
 
+  SDL_FreeSurface(img);
+
   return true;
 }
 
 void GeneratedImage::saveToFile(std::string filename) const {
-  std::vector<sf::Uint8> rgbPixels(4*_pixels.size());
+  std::vector<uint8_t> rgbPixels(4*_pixels.size());
 
   #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
@@ -71,11 +78,11 @@ void GeneratedImage::saveToFile(std::string filename) const {
     }
   }
 
-  sf::Texture texture;
-	texture.create(_size, _size);
-	texture.update(&rgbPixels[0]);
-
-	texture.copyToImage().saveToFile(filename);
+  // Little endian
+  SDL_Surface* img = SDL_CreateRGBSurface(0, _size, _size, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	img->pixels = &rgbPixels[0];
+	IMG_SavePNG(img, filename.c_str());
+  // SDL_FreeSurface(img); // Tells there's a double free !?
 }
 
 void GeneratedImage::invert() {

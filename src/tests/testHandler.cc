@@ -1,7 +1,6 @@
 #include "testHandler.hpp"
 
-#include <SFML/Graphics.hpp>
-
+#include <SDL2/SDL_image.h>
 #include <cstdio>
 #include <fstream>
 
@@ -13,14 +12,18 @@
 TestHandler::TestHandler (const Clock& beginningOfProg) :
   _beginningOfProg(beginningOfProg) {}
 
-void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) const {
-  sf::Texture texture;
+void TestHandler::saveToImage(std::vector<uint8_t> pixels, std::string filename) const {
   int size = sqrt(pixels.size() / 4);
-	texture.create(size, size);
-	texture.update(&pixels[0]);
 
-	texture.copyToImage().saveToFile(filename);
+  // Little endian
+  SDL_Surface* img = SDL_CreateRGBSurface(0, size, size, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	img->pixels = &pixels[0];
+	IMG_SavePNG(img, filename.c_str());
 
+  addToDeleteList(filename);
+}
+
+void TestHandler::addToDeleteList(std::string filename) const {
   std::ofstream deleteList;
   deleteList.open(DELETE_LIST_NAME, std::ios::app);
   deleteList << filename << "\n";
@@ -28,7 +31,7 @@ void TestHandler::saveToImage(const std::vector<sf::Uint8>& pixels, std::string 
 }
 
 void TestHandler::saveToImage(const std::vector<float>& pixels, std::string filename) const {
-  std::vector<sf::Uint8> rgbPixels(4*pixels.size());
+  std::vector<uint8_t> rgbPixels(4*pixels.size());
 
   for (size_t i = 0; i < pixels.size(); i++) {
     for (size_t j = 0; j < 3; j++) {
@@ -78,7 +81,7 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 
   const std::vector<std::vector<bool> >& forestsMask = contentGenerator.getForestsMask();
 
-  std::vector<sf::Uint8> pixels(forestsMask.size() * forestsMask.size() * 4, 255);
+  std::vector<uint8_t> pixels(forestsMask.size() * forestsMask.size() * 4, 255);
 
 	for (int i = 0 ; i < forestsMask.size() ; i++) { // Convert mask to array of pixels
 		for (int j = 0 ; j < forestsMask.size() ; j++) {
@@ -216,17 +219,20 @@ void TestHandler::testGeneratedImage() const {
 
   if (imgSaver.getPixels() == imgLoader.getPixels())
     std::cout << "OK     - Save/Loading of a generated image" << '\n';
-  else
+  else {
     std::cout << "FAILED - Save/Loading of a generated image" << '\n';
+  }
 
-  remove("testSave.png");
+  addToDeleteList("testSave.png");
 }
 
 void TestHandler::testEventHandler() const {
   std::pair<float,float> solutions = EventHandler::solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
 
-  if (solutions.first == 11*M_PI/12.f/RAD && solutions.second == 17*M_PI/12.f/RAD)
-    std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c" << '\n';
+  float precision = 1e-4;
+
+  if (abs(solutions.first - 11*M_PI/12.f/RAD) < precision && abs(solutions.second - 17*M_PI/12.f/RAD) < precision)
+    std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c with precision " << precision << '\n';
 
   else {
     std::cout << "FAILED - Solving a*cos(x) + b*sin(x) = c" << '\n';
@@ -250,10 +256,10 @@ void TestHandler::testEventHandler() const {
 
 void TestHandler::runTests(const Controller& controller) const {
   std::cout << "Initialization time: " << _beginningOfProg.getElapsedTime() << '\n';
-  // displayGameGeneratedComponents(controller._game);
+  displayEngineGeneratedComponents(controller._engine);
   testVecUtils();
-  // testPerlin();
-  // testGeneratedImage();
+  testPerlin();
+  testGeneratedImage();
   testEventHandler();
 }
 

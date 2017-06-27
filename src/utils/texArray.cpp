@@ -1,6 +1,6 @@
 #include "texArray.h"
 
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL_image.h>
 
 #include <iostream>
 #include <sstream>
@@ -25,7 +25,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 	if (count != 0) {
 		glDeleteTextures(1, &texID);
 
-		std::vector<sf::Image> img(count);
+		std::vector<SDL_Surface*> img(count, nullptr);
 		maxTexSize.x = 0;
 		maxTexSize.y = 0;
 		texSizes.resize(count);
@@ -34,9 +34,19 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 			std::ostringstream convert;
 			convert << folderPath << i << ".png";
 
-			img[i].loadFromFile(convert.str());
+			img[i] = IMG_Load(convert.str().c_str());
 
-			texSizes[i] = glm::vec2(img[i].getSize().x, img[i].getSize().y);
+			if (!img[i]) {
+				std::cerr << "Unable to load texture: " << convert.str() << ", " << SDL_GetError() << std::endl;
+				return;
+			}
+
+			else if (img[i]->format->BytesPerPixel == 3) {
+				std::cerr << "Error: image " << convert.str() << " has no alpha channel" << '\n';
+				return;
+			}
+
+			texSizes[i] = glm::vec2(img[i]->w, img[i]->h);
 
 			if (texSizes[i].x > maxTexSize.x)
 				maxTexSize.x = texSizes[i].x;
@@ -53,8 +63,10 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 		for (size_t i = 0; i < count; i++) {
 			glTexSubImage3D( GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
 											 texSizes[i].x, texSizes[i].y, 1,
-											 GL_RGBA, GL_UNSIGNED_BYTE, img[i].getPixelsPtr()
+											 GL_RGBA, GL_UNSIGNED_BYTE, img[i]->pixels
 			);
+
+			SDL_FreeSurface(img[i]);
 		}
 
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
