@@ -258,7 +258,6 @@ void GameSandbox::interruptHunt() {
     _huntHasStarted = false;
     if (Lion::getNbKilled() > _bestScore)
       _bestScore = Lion::getNbKilled();
-    Lion::resetNbKilled();
 
     LogText& logText = LogText::getInstance();
     logText.clear();
@@ -273,6 +272,8 @@ void GameSandbox::interruptHunt() {
     std::ostringstream scoreText;
     scoreText << "Kills: " << Lion::getNbKilled();
     _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
+
+    Lion::resetNbKilled();
   }
 }
 
