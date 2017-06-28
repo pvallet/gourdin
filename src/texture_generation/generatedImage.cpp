@@ -1,7 +1,7 @@
 #include "generatedImage.h"
 
 #include <SDL2/SDL_image.h>
-#include <SDL2pp/SDL2pp.hh>
+#include <SDL2pp/Surface.hh>
 
 #include <algorithm>
 #include <cassert>
@@ -35,7 +35,7 @@ union ConvertFloat {
 };
 
 bool GeneratedImage::loadFromFile(std::string filename) {
-  SDL2pp::Surface img(filename.c_str());
+  SDL2pp::Surface img(filename);
 
   if (img.GetWidth() != img.GetHeight()) {
     std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';

@@ -1,6 +1,7 @@
 #include "texArray.h"
 
 #include <SDL2pp/SDL2pp.hh>
+#include <SDL2pp/Surface.hh>
 
 #include <iostream>
 #include <sstream>

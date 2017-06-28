@@ -10,21 +10,11 @@ function get_glm {
   rm 0.9.8.3.zip
 }
 
-function get_SFML {
-  wget www.sfml-dev.org/files/SFML-2.4.1-sources.zip
-  unzip -q SFML-2.4.1-sources.zip
-  mv SFML-2.4.1 SFML
-  rm SFML-2.4.1-sources.zip
-
-  cd SFML
-  mkdir build
-  cd build
-
-  cmake ..
-  make -j4
-  cp -r lib ..
-
-  cd ../..
+function get_SDL2pp {
+  wget https://github.com/libSDL2pp/libSDL2pp/archive/0.14.0.zip
+  unzip -q 0.14.0.zip
+  mv libSDL2pp-0.14.0 libSDL2pp
+  rm 0.14.0.zip
 }
 
 function get_glew {
@@ -56,8 +46,8 @@ case $key in
     get_glm
     ;;
 
-    SFML)
-    get_SFML
+    SDL2pp)
+    get_SDL2pp
     ;;
 
     glew)

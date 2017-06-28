@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) try {
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
   SDL2pp::Window window("gourdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    1366, 768, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+    1366, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
   glContext = SDL_GL_CreateContext(window.Get());
 
