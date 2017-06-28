@@ -1,5 +1,6 @@
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2pp/SDL2pp.hh>
 
 #include <cstring>
 
@@ -9,7 +10,7 @@
   #include "testHandler.hpp"
 #endif
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) try {
 
 #ifndef NDEBUG
   bool tests = false;
@@ -33,30 +34,20 @@ int main(int argc, char* argv[]) {
   (void) argv;
 #endif
 
-  SDL_Window* window(0);
   SDL_GLContext glContext(0);
 
-  if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-    std::cerr << "SDL2 initialization error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return -1;
-  }
+  SDL2pp::SDL sdl(SDL_INIT_VIDEO);
+  SDL2pp::SDLImage image(IMG_INIT_PNG);
 
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-  window = SDL_CreateWindow("gourdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+  SDL2pp::Window window("gourdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
     1366, 768, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 
-  if (window == 0) {
-    std::cout << "SDL2 window creation error: " << SDL_GetError() << std::endl;
-    SDL_Quit();
-    return -1;
-  }
-
-  glContext = SDL_GL_CreateContext(window);
+  glContext = SDL_GL_CreateContext(window.Get());
 
   glewExperimental = true;
 
@@ -82,8 +73,15 @@ int main(int argc, char* argv[]) {
   controller.run();
 
   SDL_GL_DeleteContext(glContext);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
 
   return 0;
+}
+catch (SDL2pp::Exception& e) {
+  std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
+  std::cerr << "  Reason: " << e.GetSDLError() << std::endl;
+  return 1;
+}
+catch (std::exception& e) {
+  std::cerr << e.what() << std::endl;
+  return 1;
 }

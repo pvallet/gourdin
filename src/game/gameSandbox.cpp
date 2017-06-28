@@ -4,7 +4,7 @@
 
 #define LION_MIN_SPAWN_DIST 20
 
-GameSandbox::GameSandbox (SDL_Window* window, Engine& engine):
+GameSandbox::GameSandbox (SDL2pp::Window& window, Engine& engine):
   _displayLog(true),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
@@ -62,7 +62,7 @@ void GameSandbox::render() const {
   _interface.renderMinimap(_engine.getChunkStatus());
   _interface.renderText();
 
-  SDL_GL_SwapWindow(_window);
+  SDL_GL_SwapWindow(_window.Get());
 }
 
 std::string GameSandbox::getHuntText() const {

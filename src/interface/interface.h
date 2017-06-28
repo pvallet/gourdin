@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include <SDL2pp/SDL2pp.hh>
 
 #include <set>
 
@@ -10,7 +10,7 @@
 
 class Interface {
 public:
-  Interface(SDL_Window* window);
+  Interface(SDL2pp::Window& window);
   void init();
 
   void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
@@ -42,5 +42,5 @@ private:
   Chronometer _textCenterChrono;
   Chronometer _textBottomCenterChrono;
 
-  SDL_Window* _window;
+  SDL2pp::Window& _window;
 };

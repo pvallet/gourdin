@@ -41,6 +41,10 @@ set(GLM_ROOT_DIR   external/glm)
 set(GLEW_LOCATION  external/glew)
 set(SFML_ROOT      external/SFML)
 
+set(SDL2PP_WITH_IMAGE ON)
+set(SDL2PP_WITH_TTF ON)
+add_subdirectory(external/SDL2pp)
+
 find_package(OpenGL)
 find_package(GLM)
 find_package(GLEW)
@@ -62,6 +66,7 @@ set(INCLUDE_DIRS
   ${SFML_INCLUDE_DIR}
   ${SDL2_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
+  ${SDL2PP_INCLUDE_DIRS}
 )
 
 # Find sources recursively
@@ -111,6 +116,7 @@ target_link_libraries(out
   ${SFML_LIBRARIES}
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
+  ${SDL2PP_LIBRARIES}
 )
 
 # If we compile the dependencies ourselves, we need to copy the dlls into the

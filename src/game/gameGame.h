@@ -7,7 +7,7 @@
 
 class GameGame {
 public:
-  GameGame (SDL_Window* window, Engine& engine);
+  GameGame (SDL2pp::Window& window, Engine& engine);
 
   void init();
 
@@ -41,7 +41,7 @@ private:
 
   bool _povCamera;
 
-  SDL_Window* _window;
+  SDL2pp::Window& _window;
   Engine& _engine;
   Interface _interface;
 };

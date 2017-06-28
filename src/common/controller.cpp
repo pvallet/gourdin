@@ -9,7 +9,7 @@
 #include "lion.h"
 #include "utils.h"
 
-Controller::Controller(SDL_Window* window) :
+Controller::Controller(SDL2pp::Window& window) :
   _running(true),
   _engine(),
   _gameGame(window,_engine),
@@ -20,9 +20,7 @@ Controller::Controller(SDL_Window* window) :
   _window(window) {
 
   Camera& cam = Camera::getInstance();
-  int w, h;
-  SDL_GetWindowSize(window, &w, &h);
-	cam.resize(w,h);
+	cam.resize(window.GetWidth(),window.GetHeight());
 }
 
 void Controller::init() {

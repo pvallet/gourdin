@@ -2,7 +2,7 @@
 
 #include "camera.h"
 
-GameGame::GameGame (SDL_Window* window, Engine& engine):
+GameGame::GameGame (SDL2pp::Window& window, Engine& engine):
   _povCamera(false),
   _window(window),
   _engine(engine),
@@ -24,7 +24,7 @@ void GameGame::render() const {
 
   _interface.renderText();
 
-  SDL_GL_SwapWindow(_window);
+  SDL_GL_SwapWindow(_window.Get());
 }
 
 std::string GameGame::getInfoText() const {

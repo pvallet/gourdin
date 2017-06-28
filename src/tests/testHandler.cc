@@ -16,9 +16,8 @@ void TestHandler::saveToImage(std::vector<uint8_t> pixels, std::string filename)
   int size = sqrt(pixels.size() / 4);
 
   // Little endian
-  SDL_Surface* img = SDL_CreateRGBSurface(0, size, size, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-	img->pixels = &pixels[0];
-	IMG_SavePNG(img, filename.c_str());
+  SDL2pp::Surface img(&pixels[0], size, size, 32, 4*size, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	IMG_SavePNG(img.Get(), filename.c_str());
 
   addToDeleteList(filename);
 }

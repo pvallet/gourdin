@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <SDL2/SDL.h>
+#include <SDL2pp/SDL2pp.hh>
 #include <SDL2/SDL_opengl.h>
 
 #include "event_handler_game.h"
@@ -18,7 +18,7 @@
  */
 class Controller {
 public:
-	Controller(SDL_Window* window);
+	Controller(SDL2pp::Window& window);
 
 	void init();
 	void run();
@@ -41,5 +41,5 @@ private:
 	EventHandlerSandbox _eHandlerSandbox;
 	EventHandlerType    _currentHandlerType;
 
-	SDL_Window* _window;
+	SDL2pp::Window& _window;
 };

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL2pp/SDL2pp.hh>
 
 #include "engine.h"
 #include "interface.h"
 
 class GameSandbox {
 public:
-  GameSandbox (SDL_Window* window, Engine& engine);
+  GameSandbox (SDL2pp::Window& window, Engine& engine);
 
   void init();
 
@@ -59,7 +59,7 @@ private:
 
   std::set<Lion*> _selection;
 
-  SDL_Window* _window;
+  SDL2pp::Window& _window;
   Engine& _engine;
   Interface _interface;
 };

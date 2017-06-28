@@ -1,6 +1,7 @@
 #include "generatedImage.h"
 
 #include <SDL2/SDL_image.h>
+#include <SDL2pp/SDL2pp.hh>
 
 #include <algorithm>
 #include <cassert>
@@ -34,21 +35,15 @@ union ConvertFloat {
 };
 
 bool GeneratedImage::loadFromFile(std::string filename) {
-  SDL_Surface* img = nullptr;
-  img = IMG_Load(filename.c_str());
+  SDL2pp::Surface img(filename.c_str());
 
-  if (!img) {
-    std::cerr << "Unable to load image: " << filename << ", " << SDL_GetError() << std::endl;
-    return false;
-  }
-
-  if (img->w != img->h) {
+  if (img.GetWidth() != img.GetHeight()) {
     std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
     return false;
   }
 
-  const uint8_t* imgPixels = (const uint8_t*) img->pixels;
-  _size = img->w;
+  const uint8_t* imgPixels = (const uint8_t*) img.Get()->pixels;
+  _size = img.GetHeight();
   _pixels.resize(_size*_size, 0);
 
   #pragma omp parallel for
@@ -59,8 +54,6 @@ bool GeneratedImage::loadFromFile(std::string filename) {
     }
     _pixels[i] = convert.f;
   }
-
-  SDL_FreeSurface(img);
 
   return true;
 }
@@ -79,10 +72,8 @@ void GeneratedImage::saveToFile(std::string filename) const {
   }
 
   // Little endian
-  SDL_Surface* img = SDL_CreateRGBSurface(0, _size, _size, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
-	img->pixels = &rgbPixels[0];
-	IMG_SavePNG(img, filename.c_str());
-  // SDL_FreeSurface(img); // Tells there's a double free !?
+  SDL2pp::Surface img(&rgbPixels[0], _size, _size, 32, 4*_size, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	IMG_SavePNG(img.Get(), filename.c_str());
 }
 
 void GeneratedImage::invert() {

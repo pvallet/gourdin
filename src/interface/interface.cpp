@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "engine.h"
 
-Interface::Interface(SDL_Window* window):
+Interface::Interface(SDL2pp::Window& window):
   // _rectSelect({0.f, 0.f}),
   _window(window) {}
 
