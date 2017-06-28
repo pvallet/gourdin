@@ -33,7 +33,7 @@ function get_glew {
 
 if [ $# -eq 0 ]; then
   get_glm
-  get_SFML
+  get_SDL2pp
   get_glew
 fi
 

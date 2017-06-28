@@ -40,14 +40,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 set(GLM_ROOT_DIR   external/glm)
 set(GLEW_LOCATION  external/glew)
 
-set(SDL2PP_WITH_IMAGE ON)
-add_subdirectory(external/libSDL2pp)
-
 find_package(OpenGL)
 find_package(GLM)
 find_package(GLEW)
 find_package(SDL2)
 find_package(SDL2_image)
+
+set(SDL2PP_WITH_IMAGE ON)
+add_subdirectory(external/libSDL2pp)
 
 # If they are still not found, abort
 if ( NOT(OPENGL_FOUND AND GLM_FOUND AND GLEW_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
