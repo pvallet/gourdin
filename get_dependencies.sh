@@ -11,10 +11,10 @@ function get_glm {
 }
 
 function get_SDL2pp {
-  wget https://github.com/libSDL2pp/libSDL2pp/archive/0.14.0.zip
-  unzip -q 0.14.0.zip
-  mv libSDL2pp-0.14.0 libSDL2pp
-  rm 0.14.0.zip
+  wget https://github.com/libSDL2pp/libSDL2pp/archive/0.14.1.zip
+  unzip -q 0.14.1.zip
+  mv libSDL2pp-0.14.1 libSDL2pp
+  rm 0.14.1.zip
 }
 
 function get_glew {
