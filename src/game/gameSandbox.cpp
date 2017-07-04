@@ -272,8 +272,6 @@ void GameSandbox::interruptHunt() {
     std::ostringstream scoreText;
     scoreText << "Kills: " << Lion::getNbKilled();
     _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
-
-    Lion::resetNbKilled();
   }
 }
 
@@ -296,6 +294,7 @@ void GameSandbox::startNewHunt() {
     _engine.deleteElements(toDelete);
     _selection.clear();
     _nbLions = 0;
+    Lion::resetNbKilled();
     _huntHasStarted = true;
     _huntStart.restart();
 
