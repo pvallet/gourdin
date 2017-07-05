@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 enum ClockType {ATTACHED_TO_GLOBAL_TIMER, INDEPENDENT};
 

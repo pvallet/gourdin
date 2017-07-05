@@ -1,7 +1,7 @@
 #include "utils.h"
 
 #include <GL/glew.h>
-#include <SDL2/SDL_opengl.h>
+#include <SDL_opengl.h>
 
 #include "camera.h"
 
