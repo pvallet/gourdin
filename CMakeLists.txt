@@ -38,11 +38,9 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
 set(GLM_ROOT_DIR   external/glm)
-set(GLEW_LOCATION  external/glew)
 
 find_package(OpenGL)
 find_package(GLM)
-find_package(GLEW)
 find_package(SDL2)
 find_package(SDL2_image)
 
@@ -50,7 +48,7 @@ set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
 
 # If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND GLM_FOUND AND GLEW_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
+if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
 
   message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
 
@@ -59,7 +57,6 @@ endif()
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIRS}
   ${SDL2_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
   ${SDL2PP_INCLUDE_DIRS}
@@ -88,8 +85,6 @@ endif()
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 
 # Add external libraries added manually to the build workflow
-# We don't include the header folders but the source ones, to keep
-# the architecture, for example to be able to include GL/glew.h
 file(GLOB_RECURSE EXTERNAL_SOURCE_FILES "external_manual/*.cpp")
 list(APPEND SOURCE_FILES ${EXTERNAL_SOURCE_FILES})
 
@@ -108,21 +103,7 @@ add_executable(out ${SOURCE_FILES})
 
 target_link_libraries(out
   ${OPENGL_LIBRARIES}
-  ${GLEW_LIBRARIES}
   ${SDL2_LIBRARY}
   ${SDL2_IMAGE_LIBRARIES}
   ${SDL2PP_LIBRARIES}
 )
-
-# If we compile the dependencies ourselves, we need to copy the dlls into the
-# target directory
-
-if (WIN32)
-  if (GLEW_LOCATION)
-  add_custom_command(TARGET out POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_SOURCE_DIR}/${GLEW_LOCATION}/bin/glew32.dll"
-    $<TARGET_FILE_DIR:out>
-  )
-  endif()
-endif()

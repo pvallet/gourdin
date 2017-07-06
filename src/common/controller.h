@@ -1,8 +1,7 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <SDL2pp/SDL2pp.hh>
-#include <SDL_opengl.h>
+#include "opengl.h"
 
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"

@@ -1,6 +1,6 @@
 #include "engine.h"
 
-#include <SDL_opengl.h>
+#include "opengl.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -367,8 +367,8 @@ void Engine::render() const {
 
   // Chunk
 
-  if (_wireframe)
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+  // if (_wireframe)
+  //   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -377,8 +377,8 @@ void Engine::render() const {
     }
   }
 
-  if (_wireframe)
-    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+  // if (_wireframe)
+  //   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
   glUseProgram(0);
 

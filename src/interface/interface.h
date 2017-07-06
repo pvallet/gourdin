@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
 #include <SDL2pp/SDL2pp.hh>
 
 #include <set>

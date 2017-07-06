@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_opengl.h>
+#include "opengl.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

@@ -17,24 +17,9 @@ function get_SDL2pp {
   rm 0.14.1.zip
 }
 
-function get_glew {
-  wget https://sourceforge.net/projects/glew/files/glew/2.0.0/glew-2.0.0.zip
-  unzip -q glew-2.0.0.zip
-  mv glew-2.0.0 glew
-  rm glew-2.0.0.zip
-
-  cd glew
-
-  cmake build/cmake
-  make -j4
-
-  cd ..
-}
-
 if [ $# -eq 0 ]; then
   get_glm
   get_SDL2pp
-  get_glew
 fi
 
 while [[ $# -gt 0 ]]
@@ -48,10 +33,6 @@ case $key in
 
     SDL2pp)
     get_SDL2pp
-    ;;
-
-    glew)
-    get_glew
     ;;
 
     *)

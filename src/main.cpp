@@ -1,4 +1,3 @@
-#include <GL/glew.h>
 #include <SDL_image.h>
 #include <SDL2pp/SDL2pp.hh>
 
@@ -40,7 +39,7 @@ int main(int argc, char* argv[]) try {
   SDL2pp::SDLImage image(IMG_INIT_PNG);
 
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
@@ -48,11 +47,6 @@ int main(int argc, char* argv[]) try {
     1366, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
   glContext = SDL_GL_CreateContext(window.Get());
-
-  glewExperimental = true;
-
-  if (glewInit() != GLEW_OK)
-    std::cerr << "Failed to initialize GLEW";
 
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
