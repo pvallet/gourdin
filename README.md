@@ -3,10 +3,6 @@
 This project is a 3D/2D engine developped under SFML and OpenGL for educational
 purposes.
 
-For more details about its development, please refer to report.pdf (coming soon).
-
-Contact: <luap.vallet@gmail.com>
-
 ---
 
 Two modes are featured in gourdin, a Sandbox mode and a Game mode.
@@ -24,6 +20,22 @@ The **Game** mode is made to show how would be the controls and the camera for a
 You can move around using the mouse or the keyboard. The main purpose is to see if this type of controls would be suitable for portable devices.
 
 Any feedback on the global ergonomy of the controls and camera would be much appreciated. If that also gives you gamedesign ideas, tell me about it!
+
+---
+
+## Installation
+
+On **Windows** you have two options:
+* Download the [installer](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-setup_0.1.0.exe) to install gourdin on your computer. You will be able to run it through the windows menu and create a desktop icon if you want. If you have an error telling you that you don't have the permissions to run it, right ctrl-click on it and choose "Run as administrator".
+* Download [gourdin-windows-folder.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-folder_0.1.0.zip) that contains the directory with all the game info. You can unzip it and run it directly by double-clicking on `gourdin.exe`
+
+On **Mac OS** you should download [gourdin-mac.app.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-mac.app.zip). Then you only have to `ctrl-click` on it and choose open to allow executing from an unidentifed developer (me).
+
+On **Linux** there is no pre-built package, you have to build it from source.
+
+All the files are available here: https://github.com/pvallet/gourdin/releases/
+
+---
 
 ## Usage
 
@@ -76,20 +88,6 @@ Click and drag to rotate the camera
 
 ###### POV camera
 The controls are the same but you move the camera around with the arrows (you can still use the mouse).
-
----
-
-## Installation
-
-On **Windows** you have two options:
-* Download the [installer](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-setup_0.1.0.exe) to install gourdin on your computer. You will be able to run it through the windows menu and create a desktop icon if you want. If you have an error telling you that you don't have the permissions to run it, right ctrl-click on it and choose "Run as administrator".
-* Download [gourdin-windows-folder.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-folder_0.1.0.zip) that contains the directory with all the game info. You can unzip it and run it directly by double-clicking on `gourdin.exe`
-
-On **Mac OS** you should download [gourdin-mac.app.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-mac.app.zip). Then you only have to `ctrl-click` on it and choose open to allow executing from an unidentifed developer (me).
-
-On **Linux** there is no pre-built package, you have to build it from source.
-
-All the files are available here: https://github.com/pvallet/gourdin/releases/
 
 ---
 
