@@ -249,7 +249,7 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
 void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Triangle*>& triangles) {
 
   // Contains the modified vertices from the previous mesh (not the ones added on the edges)
-  std::unordered_map<glm::vec3, glm::vec3> tmpProcessedVertices;
+  std::unordered_map<glm::vec3, glm::vec3, vertHashFunc> tmpProcessedVertices;
 
   for (std::list<const Triangle*>::iterator t = triangles.begin(); t != triangles.end(); t++) {
 

@@ -80,6 +80,6 @@ size_t AnimationManager::getClosestOrient(float orientation) const {
 
   float oriStep = 360.f / (float) _animInfo.at(_currentAnim).orientations;
 
-  return (_animInfo.at(_currentAnim).orientations - (size_t) std::round(orientation / oriStep))
+  return (_animInfo.at(_currentAnim).orientations - (size_t) round(orientation / oriStep))
 	      % _animInfo.at(_currentAnim).orientations;
 }

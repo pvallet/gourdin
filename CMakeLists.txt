@@ -12,37 +12,75 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-# handling warnings
-if(MSVC)
-  # Force to always compile with W4
-  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-  endif()
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  # Update if necessary
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-switch -Wno-sign-compare -pedantic")
-endif()
-
-set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
-
-set (CMAKE_CXX_STANDARD 11)
-
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
-
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
-set(GLM_ROOT_DIR   external/glm)
+if (NOT ANDROID)
+  # handling warnings
+  if(MSVC)
+    # Force to always compile with W4
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+      string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    endif()
+  elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    # Update if necessary
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-switch -Wno-sign-compare -pedantic")
+  endif()
 
-find_package(OpenGL)
+  set (CMAKE_CXX_STANDARD 11)
+  set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
+
+  find_package(OpenMP)
+  if (OPENMP_FOUND)
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  endif()
+
+  find_package(OpenGL)
+  find_package(SDL2)
+  find_package(SDL2_image)
+
+# Include SDL2 libraries for android
+else()
+  string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
+  set(DISTRIBUTION_DIR ${CMAKE_SOURCE_DIR}/android/distribution/android/SDL2/intermediates/ndkBuild)
+  set(SDL_LOCATION ${CMAKE_SOURCE_DIR}/external/SDL2)
+
+  set(SDL2_INCLUDE_DIR ${SDL_LOCATION}/SDL2/include)
+  set(SDL2_IMAGE_INCLUDE_DIRS ${SDL_LOCATION}/SDL2_image)
+
+  set(SDL2_LIBRARY SDL2)
+  set(SDL2_IMAGE_LIBRARIES SDL2_image)
+
+  # For SDL2pp
+  set(SDL2_IMAGE_INCLUDE_DIR ${SDL2_IMAGE_INCLUDE_DIRS})
+  set(SDL2_IMAGE_LIBRARY ${SDL2_IMAGE_LIBRARIES})
+
+  # set(SDL2MAIN_LIBRARY ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
+
+  add_library( ${SDL2_LIBRARY} SHARED IMPORTED )
+  add_library( ${SDL2_IMAGE_LIBRARIES} SHARED IMPORTED )
+  set_target_properties(${SDL2_LIBRARY} PROPERTIES IMPORTED_LOCATION
+  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
+  set_target_properties(${SDL2_IMAGE_LIBRARIES} PROPERTIES IMPORTED_LOCATION
+  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2_image.so)
+
+
+  # If SDL2 or SDL2_image was not found, the build would have crashed before
+  set(SDL2_FOUND TRUE)
+  set(SDL2_IMAGE_FOUND TRUE)
+  set(OPENGL_FOUND TRUE) # TODO Check for GLESv3
+
+  add_definitions(-DGLM_FORCE_CXX11)
+
+endif()
+
+# Include static and header-only libraries
+
+set(GLM_ROOT_DIR   ${CMAKE_SOURCE_DIR}/external/glm)
+
 find_package(GLM)
-find_package(SDL2)
-find_package(SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
@@ -54,6 +92,7 @@ if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
 
 endif()
 
+
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
@@ -61,6 +100,7 @@ set(INCLUDE_DIRS
   ${SDL2_IMAGE_INCLUDE_DIRS}
   ${SDL2PP_INCLUDE_DIRS}
 )
+
 
 # Find sources recursively
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
@@ -99,11 +139,23 @@ endforeach()
 
 include_directories(${INCLUDE_DIRS})
 
-add_executable(out ${SOURCE_FILES})
+if (ANDROID)
+  add_library( main SHARED ${SDL_LOCATION}/SDL2/src/main/android/SDL_android_main.c ${SOURCE_FILES} )
 
-target_link_libraries(out
-  ${OPENGL_LIBRARIES}
-  ${SDL2_LIBRARY}
-  ${SDL2_IMAGE_LIBRARIES}
-  ${SDL2PP_LIBRARIES}
-)
+  target_link_libraries(main
+    GLESv3
+    ${SDL2_LIBRARY}
+    ${SDL2_IMAGE_LIBRARIES}
+    ${SDL2PP_LIBRARIES}
+  )
+
+else()
+  add_executable(gourdin ${SOURCE_FILES})
+
+  target_link_libraries(gourdin
+    ${OPENGL_LIBRARIES}
+    ${SDL2_LIBRARY}
+    ${SDL2_IMAGE_LIBRARIES}
+    ${SDL2PP_LIBRARIES}
+  )
+endif()

@@ -27,6 +27,16 @@ if (WIN32)
 		${GLM_ROOT_DIR}/include
 		${GLM_ROOT_DIR}
 		DOC "The directory where glm/glm.hpp resides")
+elseif(ANDROID)
+	find_path(
+		GLM_INCLUDE_DIR
+		NAMES glm/glm.hpp
+		NO_CMAKE_FIND_ROOT_PATH # Otherwise does't find for android
+		PATHS
+		${GLM_ROOT_DIR}/include
+		${GLM_ROOT_DIR}
+		NO_DEFAULT_PATH # To avoid including /usr/include
+		DOC "The directory where glm/glm.hpp resides")
 else()
 	# Find include files
 	find_path(

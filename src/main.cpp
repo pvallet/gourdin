@@ -38,13 +38,21 @@ int main(int argc, char* argv[]) try {
   SDL2pp::SDL sdl(SDL_INIT_VIDEO);
   SDL2pp::SDLImage image(IMG_INIT_PNG);
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+  // SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  // SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+  //
+  // SDL2pp::Window window("gourdin", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+  //   1366, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-  SDL2pp::Window window("gourdin", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-    1366, 768, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+  SDL_DisplayMode displayMode;
+    SDL_GetDesktopDisplayMode(0, &displayMode);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    /* create window and renderer */
+     SDL2pp::Window window(NULL, 0, 0, displayMode.w, displayMode.h, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+
 
   glContext = SDL_GL_CreateContext(window.Get());
 

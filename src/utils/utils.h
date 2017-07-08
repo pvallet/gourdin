@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <glm/glm.hpp>
 
 #ifndef M_PI
