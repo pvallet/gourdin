@@ -15,3 +15,8 @@ ignored/
 makebuild/
 
 res/map/relief.png
+android/SDL2/SDL2.iml
+android/app/app.iml
+android/android.iml
+android/local.properties
+.idea/

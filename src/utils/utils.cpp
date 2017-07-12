@@ -1,12 +1,10 @@
 #include "utils.h"
 
-//#include <GL/glew.h>
+#include <SDL2pp/SDL2pp.hh>
 #include "opengl.h"
-
 #include "camera.h"
 
 #include <iostream>
-#include <string>
 
 glm::uvec2 ut::convertToChunkCoords(glm::vec2 pos) {
   glm::uvec2 chunkPos;
@@ -48,6 +46,32 @@ glm::vec3 ut::spherical(float x, float y, float z) {
 	}
 
 	return u;
+}
+
+std::string ut::textFileToString(const std::string& path) {
+  SDL2pp::RWops ops = SDL2pp::RWops::FromFile(path);
+
+  Sint64 res_size = ops.Size();
+  char* tmpChar = new char[res_size + 1];
+
+  Sint64 nb_read_total = 0, nb_read = 1;
+  char* buf = tmpChar;
+  while (nb_read_total < res_size && nb_read != 0) {
+    nb_read = ops.Read(buf, 1, (res_size - nb_read_total));
+    nb_read_total += nb_read;
+    buf += nb_read;
+  }
+
+  if (nb_read_total != res_size) {
+    delete[] tmpChar;
+    return std::string();
+  }
+
+  tmpChar[nb_read_total] = '\0';
+  std::string res(tmpChar);
+  delete[] tmpChar;
+
+  return res;
 }
 
 bool glCheckError(const char *file, int line) {

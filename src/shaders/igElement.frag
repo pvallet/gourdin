@@ -13,7 +13,7 @@ uniform sampler2DArray myTextureSampler;
 uniform bool onlyOpaqueParts;
 
 void main() {
-	if (discardFrag > 0)
+	if (discardFrag > 0.f)
 		discard;
 
 	color = texture( myTextureSampler, vec3(texCoord, layer));
@@ -24,7 +24,7 @@ void main() {
 	}
 
 	else {
-		if (color.a == 0)
+		if (color.a == 0.f)
 			discard;
 	}
 }

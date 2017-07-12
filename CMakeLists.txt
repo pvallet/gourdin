@@ -72,8 +72,6 @@ else()
   set(SDL2_IMAGE_FOUND TRUE)
   set(OPENGL_FOUND TRUE) # TODO Check for GLESv3
 
-  add_definitions(-DGLM_FORCE_CXX11)
-
 endif()
 
 # Include static and header-only libraries
@@ -144,6 +142,7 @@ if (ANDROID)
 
   target_link_libraries(main
     GLESv3
+    log
     ${SDL2_LIBRARY}
     ${SDL2_IMAGE_LIBRARIES}
     ${SDL2PP_LIBRARIES}

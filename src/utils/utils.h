@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <string>
 #include <glm/glm.hpp>
 
 #ifndef M_PI
@@ -50,6 +51,8 @@ namespace ut {
 
 	inline glm::vec3 carthesian(glm::vec3 u) {return carthesian(u.x,u.y,u.z);}
 	inline glm::vec3 spherical (glm::vec3 u) {return spherical (u.x,u.y,u.z);}
+
+	std::string textFileToString(const std::string& path);
 }
 
 bool glCheckError(const char *file, int line);

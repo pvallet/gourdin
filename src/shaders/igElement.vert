@@ -19,9 +19,9 @@ uniform vec3 camPos;
 
 void main(){
 	if (length(in_Pos-camPos) < elementNearPlane)
-		discardFrag = 1;
+		discardFrag = 1.f;
 	else
-		discardFrag = 0;
+		discardFrag = 0.f;
 
 	gl_Position = VP * (vec4(in_Pos,0) + MODEL * vec4(in_Vertex,1));
 

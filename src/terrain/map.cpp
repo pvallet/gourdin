@@ -257,11 +257,8 @@ void Map::load(std::string path) {
 	std::ostringstream xmlPath;
   xmlPath << path << "map.xml";
 
-  TiXmlDocument doc(xmlPath.str());
-  if(!doc.LoadFile()) {
-    std::cerr << "Error while loading file: " << xmlPath.str() << std::endl;
-    std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
-  }
+  TiXmlDocument doc;
+	doc.Parse(ut::textFileToString(xmlPath.str()).c_str());
 
   TiXmlHandle hDoc(&doc);
 	TiXmlElement *elem;

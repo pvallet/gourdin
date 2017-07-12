@@ -1,10 +1,8 @@
 #include "shader.h"
 
-#include <cassert>
+#include "utils.h"
 
-#ifdef __APPLE__
-#define CORE_PROFILE
-#endif
+#include <cassert>
 
 Shader::Shader() :
 	_vertexID(0),
@@ -112,29 +110,14 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     return false;
   }
 
-  std::ifstream file(source.c_str());
-
-  if(!file) {
-    std::cerr << "Error: File: " << source << " cannot be found" << std::endl;
-		glDeleteShader(shader);
-
-    return false;
-  }
-
-  std::string line;
-  std::string sourceCode;
-
-  while(getline(file, line))
-    sourceCode += line + '\n';
-
-  file.close();
+  std::string sourceCode = ut::textFileToString(source);
 
   const GLchar* str = sourceCode.c_str();
 
-#ifdef CORE_PROFILE
-	const char *sources[2] = { "#version 330\n", str };
+#ifdef __ANDROID__
+	const char *sources[2] = { "#version 300 es\n", str };
 #else
-	const char *sources[2] = { "#version 130\n", str };
+	const char *sources[2] = { "#version 330\n", str };
 #endif
 
 	glShaderSource(shader, 2, sources, 0);
