@@ -367,8 +367,10 @@ void Engine::render() const {
 
   // Chunk
 
-  // if (_wireframe)
-  //   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+#ifndef __ANDROID__
+  if (_wireframe)
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+#endif
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -377,8 +379,10 @@ void Engine::render() const {
     }
   }
 
-  // if (_wireframe)
-  //   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+#ifndef __ANDROID__
+  if (_wireframe)
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+#endif
 
   glUseProgram(0);
 
