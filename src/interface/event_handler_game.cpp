@@ -85,9 +85,23 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
   Camera& cam = Camera::getInstance();
 
   switch (event.type) {
+    case SDL_MULTIGESTURE:
+      currentHandler = HDLR_SANDBOX;
+      break;
+
     case SDL_MOUSEBUTTONDOWN:
       _oldPhi = cam.getPhi();
       _oldTheta = cam.getTheta();
+
+      if (_doubleClickBegin.getElapsedTime() < DOUBLECLICK_MS) {
+        if (_game.getPovCamera())
+          resetCamera(false);
+        else
+          resetCamera(true);
+      }
+
+      else
+        _doubleClickBegin.restart();
     break;
 
     case SDL_MOUSEBUTTONUP:

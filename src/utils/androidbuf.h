@@ -8,7 +8,7 @@
 namespace ut {
   class androidbuf: public std::streambuf {
   public:
-      enum { bufsize = 1024 }; // ... or some other suitable buffer size
+      enum { bufsize = 128 }; // ... or some other suitable buffer size
       androidbuf() { this->setp(buffer, buffer + bufsize - 1); }
   private:
       int overflow(int c) {

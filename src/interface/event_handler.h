@@ -5,6 +5,8 @@
 
 #include <map>
 
+#define DOUBLECLICK_MS 200
+
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
 class EventHandler {

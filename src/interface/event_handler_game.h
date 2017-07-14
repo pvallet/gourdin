@@ -34,5 +34,7 @@ private:
   Clock _transferStart;
   glm::vec2 _previousFocusedPos;
 
+  Clock _doubleClickBegin;
+
   GameGame& _game;
 };

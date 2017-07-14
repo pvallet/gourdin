@@ -13,9 +13,15 @@
 
 // r, theta, phi follows the mathematical convention: theta is the azimuthal and phi the polar angle
 
-#define MIN_R 120.f
+#ifdef __ANDROID__
+	#define MIN_R 50.f
+	#define INIT_R 100.f
+#else
+	#define MIN_R 120.f
+	#define INIT_R 150.f
+#endif
+
 #define MAX_R 12500.f
-#define INIT_R 150.f
 #define INIT_PHI 60.f
 #define INIT_THETA 180.f
 
@@ -23,6 +29,7 @@ class Controller;
 class EventHandler;
 class EventHandlerGame;
 class EventHandlerSandbox;
+class AndroidEventHandlerSandbox;
 class Engine;
 class GameSandbox;
 
@@ -53,6 +60,7 @@ public:
 	friend EventHandler;
 	friend EventHandlerGame;
 	friend EventHandlerSandbox;
+	friend AndroidEventHandlerSandbox;
 	friend Engine;
 	friend GameSandbox;
 

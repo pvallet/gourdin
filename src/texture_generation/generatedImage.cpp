@@ -35,27 +35,33 @@ union ConvertFloat {
 };
 
 bool GeneratedImage::loadFromFile(std::string filename) {
-  SDL2pp::Surface img(filename);
+  try {
+    SDL2pp::Surface img(filename);
 
-  if (img.GetWidth() != img.GetHeight()) {
-    std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
+    if (img.GetWidth() != img.GetHeight()) {
+      std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
+      return false;
+    }
+
+    const uint8_t* imgPixels = (const uint8_t*) img.Get()->pixels;
+    _size = img.GetHeight();
+    _pixels.resize(_size*_size, 0);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < _size*_size; i++) {
+      ConvertFloat convert;
+      for (size_t j = 0; j < 4; j++) {
+        convert.uc[j] = imgPixels[4*i + j];
+      }
+      _pixels[i] = convert.f;
+    }
+
+    return true;
+
+  } catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
     return false;
   }
-
-  const uint8_t* imgPixels = (const uint8_t*) img.Get()->pixels;
-  _size = img.GetHeight();
-  _pixels.resize(_size*_size, 0);
-
-  #pragma omp parallel for
-  for (size_t i = 0; i < _size*_size; i++) {
-    ConvertFloat convert;
-    for (size_t j = 0; j < 4; j++) {
-      convert.uc[j] = imgPixels[4*i + j];
-    }
-    _pixels[i] = convert.f;
-  }
-
-  return true;
 }
 
 void GeneratedImage::saveToFile(std::string filename) const {
