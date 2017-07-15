@@ -31,12 +31,6 @@ if (NOT ANDROID)
   set (CMAKE_CXX_STANDARD 11)
   set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-  find_package(OpenMP)
-  if (OPENMP_FOUND)
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  endif()
-
   find_package(OpenGL)
   find_package(SDL2)
   find_package(SDL2_image)
@@ -73,6 +67,13 @@ else()
   set(OPENGL_FOUND TRUE) # TODO Check for GLESv3
 
 endif()
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 
 # Include static and header-only libraries
 
