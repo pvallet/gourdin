@@ -7,7 +7,12 @@
 
 AndroidEventHandlerSandbox::AndroidEventHandlerSandbox(GameSandbox& game) :
   EventHandler::EventHandler(),
-  _nbFingers(0) {}
+  _nbFingers(0) {
+
+  SDL_SetEventFilter(AndroidEventHandlerSandbox::HandleAppEvents, NULL);
+
+  (void) game;
+}
 
 bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
@@ -38,6 +43,21 @@ bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandle
   }
 
   return true;
+}
+
+int AndroidEventHandlerSandbox::HandleAppEvents(void *userdata, SDL_Event *event) {
+  switch (event->type) {
+    case SDL_APP_DIDENTERFOREGROUND:
+      Clock::resumeGlobalTimer();
+      return 0;
+
+    case SDL_APP_WILLENTERBACKGROUND:
+      Clock::pauseGlobalTimer();
+      return 0;
+
+    default:
+        return 1;
+  }
 }
 
 bool AndroidEventHandlerSandbox::gainFocus() {

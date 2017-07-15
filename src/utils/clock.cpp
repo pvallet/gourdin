@@ -18,12 +18,15 @@ int Clock::restart() {
 }
 
 void Clock::pauseGlobalTimer() {
-  _msGlobalPauseTime = SDL_GetTicks();
+  if (!isGlobalTimerPaused())
+    _msGlobalPauseTime = SDL_GetTicks();
 }
 
 void Clock::resumeGlobalTimer() {
-  _msGlobalInitialTime += SDL_GetTicks() - _msGlobalPauseTime;
-  _msGlobalPauseTime = _msGlobalInitialTime;
+  if (isGlobalTimerPaused()) {
+    _msGlobalInitialTime += SDL_GetTicks() - _msGlobalPauseTime;
+    _msGlobalPauseTime = _msGlobalInitialTime;
+  }
 }
 
 int Clock::getRelativeTicks() {

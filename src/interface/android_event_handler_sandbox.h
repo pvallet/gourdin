@@ -8,9 +8,11 @@ public:
   AndroidEventHandlerSandbox(GameSandbox& game);
 
   bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
-  inline void onGoingEvents(int msElapsed) {}
+  inline void onGoingEvents(int msElapsed) {(void) msElapsed;}
 
   bool gainFocus();
+
+  static int HandleAppEvents(void *userdata, SDL_Event *event);
 
 private:
   size_t _nbFingers;
