@@ -2,6 +2,7 @@
 
 #include "utils.h"
 
+#include <SDL_log.h>
 #include <cassert>
 
 Shader::Shader() :
@@ -89,7 +90,7 @@ bool Shader::load() {
     glGetShaderInfoLog(_programID, sizeError, &sizeError, error);
     error[sizeError] = '\0';
 
-    std::cerr << "Error in shader linking: " << error << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in shader linking: %s", error);
 
     delete[] error;
    	glDeleteProgram(_programID);
@@ -106,7 +107,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
   shader = glCreateShader(type);
 
   if(shader == 0) {
-    std::cerr << "Error: There is no (" << type << ") shader type" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: There is no (%d) shader type", type);
     return false;
   }
 
@@ -136,7 +137,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     glGetShaderInfoLog(shader, errorLength, &errorLength, error);
     error[errorLength] = '\0';
 
-    std::cerr << "Error in shader compilation: " << error << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in shader compilation: %s", error);
 
     delete[] error;
 		glDeleteShader(shader);

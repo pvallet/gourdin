@@ -1,6 +1,7 @@
 #include "terrainTexManager.h"
 
 #include <SDL2pp/SDL2pp.hh>
+#include <SDL_log.h>
 #include <iostream>
 #include <sstream>
 
@@ -12,7 +13,7 @@ glm::uvec2 TerrainTexManager::loadTexture(std::string path) {
 	glm::uvec2 imgSize(img.GetWidth(), img.GetHeight());
 
 	if (img.Get()->format->BytesPerPixel == 4)
-		std::cerr << "Error: image " << path << " has an alpha channel and should not." << '\n';
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: image %s has an alpha channel and should not.", path.c_str());
 
 	glGenTextures(1, &_texIDs.back());
 

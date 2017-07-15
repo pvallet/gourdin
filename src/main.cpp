@@ -2,10 +2,7 @@
 #include <SDL2pp/SDL2pp.hh>
 
 #include <cstring>
-
-#ifdef __ANDROID__
-  #include "androidbuf.h"
-#endif
+#include <stdexcept>
 
 #include "controller.h"
 
@@ -14,11 +11,6 @@
 #endif
 
 int main(int argc, char* argv[]) try {
-
-#ifdef __ANDROID__
-  std::cout.rdbuf(new ut::androidbuf);
-  std::cerr.rdbuf(new ut::androidbuf);
-#endif
 
 #ifndef NDEBUG
   bool tests = false;
@@ -33,7 +25,7 @@ int main(int argc, char* argv[]) try {
     else if (strcmp(argv[1],"tests") == 0)
       tests = true;
     else {
-      std::cout << "Unkown option, try 'clean' or 'tests'" << '\n';
+      SDL_Log("Unkown option, try 'clean' or 'tests'");
       return 0;
     }
   }
@@ -85,19 +77,14 @@ int main(int argc, char* argv[]) try {
 
   SDL_GL_DeleteContext(glContext);
 
-#ifdef __ANDROID__
-  delete std::cout.rdbuf(0);
-  delete std::cerr.rdbuf(0);
-#endif
-
   return 0;
 }
 catch (SDL2pp::Exception& e) {
-  std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
-  std::cerr << "  Reason: " << e.GetSDLError() << std::endl;
+  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in: %s", e.GetSDLFunction().c_str());
+  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Reason: %s", e.GetSDLError().c_str());
   return 1;
 }
 catch (std::exception& e) {
-  std::cerr << e.what() << std::endl;
+  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", e.what());
   return 1;
 }

@@ -1,5 +1,6 @@
 #include "animationManagerInitializer.h"
 
+#include <SDL_log.h>
 #include <sstream>
 
 #include "tinyxml.h"
@@ -27,7 +28,7 @@ void AnimationManagerInitializer::load(std::string folderPath) {
   elem = hdl.FirstChildElement("lstAnim").FirstChildElement().Element();
 
   if (elem == nullptr)
-    std::cerr << "XML file: " << xmlFile << " lacks animation information." << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "XML file: %s lacks animation information.", xmlFile.c_str());
 
   _maxHeight = 0;
 

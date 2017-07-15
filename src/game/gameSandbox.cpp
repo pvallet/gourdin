@@ -241,8 +241,8 @@ void GameSandbox::benchmark() {
 
   int msTotalElapsed = frameClock.getElapsedTime();
 
-  std::cout << "Rendered " << 100 << " frames in " << msTotalElapsed << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / msTotalElapsed * 100 * 1000 << std::endl;
+  SDL_Log("Rendered 100 frames in %d milliseconds.",  msTotalElapsed);
+  SDL_Log("Average FPS: %f", 1.f / msTotalElapsed * 100 * 1000);
 
   _engine.resetCamera();
 }

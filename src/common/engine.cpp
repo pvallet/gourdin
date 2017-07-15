@@ -51,7 +51,7 @@ void Engine::init() {
     _terrainGeometry.setReliefGenerator(relief);
 
   else {
-    std::cout << "Generating relief mask" << '\n';
+    SDL_Log("Generating relief mask");
 
     _mapInfoExtractor.convertMapData(512);
     _mapInfoExtractor.generateBiomesTransitions(7);
@@ -59,7 +59,7 @@ void Engine::init() {
     _reliefGenerator.generateRelief();
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
-    std::cout << "Done Generating relief mask" << '\n';
+    SDL_Log("Done Generating relief mask");
   }
 
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
@@ -113,7 +113,7 @@ glm::ivec2 Engine::neighbour(size_t x, size_t y, size_t index) const {
       return glm::ivec2(x,y+1);
       break;
     default:
-      std::cerr << "Error in Engine::neighbour: Index out of bounds" << '\n';
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in Engine::neighbour: Index out of bounds");
       return glm::ivec2(x,y);
       break;
   }

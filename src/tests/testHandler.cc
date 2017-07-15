@@ -231,7 +231,7 @@ void TestHandler::testEventHandler() const {
 
   float precision = 1e-4;
 
-  if (abs(solutions.first - 11*M_PI/12.f/RAD) < precision && abs(solutions.second - 17*M_PI/12.f/RAD) < precision)
+  if (std::abs(solutions.first - 11*M_PI/12.f/RAD) < precision && std::abs(solutions.second - 17*M_PI/12.f/RAD) < precision)
     std::cout << "OK     - Solving a*cos(x) + b*sin(x) = c with precision " << precision << '\n';
 
   else {

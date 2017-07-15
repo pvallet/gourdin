@@ -39,7 +39,7 @@ bool GeneratedImage::loadFromFile(std::string filename) {
     SDL2pp::Surface img(filename);
 
     if (img.GetWidth() != img.GetHeight()) {
-      std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in GeneratedImage::loadFromFile: %s is not square.", filename.c_str());
       return false;
     }
 
@@ -59,7 +59,7 @@ bool GeneratedImage::loadFromFile(std::string filename) {
     return true;
 
   } catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", e.what());
     return false;
   }
 }

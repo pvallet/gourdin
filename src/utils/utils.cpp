@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <SDL2pp/SDL2pp.hh>
+#include <SDL_log.h>
 #include "opengl.h"
 #include "camera.h"
 
@@ -88,11 +89,13 @@ bool glCheckError(const char *file, int line) {
       case GL_INVALID_VALUE:                 error="INVALID_VALUE";          break;
       case GL_OUT_OF_MEMORY:                 error="OUT_OF_MEMORY";          break;
       case GL_INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION";  break;
-      // case GL_STACK_UNDERFLOW:               error="STACK_UNDERFLOW";        break;
-      // case GL_STACK_OVERFLOW:                error="STACK_OVERFLOW";         break;
+#ifndef __ANDROID__
+      case GL_STACK_UNDERFLOW:               error="STACK_UNDERFLOW";        break;
+      case GL_STACK_OVERFLOW:                error="STACK_OVERFLOW";         break;
+#endif
     }
 
-    std::cerr << "GL_" << error << " - " << file << ":" << line << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "GL_%s - %s: %d", error.c_str(), file, line);
     err = glGetError();
     isError = true;
   }

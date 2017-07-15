@@ -1,6 +1,7 @@
 #include "texArray.h"
 
 #include <SDL2pp/SDL2pp.hh>
+#include <SDL_log.h>
 
 #include <iostream>
 #include <sstream>
@@ -37,7 +38,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 			img.push_back(SDL2pp::Surface(convert.str()));
 
 			if (img[i].Get()->format->BytesPerPixel == 3) {
-				std::cerr << "Error: image " << convert.str() << " has no alpha channel" << '\n';
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: image %s has no alpha channel", convert.str().c_str());
 				return;
 			}
 

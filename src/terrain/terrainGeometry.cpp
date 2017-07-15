@@ -1,5 +1,6 @@
 #include "terrainGeometry.h"
 
+#include <SDL_log.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
 #include <iostream>
@@ -65,7 +66,7 @@ std::array<size_t,3> Triangle::sortIndices(glm::vec3 refPoint) const {
   }
 
   else
-    std::cerr << "Error in Triangle::sortIndices, no match for refPoint in triangle" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in Triangle::sortIndices, no match for refPoint in triangle");
 
   return res;
 }
@@ -112,7 +113,7 @@ const Triangle* Vertex::getNextTri(const Triangle* tri) const {
   std::list<const Triangle*>::const_iterator res = std::find(_adjacentTriangles.begin(), _adjacentTriangles.end(), tri);
 
   if (res == _adjacentTriangles.end()) {
-    std::cerr << "Error in Vertex::getNextTri, current point does not belong to sent triangle" << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in Vertex::getNextTri, current point does not belong to sent triangle");
     return nullptr;
   }
 

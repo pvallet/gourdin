@@ -14,9 +14,9 @@ Controller::Controller(SDL2pp::Window& window) :
   _engine(),
   _gameGame(window,_engine),
   _gameSandbox(window,_engine),
+  _currentHandlerType(HDLR_SANDBOX),
   _eHandlerGame(_gameGame),
   _eHandlerSandbox(_gameSandbox),
-  _currentHandlerType(HDLR_SANDBOX),
   _window(window) {
 
   Camera& cam = Camera::getInstance();
