@@ -1,8 +1,8 @@
 // Version is defined by shader compiler, 130 for compatibility and 330 for core
 
-in vec3 in_Vertex;
-in vec3 in_Normal;
-in vec2 in_TexCoord;
+layout (location = 0) in vec3 in_Vertex;
+layout (location = 1) in vec3 in_Normal;
+layout (location = 2) in vec2 in_TexCoord;
 
 out vec2 uv;
 out vec3 normal;

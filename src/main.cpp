@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) try {
   SDL_GetDesktopDisplayMode(0, &displayMode);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); 
 
   SDL2pp::Window window("gourdin", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480,
     SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN);

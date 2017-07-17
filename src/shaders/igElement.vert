@@ -1,9 +1,9 @@
 // Version is defined by shader compiler, 130 for compatibility and 330 for core
 
-in vec3 in_Vertex;
-in vec3 in_Pos;
-in vec2 in_TexCoord;
-in float in_Layer;
+layout (location = 0) in vec3 in_Vertex;
+layout (location = 1) in vec3 in_Pos;
+layout (location = 2) in vec2 in_TexCoord;
+layout (location = 3) in float in_Layer;
 
 out vec2 texCoord;
 out float layer;
