@@ -1,4 +1,4 @@
-// Version is defined by shader compiler, 130 for compatibility and 330 for core
+// Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
 layout (location = 0) in vec3 in_Vertex;
 layout (location = 1) in vec3 in_Pos;

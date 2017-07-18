@@ -1,4 +1,4 @@
-// Version is defined by shader compiler, 130 for compatibility and 330 for core
+// Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
 in vec2 texCoord;
 in float layer;
@@ -6,7 +6,7 @@ in float layer;
 // The vertex shader signals that the element is too close
 in float discardFrag;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 uniform sampler2DArray myTextureSampler;
 

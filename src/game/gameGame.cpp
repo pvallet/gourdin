@@ -1,14 +1,19 @@
 #include "gameGame.h"
 
 #include "camera.h"
+#include "opengl.h"
+#include "texturedRectangle.h"
 
 GameGame::GameGame (SDL2pp::Window& window, Engine& engine):
   _povCamera(false),
+  _2DShader("src/shaders/passthrough.vert", "src/shaders/simpleTexture.frag"),
   _window(window),
   _engine(engine),
   _interface(window) {}
 
 void GameGame::init() {
+  _2DShader.load();
+  _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
   _interface.setTextTopLeft(getInfoText());
 }
@@ -20,9 +25,17 @@ void GameGame::update(int msElapsed) {
 }
 
 void GameGame::render() const {
-  _engine.render();
+  Camera& cam = Camera::getInstance();
 
+  _engine.renderToFBO();
+
+  glUseProgram(_2DShader.getProgramID());
+  glViewport(0, 0, (GLint) _window.GetWidth(), (GLint) _window.GetHeight());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  _interface.renderEngine();
   _interface.renderText();
+  glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
+  glUseProgram(0);
 
   SDL_GL_SwapWindow(_window.Get());
 }

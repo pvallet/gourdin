@@ -25,7 +25,7 @@ Engine::Engine() :
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
   cam.setPointedPos(glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                                 CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+                              CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
 
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 }
@@ -78,6 +78,9 @@ void Engine::init() {
 
   _igElementDisplay.init();
   _contentGenerator.init();
+
+  Camera& cam = Camera::getInstance();
+  _globalFBO.init(cam.getW(), cam.getH());
 
   resetCamera();
 
@@ -328,9 +331,11 @@ void Engine::update(int msElapsed) {
   compute2DCorners();
 }
 
-void Engine::render() const {
+void Engine::renderToFBO() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;
+
+  glBindFramebuffer(GL_FRAMEBUFFER, _globalFBO.getID());
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -433,6 +438,8 @@ void Engine::render() const {
   glDisable(GL_BLEND);
 
   glUseProgram(0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   LogText& logText = LogText::getInstance();
 

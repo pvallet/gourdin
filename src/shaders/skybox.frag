@@ -1,9 +1,9 @@
-// Version is defined by shader compiler, 130 for compatibility and 330 for core
+// Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
 in vec2 texCoord;
 in float layer;
 
-out vec3 color;
+layout (location = 0) out vec3 color;
 
 uniform sampler2DArray myTextureSampler;
 

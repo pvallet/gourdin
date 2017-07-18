@@ -46,6 +46,8 @@ bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandle
 }
 
 int AndroidEventHandlerSandbox::HandleAppEvents(void *userdata, SDL_Event *event) {
+  (void) userdata;
+  
   switch (event->type) {
     case SDL_APP_DIDENTERFOREGROUND:
       Clock::resumeGlobalTimer();

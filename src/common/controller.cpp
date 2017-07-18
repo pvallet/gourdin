@@ -20,13 +20,18 @@ Controller::Controller(SDL2pp::Window& window) :
   _window(window) {
 
   Camera& cam = Camera::getInstance();
-	cam.resize(window.GetWidth(),window.GetHeight());
+#ifdef __ANDROID__
+  // We lower the game resolution to increase performance. Interface is left untouched
+  cam.resize(1280, 720);
+#else
+  cam.resize(window.GetWidth(),window.GetHeight());
+#endif
 }
 
 void Controller::init() {
+  _engine.init();
   _gameGame.init();
   _gameSandbox.init();
-  _engine.init();
 }
 
 void Controller::run() {

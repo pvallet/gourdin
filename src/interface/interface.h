@@ -6,12 +6,15 @@
 
 #include "chronometer.h"
 #include "engine.h"
+#include "opengl.h"
+#include "texturedRectangle.h"
 
 class Interface {
 public:
   Interface(SDL2pp::Window& window);
   void init();
 
+  void renderEngine() const;
   void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
   void renderText() const;
   void renderRectSelect() const;
@@ -25,6 +28,7 @@ public:
   void setTextBottomCenter(const std::string& string, int msDuration = -1);
   void clearText();
 
+  inline void setEngineTexture(GLuint texID) {_texRectEngine.reset(new TexturedRectangle(texID, -1, -1, 2, 2));}
   void setRectSelect(glm::ivec4 rect);
 
 private:
@@ -40,6 +44,8 @@ private:
 
   Chronometer _textCenterChrono;
   Chronometer _textBottomCenterChrono;
+
+  std::unique_ptr<const TexturedRectangle> _texRectEngine;
 
   SDL2pp::Window& _window;
 };

@@ -4,6 +4,7 @@
 
 #include "engine.h"
 #include "interface.h"
+#include "shader.h"
 
 class GameSandbox {
 public:
@@ -58,6 +59,8 @@ private:
   Clock _huntStart;
 
   std::set<Lion*> _selection;
+
+  Shader _2DShader;
 
   SDL2pp::Window& _window;
   Engine& _engine;

@@ -1,7 +1,6 @@
 #include "interface.h"
 
 #include "camera.h"
-#include "engine.h"
 
 Interface::Interface(SDL2pp::Window& window):
   // _rectSelect({0.f, 0.f}),
@@ -35,6 +34,10 @@ void Interface::init() {
 
   // _minimapSprite.setTexture(_minimapTexture);
   // _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
+}
+
+void Interface::renderEngine() const {
+  _texRectEngine->draw();
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {

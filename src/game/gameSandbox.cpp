@@ -1,6 +1,7 @@
 #include "gameSandbox.h"
 
 #include "camera.h"
+#include "texturedRectangle.h"
 
 #define LION_MIN_SPAWN_DIST 20
 
@@ -12,11 +13,14 @@ GameSandbox::GameSandbox (SDL2pp::Window& window, Engine& engine):
   _bestScore(0),
   _msHuntDuration(120000),
   _msCenterTextDisplayDuration(1000),
+  _2DShader("src/shaders/passthrough.vert", "src/shaders/simpleTexture.frag"),
   _window(window),
   _engine(engine),
   _interface(window) {}
 
 void GameSandbox::init() {
+  _2DShader.load();
+  _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
   _interface.setTextTopLeft(getInfoText());
   _interface.setTextTopCenter("Best score: 0");
@@ -55,12 +59,20 @@ void GameSandbox::update(int msElapsed) {
 }
 
 void GameSandbox::render() const {
-  _engine.render();
+  Camera& cam = Camera::getInstance();
 
+  _engine.renderToFBO();
+
+  glUseProgram(_2DShader.getProgramID());
+  glViewport(0, 0, (GLint) _window.GetWidth(), (GLint) _window.GetHeight());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  _interface.renderEngine();
   _interface.renderLifeBars(_selection);
   _interface.renderRectSelect();
   _interface.renderMinimap(_engine.getChunkStatus());
   _interface.renderText();
+  glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
+  glUseProgram(0);
 
   SDL_GL_SwapWindow(_window.Get());
 }

@@ -22,6 +22,7 @@
 
 #include "terrainTexManager.h"
 
+#include "frameBufferObject.h"
 #include "shader.h"
 #include "utils.h"
 
@@ -44,7 +45,7 @@ public:
   void init();
 
 	void update(int msElapsed);
-	void render() const;
+	void renderToFBO() const;
 	void moveSelection(glm::ivec2 screenTarget);
 	void moveCamera(glm::vec2 newAimedPos);
 	void addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
@@ -58,6 +59,7 @@ public:
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
+	inline GLuint getColorBuffer() const {return _globalFBO.getTexID();}
 
 	static glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 
@@ -99,4 +101,6 @@ private:
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;
 
   std::vector<std::vector<ChunkStatus> > _chunkStatus;
+
+	FrameBufferObject _globalFBO;
 };

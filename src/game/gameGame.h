@@ -4,6 +4,7 @@
 
 #include "engine.h"
 #include "interface.h"
+#include "shader.h"
 
 class GameGame {
 public:
@@ -40,6 +41,8 @@ private:
   std::vector<Controllable*> _tribe;
 
   bool _povCamera;
+
+  Shader _2DShader;
 
   SDL2pp::Window& _window;
   Engine& _engine;
