@@ -1,18 +1,11 @@
 #pragma once
 
-#include <SDL.h>
+#include "game.h"
 
-#include "engine.h"
-#include "interface.h"
-#include "shader.h"
-
-class GameGame {
+class GameGame : public Game {
 public:
   GameGame (SDL2pp::Window& window, Engine& engine);
 
-  void init();
-
-  void update(int msElapsed);
   void render() const;
 
   bool genTribe();
@@ -32,8 +25,6 @@ public:
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoText());}
   inline bool getPovCamera() const {return _povCamera;}
 
-  inline const Engine& getEngine() const {return _engine;}
-
 private:
   std::string getInfoText() const;
 
@@ -41,10 +32,4 @@ private:
   std::vector<Controllable*> _tribe;
 
   bool _povCamera;
-
-  Shader _2DShader;
-
-  SDL2pp::Window& _window;
-  Engine& _engine;
-  Interface _interface;
 };

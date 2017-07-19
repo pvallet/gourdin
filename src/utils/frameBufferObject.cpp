@@ -7,13 +7,14 @@ FrameBufferObject::FrameBufferObject() :
   _colorBuffer(0),
   _depthBuffer(0) {}
 
-void FrameBufferObject::init(size_t width, size_t height) {
+void FrameBufferObject::init(size_t width, size_t height,
+  GLenum colorBufferInternalFormat, GLenum colorBufferFormat, GLenum colorBufferType) {
 
   glGenTextures(1, &_colorBuffer);
   glBindTexture(GL_TEXTURE_2D, _colorBuffer);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, colorBufferInternalFormat, width, height, 0, colorBufferFormat, colorBufferType, 0);
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glGenTextures(1, &_depthBuffer);

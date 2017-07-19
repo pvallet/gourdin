@@ -162,10 +162,10 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
   if (mousePosY == 0)
     cam.translate(0.f, - realTranslationValue);
 
-  if (mousePosX == (int) cam.getW() - 1)
+  if (mousePosX == (int) cam.getWindowW() - 1)
     cam.translate(realTranslationValue, 0.f);
 
-  if (mousePosY == (int) cam.getH() - 1)
+  if (mousePosY == (int) cam.getWindowH() - 1)
     cam.translate(0.f, realTranslationValue);
 
   float theta = cam.getTheta();

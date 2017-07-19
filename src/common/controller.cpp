@@ -20,6 +20,8 @@ Controller::Controller(SDL2pp::Window& window) :
   _window(window) {
 
   Camera& cam = Camera::getInstance();
+  cam.setWindowSize(window.GetWidth(), window.GetHeight());
+
 #ifdef __ANDROID__
   // We lower the game resolution to increase performance. Interface is left untouched
   cam.resize(1280, 720);

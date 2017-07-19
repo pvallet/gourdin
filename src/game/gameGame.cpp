@@ -5,24 +5,8 @@
 #include "texturedRectangle.h"
 
 GameGame::GameGame (SDL2pp::Window& window, Engine& engine):
-  _povCamera(false),
-  _2DShader("src/shaders/passthrough.vert", "src/shaders/simpleTexture.frag"),
-  _window(window),
-  _engine(engine),
-  _interface(window) {}
-
-void GameGame::init() {
-  _2DShader.load();
-  _interface.setEngineTexture(_engine.getColorBuffer());
-  _interface.init();
-  _interface.setTextTopLeft(getInfoText());
-}
-
-void GameGame::update(int msElapsed) {
-  if (Clock::isGlobalTimerPaused())
-    _interface.setTextCenter("PAUSED", 1);
-  _engine.update(msElapsed);
-}
+  Game::Game(window, engine),
+  _povCamera(false) {}
 
 void GameGame::render() const {
   Camera& cam = Camera::getInstance();
@@ -43,10 +27,7 @@ void GameGame::render() const {
 std::string GameGame::getInfoText() const {
   std::ostringstream text;
 
-  text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Sandbox mode" << std::endl
-       << "P: " << "Pause" << std::endl
-       << "1: " << "God camera" << std::endl
+  text << "1: " << "God camera" << std::endl
        << "2: " << "POV camera" << std::endl;
   if (_povCamera)
     text << "Arrows: " << "Move camera around" << std::endl;
@@ -60,7 +41,7 @@ std::string GameGame::getInfoText() const {
       << "Click on another character to change the focus" << std::endl
       << "Click and drag to rotate the camera" << std::endl;
 
-  return text.str();
+  return Game::getInfoText() + text.str();
 }
 
 bool GameGame::genTribe() {
@@ -137,5 +118,5 @@ void GameGame::moveCharacter(glm::ivec2 screenTarget) {
   }
 
   if (_focusedCharacter != nullptr)
-    _focusedCharacter->setTarget(Engine::get2DCoord(screenTarget));
+    _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));
 }

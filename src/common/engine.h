@@ -11,6 +11,8 @@
 #include "tree.h"
 #include "igElementDisplay.h"
 
+#include "texturedRectangle.h"
+
 #include "chunk.h"
 #include "contentGenerator.h"
 #include "map.h"
@@ -61,7 +63,7 @@ public:
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 	inline GLuint getColorBuffer() const {return _globalFBO.getTexID();}
 
-	static glm::vec2 get2DCoord(glm::ivec2 screenTarget);
+	glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
@@ -102,5 +104,8 @@ private:
 
   std::vector<std::vector<ChunkStatus> > _chunkStatus;
 
+	Shader _depthInColorBufferShader;
 	FrameBufferObject _globalFBO;
+	FrameBufferObject _depthInColorBufferFBO;
+	std::unique_ptr<TexturedRectangle> _depthTexturedRectangle;
 };

@@ -6,27 +6,23 @@
 #define LION_MIN_SPAWN_DIST 20
 
 GameSandbox::GameSandbox (SDL2pp::Window& window, Engine& engine):
+  Game::Game(window, engine),
   _displayLog(true),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
   _bestScore(0),
   _msHuntDuration(120000),
-  _msCenterTextDisplayDuration(1000),
-  _2DShader("src/shaders/passthrough.vert", "src/shaders/simpleTexture.frag"),
-  _window(window),
-  _engine(engine),
-  _interface(window) {}
+  _msCenterTextDisplayDuration(1000) {}
 
 void GameSandbox::init() {
-  _2DShader.load();
-  _interface.setEngineTexture(_engine.getColorBuffer());
-  _interface.init();
-  _interface.setTextTopLeft(getInfoText());
+  Game::init();
   _interface.setTextTopCenter("Best score: 0");
 }
 
 void GameSandbox::update(int msElapsed) {
+  Game::update(msElapsed);
+
   LogText& logText = LogText::getInstance();
   logText.addFPSandCamInfo(msElapsed);
 
@@ -51,11 +47,7 @@ void GameSandbox::update(int msElapsed) {
   else
     _interface.setTextTopRight("");
 
-  if (Clock::isGlobalTimerPaused())
-    _interface.setTextCenter("PAUSED", 1);
-
   logText.clear();
-  _engine.update(msElapsed);
 }
 
 void GameSandbox::render() const {
@@ -90,10 +82,7 @@ std::string GameSandbox::getHuntText() const {
 std::string GameSandbox::getInfoText() const {
   std::ostringstream text;
 
-  text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Game mode" << std::endl
-       << "P: " << "Pause" << std::endl
-       << "Left-Right / Q-D: " << "Rotate camera" << std::endl
+  text << "Left-Right / Q-D: " << "Rotate camera" << std::endl
        << "Up-Down    / Z-S: " << "Go forwards/backwards" << std::endl
        << "A/Return: " << "Select all lions" << std::endl
        << "B: " << "Launch benchmark" << std::endl
@@ -114,7 +103,7 @@ std::string GameSandbox::getInfoText() const {
        << std::endl
        << "Go hunt them juicy antilopes!" << std::endl;
 
-  return text.str();
+  return Game::getInfoText() + text.str();
 }
 
 void GameSandbox::select(glm::ivec4 rect, bool add) {
@@ -177,7 +166,7 @@ void GameSandbox::createLion(glm::ivec2 screenTarget) {
 }
 
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
-  glm::vec2 target = Engine::get2DCoord(screenTarget);
+  glm::vec2 target = _engine.get2DCoord(screenTarget);
 
   for(auto it = _selection.begin(); it != _selection.end(); ++it) {
     Controllable* ctrl = dynamic_cast<Controllable*>(*it);

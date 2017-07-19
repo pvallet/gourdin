@@ -45,6 +45,8 @@ public:
 
 	inline unsigned int getW() const {return _W;}
 	inline unsigned int getH() const {return _H;}
+	inline unsigned int getWindowW() const {return _windowW;}
+	inline unsigned int getWindowH() const {return _windowH;}
   inline glm::vec3 getPos() const {return _pos;}
   inline float getTheta() const {return _theta;}
   inline float getPhi() const {return _phi;}
@@ -68,6 +70,7 @@ private:
 	Camera();
 
 	void resize(unsigned int W, unsigned int H);
+	inline void setWindowSize(unsigned int W, unsigned int H) {_windowW = W; _windowH = H;}
 	void apply();
 
 	void translate (float dWinX, float dWinY);
@@ -83,6 +86,7 @@ private:
 	inline void setAdditionalHeight(float nAddHeight) {_additionalHeight = nAddHeight;}
 
 	unsigned int _W, _H;
+	unsigned int _windowW, _windowH;
 
   float _fovAngle;
   float _aspectRatio;

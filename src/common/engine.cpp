@@ -20,7 +20,8 @@ Engine::Engine() :
   _reliefGenerator(_mapInfoExtractor),
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
+  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
+  _depthInColorBufferShader ("src/shaders/passthrough.vert", "src/shaders/depthShader.frag") {}
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -36,6 +37,7 @@ void Engine::init() {
   _terrainShader.load();
   _igEShader.load();
   _skyboxShader.load();
+  _depthInColorBufferShader.load();
 
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
@@ -80,7 +82,10 @@ void Engine::init() {
   _contentGenerator.init();
 
   Camera& cam = Camera::getInstance();
-  _globalFBO.init(cam.getW(), cam.getH());
+  _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+  _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
+  // _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getTexIDDepth(), -1, -1, 2, 2));
 
   resetCamera();
 
@@ -527,12 +532,25 @@ void Engine::deleteElements(const std::vector<igMovingElement*>& elementsToDelet
 
 glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
   Camera& cam = Camera::getInstance();
+
+  screenTarget = glm::ivec2(screenTarget.x * cam.getW() / cam.getWindowW(),
+                            screenTarget.y * cam.getH() / cam.getWindowH());
+
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
-  GLfloat d;
-  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
+  glBindFramebuffer(GL_FRAMEBUFFER, _depthInColorBufferFBO.getID());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
+  glUseProgram(_depthInColorBufferShader.getProgramID());
+  _depthTexturedRectangle->draw();
+  glUseProgram(0);
+
+  GLfloat depth;
+  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_RED, GL_FLOAT, &depth);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,depth),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),
     glm::vec4(0,0, cam.getW(), cam.getH()));
 
