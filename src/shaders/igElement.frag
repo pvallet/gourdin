@@ -1,14 +1,14 @@
 // Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
-in vec2 texCoord;
+in vec2 texCoords;
 in float layer;
 
 // The vertex shader signals that the element is too close
 in float discardFrag;
 
-layout (location = 0) out vec4 color;
+layout (location = 0) out vec4 fragColor;
 
-uniform sampler2DArray myTextureSampler;
+uniform sampler2DArray tex;
 
 uniform bool onlyOpaqueParts;
 
@@ -16,15 +16,15 @@ void main() {
 	if (discardFrag > 0.f)
 		discard;
 
-	color = texture( myTextureSampler, vec3(texCoord, layer));
+	fragColor = texture(tex, vec3(texCoords, layer));
 
 	if (onlyOpaqueParts) {
-		if (color.a < 0.9)
+		if (fragColor.a < 0.9)
 			discard;
 	}
 
 	else {
-		if (color.a == 0.f)
+		if (fragColor.a == 0.f)
 			discard;
 	}
 }

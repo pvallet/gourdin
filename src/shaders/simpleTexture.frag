@@ -1,11 +1,11 @@
 // Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
-in vec2 texCoord;
+in vec2 texCoords;
 
-out vec3 color;
+out vec3 fragColor;
 
-uniform sampler2D renderedTexture;
+uniform sampler2D tex;
 
 void main() {
-  color = texture( renderedTexture, texCoord ).rgb;
+  fragColor = texture( tex, texCoords ).rgb;
 }

@@ -2,10 +2,10 @@
 
 layout (location = 0) in vec3 in_Vertex;
 layout (location = 1) in vec3 in_Pos;
-layout (location = 2) in vec2 in_TexCoord;
+layout (location = 2) in vec2 in_TexCoords;
 layout (location = 3) in float in_Layer;
 
-out vec2 texCoord;
+out vec2 texCoords;
 out float layer;
 
 // If the element is too close
@@ -25,6 +25,6 @@ void main(){
 
 	gl_Position = VP * (vec4(in_Pos,0) + MODEL * vec4(in_Vertex,1));
 
-	texCoord = in_TexCoord;
+	texCoords = in_TexCoords;
 	layer = in_Layer;
 }

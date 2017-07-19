@@ -21,7 +21,7 @@ Engine::Engine() :
   _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
   _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
   _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
-  _depthInColorBufferShader ("src/shaders/passthrough.vert", "src/shaders/depthShader.frag") {}
+  _depthInColorBufferShader ("src/shaders/2D.vert", "src/shaders/depthToColor.frag") {}
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();

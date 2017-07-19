@@ -2,14 +2,14 @@
 
 const vec3 lightDir = normalize(vec3 (1,0,1));
 
-in vec2 uv;
+in vec2 texCoords;
 in vec3 normal;
 
-layout (location = 0) out vec3 color;
+layout (location = 0) out vec3 fragColor;
 
-uniform sampler2D myTextureSampler;
+uniform sampler2D tex;
 
-void main(){
-	color = texture( myTextureSampler, uv ).rgb *
+void main() {
+	fragColor = texture( tex, texCoords ).rgb *
 		(0.5 + 0.5*dot(lightDir,normal));
 }

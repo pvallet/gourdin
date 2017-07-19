@@ -2,7 +2,7 @@
 #include "camera.h"
 
 Game::Game (SDL2pp::Window& window, Engine& engine):
-  _2DShader("src/shaders/passthrough.vert", "src/shaders/simpleTexture.frag"),
+  _2DShader("src/shaders/2D.vert", "src/shaders/simpleTexture.frag"),
   _window(window),
   _engine(engine),
   _interface(window) {}
