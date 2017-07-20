@@ -5,18 +5,6 @@
 void Interface::init() {
   Text::loadShader();
 
-  // Text
-  // _textFont.loadFromFile("res/FiraMono-Regular.otf");
-  // _textTopLeft.setFont(_textFont);
-  // _textTopLeft.setCharacterSize(10);
-  // _textTopLeft.setFillColor(sf::Color::White);
-  // _textTopRight  = sf::Text(_textTopLeft);
-  // _textTopCenter = sf::Text(_textTopLeft);
-  // _textCenter    = sf::Text(_textTopLeft);
-  // _textCenter.setCharacterSize(40);
-  // _textBottomCenter = sf::Text(_textTopLeft);
-  // _textBottomCenter.setCharacterSize(15);
-
   // Selection rectangle
   // _rectSelect.setFillColor(sf::Color::Transparent);
   // _rectSelect.setOutlineThickness(1);
@@ -39,8 +27,6 @@ void Interface::renderEngine() const {
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
-  Camera& cam = Camera::getInstance();
-
   // // Background image
   // _window.draw(_minimapSprite);
   //
@@ -110,32 +96,37 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _textTopLeft.setText(string, glm::uvec2(0,0), 12);
+  _textTopLeft.setText(string, 12);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
-  // _textTopRight.setString(string);
-  // _textTopRight.setPosition(_window.getSize().x - _textTopRight.getLocalBounds().width, 0);
+  Camera& cam = Camera::getInstance();
+  _textTopRight.setText(string, 12);
+  _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-  // Camera& cam = Camera::getInstance();
-  // _textTopCenter.setString(string, glm::uvec2(cam.getWindowW() / 2));
-  // _textTopCenter.setPosition(_window.getSize().x / 2 - _textTopCenter.getLocalBounds().width / 2, 0);
+  Camera& cam = Camera::getInstance();
+  _textTopCenter.setText(string, 12);
+  _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
 }
 
 void Interface::setTextCenter(const std::string& string, int msDuration) {
-  // _textCenter.setString(string);
-  // _textCenter.setPosition(_window.getSize().x / 2 - _textCenter.getLocalBounds().width / 2,
-  //                         _window.getSize().y / 2 - _textCenter.getLocalBounds().height / 2);
-  // _textCenterChrono.reset(msDuration);
+  Camera& cam = Camera::getInstance();
+  _textCenter.setText(string);
+  _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
+                          cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
+
+  _textCenterChrono.reset(msDuration);
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
-  // _textBottomCenter.setString(string);
-  // _textBottomCenter.setPosition(_window.getSize().x / 2 - _textBottomCenter.getLocalBounds().width / 2,
-  //                               _window.getSize().y - _textBottomCenter.getLocalBounds().height*2);
-  // _textBottomCenterChrono.reset(msDuration);
+  Camera& cam = Camera::getInstance();
+  _textBottomCenter.setText(string, 17);
+  _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
+                                cam.getWindowH() - _textBottomCenter.getSize().y);
+
+  _textBottomCenterChrono.reset(msDuration);
 }
 
 void Interface::renderRectSelect() const {

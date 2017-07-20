@@ -17,10 +17,13 @@ public:
 
   inline GLuint getTexID() const {return _texID;}
 
-  void setText(const std::string &str, glm::uvec2 windowCoords, float fontSize = _fontHandler.getFontSize());
+  void setText(const std::string &str, float fontSize = _fontHandler.getFontSize());
+  void setPosition(size_t X, size_t Y);
   void render() const;
 
   void displayAtlas(glm::uvec2 windowCoords) const;
+
+  glm::uvec2 getSize() const;
 
   // Loaded in Interface init function to ensure it is only loaded once
   static void loadShader();
@@ -35,4 +38,6 @@ private:
   GLuint _texID;
 
   size_t _stringLength;
+  glm::vec2 _origin;
+  glm::vec2 _bounds;
 };

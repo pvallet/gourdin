@@ -52,15 +52,18 @@ void Text::loadShader() {
   }
 }
 
-void Text::setText(const std::string &str, glm::uvec2 windowCoords, float fontSize) {
+void Text::setText(const std::string &str, float fontSize) {
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   Camera& cam = Camera::getInstance();
-  glm::vec2 glCoords = cam.windowCoordsToGLCoords(windowCoords);
-  float x = glCoords.x;
-  float y = glCoords.y;
   float sx = 2 / (float) cam.getWindowW() * fontSize / _fontHandler.getFontSize();
   float sy = 2 / (float) cam.getWindowH() * fontSize / _fontHandler.getFontSize();
+
+  // Default text location on top left corner of the screen
+  float x = -1;
+  float y =  1 - _fontHandler.getFontSize() * sy;
+
+  float maxX = -1;
 
   _stringLength = str.size();
   size_t glyphGLDataSize = 24 * sizeof(float);
@@ -70,7 +73,7 @@ void Text::setText(const std::string &str, glm::uvec2 windowCoords, float fontSi
   for (size_t i = 0; i < str.size(); i++) {
     if (str[i] == '\n') {
       y -= _fontHandler.getFontSize() * sy;
-      x = glCoords.x;
+      x = -1;
     }
 
     else {
@@ -102,9 +105,25 @@ void Text::setText(const std::string &str, glm::uvec2 windowCoords, float fontSi
 
       x += (glyph->advance_x * sx);
     }
+
+    if (x > maxX)
+      maxX = x;
   }
 
+  _bounds.x = maxX;
+  _bounds.y = y;
+
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Text::setPosition(size_t X, size_t Y) {
+  glm::uvec2 windowCoords(X,Y);
+  Camera& cam = Camera::getInstance();
+  _origin = cam.windowCoordsToGLCoords(windowCoords);
+
+  // Substract default origin of the text
+  _origin.x += 1;
+  _origin.y -= 1;
 }
 
 void Text::render() const {
@@ -113,6 +132,8 @@ void Text::render() const {
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBindVertexArray(_vao);
   glBindTexture(GL_TEXTURE_2D, _texID);
+
+  glUniform2f(glGetUniformLocation(_textShader.getProgramID(), "offset"), _origin.x, _origin.y);
 
   glDrawArrays(GL_TRIANGLES, 0, 6*_stringLength);
 
@@ -137,4 +158,9 @@ void Text::displayAtlas(glm::uvec2 windowCoords) const {
 
   glDisable(GL_BLEND);
   glUseProgram(0);
+}
+
+glm::uvec2 Text::getSize() const {
+  Camera& cam = Camera::getInstance();
+  return cam.glCoordsToWindowCoords(_bounds);
 }
