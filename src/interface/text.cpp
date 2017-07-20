@@ -15,8 +15,8 @@ Text::Text() :
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   glTexImage2D( GL_TEXTURE_2D, 0, GL_R8, _fontHandler.getWidth(), _fontHandler.getHeight(),
     0, GL_RED, GL_UNSIGNED_BYTE, _fontHandler.getPixelData());
@@ -42,52 +42,53 @@ Text::~Text() {
 	glDeleteVertexArrays(1, &_vao);
 }
 
-#include <iostream>
-
-void Text::renderString(
-      const std::string &str,
-      float x,
-      float y,
-      float sx,
-      float sy) const {
-
+void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
   glBindVertexArray(_vao);
-  // glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   glBindTexture(GL_TEXTURE_2D, _texID);
-//    for (int i = 0; i < str.size(); i++) {
-// //Find the glyph for the character we are looking for
-//       texture_glyph_t *glyph = 0;
-//       for (int j = 0; j < font.glyphs_count; ++j) {
-//          if (font.glyphs[j].codepoint == str[i]) {
-//             glyph = &font.glyphs[j];
-//             break;
-//          }
-//       }
-//       if (!glyph) {
-//          continue;
-//       }
-//       // x += glyph->kerning[0].kerning;
-//       float x0 = (float) (x + glyph->offset_x * sx);
-//       float y0 = (float) (y + glyph->offset_y * sy);
-//       float x1 = (float) (x0 + glyph->width * sx);
-//       float y1 = (float) (y0 - glyph->height * sy);
-//
-//       float s0 = glyph->s0;
-//       float t0 = glyph->t0;
-//       float s1 = glyph->s1;
-//       float t1 = glyph->t1;
-//
-//       struct {float x, y, s, t;} data[6] = { { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 }, { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 } };
-//
-//       glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), data, GL_DYNAMIC_DRAW);
-//
-//       glDrawArrays(GL_TRIANGLES, 0, 6);
-//       x += (glyph->advance_x * sx);
-//    }
 
-   glBindTexture(GL_TEXTURE_2D, 0);
-  //  glBindBuffer(GL_ARRAY_BUFFER, 0);
- 	glBindVertexArray(0);
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  Camera& cam = Camera::getInstance();
+  glm::vec2 glCoords = cam.windowCoordsToGLCoords(windowCoords);
+  float x = glCoords.x;
+  float y = glCoords.y;
+  float sx = 2 / (float) cam.getWindowW();
+  float sy = 2 / (float) cam.getWindowH();
+
+  for (size_t i = 0; i < str.size(); i++) {
+    const Glyph* glyph = _fontHandler.getGlyph(str[i]);
+
+    if (!glyph) {
+      continue;
+    }
+
+    if (i > 0)
+      x += glyph->kerning[str[i-1]];
+
+    float x0 = (float) (x + glyph->offset_x * sx);
+    float y0 = (float) (y + glyph->offset_y * sy);
+    float x1 = (float) (x0 + glyph->width * sx);
+    float y1 = (float) (y0 - glyph->height * sy);
+
+    float s0 = glyph->s0;
+    float t0 = glyph->t0;
+    float s1 = glyph->s1;
+    float t1 = glyph->t1;
+
+    struct {float x, y, s, t;} data[6] = { { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 }, { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 } };
+
+    glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), data, GL_DYNAMIC_DRAW);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    x += (glyph->advance_x * sx);
+  }
+
+  glDisable(GL_BLEND);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 void Text::displayAtlas(glm::uvec2 windowCoords) const {

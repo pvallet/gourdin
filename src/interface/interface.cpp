@@ -105,6 +105,7 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
 void Interface::renderText() const {
   glUseProgram(_textShader.getProgramID());
   _text.displayAtlas(glm::uvec2(0, 0));
+  _text.renderString("hello world", glm::uvec2(500,256));
   glUseProgram(0);
 
   // _window.draw(_textTopLeft);

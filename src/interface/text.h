@@ -16,7 +16,7 @@ public:
 
   inline GLuint getTexID() const {return _texID;}
 
-  void renderString(const std::string &str, float x, float y, float sx, float sy) const;
+  void renderString(const std::string &str, glm::uvec2 windowCoords) const;
 
   void displayAtlas(glm::uvec2 windowCoords) const;
 

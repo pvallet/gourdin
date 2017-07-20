@@ -43,6 +43,7 @@ public:
 	Camera(Camera const&)          = delete;
 	void operator=(Camera const&)  = delete;
 
+	glm::vec2 windowCoordsToGLCoords(glm::uvec2 windowCoords);
 	glm::vec4 rectWindowCoordsToGLCoords(glm::uvec4 windowRect);
 
 	inline unsigned int getW() const {return _W;}
