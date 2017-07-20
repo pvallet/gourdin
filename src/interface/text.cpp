@@ -10,7 +10,8 @@ bool Text::_shaderLoaded = false;
 Text::Text() :
   _vao(0),
   _vbo(0),
-  _texID(0) {
+  _texID(0),
+  _stringLength(0) {
 
   glGenTextures(1, &_texID);
   glBindTexture(GL_TEXTURE_2D, _texID);
@@ -51,14 +52,8 @@ void Text::loadShader() {
   }
 }
 
-void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
-  glUseProgram(_textShader.getProgramID());
-  glBindVertexArray(_vao);
+void Text::setText(const std::string &str, glm::uvec2 windowCoords) {
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-  glBindTexture(GL_TEXTURE_2D, _texID);
-
-  glEnable (GL_BLEND);
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   Camera& cam = Camera::getInstance();
   glm::vec2 glCoords = cam.windowCoordsToGLCoords(windowCoords);
@@ -66,6 +61,11 @@ void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
   float y = glCoords.y;
   float sx = 2 / (float) cam.getWindowW();
   float sy = 2 / (float) cam.getWindowH();
+
+  _stringLength = str.size();
+  size_t glyphGLDataSize = 24 * sizeof(float);
+
+  glBufferData(GL_ARRAY_BUFFER, _stringLength * glyphGLDataSize, NULL, GL_DYNAMIC_DRAW);
 
   for (size_t i = 0; i < str.size(); i++) {
     const Glyph* glyph = _fontHandler.getGlyph(str[i]);
@@ -87,17 +87,30 @@ void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
     float s1 = glyph->s1;
     float t1 = glyph->t1;
 
-    struct {float x, y, s, t;} data[6] = { { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 }, { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 } };
+    struct {float x, y, s, t;} data[6] = {
+      { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 },
+      { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 }
+    };
 
-    glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), data, GL_DYNAMIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize , glyphGLDataSize, data);
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
     x += (glyph->advance_x * sx);
   }
 
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Text::render() const {
+  glUseProgram(_textShader.getProgramID());
+  glEnable (GL_BLEND);
+  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBindVertexArray(_vao);
+  glBindTexture(GL_TEXTURE_2D, _texID);
+
+  glDrawArrays(GL_TRIANGLES, 0, 6*_stringLength);
+
   glDisable(GL_BLEND);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
   glUseProgram(0);
 }

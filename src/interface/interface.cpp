@@ -97,8 +97,8 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
 }
 
 void Interface::renderText() const {
+  _text.render();
   _text.displayAtlas(glm::uvec2(0, 0));
-  _text.renderString("hello world", glm::uvec2(500,256));
 
   // _window.draw(_textTopLeft);
   // _window.draw(_textTopRight);
@@ -112,6 +112,7 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
+  _text.setText("hello world", glm::uvec2(500,256));
   // _textTopLeft.setString(string);
 }
 

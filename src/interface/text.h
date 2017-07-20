@@ -17,7 +17,8 @@ public:
 
   inline GLuint getTexID() const {return _texID;}
 
-  void renderString(const std::string &str, glm::uvec2 windowCoords) const;
+  void setText(const std::string &str, glm::uvec2 windowCoords);
+  void render() const;
 
   void displayAtlas(glm::uvec2 windowCoords) const;
 
@@ -32,4 +33,6 @@ private:
   GLuint _vao;
   GLuint _vbo;
   GLuint _texID;
+
+  size_t _stringLength;
 };
