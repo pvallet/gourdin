@@ -13,7 +13,9 @@ Ocean::Ocean(float oversizeFactor) :
           TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), 0,
           0, TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor),
           TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor)},
-	_indices {0, 1, 2, 3} {
+	_indices {0, 1, 2, 3},
+	_vao(0),
+	_vbo(0) {
 
   // vbo
 	glGenBuffers(1, &_vbo);

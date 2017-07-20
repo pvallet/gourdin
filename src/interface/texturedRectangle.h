@@ -14,8 +14,7 @@ public:
   void draw() const;
 
 private:
-  std::array<float,8> _vertices;
-  std::array<float,8> _coord;
+  std::array<float,16> _verticesAndCoord;
 
   GLuint _texID;
   GLuint _vao;

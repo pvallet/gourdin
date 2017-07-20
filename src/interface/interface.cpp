@@ -4,9 +4,12 @@
 
 Interface::Interface(SDL2pp::Window& window):
   // _rectSelect({0.f, 0.f}),
+  _textShader ("src/shaders/2D.vert", "src/shaders/text.frag"),
   _window(window) {}
 
 void Interface::init() {
+  _textShader.load();
+
   // Text
   // _textFont.loadFromFile("res/FiraMono-Regular.otf");
   // _textTopLeft.setFont(_textFont);
@@ -100,6 +103,10 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
 }
 
 void Interface::renderText() const {
+  glUseProgram(_textShader.getProgramID());
+  _text.displayAtlas(glm::uvec2(0, 0));
+  glUseProgram(0);
+
   // _window.draw(_textTopLeft);
   // _window.draw(_textTopRight);
   // _window.draw(_textTopCenter);

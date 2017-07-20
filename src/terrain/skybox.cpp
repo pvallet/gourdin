@@ -37,7 +37,9 @@ Skybox::Skybox() :
     3, 3, 3, 3,
     4, 4, 4, 4,
     5, 5, 5, 5
-  } {
+  },
+	_vao(0),
+	_vbo(0) {
 
   // vbo
 	glGenBuffers(1, &_vbo);

@@ -3,25 +3,19 @@
 #include "utils.h"
 
 TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, float h) :
-	_vertices {
-     x, y,
-		 x+w, y,
-     x, y+h,
-     x+w, y+h,
+	_verticesAndCoord {
+     x,   y,   0, 0,
+		 x+w, y,   1, 0,
+     x,   y+h, 0, 1,
+     x+w, y+h, 1, 1
 	},
-  _coord {
-    0, 0,  1, 0,  0, 1,  1, 1
-  },
 	_texID(texID) {
 
   // vbo
 	glGenBuffers(1, &_vbo);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glBufferData(	GL_ARRAY_BUFFER, sizeof(_vertices) + sizeof(_coord), NULL, GL_STATIC_DRAW);
-
-  glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_vertices), &_vertices[0]);
-  glBufferSubData(GL_ARRAY_BUFFER, sizeof(_vertices) , sizeof(_coord), &_coord[0]);
+  glBufferData(	GL_ARRAY_BUFFER, sizeof(_verticesAndCoord), &_verticesAndCoord[0], GL_STATIC_DRAW);
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -31,11 +25,9 @@ TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, f
   glBindVertexArray(_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
