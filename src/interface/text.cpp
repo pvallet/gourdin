@@ -68,33 +68,40 @@ void Text::setText(const std::string &str, glm::uvec2 windowCoords) {
   glBufferData(GL_ARRAY_BUFFER, _stringLength * glyphGLDataSize, NULL, GL_DYNAMIC_DRAW);
 
   for (size_t i = 0; i < str.size(); i++) {
-    const Glyph* glyph = _fontHandler.getGlyph(str[i]);
-
-    if (!glyph) {
-      continue;
+    if (str[i] == '\n') {
+      y -= _fontHandler.getFontSize() * sy;
+      x = glCoords.x;
     }
 
-    if (i > 0)
-      x += glyph->kerning[str[i-1]];
+    else {
+      const Glyph* glyph = _fontHandler.getGlyph(str[i]);
 
-    float x0 = (float) (x + glyph->offset_x * sx);
-    float y0 = (float) (y + glyph->offset_y * sy);
-    float x1 = (float) (x0 + glyph->width * sx);
-    float y1 = (float) (y0 - glyph->height * sy);
+      if (!glyph) {
+        continue;
+      }
 
-    float s0 = glyph->s0;
-    float t0 = glyph->t0;
-    float s1 = glyph->s1;
-    float t1 = glyph->t1;
+      if (i > 0)
+        x += glyph->kerning[str[i-1]];
 
-    struct {float x, y, s, t;} data[6] = {
-      { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 },
-      { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 }
-    };
+      float x0 = (float) (x + glyph->offset_x * sx);
+      float y0 = (float) (y + glyph->offset_y * sy);
+      float x1 = (float) (x0 + glyph->width * sx);
+      float y1 = (float) (y0 - glyph->height * sy);
 
-    glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize , glyphGLDataSize, data);
+      float s0 = glyph->s0;
+      float t0 = glyph->t0;
+      float s1 = glyph->s1;
+      float t1 = glyph->t1;
 
-    x += (glyph->advance_x * sx);
+      struct {float x, y, s, t;} data[6] = {
+        { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 },
+        { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 }
+      };
+
+      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize , glyphGLDataSize, data);
+
+      x += (glyph->advance_x * sx);
+    }
   }
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);

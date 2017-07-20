@@ -21,6 +21,10 @@ public:
 
   const Glyph* getGlyph(char character) const;
 
+  inline const float getFontSize() const {return _fontSize;}
+
 private:
   std::array<std::unique_ptr<Glyph>,128> _glyphs;
+
+  const float _fontSize;
 };

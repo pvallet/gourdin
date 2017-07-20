@@ -112,7 +112,7 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _text.setText("hello world", glm::uvec2(500,256));
+  _text.setText("hello world\nbim feinte", glm::uvec2(500,256));
   // _textTopLeft.setString(string);
 }
 

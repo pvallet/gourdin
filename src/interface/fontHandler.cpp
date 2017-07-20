@@ -3,7 +3,10 @@
 #include <algorithm>
 #include "vera_mono_10.h"
 
-FontHandler::FontHandler() {
+#define FONT_SIZE 10.
+
+FontHandler::FontHandler():
+  _fontSize(FONT_SIZE) {
   // Flip the texture upside down to match OpenGL coordinates system
   for (unsigned int i = 0; i < font.tex_width / 2; i++) {
     for (unsigned int j = 0; j < font.tex_height; j++) {
