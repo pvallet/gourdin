@@ -19,7 +19,7 @@ Text::Text() :
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   glTexImage2D( GL_TEXTURE_2D, 0, GL_R8, _fontHandler.getWidth(), _fontHandler.getHeight(),
     0, GL_RED, GL_UNSIGNED_BYTE, _fontHandler.getPixelData());
@@ -52,15 +52,15 @@ void Text::loadShader() {
   }
 }
 
-void Text::setText(const std::string &str, glm::uvec2 windowCoords) {
+void Text::setText(const std::string &str, glm::uvec2 windowCoords, float fontSize) {
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   Camera& cam = Camera::getInstance();
   glm::vec2 glCoords = cam.windowCoordsToGLCoords(windowCoords);
   float x = glCoords.x;
   float y = glCoords.y;
-  float sx = 2 / (float) cam.getWindowW();
-  float sy = 2 / (float) cam.getWindowH();
+  float sx = 2 / (float) cam.getWindowW() * fontSize / _fontHandler.getFontSize();
+  float sy = 2 / (float) cam.getWindowH() * fontSize / _fontHandler.getFontSize();
 
   _stringLength = str.size();
   size_t glyphGLDataSize = 24 * sizeof(float);

@@ -34,12 +34,11 @@ public:
 
 private:
   // sf::RectangleShape _rectSelect;
-  // sf::Font _textFont;
-  // sf::Text _textTopLeft;
-  // sf::Text _textTopRight;
-  // sf::Text _textTopCenter;
-  // sf::Text _textCenter;
-  // sf::Text _textBottomCenter;
+  Text _textTopLeft;
+  Text _textTopRight;
+  Text _textTopCenter;
+  Text _textCenter;
+  Text _textBottomCenter;
   // sf::Sprite _minimapSprite;
   // sf::Texture _minimapTexture;
 
@@ -47,6 +46,4 @@ private:
   Chronometer _textBottomCenterChrono;
 
   std::unique_ptr<const TexturedRectangle> _texRectEngine;
-
-  Text _text;
 };

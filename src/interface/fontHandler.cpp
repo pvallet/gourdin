@@ -1,9 +1,9 @@
 #include "fontHandler.h"
 
 #include <algorithm>
-#include "vera_mono_10.h"
+#include "vera_mono_39.h"
 
-#define FONT_SIZE 10.
+#define FONT_SIZE 39.
 
 FontHandler::FontHandler():
   _fontSize(FONT_SIZE) {

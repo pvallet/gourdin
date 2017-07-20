@@ -17,7 +17,7 @@ public:
 
   inline GLuint getTexID() const {return _texID;}
 
-  void setText(const std::string &str, glm::uvec2 windowCoords);
+  void setText(const std::string &str, glm::uvec2 windowCoords, float fontSize = _fontHandler.getFontSize());
   void render() const;
 
   void displayAtlas(glm::uvec2 windowCoords) const;

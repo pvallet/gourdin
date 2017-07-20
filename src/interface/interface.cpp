@@ -3,6 +3,8 @@
 #include "camera.h"
 
 void Interface::init() {
+  Text::loadShader();
+
   // Text
   // _textFont.loadFromFile("res/FiraMono-Regular.otf");
   // _textTopLeft.setFont(_textFont);
@@ -30,7 +32,6 @@ void Interface::init() {
 
   // _minimapSprite.setTexture(_minimapTexture);
   // _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
-  Text::loadShader();
 }
 
 void Interface::renderEngine() const {
@@ -97,23 +98,19 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
 }
 
 void Interface::renderText() const {
-  _text.render();
-  _text.displayAtlas(glm::uvec2(0, 0));
+  _textTopLeft.render();
+  _textTopRight.render();
+  _textTopCenter.render();
 
-  // _window.draw(_textTopLeft);
-  // _window.draw(_textTopRight);
-  // _window.draw(_textTopCenter);
-  //
-  // if (_textCenterChrono.isStillRunning())
-  //   _window.draw(_textCenter);
-  //
-  // if (_textBottomCenterChrono.isStillRunning())
-  //   _window.draw(_textBottomCenter);
+  if (_textCenterChrono.isStillRunning())
+    _textCenter.render();
+
+  if (_textBottomCenterChrono.isStillRunning())
+    _textBottomCenter.render();
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _text.setText("hello world\nbim feinte", glm::uvec2(500,256));
-  // _textTopLeft.setString(string);
+  _textTopLeft.setText(string, glm::uvec2(0,0), 12);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
@@ -122,7 +119,8 @@ void Interface::setTextTopRight(const std::string& string) {
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-  // _textTopCenter.setString(string);
+  // Camera& cam = Camera::getInstance();
+  // _textTopCenter.setString(string, glm::uvec2(cam.getWindowW() / 2));
   // _textTopCenter.setPosition(_window.getSize().x / 2 - _textTopCenter.getLocalBounds().width / 2, 0);
 }
 
