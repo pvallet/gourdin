@@ -4,7 +4,7 @@
 
 class GameSandbox : public Game {
 public:
-  GameSandbox (SDL2pp::Window& window, Engine& engine);
+  GameSandbox (Engine& engine);
 
   void init();
 

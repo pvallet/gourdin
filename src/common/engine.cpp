@@ -17,11 +17,7 @@ Engine::Engine() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _mapInfoExtractor(_terrainGeometry),
-  _reliefGenerator(_mapInfoExtractor),
-  _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
-  _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag"),
-  _depthInColorBufferShader ("src/shaders/2D.vert", "src/shaders/depthToColor.frag") {}
+  _reliefGenerator(_mapInfoExtractor) {}
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -34,10 +30,10 @@ void Engine::resetCamera() {
 void Engine::init() {
   srand(time(NULL));
 
-  _terrainShader.load();
-  _igEShader.load();
-  _skyboxShader.load();
-  _depthInColorBufferShader.load();
+  _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
+  _igEShader.load("src/shaders/igElement.vert", "src/shaders/igElement.frag");
+  _skyboxShader.load("src/shaders/skybox.vert", "src/shaders/skybox.frag");
+  _depthInColorBufferShader.load("src/shaders/2D.vert", "src/shaders/depthToColor.frag");
 
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);

@@ -4,6 +4,8 @@
 #include "texturedRectangle.h"
 
 FontHandler Text::_fontHandler;
+Shader Text::_textShader;
+bool Text::_shaderLoaded = false;
 
 Text::Text() :
   _vao(0),
@@ -42,7 +44,15 @@ Text::~Text() {
 	glDeleteVertexArrays(1, &_vao);
 }
 
+void Text::loadShader() {
+  if (!Text::_shaderLoaded) {
+    Text::_textShader.load("src/shaders/2D.vert", "src/shaders/text.frag");
+    Text::_shaderLoaded = true;
+  }
+}
+
 void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
+  glUseProgram(_textShader.getProgramID());
   glBindVertexArray(_vao);
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   glBindTexture(GL_TEXTURE_2D, _texID);
@@ -89,6 +99,7 @@ void Text::renderString(const std::string &str, glm::uvec2 windowCoords) const {
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
+  glUseProgram(0);
 }
 
 void Text::displayAtlas(glm::uvec2 windowCoords) const {
@@ -98,10 +109,12 @@ void Text::displayAtlas(glm::uvec2 windowCoords) const {
 
   TexturedRectangle atlas(_texID, glCoords.x, glCoords.y, glCoords.z, glCoords.w);
 
+  glUseProgram(_textShader.getProgramID());
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   atlas.draw();
 
   glDisable(GL_BLEND);
+  glUseProgram(0);
 }

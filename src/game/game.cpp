@@ -1,14 +1,12 @@
 #include "game.h"
 #include "camera.h"
 
-Game::Game (SDL2pp::Window& window, Engine& engine):
-  _2DShader("src/shaders/2D.vert", "src/shaders/simpleTexture.frag"),
-  _window(window),
+Game::Game (Engine& engine):
   _engine(engine),
-  _interface(window) {}
+  _interface() {}
 
 void Game::init() {
-  _2DShader.load();
+  _2DShader.load("src/shaders/2D.vert", "src/shaders/simpleTexture.frag");
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
   _interface.setTextTopLeft(getInfoText());

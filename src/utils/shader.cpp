@@ -8,10 +8,7 @@
 Shader::Shader() :
 	_vertexID(0),
 	_fragmentID(0),
-	_programID(0),
-	_vertexSource(),
-	_fragmentSource() {
-}
+	_programID(0) {}
 
 
 Shader::Shader(Shader const &shader) {
@@ -20,16 +17,6 @@ Shader::Shader(Shader const &shader) {
 
   load();
 }
-
-
-Shader::Shader(std::string vertexSource, std::string fragmentSource) :
-	_vertexID(0),
-	_fragmentID(0),
-	_programID(0),
-	_vertexSource(vertexSource),
-	_fragmentSource(fragmentSource) {
-}
-
 
 Shader::~Shader() {
 	glDeleteShader(_vertexID);
@@ -47,6 +34,12 @@ Shader& Shader::operator=(Shader const &shader) {
   return *this;
 }
 
+bool Shader::load(std::string vertexSource, std::string fragmentSource) {
+	_vertexSource = vertexSource;
+	_fragmentSource = fragmentSource;
+
+	return load();
+}
 
 bool Shader::load() {
   if(glIsShader(_vertexID) == GL_TRUE)
@@ -97,7 +90,7 @@ bool Shader::load() {
 
 
 bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &source) {
-
+	
   shader = glCreateShader(type);
 
   if(shader == 0) {

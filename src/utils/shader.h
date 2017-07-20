@@ -13,16 +13,16 @@ public:
 
   Shader();
   Shader(Shader const &shader);
-  Shader(std::string vertexSource, std::string fragmentSource);
   virtual ~Shader();
 
   Shader& operator=(Shader const &shader);
 
-  bool load();
-  bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
+  bool load(std::string vertexSource, std::string fragmentSource);
   inline GLuint getProgramID() const {return _programID;}
 
 private:
+  bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
+  bool load();
 
   GLuint _vertexID;
   GLuint _fragmentID;

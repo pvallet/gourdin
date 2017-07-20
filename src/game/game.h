@@ -1,14 +1,12 @@
 #pragma once
 
-#include <SDL2pp/SDL2pp.hh>
-
 #include "engine.h"
 #include "interface.h"
 #include "shader.h"
 
 class Game {
 public:
-  Game (SDL2pp::Window& window, Engine& engine);
+  Game (Engine& engine);
 
   virtual void init();
 
@@ -24,7 +22,6 @@ protected:
 
   Shader _2DShader;
 
-  SDL2pp::Window& _window;
   Engine& _engine;
   Interface _interface;
 };

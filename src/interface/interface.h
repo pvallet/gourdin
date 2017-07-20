@@ -7,13 +7,12 @@
 #include "chronometer.h"
 #include "engine.h"
 #include "opengl.h"
-#include "shader.h"
 #include "text.h"
 #include "texturedRectangle.h"
 
 class Interface {
 public:
-  Interface(SDL2pp::Window& window);
+  Interface() {}
   void init();
 
   void renderEngine() const;
@@ -50,7 +49,4 @@ private:
   std::unique_ptr<const TexturedRectangle> _texRectEngine;
 
   Text _text;
-  Shader _textShader;
-
-  SDL2pp::Window& _window;
 };

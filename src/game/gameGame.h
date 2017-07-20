@@ -4,7 +4,7 @@
 
 class GameGame : public Game {
 public:
-  GameGame (SDL2pp::Window& window, Engine& engine);
+  GameGame (Engine& engine);
 
   void render() const;
 

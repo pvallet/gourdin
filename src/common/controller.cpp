@@ -12,8 +12,8 @@
 Controller::Controller(SDL2pp::Window& window) :
   _running(true),
   _engine(),
-  _gameGame(window,_engine),
-  _gameSandbox(window,_engine),
+  _gameGame(_engine),
+  _gameSandbox(_engine),
   _currentHandlerType(HDLR_SANDBOX),
   _eHandlerGame(_gameGame),
   _eHandlerSandbox(_gameSandbox),
@@ -77,5 +77,6 @@ void Controller::run() {
       _gameSandbox.update(_msElapsed);
       _gameSandbox.render();
     }
+    SDL_GL_SwapWindow(_window.Get());
   }
 }
