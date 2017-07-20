@@ -136,6 +136,9 @@ foreach (_sourceFile ${EXTERNAL_SOURCE_FILES})
     list (APPEND INCLUDE_DIRS ${_dir})
 endforeach()
 
+# Add font header files
+list (APPEND INCLUDE_DIRS "external_manual/fonts/")
+
 include_directories(${INCLUDE_DIRS})
 
 if (ANDROID)
