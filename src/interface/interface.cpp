@@ -5,6 +5,12 @@
 void Interface::init() {
   Text::loadShader();
 
+#ifdef __ANDROID__
+  _androidBuild = true;
+#else
+  _androidBuild = false;
+#endif
+
   // Selection rectangle
   // _rectSelect.setFillColor(sf::Color::Transparent);
   // _rectSelect.setOutlineThickness(1);
@@ -96,33 +102,38 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _textTopLeft.setText(string, 12);
+  if (!_androidBuild)
+    _textTopLeft.setText(string, 12);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
   Camera& cam = Camera::getInstance();
-  _textTopRight.setText(string, 12);
+  _textTopRight.setText(string, _androidBuild ? 30 : 12);
   _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-  Camera& cam = Camera::getInstance();
-  _textTopCenter.setText(string, 12);
-  _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
+  if (!_androidBuild) {
+    Camera& cam = Camera::getInstance();
+    _textTopCenter.setText(string, 12);
+    _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
+  }
 }
 
 void Interface::setTextCenter(const std::string& string, int msDuration) {
-  Camera& cam = Camera::getInstance();
-  _textCenter.setText(string);
-  _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
-                          cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
+  if (!_androidBuild) {
+    Camera& cam = Camera::getInstance();
+    _textCenter.setText(string);
+    _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
+                            cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
 
-  _textCenterChrono.reset(msDuration);
+    _textCenterChrono.reset(msDuration);
+  }
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
   Camera& cam = Camera::getInstance();
-  _textBottomCenter.setText(string, 17);
+  _textBottomCenter.setText(string, _androidBuild ? 38 : 17);
   _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
                                 cam.getWindowH() - _textBottomCenter.getSize().y);
 

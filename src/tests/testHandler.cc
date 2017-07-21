@@ -4,6 +4,7 @@
 #include <SDL2pp/SDL2pp.hh>
 #include <cstdio>
 #include <fstream>
+#include <sstream>
 
 #include "generatedImage.h"
 #include "reliefGenerator.h"

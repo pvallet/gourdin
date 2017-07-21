@@ -1,9 +1,14 @@
 #include "fontHandler.h"
 
 #include <algorithm>
-#include "vera_mono_39.h"
 
-#define FONT_SIZE 39.
+#ifdef __ANDROID__
+  #include "vera_38.h"
+  #define FONT_SIZE 38.
+#else
+  #include "vera_mono_39.h"
+  #define FONT_SIZE 39.
+#endif
 
 FontHandler::FontHandler():
   _fontSize(FONT_SIZE) {

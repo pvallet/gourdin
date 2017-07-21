@@ -3,9 +3,6 @@
 #include <SDL2pp/SDL2pp.hh>
 #include <SDL_log.h>
 #include "opengl.h"
-#include "camera.h"
-
-#include <iostream>
 
 glm::uvec2 ut::convertToChunkCoords(glm::vec2 pos) {
   glm::uvec2 chunkPos;
@@ -101,20 +98,4 @@ bool glCheckError(const char *file, int line) {
   }
 
   return isError;
-}
-
-void LogText::addFPSandCamInfo(int msElapsed) {
-  Camera& cam = Camera::getInstance();
-  int fps = 0;
-
-  if (msElapsed != 0)
-    fps = 1.f / msElapsed * 1000;
-
-  _text << "X: " << cam.getPointedPos().x << "\n"
-  << "Y: " << cam.getPointedPos().y << std::endl;
-  _text << "R: " << cam.getZoom() << "\n"
-  << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
-  (cam.getTheta() < 0 ? 360 : 0) << "\n"
-  << "Phi: " << cam.getPhi() << std::endl;
-  _text << "FPS: " << fps << std::endl;
 }

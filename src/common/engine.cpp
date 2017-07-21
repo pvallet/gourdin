@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.h"
+#include "log.h"
 #include "reliefGenerator.h"
 
 #include <ctime>
@@ -277,7 +278,7 @@ void Engine::update(int msElapsed) {
     }
   }
 
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
   std::ostringstream subdivLvl;
   subdivLvl << "Current subdivision level: " << _terrain[camPos.x][camPos.y]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
@@ -442,7 +443,7 @@ void Engine::renderToFBO() const {
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl

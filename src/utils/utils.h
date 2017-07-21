@@ -60,31 +60,3 @@ bool glCheckError(const char *file, int line);
 // regex to replace gl calls: ([_a-zA-Z]* = )?(gl[^ :;>]*\([^;]*\));
 // replace with _glCheck($2);
 #define _glCheck(expr) {expr; glCheckError(__FILE__,__LINE__);}
-
-
-#include <sstream>
-
-/** Singleton class in which any function can store info to be displayed on the
-  * screen
-	*/
-class LogText	{
-public:
-	static LogText& getInstance() {
-    static LogText instance;
-    return instance;
-  }
-
-	LogText(LogText const&)         = delete;
-	void operator=(LogText const&)  = delete;
-
-	inline void clear() {_text.str("");}
-	inline void addLine(std::string newLine) { _text << newLine;}
-	void addFPSandCamInfo(int msElapsed);
-	inline std::string getText() const {return _text.str();}
-
-
-private:
-	LogText() {}
-
-	std::ostringstream _text;
-};

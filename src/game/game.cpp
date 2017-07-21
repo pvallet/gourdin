@@ -1,6 +1,8 @@
 #include "game.h"
 #include "camera.h"
 
+#include <sstream>
+
 Game::Game (Engine& engine):
   _engine(engine),
   _interface() {}

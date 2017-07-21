@@ -4,6 +4,8 @@
 #include "opengl.h"
 #include "texturedRectangle.h"
 
+#include <sstream>
+
 GameGame::GameGame (Engine& engine):
   Game::Game(engine),
   _povCamera(false) {}

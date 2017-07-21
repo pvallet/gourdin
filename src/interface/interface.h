@@ -33,6 +33,8 @@ public:
   void setRectSelect(glm::ivec4 rect);
 
 private:
+  bool _androidBuild;
+
   // sf::RectangleShape _rectSelect;
   Text _textTopLeft;
   Text _textTopRight;

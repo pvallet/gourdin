@@ -1,6 +1,7 @@
 #include "gameSandbox.h"
 
 #include "camera.h"
+#include "log.h"
 #include "texturedRectangle.h"
 
 #define LION_MIN_SPAWN_DIST 20
@@ -23,7 +24,7 @@ void GameSandbox::init() {
 void GameSandbox::update(int msElapsed) {
   Game::update(msElapsed);
 
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
   logText.addFPSandCamInfo(msElapsed);
 
   // Remove the dead elements from the selected elements
@@ -219,7 +220,7 @@ void GameSandbox::killLion() {
 }
 
 void GameSandbox::clearLog() const {
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
   logText.clear();
 }
 
@@ -253,7 +254,7 @@ void GameSandbox::interruptHunt() {
       _bestScore = Lion::getNbKilled();
     Lion::resetNbKilled();
 
-    LogText& logText = LogText::getInstance();
+    Log& logText = Log::getInstance();
     logText.clear();
 
     std::ostringstream bestScoreText;

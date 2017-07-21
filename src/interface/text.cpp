@@ -84,7 +84,7 @@ void Text::setText(const std::string &str, float fontSize) {
       }
 
       if (i > 0)
-        x += glyph->kerning[str[i-1]];
+        x += glyph->kerning[str[i-1]] * sx;
 
       float x0 = (float) (x + glyph->offset_x * sx);
       float y0 = (float) (y + glyph->offset_y * sy);
