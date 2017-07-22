@@ -1,28 +1,14 @@
 #include "terrainTexManager.h"
 
-#include <SDL2pp/SDL2pp.hh>
-#include <SDL_log.h>
 #include <sstream>
 
-glm::uvec2 TerrainTexManager::loadTexture(std::string path) {
-	SDL2pp::Surface img(path);
+void TerrainTexManager::loadTexture(std::string path) {
 
-  _texIDs.push_back(0);
+	Texture texture;
 
-	glm::uvec2 imgSize(img.GetWidth(), img.GetHeight());
+	texture.loadFromFile(path);
 
-	if (img.Get()->format->BytesPerPixel == 4)
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: image %s has an alpha channel and should not.", path.c_str());
-
-	glGenTextures(1, &_texIDs.back());
-
-  glBindTexture(GL_TEXTURE_2D, _texIDs.back());
-
-  glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGB,
-                  imgSize.x, imgSize.y,
-                  0,
-                  GL_RGB, GL_UNSIGNED_BYTE, img.Get()->pixels
-  );
+	glBindTexture(GL_TEXTURE_2D, texture.getTexID());
 
   glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -33,7 +19,7 @@ glm::uvec2 TerrainTexManager::loadTexture(std::string path) {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return imgSize;
+	_textures.push_back(std::move(texture));
 }
 
 void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {

@@ -1,6 +1,6 @@
 #include "fontHandler.h"
 
-#include <algorithm>
+#include "texture.h"
 
 #ifdef __ANDROID__
   #include "vera_38.h"
@@ -12,13 +12,8 @@
 
 FontHandler::FontHandler():
   _fontSize(FONT_SIZE) {
-  // Flip the texture upside down to match OpenGL coordinates system
-  for (unsigned int i = 0; i < font.tex_width / 2; i++) {
-    for (unsigned int j = 0; j < font.tex_height; j++) {
-      std::swap(font.tex_data[i * font.tex_width + j],
-        font.tex_data[font.tex_width * (font.tex_width - i - 1) + j]);
-    }
-  }
+  
+  Texture::flipPixelsUpsideDown(font.tex_width, font.tex_height, 1, font.tex_data);
 
   // Fill the glyph data with the glyphs from the font
   for (size_t i = 0; i < font.glyphs_count; i++) {

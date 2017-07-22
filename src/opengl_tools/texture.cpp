@@ -10,6 +10,20 @@ Texture::~Texture() {
   deleteTexture();
 }
 
+Texture::Texture(Texture&& other) noexcept :
+  _size(other._size),
+  _texID(other._texID) {
+  other._texID = 0;
+}
+
+Texture& Texture::operator=(Texture&& other) noexcept {
+  _size = other._size;
+  _texID = other._texID;
+  other._texID = 0;
+  
+  return *this;
+}
+
 void Texture::deleteTexture() {
   if(glIsTexture(_texID) == GL_TRUE)
     glDeleteTextures(1, &_texID);
@@ -68,7 +82,7 @@ void Texture::flipPixelsUpsideDown(size_t width, size_t height, size_t bytesPerP
     for (size_t j = 0; j < height; j++) {
       for (size_t k = 0; k < bytesPerPixel; k++) {
         std::swap(data[bytesPerPixel * (i * width + j) + k],
-                  data[bytesPerPixel * (width * (width - i - 1) + j) + k]);
+                  data[bytesPerPixel * (width * (height - i - 1) + j) + k]);
       }
     }
   }

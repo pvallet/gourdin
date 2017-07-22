@@ -1,25 +1,26 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <glm/glm.hpp>
 
 #include "opengl.h"
-#include <glm/glm.hpp>
+#include "texture.h"
+
+#include <string>
+#include <vector>
 
 class TerrainTexManager {
 public:
 	TerrainTexManager() {}
-  ~TerrainTexManager() {glDeleteTextures(_texIDs.size(), &_texIDs[0]);}
 	TerrainTexManager(TerrainTexManager const&) = delete;
 	void operator=   (TerrainTexManager const&) = delete;
 
-	glm::uvec2 loadTexture(std::string path);
+	void loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);
 
-	void bindTexture(size_t index) const {glBindTexture(GL_TEXTURE_2D, _texIDs[index]);}
+	void bindTexture(size_t index) const {glBindTexture(GL_TEXTURE_2D, _textures[index].getTexID());}
 
-	inline GLuint getTexID(size_t index) const {return _texIDs[index];}
+	inline GLuint getTexID(size_t index) const {return _textures[index].getTexID();}
 
 private:
-	std::vector<GLuint> _texIDs;
+	std::vector<Texture> _textures;
 };
