@@ -8,7 +8,7 @@ Game::Game (Engine& engine):
   _interface() {}
 
 void Game::init() {
-  _2DShader.load("src/shaders/2D.vert", "src/shaders/simpleTexture.frag");
+  _2DShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/simpleTexture.frag");
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
   _interface.setTextTopLeft(getInfoText());

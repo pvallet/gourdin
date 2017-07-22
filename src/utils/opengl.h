@@ -31,3 +31,5 @@
 
   #endif
 #endif
+
+#define BUFFER_OFFSET(a) ((char*)NULL + (a))

@@ -34,7 +34,7 @@ void Engine::init() {
   _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
   _igEShader.load("src/shaders/igElement.vert", "src/shaders/igElement.frag");
   _skyboxShader.load("src/shaders/skybox.vert", "src/shaders/skybox.frag");
-  _depthInColorBufferShader.load("src/shaders/2D.vert", "src/shaders/depthToColor.frag");
+  _depthInColorBufferShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/depthToColor.frag");
 
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);

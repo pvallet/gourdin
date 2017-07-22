@@ -47,7 +47,7 @@ Text::~Text() {
 
 void Text::loadShader() {
   if (!Text::_shaderLoaded) {
-    Text::_textShader.load("src/shaders/2D.vert", "src/shaders/text.frag");
+    Text::_textShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/text.frag");
     Text::_shaderLoaded = true;
   }
 }

@@ -1,6 +1,7 @@
 #include "event_handler.h"
 #include "camera.h"
 #include "clock.h"
+#include "utils.h"
 
 bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   bool running = true;

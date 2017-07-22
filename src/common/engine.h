@@ -26,7 +26,6 @@
 
 #include "frameBufferObject.h"
 #include "shader.h"
-#include "utils.h"
 
 enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 

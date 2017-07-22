@@ -90,7 +90,7 @@ bool Shader::load() {
 
 
 bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &source) {
-	
+
   shader = glCreateShader(type);
 
   if(shader == 0) {

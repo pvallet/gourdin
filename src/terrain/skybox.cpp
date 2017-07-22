@@ -1,9 +1,5 @@
 #include "skybox.h"
 
-#include "utils.h"
-
-#include <iostream>
-
 Skybox::Skybox() :
 	t(1000.),
   _indices {

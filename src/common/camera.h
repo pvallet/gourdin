@@ -5,8 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "utils.h"
-
 #include <cmath>
 
 #define ELEMENT_NEAR_PLANE 20.f

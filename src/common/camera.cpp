@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include "utils.h"
+
 Camera::Camera() :
   _fovAngle(45),
 	_aspectRatio(1.f),

@@ -8,7 +8,6 @@
 #include "terrainGeometry.h"
 #include "terrainTexManager.h"
 #include "igElementDisplay.h"
-#include "utils.h"
 
 struct BiomeIndices {
 	std::vector<GLuint> indices;

@@ -7,7 +7,6 @@
 #include "camera.h"
 #include "clock.h"
 #include "lion.h"
-#include "utils.h"
 
 Controller::Controller(SDL2pp::Window& window) :
   _running(true),

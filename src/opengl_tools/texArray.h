@@ -12,8 +12,8 @@ public:
 	~TextureArray() {glDeleteTextures(1, &texID);}
 	TextureArray           (TextureArray const&) = delete;
 	TextureArray& operator=(TextureArray const&) = delete;
-	TextureArray           (TextureArray&& other) = default;
-  TextureArray& operator=(TextureArray&& other) = default;
+	TextureArray           (TextureArray&&) = default;
+  TextureArray& operator=(TextureArray&&) = default;
 
 	void loadTextures(size_t count, std::string folderPath);
 

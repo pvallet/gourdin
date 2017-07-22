@@ -2,8 +2,6 @@
 
 #include "tinyxml.h"
 
-#include <iostream>
-
 TreeTexManager::TreeTexManager() :
   _heightFactor(0.15) {}
 
