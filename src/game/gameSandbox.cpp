@@ -56,7 +56,6 @@ void GameSandbox::render() const {
 
   _engine.renderToFBO();
 
-  glUseProgram(_2DShader.getProgramID());
   glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   _interface.renderEngine();
@@ -65,7 +64,6 @@ void GameSandbox::render() const {
   _interface.renderMinimap(_engine.getChunkStatus());
   _interface.renderText();
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
-  glUseProgram(0);
 }
 
 std::string GameSandbox::getHuntText() const {

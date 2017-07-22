@@ -2,6 +2,9 @@
 
 #include "utils.h"
 
+Shader TexturedRectangle::_2DShader;
+bool TexturedRectangle::_shaderLoaded = false;
+
 TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, float h):
 	_verticesAndCoord {
      x,   y,   0, 0,
@@ -41,7 +44,15 @@ TexturedRectangle::~TexturedRectangle() {
   glDeleteVertexArrays(1, &_vao);
 }
 
+void TexturedRectangle::loadShader() {
+  if (!TexturedRectangle::_shaderLoaded) {
+    TexturedRectangle::_2DShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/simpleTexture.frag");
+    TexturedRectangle::_shaderLoaded = true;
+  }
+}
+
 void TexturedRectangle::draw() const {
+	glUseProgram(_2DShader.getProgramID());
 	glBindVertexArray(_vao);
 	glBindTexture(GL_TEXTURE_2D, _texID);
 
@@ -49,6 +60,7 @@ void TexturedRectangle::draw() const {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 glm::vec4 TexturedRectangle::getTextureRect() const {

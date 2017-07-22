@@ -1,9 +1,12 @@
 #include "interface.h"
 
 #include "camera.h"
+#include "coloredRectangles.h"
 
 void Interface::init() {
+  ColoredRectangles::loadShader();
   Text::loadShader();
+  TexturedRectangle::loadShader();
 
 #ifdef __ANDROID__
   _androidBuild = true;
@@ -32,60 +35,62 @@ void Interface::renderEngine() const {
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
-  // Background image
+  Camera& cam = Camera::getInstance();
+  glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
+
+  // Background texture
   _minimapRect->draw();
 
-  // // Position of the viewer
-  // sf::Vector2f viewerPos( _minimapSprite.getPosition().x +
-  //   (float) _minimapSprite.getTextureRect().height * cam.getPointedPos().y / MAX_COORD,
-  //                         _minimapSprite.getPosition().y +
-  //   (float) _minimapSprite.getTextureRect().width  * cam.getPointedPos().x / MAX_COORD);
-  //
-  // sf::CircleShape miniCamPos(3);
-  // miniCamPos.setPointCount(8);
-  // miniCamPos.setFillColor(sf::Color::Black);
-  // miniCamPos.setPosition( viewerPos - sf::Vector2f(miniCamPos.getRadius(),
-  //                                                  miniCamPos.getRadius()));
-  //
-  // float theta = cam.getTheta();
-  // sf::RectangleShape miniCamDir({6, 2});
-  // miniCamDir.setFillColor(sf::Color::Black);
-  // miniCamDir.setPosition(viewerPos - sf::Vector2f(cos(-theta*RAD), sin(-theta*RAD)));
-  // miniCamDir.setRotation(-theta-90);
-  //
-  // _window.draw(miniCamPos);
-  // _window.draw(miniCamDir);
-  //
-  // // Highlight generated chunks
-  // float miniChunkSize = _minimapSprite.getTextureRect().height / (float) NB_CHUNKS;
-  //
-  // sf::RectangleShape miniChunk({miniChunkSize, miniChunkSize});
-  // miniChunk.setFillColor(sf::Color::Black);
-  // sf::Color edge(0,0,0,200);
-  // sf::Color fog(0,0,0,100);
-  //
-  // for (size_t i = 0; i < NB_CHUNKS; i++) {
-  //   for (size_t j = 0; j < NB_CHUNKS; j++) {
-  //     miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
-  //
-  //     switch (chunkStatus[i][j]) {
-  //       case NOT_GENERATED:
-  //         miniChunk.setFillColor(sf::Color::Black);
-  //         _window.draw(miniChunk);
-  //         break;
-  //
-  //       case EDGE:
-  //         miniChunk.setFillColor(edge);
-  //         _window.draw(miniChunk);
-  //         break;
-  //
-  //       case NOT_VISIBLE:
-  //         miniChunk.setFillColor(fog);
-  //         _window.draw(miniChunk);
-  //         break;
-  //     }
-  //   }
-  // }
+  // Highlight generated chunks
+  std::vector<glm::vec4> blackRects;
+  std::vector<glm::vec4> darkGreyRects;
+  std::vector<glm::vec4> lightGreyRects;
+
+  glm::vec2 miniChunkSize = glm::vec2(minimapTextureRect.z / (float) NB_CHUNKS,
+                                      minimapTextureRect.w / (float) NB_CHUNKS);
+
+  glm::vec4 miniChunk(-1, -1, miniChunkSize);
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    miniChunk.y = -1;
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      switch (chunkStatus[i][j]) {
+        case NOT_GENERATED:
+          blackRects.push_back(miniChunk);
+          break;
+
+        case EDGE:
+          darkGreyRects.push_back(miniChunk);
+          break;
+
+        case NOT_VISIBLE:
+          lightGreyRects.push_back(miniChunk);
+          break;
+      }
+      miniChunk.y += miniChunkSize.y;
+    }
+    miniChunk.x += miniChunkSize.x;
+  }
+
+  ColoredRectangles black(glm::vec4(0,0,0,1), blackRects);
+  ColoredRectangles darkGrey(glm::vec4(0,0,0,0.8), darkGreyRects);
+  ColoredRectangles lightGrey(glm::vec4(0,0,0,0.4), lightGreyRects);
+  black.draw();
+  darkGrey.draw();
+  lightGrey.draw();
+
+  // Position of the viewer
+
+  glm::vec2 viewerPos( minimapTextureRect.x + (float) minimapTextureRect.z * cam.getPointedPos().x / MAX_COORD,
+                       minimapTextureRect.y + (float) minimapTextureRect.w * cam.getPointedPos().y / MAX_COORD);
+
+  ColoredRectangles opaqueGrey(glm::vec4(0.2,0.2,0.2,1), std::vector<glm::vec4>(1,
+    glm::vec4(viewerPos.x - miniChunkSize.x/2.f,
+              viewerPos.y - miniChunkSize.y/2.f,
+              miniChunkSize*2.f)
+  ));
+
+  opaqueGrey.draw();
 }
 
 void Interface::renderText() const {

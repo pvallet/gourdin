@@ -2,7 +2,6 @@
 
 #include "engine.h"
 #include "interface.h"
-#include "shader.h"
 
 class Game {
 public:
@@ -19,8 +18,6 @@ public:
 
 protected:
   virtual std::string getInfoText() const;
-
-  Shader _2DShader;
 
   Engine& _engine;
   Interface _interface;
