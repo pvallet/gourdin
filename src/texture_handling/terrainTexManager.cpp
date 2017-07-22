@@ -2,7 +2,6 @@
 
 #include <SDL2pp/SDL2pp.hh>
 #include <SDL_log.h>
-#include <iostream>
 #include <sstream>
 
 glm::uvec2 TerrainTexManager::loadTexture(std::string path) {

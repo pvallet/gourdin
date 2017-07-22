@@ -8,6 +8,7 @@
 #include "engine.h"
 #include "opengl.h"
 #include "text.h"
+#include "texture.h"
 #include "texturedRectangle.h"
 
 class Interface {
@@ -21,7 +22,7 @@ public:
   void renderRectSelect() const;
   void renderLifeBars(std::set<Lion*> selection) const;
 
-  glm::vec2 getMinimapClickCoord(float x, float y) const;
+  glm::vec2 getMinimapClickCoords(size_t x, size_t y) const;
   void setTextTopLeft(const std::string& string);
   void setTextTopRight(const std::string& string);
   void setTextTopCenter(const std::string& string);
@@ -41,8 +42,9 @@ private:
   Text _textTopCenter;
   Text _textCenter;
   Text _textBottomCenter;
-  // sf::Sprite _minimapSprite;
-  // sf::Texture _minimapTexture;
+
+  Texture _minimapTexture;
+  std::unique_ptr<TexturedRectangle> _minimapRect;
 
   Chronometer _textCenterChrono;
   Chronometer _textBottomCenterChrono;

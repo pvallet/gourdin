@@ -1,7 +1,6 @@
 #include "igElement.h"
 
 #include <cmath>
-#include <iostream>
 #include <ctime>
 
 #include "camera.h"

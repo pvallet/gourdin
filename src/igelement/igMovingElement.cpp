@@ -3,7 +3,6 @@
 
 #include <glm/gtx/vector_angle.hpp>
 #include <cmath>
-#include <iostream>
 
 igMovingElement::igMovingElement(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igElement(position),

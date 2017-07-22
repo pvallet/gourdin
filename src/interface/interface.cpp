@@ -17,15 +17,14 @@ void Interface::init() {
   // _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
 
   // Minimap
-  // sf::Image mapImg;
-  // if (mapImg.loadFromFile("res/map/map.png")) {
-  //   _minimapTexture.loadFromImage(mapImg);
-  //   _minimapTexture.setSmooth(true);
-  // }
+  Camera& cam = Camera::getInstance();
 
+  _minimapTexture.loadFromFile("res/map/map.png");
 
-  // _minimapSprite.setTexture(_minimapTexture);
-  // _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
+  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+    0, cam.getWindowH() - _minimapTexture.getSize().y,
+    _minimapTexture.getSize()
+  ))));
 }
 
 void Interface::renderEngine() const {
@@ -33,9 +32,9 @@ void Interface::renderEngine() const {
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
-  // // Background image
-  // _window.draw(_minimapSprite);
-  //
+  // Background image
+  _minimapRect->draw();
+
   // // Position of the viewer
   // sf::Vector2f viewerPos( _minimapSprite.getPosition().x +
   //   (float) _minimapSprite.getTextureRect().height * cam.getPointedPos().y / MAX_COORD,
@@ -176,12 +175,16 @@ void Interface::renderLifeBars(std::set<Lion*> selection) const {
   // }
 }
 
-glm::vec2 Interface::getMinimapClickCoord(float x, float y) const {
-  // y = _window.getSize().y - y;
+glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
+  Camera& cam = Camera::getInstance();
 
-  // return glm::vec2( (y - _minimapSprite.getPosition().y) / (float) _minimapSprite.getTextureRect().height,
-  //                   (x - _minimapSprite.getPosition().x) / (float) _minimapSprite.getTextureRect().width);
-  return glm::vec2(-1,-1);
+  glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::uvec2(x,y));
+  glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
+
+  glm::vec2 coords = glm::vec2( (clickGLCoords.x - minimapTexRect.x) / minimapTexRect.z,
+                                (clickGLCoords.y - minimapTexRect.y) / minimapTexRect.w);
+
+  return coords;
 }
 
 void Interface::setRectSelect(glm::ivec4 rect) {

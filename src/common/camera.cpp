@@ -82,7 +82,7 @@ glm::uvec2 Camera::glCoordsToWindowCoords(glm::vec2 glCoords) const {
                     _windowH * (1 - glCoords.y));
 }
 
-glm::vec4 Camera::rectWindowCoordsToGLCoords(glm::uvec4 windowRect) const {
+glm::vec4 Camera::windowRectCoordsToGLRectCoords(glm::uvec4 windowRect) const {
   return glm::vec4(2 *  windowRect.x / (float) _windowW - 1,
                    1 - 2 * (windowRect.y + windowRect.w) / (float) _windowH,
                    2 *  windowRect.z / (float) _windowW,

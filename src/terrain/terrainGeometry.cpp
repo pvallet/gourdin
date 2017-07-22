@@ -3,7 +3,6 @@
 #include <SDL_log.h>
 #include <glm/gtx/vector_angle.hpp>
 #include <algorithm>
-#include <iostream>
 #include <unordered_set>
 #include <utility>
 

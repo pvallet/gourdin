@@ -1,7 +1,5 @@
 #include "chunk.h"
 
-#include <iostream>
-
 #include "camera.h"
 
 #include <glm/gtx/rotate_vector.hpp>

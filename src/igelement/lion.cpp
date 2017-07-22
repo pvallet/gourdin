@@ -1,7 +1,5 @@
 #include "lion.h"
 
-#include <iostream>
-
 #include "antilope.h"
 
 size_t Lion::_nbKilled = 0;

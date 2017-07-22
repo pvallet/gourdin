@@ -145,7 +145,7 @@ void Text::render() const {
 
 void Text::displayAtlas(glm::uvec2 windowCoords) const {
   Camera& cam = Camera::getInstance();
-  glm::vec4 glCoords = cam.rectWindowCoordsToGLCoords(glm::vec4(windowCoords,
+  glm::vec4 glCoords = cam.windowRectCoordsToGLRectCoords(glm::vec4(windowCoords,
     _fontHandler.getWidth(), _fontHandler.getHeight()));
 
   TexturedRectangle atlas(_texID, glCoords.x, glCoords.y, glCoords.z, glCoords.w);

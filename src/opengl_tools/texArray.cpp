@@ -3,7 +3,6 @@
 #include <SDL2pp/SDL2pp.hh>
 #include <SDL_log.h>
 
-#include <iostream>
 #include <sstream>
 
 #define MIPMAP_LVLS 4

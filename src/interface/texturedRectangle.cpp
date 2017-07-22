@@ -2,7 +2,7 @@
 
 #include "utils.h"
 
-TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, float h) :
+TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, float h):
 	_verticesAndCoord {
      x,   y,   0, 0,
 		 x+w, y,   1, 0,
@@ -33,6 +33,9 @@ TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, f
 	glBindVertexArray(0);
 }
 
+TexturedRectangle::TexturedRectangle (GLuint texID, glm::vec4 rect):
+	TexturedRectangle(texID, rect.x, rect.y, rect.z, rect.w) {}
+
 TexturedRectangle::~TexturedRectangle() {
 	glDeleteBuffers(1, &_vbo);
   glDeleteVertexArrays(1, &_vao);
@@ -46,4 +49,13 @@ void TexturedRectangle::draw() const {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
+}
+
+glm::vec4 TexturedRectangle::getTextureRect() const {
+	return glm::vec4(
+		_verticesAndCoord[0],
+		_verticesAndCoord[1],
+		_verticesAndCoord[12] - _verticesAndCoord[0],
+		_verticesAndCoord[13] - _verticesAndCoord[1]
+	);
 }

@@ -1,7 +1,6 @@
 #include "antilope.h"
 
 #include <cmath>
-#include <iostream>
 
 #include "lion.h"
 #include "utils.h"

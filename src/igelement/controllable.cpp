@@ -1,7 +1,6 @@
 #include "controllable.h"
 
 #include "camera.h"
-#include <iostream>
 
 Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
  	igMovingElement(position, graphics, terrainGeometry),

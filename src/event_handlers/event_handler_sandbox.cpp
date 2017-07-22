@@ -1,8 +1,6 @@
 #include "event_handler_sandbox.h"
 #include "camera.h"
 
-#include <iostream>
-
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define TRANSLATION_VALUE_PMS 0.0007f
 #define SCROLL_SPEED_SLOW 30.f
@@ -17,7 +15,7 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
 }
 
 void EventHandlerSandbox::handleClick(const SDL_Event& event) {
-  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoord(event.button.x, event.button.y);
+  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
     _game.moveCamera(MAX_COORD * minimapCoord);

@@ -1,7 +1,6 @@
 #include "reliefGenerator.h"
 
 #include <cmath>
-#include <iostream>
 
 ReliefGenerator::ReliefGenerator(const MapInfoExtractor& mapInfoExtractor) :
   _mapInfoExtractor(mapInfoExtractor) {}
