@@ -9,10 +9,11 @@
 class TextureArray {
 public:
 	TextureArray() : texID(0), _count(0) {}
-	TextureArray(TextureArray const &textureArray);
 	~TextureArray() {glDeleteTextures(1, &texID);}
-
-	TextureArray& operator=(TextureArray const &textureArray);
+	TextureArray           (TextureArray const&) = delete;
+	TextureArray& operator=(TextureArray const&) = delete;
+	TextureArray           (TextureArray&& other) = default;
+  TextureArray& operator=(TextureArray&& other) = default;
 
 	void loadTextures(size_t count, std::string folderPath);
 

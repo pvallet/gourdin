@@ -7,17 +7,6 @@
 
 #define MIPMAP_LVLS 4
 
-TextureArray::TextureArray(TextureArray const &textureArray) {
-	loadTextures(textureArray._count, textureArray._folderPath);
-}
-
-TextureArray& TextureArray::operator=(TextureArray const &textureArray) {
-
-  loadTextures(textureArray._count, textureArray._folderPath);
-
-  return *this;
-}
-
 void TextureArray::loadTextures(size_t count, std::string folderPath) {
 	_count = count;
 	_folderPath = folderPath;
