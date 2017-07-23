@@ -4,16 +4,19 @@
 
 #include <set>
 
+#include "camera.h"
 #include "chronometer.h"
 #include "engine.h"
 #include "opengl.h"
+
+#include "coloredRectangles.h"
 #include "text.h"
 #include "texture.h"
 #include "texturedRectangle.h"
 
 class Interface {
 public:
-  Interface() {}
+  Interface();
   void init();
 
   void renderEngine() const;
@@ -34,9 +37,11 @@ public:
   void setRectSelect(glm::ivec4 rect);
 
 private:
+  const Camera& cam;
+
   bool _androidBuild;
 
-  // sf::RectangleShape _rectSelect;
+  ColoredRectangles _rectSelect;
   Text _textTopLeft;
   Text _textTopRight;
   Text _textTopCenter;

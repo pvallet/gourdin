@@ -3,6 +3,9 @@
 #include "clock.h"
 #include "utils.h"
 
+EventHandler::EventHandler():
+  _beginDragLeft(-1,-1) {}
+
 bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   bool running = true;
 
@@ -47,7 +50,7 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
 
     case SDL_MOUSEBUTTONUP:
       if (event.button.button == SDL_BUTTON_LEFT)
-        _beginDragLeft = glm::ivec2(0,0);
+        _beginDragLeft = glm::ivec2(-1,-1);
       break;
   }
 

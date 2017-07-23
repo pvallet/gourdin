@@ -4,6 +4,7 @@ Shader ColoredRectangles::_plainColorShader;
 bool ColoredRectangles::_shaderLoaded = false;
 
 ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
+	_linesOffset(1e-5),
 	_color(color),
 	_filled(filled),
   _nbRect(0) {
@@ -22,6 +23,9 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
 	glBindVertexArray(0);
 }
 
+ColoredRectangles::ColoredRectangles (glm::vec4 color, const glm::vec4& rectangle, bool filled):
+ ColoredRectangles(color, std::vector<glm::vec4>(1,rectangle), filled) {}
+
 ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled):
   ColoredRectangles(color, filled) {
   setRectangles(rectangles);
@@ -37,6 +41,10 @@ void ColoredRectangles::loadShader() {
     ColoredRectangles::_plainColorShader.load("src/shaders/2D_shaders/2D_noTexCoords.vert", "src/shaders/2D_shaders/plainColor.frag");
     ColoredRectangles::_shaderLoaded = true;
   }
+}
+
+void ColoredRectangles::setRectangles(const glm::vec4& rectangle) {
+	setRectangles(std::vector<glm::vec4>(1,rectangle));
 }
 
 void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) {
@@ -65,6 +73,8 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 			glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
 		}
 		else {
+			x0 += _linesOffset; y0 += _linesOffset; x1 -= 2*_linesOffset; y1 -= 2*_linesOffset;
+			
 			struct {float x, y;} data[8] = {
 				{ x0, y0 }, { x0, y1 }, { x0, y1 }, { x1, y1 },
 				{ x1, y1 }, { x1, y0 }, { x1, y0 }, { x0, y0 }

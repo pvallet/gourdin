@@ -1,7 +1,8 @@
 #include "interface.h"
 
-#include "camera.h"
-#include "coloredRectangles.h"
+Interface::Interface():
+  cam(Camera::getInstance()),
+  _rectSelect(glm::vec4(1), false) {}
 
 void Interface::init() {
   ColoredRectangles::loadShader();
@@ -14,14 +15,7 @@ void Interface::init() {
   _androidBuild = false;
 #endif
 
-  // Selection rectangle
-  // _rectSelect.setFillColor(sf::Color::Transparent);
-  // _rectSelect.setOutlineThickness(1);
-  // _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
-
   // Minimap
-  Camera& cam = Camera::getInstance();
-
   _minimapTexture.loadFromFile("res/map/map.png");
 
   _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
@@ -35,7 +29,6 @@ void Interface::renderEngine() const {
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
-  Camera& cam = Camera::getInstance();
   glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
 
   // Background texture
@@ -93,12 +86,7 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
   opaqueGrey.draw();
 
   // Texture frame
-  ColoredRectangles frame(glm::vec4(1), std::vector<glm::vec4>(1,glm::vec4(
-    minimapTextureRect.x + 1e-5,
-    minimapTextureRect.y + 1e-5,
-    minimapTextureRect.z - 2e-5,
-    minimapTextureRect.w - 2e-5
-  )), false);
+  ColoredRectangles frame(glm::vec4(0.52, 0.34, 0.138, 1), minimapTextureRect, false);
   frame.draw();
 }
 
@@ -120,14 +108,12 @@ void Interface::setTextTopLeft(const std::string& string) {
 }
 
 void Interface::setTextTopRight(const std::string& string) {
-  Camera& cam = Camera::getInstance();
   _textTopRight.setText(string, _androidBuild ? 30 : 12);
   _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
   if (!_androidBuild) {
-    Camera& cam = Camera::getInstance();
     _textTopCenter.setText(string, 12);
     _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
   }
@@ -135,7 +121,6 @@ void Interface::setTextTopCenter(const std::string& string) {
 
 void Interface::setTextCenter(const std::string& string, int msDuration) {
   if (!_androidBuild) {
-    Camera& cam = Camera::getInstance();
     _textCenter.setText(string);
     _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
                             cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
@@ -145,7 +130,6 @@ void Interface::setTextCenter(const std::string& string, int msDuration) {
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
-  Camera& cam = Camera::getInstance();
   _textBottomCenter.setText(string, _androidBuild ? 38 : 17);
   _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
                                 cam.getWindowH() - _textBottomCenter.getSize().y);
@@ -154,7 +138,7 @@ void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
 }
 
 void Interface::renderRectSelect() const {
-  // _window.draw(_rectSelect);
+  _rectSelect.draw();
 }
 
 void Interface::renderLifeBars(std::set<Lion*> selection) const {
@@ -190,8 +174,6 @@ void Interface::renderLifeBars(std::set<Lion*> selection) const {
 }
 
 glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
-  Camera& cam = Camera::getInstance();
-
   glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::uvec2(x,y));
   glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
 
@@ -202,6 +184,24 @@ glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
 }
 
 void Interface::setRectSelect(glm::ivec4 rect) {
-  // _rectSelect.setPosition(sf::Vector2f(rect.x, rect.y));
-  // _rectSelect.setSize    (sf::Vector2f(rect.z, rect.w));
+  glm::uvec4 absoluteRect;
+  if (rect.z > 0) {
+    absoluteRect.x = rect.x;
+    absoluteRect.z = rect.z;
+  }
+  else {
+    absoluteRect.x = rect.x + rect.z;
+    absoluteRect.z = - rect.z;
+  }
+
+  if (rect.w > 0) {
+    absoluteRect.y = rect.y;
+    absoluteRect.w = rect.w;
+  }
+  else {
+    absoluteRect.y = rect.y + rect.w;
+    absoluteRect.w = - rect.w;
+  }
+
+  _rectSelect.setRectangles(cam.windowRectCoordsToGLRectCoords(absoluteRect));
 }

@@ -11,7 +11,7 @@ enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
 class EventHandler {
 public:
-  EventHandler() {}
+  EventHandler();
 
   // Returns whether the engine will stop or not
   virtual bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);

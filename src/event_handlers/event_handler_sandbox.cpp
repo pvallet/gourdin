@@ -123,7 +123,7 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != glm::ivec2(0,0)) {
+      if (_beginDragLeft != glm::ivec2(-1,-1)) {
         _rectSelect.z = event.motion.x - _rectSelect.x;
         _rectSelect.w = event.motion.y - _rectSelect.y;
         _game.getInterface().setRectSelect(_rectSelect);
