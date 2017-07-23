@@ -18,10 +18,18 @@ void Interface::init() {
   // Minimap
   _minimapTexture.loadFromFile("res/map/map.png");
 
+#ifndef __ANDROID__
   _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
     0, cam.getWindowH() - _minimapTexture.getSize().y,
     _minimapTexture.getSize()
   ))));
+#else
+  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+    cam.getWindowW() - _minimapTexture.getSize().x*2, cam.getWindowH() - _minimapTexture.getSize().y*2,
+    _minimapTexture.getSize().x*2,
+    _minimapTexture.getSize().y*2
+  ))));
+#endif
 }
 
 void Interface::renderEngine() const {
@@ -42,10 +50,10 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
   glm::vec2 miniChunkSize = glm::vec2(minimapTextureRect.z / (float) NB_CHUNKS,
                                       minimapTextureRect.w / (float) NB_CHUNKS);
 
-  glm::vec4 miniChunk(-1, -1, miniChunkSize);
+  glm::vec4 miniChunk(minimapTextureRect.x, minimapTextureRect.y, miniChunkSize);
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
-    miniChunk.y = -1;
+    miniChunk.y = minimapTextureRect.y;
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       switch (chunkStatus[i][j]) {
         case NOT_GENERATED:
@@ -142,14 +150,6 @@ void Interface::renderRectSelect() const {
 }
 
 void Interface::renderLifeBars(std::set<Lion*> selection) const {
-  // sf::RectangleShape lifeBar({20.f, 2.f});
-  // lifeBar.setFillColor(sf::Color::Green);
-  //
-  // sf::RectangleShape fullLifeBar({20.f, 2.f});
-  // fullLifeBar.setFillColor(sf::Color::Transparent);
-  // fullLifeBar.setOutlineColor(sf::Color::Black);
-  // fullLifeBar.setOutlineThickness(1);
-  //
   // glm::ivec4 corners;
   // float maxHeightFactor;
   //
