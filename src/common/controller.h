@@ -1,18 +1,14 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
+#include <SDL2pp/SDL2pp.hh>
+#include "opengl.h"
 
+#include "android_event_handler_sandbox.h"
 #include "event_handler_game.h"
 #include "event_handler_sandbox.h"
 #include "engine.h"
 #include "gameGame.h"
 #include "gameSandbox.h"
-
-#ifdef __APPLE__
-#define CORE_PROFILE
-#endif
 
 #ifndef NDEBUG
 	class TestHandler;
@@ -22,7 +18,7 @@
  */
 class Controller {
 public:
-	Controller(sf::RenderWindow& window);
+	Controller(SDL2pp::Window& window);
 
 	void init();
 	void run();
@@ -41,9 +37,14 @@ private:
 	GameGame _gameGame;
 	GameSandbox _gameSandbox;
 
-	EventHandlerGame    _eHandlerGame;
-	EventHandlerSandbox _eHandlerSandbox;
 	EventHandlerType    _currentHandlerType;
+	EventHandlerGame    _eHandlerGame;
 
-	sf::RenderWindow& _window;
+#ifdef __ANDROID__
+	AndroidEventHandlerSandbox _eHandlerSandbox;
+#else
+	EventHandlerSandbox _eHandlerSandbox;
+#endif
+
+	SDL2pp::Window& _window;
 };

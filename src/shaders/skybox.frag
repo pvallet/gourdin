@@ -1,12 +1,13 @@
-// Version is defined by shader compiler, 130 for compatibility and 330 for core
+// Version is defined by shader compiler, 330 for desktop and 300 es for mobile
 
-in vec2 texCoord;
+in vec2 texCoords;
+
 in float layer;
 
-out vec3 color;
+layout (location = 0) out vec3 fragColor;
 
-uniform sampler2DArray myTextureSampler;
+uniform sampler2DArray tex;
 
 void main() {
-	color = texture( myTextureSampler, vec3(texCoord, layer)).rgb;
+	fragColor = texture( tex, vec3(texCoords, layer)).rgb;
 }

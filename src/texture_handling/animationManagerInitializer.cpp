@@ -1,8 +1,10 @@
 #include "animationManagerInitializer.h"
 
+#include <SDL_log.h>
 #include <sstream>
 
 #include "tinyxml.h"
+#include "utils.h"
 
 AnimationManagerInitializer::AnimationManagerInitializer () {
   _parameters.size = 0.f;
@@ -12,12 +14,8 @@ AnimationManagerInitializer::AnimationManagerInitializer () {
 void AnimationManagerInitializer::load(std::string folderPath) {
   std::string xmlFile = folderPath + "animInfo.xml";
 
-  TiXmlDocument doc(xmlFile);
-
-  if(!doc.LoadFile()) {
-    std::cerr << "Error while loading file: " << xmlFile << std::endl;
-    std::cerr << "Error #" << doc.ErrorId() << ": " << doc.ErrorDesc() << std::endl;
-  }
+  TiXmlDocument doc;
+	doc.Parse(ut::textFileToString(xmlFile).c_str());
 
   TiXmlHandle hdl(&doc);
   TiXmlElement *elem = hdl.FirstChildElement("standardParams").Element();
@@ -30,7 +28,7 @@ void AnimationManagerInitializer::load(std::string folderPath) {
   elem = hdl.FirstChildElement("lstAnim").FirstChildElement().Element();
 
   if (elem == nullptr)
-    std::cerr << "XML file: " << xmlFile << " lacks animation information." << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "XML file: %s lacks animation information.", xmlFile.c_str());
 
   _maxHeight = 0;
 

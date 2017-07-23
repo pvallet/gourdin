@@ -1,25 +1,31 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
+#include <SDL2pp/SDL2pp.hh>
 
 #include <set>
 
+#include "camera.h"
 #include "chronometer.h"
 #include "engine.h"
+#include "opengl.h"
+
+#include "coloredRectangles.h"
+#include "text.h"
+#include "texture.h"
+#include "texturedRectangle.h"
 
 class Interface {
 public:
-  Interface(sf::RenderWindow& window);
+  Interface();
   void init();
 
+  void renderEngine() const;
   void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
   void renderText() const;
   void renderRectSelect() const;
   void renderLifeBars(std::set<Lion*> selection) const;
 
-  glm::vec2 getMinimapClickCoord(float x, float y) const;
+  glm::vec2 getMinimapClickCoords(size_t x, size_t y) const;
   void setTextTopLeft(const std::string& string);
   void setTextTopRight(const std::string& string);
   void setTextTopCenter(const std::string& string);
@@ -27,21 +33,26 @@ public:
   void setTextBottomCenter(const std::string& string, int msDuration = -1);
   void clearText();
 
+  inline void setEngineTexture(GLuint texID) {_texRectEngine.reset(new TexturedRectangle(texID, -1, -1, 2, 2));}
   void setRectSelect(glm::ivec4 rect);
 
 private:
-  sf::RectangleShape _rectSelect;
-  sf::Font _textFont;
-  sf::Text _textTopLeft;
-  sf::Text _textTopRight;
-  sf::Text _textTopCenter;
-  sf::Text _textCenter;
-  sf::Text _textBottomCenter;
-  sf::Sprite _minimapSprite;
-  sf::Texture _minimapTexture;
+  const Camera& cam;
+
+  bool _androidBuild;
+
+  ColoredRectangles _rectSelect;
+  Text _textTopLeft;
+  Text _textTopRight;
+  Text _textTopCenter;
+  Text _textCenter;
+  Text _textBottomCenter;
+
+  Texture _minimapTexture;
+  std::unique_ptr<TexturedRectangle> _minimapRect;
 
   Chronometer _textCenterChrono;
   Chronometer _textBottomCenterChrono;
 
-  sf::RenderWindow& _window;
+  std::unique_ptr<const TexturedRectangle> _texRectEngine;
 };

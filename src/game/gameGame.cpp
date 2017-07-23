@@ -1,45 +1,31 @@
 #include "gameGame.h"
 
 #include "camera.h"
+#include "opengl.h"
+#include "texturedRectangle.h"
 
-GameGame::GameGame (sf::RenderWindow& window, Engine& engine):
-  _povCamera(false),
-  _window(window),
-  _engine(engine),
-  _interface(window) {}
+#include <sstream>
 
-void GameGame::init() {
-  _interface.init();
-  _interface.setTextTopLeft(getInfoText());
-}
-
-void GameGame::update(int msElapsed) {
-  if (Clock::isGlobalTimerPaused())
-    _interface.setTextCenter("PAUSED", 1);
-  _engine.update(msElapsed);
-}
+GameGame::GameGame (Engine& engine):
+  Game::Game(engine),
+  _povCamera(false) {}
 
 void GameGame::render() const {
-  _engine.render();
+  Camera& cam = Camera::getInstance();
 
-#ifndef CORE_PROFILE
-  _window.pushGLStates();
+  _engine.renderToFBO();
 
+  glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  _interface.renderEngine();
   _interface.renderText();
-
-  _window.popGLStates();
-#endif
-
-  _window.display();
+  glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }
 
 std::string GameGame::getInfoText() const {
   std::ostringstream text;
 
-  text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Sandbox mode" << std::endl
-       << "P: " << "Pause" << std::endl
-       << "1: " << "God camera" << std::endl
+  text << "1: " << "God camera" << std::endl
        << "2: " << "POV camera" << std::endl;
   if (_povCamera)
     text << "Arrows: " << "Move camera around" << std::endl;
@@ -53,7 +39,7 @@ std::string GameGame::getInfoText() const {
       << "Click on another character to change the focus" << std::endl
       << "Click and drag to rotate the camera" << std::endl;
 
-  return text.str();
+  return Game::getInfoText() + text.str();
 }
 
 bool GameGame::genTribe() {
@@ -130,5 +116,5 @@ void GameGame::moveCharacter(glm::ivec2 screenTarget) {
   }
 
   if (_focusedCharacter != nullptr)
-    _focusedCharacter->setTarget(Engine::get2DCoord(screenTarget));
+    _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));
 }

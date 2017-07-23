@@ -1,12 +1,8 @@
 #include "utils.h"
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
-
-#include "camera.h"
-
-#include <iostream>
-#include <string>
+#include <SDL2pp/SDL2pp.hh>
+#include <SDL_log.h>
+#include "opengl.h"
 
 glm::uvec2 ut::convertToChunkCoords(glm::vec2 pos) {
   glm::uvec2 chunkPos;
@@ -50,6 +46,32 @@ glm::vec3 ut::spherical(float x, float y, float z) {
 	return u;
 }
 
+std::string ut::textFileToString(const std::string& path) {
+  SDL2pp::RWops ops = SDL2pp::RWops::FromFile(path);
+
+  Sint64 res_size = ops.Size();
+  char* tmpChar = new char[res_size + 1];
+
+  Sint64 nb_read_total = 0, nb_read = 1;
+  char* buf = tmpChar;
+  while (nb_read_total < res_size && nb_read != 0) {
+    nb_read = ops.Read(buf, 1, (res_size - nb_read_total));
+    nb_read_total += nb_read;
+    buf += nb_read;
+  }
+
+  if (nb_read_total != res_size) {
+    delete[] tmpChar;
+    return std::string();
+  }
+
+  tmpChar[nb_read_total] = '\0';
+  std::string res(tmpChar);
+  delete[] tmpChar;
+
+  return res;
+}
+
 bool glCheckError(const char *file, int line) {
   GLenum err (glGetError());
 
@@ -64,30 +86,16 @@ bool glCheckError(const char *file, int line) {
       case GL_INVALID_VALUE:                 error="INVALID_VALUE";          break;
       case GL_OUT_OF_MEMORY:                 error="OUT_OF_MEMORY";          break;
       case GL_INVALID_FRAMEBUFFER_OPERATION: error="INVALID_FRAMEBUFFER_OPERATION";  break;
+#ifndef __ANDROID__
       case GL_STACK_UNDERFLOW:               error="STACK_UNDERFLOW";        break;
       case GL_STACK_OVERFLOW:                error="STACK_OVERFLOW";         break;
+#endif
     }
 
-    std::cerr << "GL_" << error << " - " << file << ":" << line << std::endl;
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "GL_%s - %s: %d", error.c_str(), file, line);
     err = glGetError();
     isError = true;
   }
 
   return isError;
-}
-
-void LogText::addFPSandCamInfo(int msElapsed) {
-  Camera& cam = Camera::getInstance();
-  int fps = 0;
-
-  if (msElapsed != 0)
-    fps = 1.f / msElapsed * 1000;
-
-  _text << "X: " << cam.getPointedPos().x << "\n"
-  << "Y: " << cam.getPointedPos().y << std::endl;
-  _text << "R: " << cam.getZoom() << "\n"
-  << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
-  (cam.getTheta() < 0 ? 360 : 0) << "\n"
-  << "Phi: " << cam.getPhi() << std::endl;
-  _text << "FPS: " << fps << std::endl;
 }

@@ -1,29 +1,30 @@
 #include "gameSandbox.h"
 
 #include "camera.h"
+#include "log.h"
+#include "texturedRectangle.h"
 
 #define LION_MIN_SPAWN_DIST 20
 
-GameSandbox::GameSandbox (sf::RenderWindow& window, Engine& engine):
+GameSandbox::GameSandbox(Engine& engine):
+  Game::Game(engine),
   _displayLog(true),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
   _bestScore(0),
   _msHuntDuration(120000),
-  _msCenterTextDisplayDuration(1000),
-  _window(window),
-  _engine(engine),
-  _interface(window) {}
+  _msCenterTextDisplayDuration(1000) {}
 
 void GameSandbox::init() {
-  _interface.init();
-  _interface.setTextTopLeft(getInfoText());
+  Game::init();
   _interface.setTextTopCenter("Best score: 0");
 }
 
 void GameSandbox::update(int msElapsed) {
-  LogText& logText = LogText::getInstance();
+  Game::update(msElapsed);
+
+  Log& logText = Log::getInstance();
   logText.addFPSandCamInfo(msElapsed);
 
   // Remove the dead elements from the selected elements
@@ -47,28 +48,22 @@ void GameSandbox::update(int msElapsed) {
   else
     _interface.setTextTopRight("");
 
-  if (Clock::isGlobalTimerPaused())
-    _interface.setTextCenter("PAUSED", 1);
-
   logText.clear();
-  _engine.update(msElapsed);
 }
 
 void GameSandbox::render() const {
-  _engine.render();
+  Camera& cam = Camera::getInstance();
 
-#ifndef CORE_PROFILE
-  _window.pushGLStates();
+  _engine.renderToFBO();
 
+  glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  _interface.renderEngine();
   _interface.renderLifeBars(_selection);
   _interface.renderRectSelect();
   _interface.renderMinimap(_engine.getChunkStatus());
-
   _interface.renderText();
-  _window.popGLStates();
-#endif
-
-  _window.display();
+  glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }
 
 std::string GameSandbox::getHuntText() const {
@@ -84,10 +79,7 @@ std::string GameSandbox::getHuntText() const {
 std::string GameSandbox::getInfoText() const {
   std::ostringstream text;
 
-  text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Game mode" << std::endl
-       << "P: " << "Pause" << std::endl
-       << "Left-Right / Q-D: " << "Rotate camera" << std::endl
+  text << "Left-Right / Q-D: " << "Rotate camera" << std::endl
        << "Up-Down    / Z-S: " << "Go forwards/backwards" << std::endl
        << "A/Return: " << "Select all lions" << std::endl
        << "B: " << "Launch benchmark" << std::endl
@@ -108,7 +100,7 @@ std::string GameSandbox::getInfoText() const {
        << std::endl
        << "Go hunt them juicy antilopes!" << std::endl;
 
-  return text.str();
+  return Game::getInfoText() + text.str();
 }
 
 void GameSandbox::select(glm::ivec4 rect, bool add) {
@@ -171,7 +163,7 @@ void GameSandbox::createLion(glm::ivec2 screenTarget) {
 }
 
 void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
-  glm::vec2 target = Engine::get2DCoord(screenTarget);
+  glm::vec2 target = _engine.get2DCoord(screenTarget);
 
   for(auto it = _selection.begin(); it != _selection.end(); ++it) {
     Controllable* ctrl = dynamic_cast<Controllable*>(*it);
@@ -226,7 +218,7 @@ void GameSandbox::killLion() {
 }
 
 void GameSandbox::clearLog() const {
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
   logText.clear();
 }
 
@@ -247,8 +239,8 @@ void GameSandbox::benchmark() {
 
   int msTotalElapsed = frameClock.getElapsedTime();
 
-  std::cout << "Rendered " << 100 << " frames in " << msTotalElapsed << " milliseconds." << std::endl;
-  std::cout << "Average FPS: " << 1.f / msTotalElapsed * 100 * 1000 << std::endl;
+  SDL_Log("Rendered 100 frames in %d milliseconds.",  msTotalElapsed);
+  SDL_Log("Average FPS: %f", 1.f / msTotalElapsed * 100 * 1000);
 
   _engine.resetCamera();
 }
@@ -259,7 +251,7 @@ void GameSandbox::interruptHunt() {
     if (Lion::getNbKilled() > _bestScore)
       _bestScore = Lion::getNbKilled();
 
-    LogText& logText = LogText::getInstance();
+    Log& logText = Log::getInstance();
     logText.clear();
 
     std::ostringstream bestScoreText;

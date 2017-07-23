@@ -1,11 +1,10 @@
 #pragma once
 
-#include "engine.h"
-#include "interface.h"
+#include "game.h"
 
-class GameSandbox {
+class GameSandbox : public Game {
 public:
-  GameSandbox (sf::RenderWindow& window, Engine& engine);
+  GameSandbox (Engine& engine);
 
   void init();
 
@@ -25,9 +24,6 @@ public:
   void interruptHunt();
   void startNewHunt();
 
-  inline       Interface& getInterface()       {return _interface;}
-  inline const Interface& getInterface() const {return _interface;}
-
   inline void moveCamera(glm::vec2 newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
   inline void switchWireframe() {_engine.switchWireframe();}
@@ -36,8 +32,6 @@ public:
   inline bool huntHasStarted() const {return _huntHasStarted;}
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
   inline void displayError(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
-
-  inline const Engine& getEngine() const {return _engine;}
 
 private:
   std::string getHuntText() const;
@@ -56,8 +50,4 @@ private:
   Clock _huntStart;
 
   std::set<Lion*> _selection;
-
-  sf::RenderWindow& _window;
-  Engine& _engine;
-  Interface _interface;
 };

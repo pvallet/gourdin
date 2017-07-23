@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+#include <string>
 #include <glm/glm.hpp>
 
 #ifndef M_PI
@@ -17,18 +19,16 @@
 
 #define RANDOMF (rand() / (float) RAND_MAX)
 
-#define BUFFER_OFFSET(a) ((char*)NULL + (a))
-
 enum Animals {ANTILOPE, DEER, LION, WOLF, LEOPARD,
 	AOE1_MAN, AOE2_MAN, WOMAN, ANIMALS_NB_ITEMS};
 
-	enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
-		SNOW, TUNDRA, BARE, SCORCHED,
-		TAIGA, SHRUBLAND, TEMPERATE_DESERT,
-		TEMPERATE_RAIN_FOREST, TEMPERATE_DECIDUOUS_FOREST, GRASSLAND,
-		TROPICAL_RAIN_FOREST, TROPICAL_SEASONAL_FOREST, SUBTROPICAL_DESERT,
-		BIOME_NB_ITEMS
-	};
+enum Biome {OCEAN, WATER, LAKE, ICE, MARSH, BEACH, RIVER,
+	SNOW, TUNDRA, BARE, SCORCHED,
+	TAIGA, SHRUBLAND, TEMPERATE_DESERT,
+	TEMPERATE_RAIN_FOREST, TEMPERATE_DECIDUOUS_FOREST, GRASSLAND,
+	TROPICAL_RAIN_FOREST, TROPICAL_SEASONAL_FOREST, SUBTROPICAL_DESERT,
+	BIOME_NB_ITEMS
+};
 
 // ut = utils
 namespace ut {
@@ -49,6 +49,8 @@ namespace ut {
 
 	inline glm::vec3 carthesian(glm::vec3 u) {return carthesian(u.x,u.y,u.z);}
 	inline glm::vec3 spherical (glm::vec3 u) {return spherical (u.x,u.y,u.z);}
+
+	std::string textFileToString(const std::string& path);
 }
 
 bool glCheckError(const char *file, int line);
@@ -56,31 +58,3 @@ bool glCheckError(const char *file, int line);
 // regex to replace gl calls: ([_a-zA-Z]* = )?(gl[^ :;>]*\([^;]*\));
 // replace with _glCheck($2);
 #define _glCheck(expr) {expr; glCheckError(__FILE__,__LINE__);}
-
-
-#include <sstream>
-
-/** Singleton class in which any function can store info to be displayed on the
-  * screen
-	*/
-class LogText	{
-public:
-	static LogText& getInstance() {
-    static LogText instance;
-    return instance;
-  }
-
-	LogText(LogText const&)         = delete;
-	void operator=(LogText const&)  = delete;
-
-	inline void clear() {_text.str("");}
-	inline void addLine(std::string newLine) { _text << newLine;}
-	void addFPSandCamInfo(int msElapsed);
-	inline std::string getText() const {return _text.str();}
-
-
-private:
-	LogText() {}
-
-	std::ostringstream _text;
-};

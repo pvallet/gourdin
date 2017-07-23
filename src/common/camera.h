@@ -1,11 +1,9 @@
 #pragma once
 
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "utils.h"
 
 #include <cmath>
 
@@ -13,9 +11,15 @@
 
 // r, theta, phi follows the mathematical convention: theta is the azimuthal and phi the polar angle
 
-#define MIN_R 120.f
+#ifdef __ANDROID__
+	#define MIN_R 50.f
+	#define INIT_R 100.f
+#else
+	#define MIN_R 120.f
+	#define INIT_R 150.f
+#endif
+
 #define MAX_R 12500.f
-#define INIT_R 150.f
 #define INIT_PHI 60.f
 #define INIT_THETA 180.f
 
@@ -23,6 +27,7 @@ class Controller;
 class EventHandler;
 class EventHandlerGame;
 class EventHandlerSandbox;
+class AndroidEventHandlerSandbox;
 class Engine;
 class GameSandbox;
 
@@ -36,8 +41,14 @@ public:
 	Camera(Camera const&)          = delete;
 	void operator=(Camera const&)  = delete;
 
+	glm::vec2 windowCoordsToGLCoords(glm::uvec2 windowCoords) const;
+	glm::uvec2 glCoordsToWindowCoords(glm::vec2 glCoords) const;
+	glm::vec4 windowRectCoordsToGLRectCoords(glm::uvec4 windowRect) const;
+
 	inline unsigned int getW() const {return _W;}
 	inline unsigned int getH() const {return _H;}
+	inline unsigned int getWindowW() const {return _windowW;}
+	inline unsigned int getWindowH() const {return _windowH;}
   inline glm::vec3 getPos() const {return _pos;}
   inline float getTheta() const {return _theta;}
   inline float getPhi() const {return _phi;}
@@ -53,6 +64,7 @@ public:
 	friend EventHandler;
 	friend EventHandlerGame;
 	friend EventHandlerSandbox;
+	friend AndroidEventHandlerSandbox;
 	friend Engine;
 	friend GameSandbox;
 
@@ -60,6 +72,7 @@ private:
 	Camera();
 
 	void resize(unsigned int W, unsigned int H);
+	inline void setWindowSize(unsigned int W, unsigned int H) {_windowW = W; _windowH = H;}
 	void apply();
 
 	void translate (float dWinX, float dWinY);
@@ -75,6 +88,7 @@ private:
 	inline void setAdditionalHeight(float nAddHeight) {_additionalHeight = nAddHeight;}
 
 	unsigned int _W, _H;
+	unsigned int _windowW, _windowH;
 
   float _fovAngle;
   float _aspectRatio;

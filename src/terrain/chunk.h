@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 
 #include <map>
 #include <vector>
@@ -9,7 +8,6 @@
 #include "terrainGeometry.h"
 #include "terrainTexManager.h"
 #include "igElementDisplay.h"
-#include "utils.h"
 
 struct BiomeIndices {
 	std::vector<GLuint> indices;

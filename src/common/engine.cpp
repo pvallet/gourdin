@@ -1,10 +1,11 @@
 #include "engine.h"
 
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "camera.h"
+#include "log.h"
 #include "reliefGenerator.h"
 
 #include <ctime>
@@ -17,10 +18,7 @@ Engine::Engine() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _mapInfoExtractor(_terrainGeometry),
-  _reliefGenerator(_mapInfoExtractor),
-  _terrainShader("src/shaders/heightmap.vert", "src/shaders/heightmap.frag"),
-  _igEShader ("src/shaders/igElement.vert", "src/shaders/igElement.frag"),
-  _skyboxShader ("src/shaders/skybox.vert", "src/shaders/skybox.frag") {}
+  _reliefGenerator(_mapInfoExtractor) {}
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -33,9 +31,10 @@ void Engine::resetCamera() {
 void Engine::init() {
   srand(time(NULL));
 
-  _terrainShader.load();
-  _igEShader.load();
-  _skyboxShader.load();
+  _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
+  _igEShader.load("src/shaders/igElement.vert", "src/shaders/igElement.frag");
+  _skyboxShader.load("src/shaders/skybox.vert", "src/shaders/skybox.frag");
+  _depthInColorBufferShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/depthToColor.frag");
 
   glUseProgram(_igEShader.getProgramID());
   glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
@@ -51,7 +50,7 @@ void Engine::init() {
     _terrainGeometry.setReliefGenerator(relief);
 
   else {
-    std::cout << "Generating relief mask" << '\n';
+    SDL_Log("Generating relief mask");
 
     _mapInfoExtractor.convertMapData(512);
     _mapInfoExtractor.generateBiomesTransitions(7);
@@ -59,7 +58,7 @@ void Engine::init() {
     _reliefGenerator.generateRelief();
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
-    std::cout << "Done Generating relief mask" << '\n';
+    SDL_Log("Done Generating relief mask");
   }
 
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
@@ -78,6 +77,12 @@ void Engine::init() {
 
   _igElementDisplay.init();
   _contentGenerator.init();
+
+  Camera& cam = Camera::getInstance();
+  _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+  _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
+  // _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
+  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getTexIDDepth(), -1, -1, 2, 2));
 
   resetCamera();
 
@@ -113,7 +118,7 @@ glm::ivec2 Engine::neighbour(size_t x, size_t y, size_t index) const {
       return glm::ivec2(x,y+1);
       break;
     default:
-      std::cerr << "Error in Engine::neighbour: Index out of bounds" << '\n';
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in Engine::neighbour: Index out of bounds");
       return glm::ivec2(x,y);
       break;
   }
@@ -273,7 +278,7 @@ void Engine::update(int msElapsed) {
     }
   }
 
-  LogText& logText = LogText::getInstance();
+  Log& logText = Log::getInstance();
   std::ostringstream subdivLvl;
   subdivLvl << "Current subdivision level: " << _terrain[camPos.x][camPos.y]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
@@ -328,9 +333,11 @@ void Engine::update(int msElapsed) {
   compute2DCorners();
 }
 
-void Engine::render() const {
+void Engine::renderToFBO() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;
+
+  glBindFramebuffer(GL_FRAMEBUFFER, _globalFBO.getID());
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -367,8 +374,10 @@ void Engine::render() const {
 
   // Chunk
 
+#ifndef __ANDROID__
   if (_wireframe)
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+#endif
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -377,8 +386,10 @@ void Engine::render() const {
     }
   }
 
+#ifndef __ANDROID__
   if (_wireframe)
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+#endif
 
   glUseProgram(0);
 
@@ -430,7 +441,9 @@ void Engine::render() const {
 
   glUseProgram(0);
 
-  LogText& logText = LogText::getInstance();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  Log& logText = Log::getInstance();
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
@@ -516,12 +529,25 @@ void Engine::deleteElements(const std::vector<igMovingElement*>& elementsToDelet
 
 glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
   Camera& cam = Camera::getInstance();
+
+  screenTarget = glm::ivec2(screenTarget.x * cam.getW() / cam.getWindowW(),
+                            screenTarget.y * cam.getH() / cam.getWindowH());
+
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
-  GLfloat d;
-  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &d);
+  glBindFramebuffer(GL_FRAMEBUFFER, _depthInColorBufferFBO.getID());
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,d),
+  glUseProgram(_depthInColorBufferShader.getProgramID());
+  _depthTexturedRectangle->draw();
+  glUseProgram(0);
+
+  GLfloat depth;
+  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_RED, GL_FLOAT, &depth);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,depth),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),
     glm::vec4(0,0, cam.getW(), cam.getH()));
 

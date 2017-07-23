@@ -1,6 +1,8 @@
 #include "contentGenerator.h"
 
+#include <algorithm>
 #include <cstdlib>
+#include <sstream>
 
 #include "antilope.h"
 #include "lion.h"

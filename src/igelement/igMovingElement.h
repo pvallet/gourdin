@@ -5,7 +5,6 @@
 #include "animationManager.h"
 #include "igElement.h"
 #include "terrainGeometry.h"
-#include "utils.h"
 
 class igMovingElement : public igElement {
 public:

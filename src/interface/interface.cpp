@@ -1,185 +1,217 @@
 #include "interface.h"
 
-#include "camera.h"
-#include "engine.h"
-
-Interface::Interface(sf::RenderWindow& window):
-  _rectSelect({0.f, 0.f}),
-  _window(window) {}
+Interface::Interface():
+  cam(Camera::getInstance()),
+  _rectSelect(glm::vec4(1), false) {}
 
 void Interface::init() {
-  // Text
-  _textFont.loadFromFile("res/FiraMono-Regular.otf");
-  _textTopLeft.setFont(_textFont);
-  _textTopLeft.setCharacterSize(10);
-  _textTopLeft.setFillColor(sf::Color::White);
-  _textTopRight  = sf::Text(_textTopLeft);
-  _textTopCenter = sf::Text(_textTopLeft);
-  _textCenter    = sf::Text(_textTopLeft);
-  _textCenter.setCharacterSize(40);
-  _textBottomCenter = sf::Text(_textTopLeft);
-  _textBottomCenter.setCharacterSize(15);
+  ColoredRectangles::loadShader();
+  Text::loadShader();
+  TexturedRectangle::loadShader();
 
-  // Selection rectangle
-  _rectSelect.setFillColor(sf::Color::Transparent);
-  _rectSelect.setOutlineThickness(1);
-  _rectSelect.setOutlineColor(sf::Color(255, 255, 255));
+#ifdef __ANDROID__
+  _androidBuild = true;
+#else
+  _androidBuild = false;
+#endif
 
   // Minimap
-  sf::Image mapImg;
-  if (mapImg.loadFromFile("res/map/map.png")) {
-    _minimapTexture.loadFromImage(mapImg);
-    _minimapTexture.setSmooth(true);
-  }
+  _minimapTexture.loadFromFile("res/map/map.png");
 
+#ifndef __ANDROID__
+  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+    0, cam.getWindowH() - _minimapTexture.getSize().y,
+    _minimapTexture.getSize()
+  ))));
+#else
+  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+    cam.getWindowW() - _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
+    cam.getWindowH() - _minimapTexture.getSize().y * cam.getWindowH()/cam.getH(),
+    _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
+    _minimapTexture.getSize().y * cam.getWindowH()/cam.getH()
+  ))));
+#endif
+}
 
-  _minimapSprite.setTexture(_minimapTexture);
-  _minimapSprite.setPosition(sf::Vector2f(0.f, _window.getSize().y - _minimapSprite.getTextureRect().height));
+void Interface::renderEngine() const {
+  _texRectEngine->draw();
 }
 
 void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
-  Camera& cam = Camera::getInstance();
+  glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
 
-  // Background image
-  _window.draw(_minimapSprite);
-
-  // Position of the viewer
-  sf::Vector2f viewerPos( _minimapSprite.getPosition().x +
-    (float) _minimapSprite.getTextureRect().height * cam.getPointedPos().y / MAX_COORD,
-                          _minimapSprite.getPosition().y +
-    (float) _minimapSprite.getTextureRect().width  * cam.getPointedPos().x / MAX_COORD);
-
-  sf::CircleShape miniCamPos(3);
-  miniCamPos.setPointCount(8);
-  miniCamPos.setFillColor(sf::Color::Black);
-  miniCamPos.setPosition( viewerPos - sf::Vector2f(miniCamPos.getRadius(),
-                                                   miniCamPos.getRadius()));
-
-  float theta = cam.getTheta();
-  sf::RectangleShape miniCamDir({6, 2});
-  miniCamDir.setFillColor(sf::Color::Black);
-  miniCamDir.setPosition(viewerPos - sf::Vector2f(cos(-theta*RAD), sin(-theta*RAD)));
-  miniCamDir.setRotation(-theta-90);
-
-  _window.draw(miniCamPos);
-  _window.draw(miniCamDir);
+  // Background texture
+  _minimapRect->draw();
 
   // Highlight generated chunks
-  float miniChunkSize = _minimapSprite.getTextureRect().height / (float) NB_CHUNKS;
+  std::vector<glm::vec4> blackRects;
+  std::vector<glm::vec4> darkGreyRects;
+  std::vector<glm::vec4> lightGreyRects;
 
-  sf::RectangleShape miniChunk({miniChunkSize, miniChunkSize});
-  miniChunk.setFillColor(sf::Color::Black);
-  sf::Color edge(0,0,0,200);
-  sf::Color fog(0,0,0,100);
+  glm::vec2 miniChunkSize = glm::vec2(minimapTextureRect.z / (float) NB_CHUNKS,
+                                      minimapTextureRect.w / (float) NB_CHUNKS);
+
+  glm::vec4 miniChunk(minimapTextureRect.x, minimapTextureRect.y, miniChunkSize);
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
+    miniChunk.y = minimapTextureRect.y;
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      miniChunk.setPosition(_minimapSprite.getPosition() + sf::Vector2f(miniChunkSize*j, miniChunkSize*i));
-
       switch (chunkStatus[i][j]) {
         case NOT_GENERATED:
-          miniChunk.setFillColor(sf::Color::Black);
-          _window.draw(miniChunk);
+          blackRects.push_back(miniChunk);
           break;
 
         case EDGE:
-          miniChunk.setFillColor(edge);
-          _window.draw(miniChunk);
+          darkGreyRects.push_back(miniChunk);
           break;
 
         case NOT_VISIBLE:
-          miniChunk.setFillColor(fog);
-          _window.draw(miniChunk);
+          lightGreyRects.push_back(miniChunk);
           break;
       }
+      miniChunk.y += miniChunkSize.y;
     }
+    miniChunk.x += miniChunkSize.x;
   }
+
+  ColoredRectangles black(glm::vec4(0,0,0,1), blackRects);
+  ColoredRectangles darkGrey(glm::vec4(0,0,0,0.8), darkGreyRects);
+  ColoredRectangles lightGrey(glm::vec4(0,0,0,0.4), lightGreyRects);
+  black.draw();
+  darkGrey.draw();
+  lightGrey.draw();
+
+  // Position of the viewer
+
+  glm::vec2 viewerPos( minimapTextureRect.x + (float) minimapTextureRect.z * cam.getPointedPos().x / MAX_COORD,
+                       minimapTextureRect.y + (float) minimapTextureRect.w * cam.getPointedPos().y / MAX_COORD);
+
+  ColoredRectangles opaqueGrey(glm::vec4(0.2,0.2,0.2,1), std::vector<glm::vec4>(1,
+    glm::vec4(viewerPos.x - miniChunkSize.x/2.f,
+              viewerPos.y - miniChunkSize.y/2.f,
+              miniChunkSize*2.f)
+  ));
+
+  opaqueGrey.draw();
+
+  // Texture frame
+  ColoredRectangles frame(glm::vec4(0.52, 0.34, 0.138, 1), minimapTextureRect, false);
+  frame.draw();
 }
 
 void Interface::renderText() const {
-  _window.draw(_textTopLeft);
-  _window.draw(_textTopRight);
-  _window.draw(_textTopCenter);
+  _textTopLeft.render();
+  _textTopRight.render();
+  _textTopCenter.render();
 
   if (_textCenterChrono.isStillRunning())
-    _window.draw(_textCenter);
+    _textCenter.render();
 
   if (_textBottomCenterChrono.isStillRunning())
-    _window.draw(_textBottomCenter);
+    _textBottomCenter.render();
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _textTopLeft.setString(string);
+  if (!_androidBuild)
+    _textTopLeft.setText(string, 12);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
-  _textTopRight.setString(string);
-  _textTopRight.setPosition(_window.getSize().x - _textTopRight.getLocalBounds().width, 0);
+  _textTopRight.setText(string, _androidBuild ? 30 : 12);
+  _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-  _textTopCenter.setString(string);
-  _textTopCenter.setPosition(_window.getSize().x / 2 - _textTopCenter.getLocalBounds().width / 2, 0);
+  if (!_androidBuild) {
+    _textTopCenter.setText(string, 12);
+    _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
+  }
 }
 
 void Interface::setTextCenter(const std::string& string, int msDuration) {
-  _textCenter.setString(string);
-  _textCenter.setPosition(_window.getSize().x / 2 - _textCenter.getLocalBounds().width / 2,
-                          _window.getSize().y / 2 - _textCenter.getLocalBounds().height / 2);
-  _textCenterChrono.reset(msDuration);
+  if (!_androidBuild) {
+    _textCenter.setText(string);
+    _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
+                            cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
+
+    _textCenterChrono.reset(msDuration);
+  }
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
-  _textBottomCenter.setString(string);
-  _textBottomCenter.setPosition(_window.getSize().x / 2 - _textBottomCenter.getLocalBounds().width / 2,
-                                _window.getSize().y - _textBottomCenter.getLocalBounds().height*2);
+  _textBottomCenter.setText(string, _androidBuild ? 38 : 17);
+  _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
+                                cam.getWindowH() - _textBottomCenter.getSize().y);
+
   _textBottomCenterChrono.reset(msDuration);
 }
 
 void Interface::renderRectSelect() const {
-  _window.draw(_rectSelect);
+  _rectSelect.draw();
 }
 
 void Interface::renderLifeBars(std::set<Lion*> selection) const {
-  sf::RectangleShape lifeBar({20.f, 2.f});
-  lifeBar.setFillColor(sf::Color::Green);
-
-  sf::RectangleShape fullLifeBar({20.f, 2.f});
-  fullLifeBar.setFillColor(sf::Color::Transparent);
-  fullLifeBar.setOutlineColor(sf::Color::Black);
-  fullLifeBar.setOutlineThickness(1);
-
-  glm::ivec4 corners;
-  float maxHeightFactor;
+  std::vector<glm::vec4> staminaBarsRects;
+  std::vector<glm::vec4> outlinesRects;
 
   for(auto it = selection.begin(); it != selection.end(); ++it) {
-    corners = (*it)->getScreenRect();
+    glm::uvec4 corners = (*it)->getScreenRect();
+
     // Otherwise the selected element is outside the screen
     if (corners.z != 0) {
-      maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+      float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-      lifeBar.setSize({20.f* (*it)->getStamina() / 100.f, 2.f});
+      staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+        corners.x + corners.z/2 - 10,
+        corners.y - corners.w*maxHeightFactor + corners.w - 5,
+        20.f* (*it)->getStamina() / 100.f,
+        2
+      )));
 
-      lifeBar.setPosition(corners.x + corners.z/2 - 10,
-        corners.y - corners.w*maxHeightFactor + corners.w - 5);
-      fullLifeBar.setPosition(corners.x + corners.z/2 - 10,
-        corners.y - corners.w*maxHeightFactor + corners.w - 5);
-
-      _window.draw(lifeBar);
-      _window.draw(fullLifeBar);
-      lifeBar.setSize({20.f, 2.f});
+      outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+        corners.x + corners.z/2 - 10,
+        corners.y - corners.w*maxHeightFactor + corners.w - 5,
+        20,
+        4
+      )));
     }
   }
+
+  ColoredRectangles staminaBars(glm::vec4(0,1,0,1), staminaBarsRects);
+  ColoredRectangles outlines(glm::vec4(0,0,0,1), outlinesRects, false);
+  staminaBars.draw();
+  outlines.draw();
 }
 
-glm::vec2 Interface::getMinimapClickCoord(float x, float y) const {
-  // y = _window.getSize().y - y;
+glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
+  glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::uvec2(x,y));
+  glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
 
-  return glm::vec2( (y - _minimapSprite.getPosition().y) / (float) _minimapSprite.getTextureRect().height,
-                    (x - _minimapSprite.getPosition().x) / (float) _minimapSprite.getTextureRect().width);
+  glm::vec2 coords = glm::vec2( (clickGLCoords.x - minimapTexRect.x) / minimapTexRect.z,
+                                (clickGLCoords.y - minimapTexRect.y) / minimapTexRect.w);
+
+  return coords;
 }
 
 void Interface::setRectSelect(glm::ivec4 rect) {
-  _rectSelect.setPosition(sf::Vector2f(rect.x, rect.y));
-  _rectSelect.setSize    (sf::Vector2f(rect.z, rect.w));
+  glm::uvec4 absoluteRect;
+  if (rect.z > 0) {
+    absoluteRect.x = rect.x;
+    absoluteRect.z = rect.z;
+  }
+  else {
+    absoluteRect.x = rect.x + rect.z;
+    absoluteRect.z = - rect.z;
+  }
+
+  if (rect.w > 0) {
+    absoluteRect.y = rect.y;
+    absoluteRect.w = rect.w;
+  }
+  else {
+    absoluteRect.y = rect.y + rect.w;
+    absoluteRect.w = - rect.w;
+  }
+
+  _rectSelect.setRectangles(cam.windowRectCoordsToGLRectCoords(absoluteRect));
 }

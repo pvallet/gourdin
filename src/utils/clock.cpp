@@ -1,7 +1,6 @@
 #include "clock.h"
 
-const sf::Clock Clock::_globalTimer;
-int Clock::_msGlobalInitialTime = Clock::_globalTimer.getElapsedTime().asMilliseconds();
+int Clock::_msGlobalInitialTime = SDL_GetTicks();
 int Clock::_msGlobalPauseTime = _msGlobalInitialTime;
 
 Clock::Clock (ClockType clockType) :
@@ -19,24 +18,27 @@ int Clock::restart() {
 }
 
 void Clock::pauseGlobalTimer() {
-  _msGlobalPauseTime = _globalTimer.getElapsedTime().asMilliseconds();
+  if (!isGlobalTimerPaused())
+    _msGlobalPauseTime = SDL_GetTicks();
 }
 
 void Clock::resumeGlobalTimer() {
-  _msGlobalInitialTime += _globalTimer.getElapsedTime().asMilliseconds() - _msGlobalPauseTime;
-  _msGlobalPauseTime = _msGlobalInitialTime;
+  if (isGlobalTimerPaused()) {
+    _msGlobalInitialTime += SDL_GetTicks() - _msGlobalPauseTime;
+    _msGlobalPauseTime = _msGlobalInitialTime;
+  }
 }
 
 int Clock::getRelativeTicks() {
   if (isGlobalTimerPaused())
     return _msGlobalPauseTime - _msGlobalInitialTime;
   else
-    return _globalTimer.getElapsedTime().asMilliseconds() - _msGlobalInitialTime;
+    return SDL_GetTicks() - _msGlobalInitialTime;
 }
 
 int Clock::getTicks() const {
   if (_clockType == INDEPENDENT)
-    return _globalTimer.getElapsedTime().asMilliseconds();
+    return SDL_GetTicks();
   else
     return getRelativeTicks();
 }

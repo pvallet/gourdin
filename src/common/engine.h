@@ -1,7 +1,6 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
+#include "opengl.h"
 
 #include <set>
 #include <unordered_set>
@@ -11,6 +10,8 @@
 #include "lion.h"
 #include "tree.h"
 #include "igElementDisplay.h"
+
+#include "texturedRectangle.h"
 
 #include "chunk.h"
 #include "contentGenerator.h"
@@ -23,8 +24,8 @@
 
 #include "terrainTexManager.h"
 
+#include "frameBufferObject.h"
 #include "shader.h"
-#include "utils.h"
 
 enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
 
@@ -45,7 +46,7 @@ public:
   void init();
 
 	void update(int msElapsed);
-	void render() const;
+	void renderToFBO() const;
 	void moveSelection(glm::ivec2 screenTarget);
 	void moveCamera(glm::vec2 newAimedPos);
 	void addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
@@ -59,8 +60,9 @@ public:
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
+	inline GLuint getColorBuffer() const {return _globalFBO.getTexID();}
 
-	static glm::vec2 get2DCoord(glm::ivec2 screenTarget);
+	glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 
 private:
   // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
@@ -100,4 +102,9 @@ private:
 	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;
 
   std::vector<std::vector<ChunkStatus> > _chunkStatus;
+
+	Shader _depthInColorBufferShader;
+	FrameBufferObject _globalFBO;
+	FrameBufferObject _depthInColorBufferFBO;
+	std::unique_ptr<TexturedRectangle> _depthTexturedRectangle;
 };

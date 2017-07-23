@@ -1,9 +1,5 @@
 #include "skybox.h"
 
-#include "utils.h"
-
-#include <iostream>
-
 Skybox::Skybox() :
 	t(1000.),
   _indices {
@@ -37,7 +33,9 @@ Skybox::Skybox() :
     3, 3, 3, 3,
     4, 4, 4, 4,
     5, 5, 5, 5
-  } {
+  },
+	_vao(0),
+	_vbo(0) {
 
   // vbo
 	glGenBuffers(1, &_vbo);
@@ -68,12 +66,12 @@ Skybox::Skybox() :
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
-	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_coord)));
 
 	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(3);
-	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

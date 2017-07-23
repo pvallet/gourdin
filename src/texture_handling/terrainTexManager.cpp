@@ -1,24 +1,14 @@
 #include "terrainTexManager.h"
 
-#include <SFML/Graphics.hpp>
 #include <sstream>
 
-glm::uvec2 TerrainTexManager::loadTexture(std::string folder) {
-	sf::Image img;
+void TerrainTexManager::loadTexture(std::string path) {
 
-  img.loadFromFile(folder);
+	Texture texture;
 
-  _texIDs.push_back(0);
+	texture.loadFromFile(path);
 
-	glGenTextures(1, &_texIDs.back());
-
-  glBindTexture(GL_TEXTURE_2D, _texIDs.back());
-
-  glTexImage2D(   GL_TEXTURE_2D, 0, GL_RGBA,
-                  img.getSize().x, img.getSize().y,
-                  0,
-                  GL_RGBA, GL_UNSIGNED_BYTE, img.getPixelsPtr()
-  );
+	glBindTexture(GL_TEXTURE_2D, texture.getTexID());
 
   glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -29,7 +19,7 @@ glm::uvec2 TerrainTexManager::loadTexture(std::string folder) {
 
   glBindTexture(GL_TEXTURE_2D, 0);
 
-	return glm::uvec2(img.getSize().x, img.getSize().y);
+	_textures.push_back(std::move(texture));
 }
 
 void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {

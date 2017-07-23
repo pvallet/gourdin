@@ -1,7 +1,6 @@
 #include "controllable.h"
 
 #include "camera.h"
-#include <iostream>
 
 Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
  	igMovingElement(position, graphics, terrainGeometry),
@@ -33,15 +32,15 @@ void Controllable::stop() {
   igMovingElement::stop();
 }
 
-glm::ivec4 Controllable::getScreenRect() const {
+glm::uvec4 Controllable::getScreenRect() const {
 	Camera& cam = Camera::getInstance();
 
-	glm::ivec4 res;
+	glm::uvec4 res;
 
-	res.x =  (_projectedVertices[3] + 1.f) / 2.f * cam.getW();
-	res.y = -(_projectedVertices[1] + 1.f) / 2.f * cam.getH() + cam.getH();
-	res.z =  (_projectedVertices[0] - _projectedVertices[3]) / 2.f * cam.getW();
-	res.w =  (_projectedVertices[1] - _projectedVertices[7]) / 2.f * cam.getH();
+	res.x =  (_projectedVertices[3] + 1.f) / 2.f * cam.getWindowW();
+	res.y = -(_projectedVertices[1] + 1.f) / 2.f * cam.getWindowH() + cam.getWindowH();
+	res.z =  (_projectedVertices[0] - _projectedVertices[3]) / 2.f * cam.getWindowW();
+	res.w =  (_projectedVertices[1] - _projectedVertices[7]) / 2.f * cam.getWindowH();
 
 	return res;
 }

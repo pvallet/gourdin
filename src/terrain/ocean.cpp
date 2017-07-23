@@ -13,7 +13,9 @@ Ocean::Ocean(float oversizeFactor) :
           TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), 0,
           0, TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor),
           TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor), TEX_FACTOR*NB_CHUNKS*(1+2*oversizeFactor)},
-	_indices {0, 1, 2, 3} {
+	_indices {0, 1, 2, 3},
+	_vao(0),
+	_vbo(0) {
 
   // vbo
 	glGenBuffers(1, &_vbo);
@@ -44,12 +46,12 @@ Ocean::Ocean(float oversizeFactor) :
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_normals)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(_vertices) + sizeof(_normals)));
 
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
-	glEnableVertexAttribArray(3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

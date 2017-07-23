@@ -1,0 +1,4 @@
+distribution/
+.gradle/
+.idea/
+keystore.properties

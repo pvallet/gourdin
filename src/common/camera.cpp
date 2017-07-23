@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include "utils.h"
+
 Camera::Camera() :
   _fovAngle(45),
 	_aspectRatio(1.f),
@@ -70,4 +72,21 @@ void Camera::rotate (float dtheta, float dphi) {
     _phi = 0;
   else if (_phi > 180.f)
     _phi = 180.f;
+}
+
+glm::vec2 Camera::windowCoordsToGLCoords(glm::uvec2 windowCoords) const {
+  return glm::vec2(2 *  windowCoords.x / (float) _windowW - 1,
+                   1 - 2 * windowCoords.y / (float) _windowH);
+}
+
+glm::uvec2 Camera::glCoordsToWindowCoords(glm::vec2 glCoords) const {
+  return glm::uvec2(_windowW * (1 + glCoords.x) / 2,
+                    _windowH * (1 - glCoords.y));
+}
+
+glm::vec4 Camera::windowRectCoordsToGLRectCoords(glm::uvec4 windowRect) const {
+  return glm::vec4(2 *  windowRect.x / (float) _windowW - 1,
+                   1 - 2 * (windowRect.y + windowRect.w) / (float) _windowH,
+                   2 *  windowRect.z / (float) _windowW,
+                   2 *  windowRect.w / (float) _windowH);
 }

@@ -1,15 +1,11 @@
 #pragma once
 
-#include "engine.h"
-#include "interface.h"
+#include "game.h"
 
-class GameGame {
+class GameGame : public Game {
 public:
-  GameGame (sf::RenderWindow& window, Engine& engine);
+  GameGame (Engine& engine);
 
-  void init();
-
-  void update(int msElapsed);
   void render() const;
 
   bool genTribe();
@@ -29,8 +25,6 @@ public:
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoText());}
   inline bool getPovCamera() const {return _povCamera;}
 
-  inline const Engine& getEngine() const {return _engine;}
-
 private:
   std::string getInfoText() const;
 
@@ -38,8 +32,4 @@ private:
   std::vector<Controllable*> _tribe;
 
   bool _povCamera;
-
-  sf::RenderWindow& _window;
-  Engine& _engine;
-  Interface _interface;
 };

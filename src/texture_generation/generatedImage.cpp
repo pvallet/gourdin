@@ -1,12 +1,11 @@
 #include "generatedImage.h"
 
-#include <SFML/Graphics.hpp>
+#include <SDL_image.h>
+#include <SDL2pp/SDL2pp.hh>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <iostream>
-
-#include "utils.h"
 
 GeneratedImage::GeneratedImage() :
   _size(0) {}
@@ -29,37 +28,41 @@ void GeneratedImage::setPixels(const std::vector<float>& pixels) {
 
 union ConvertFloat {
   float f;
-  sf::Uint8 uc[4];
+  uint8_t uc[4];
 };
 
 bool GeneratedImage::loadFromFile(std::string filename) {
-  sf::Image img;
-  if (!img.loadFromFile(filename))
-    return false;
+  try {
+    SDL2pp::Surface img(filename);
 
-  if (img.getSize().x != img.getSize().y) {
-    std::cerr << "Error in GeneratedImage::loadFromFile: " << filename << " is not square." << '\n';
-    return false;
-  }
-
-  const sf::Uint8* imgPixels = img.getPixelsPtr();
-  _size = img.getSize().x;
-  _pixels.resize(_size*_size, 0);
-
-  #pragma omp parallel for
-  for (size_t i = 0; i < _size*_size; i++) {
-    ConvertFloat convert;
-    for (size_t j = 0; j < 4; j++) {
-      convert.uc[j] = imgPixels[4*i + j];
+    if (img.GetWidth() != img.GetHeight()) {
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in GeneratedImage::loadFromFile: %s is not square.", filename.c_str());
+      return false;
     }
-    _pixels[i] = convert.f;
-  }
 
-  return true;
+    const uint8_t* imgPixels = (const uint8_t*) img.Get()->pixels;
+    _size = img.GetHeight();
+    _pixels.resize(_size*_size, 0);
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < _size*_size; i++) {
+      ConvertFloat convert;
+      for (size_t j = 0; j < 4; j++) {
+        convert.uc[j] = imgPixels[4*i + j];
+      }
+      _pixels[i] = convert.f;
+    }
+
+    return true;
+
+  } catch (std::exception& e) {
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", e.what());
+    return false;
+  }
 }
 
 void GeneratedImage::saveToFile(std::string filename) const {
-  std::vector<sf::Uint8> rgbPixels(4*_pixels.size());
+  std::vector<uint8_t> rgbPixels(4*_pixels.size());
 
   #pragma omp parallel for
   for (size_t i = 0; i < _pixels.size(); i++) {
@@ -71,11 +74,9 @@ void GeneratedImage::saveToFile(std::string filename) const {
     }
   }
 
-  sf::Texture texture;
-	texture.create(_size, _size);
-	texture.update(&rgbPixels[0]);
-
-	texture.copyToImage().saveToFile(filename);
+  // Little endian
+  SDL2pp::Surface img(&rgbPixels[0], _size, _size, 32, 4*_size, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	IMG_SavePNG(img.Get(), filename.c_str());
 }
 
 void GeneratedImage::invert() {

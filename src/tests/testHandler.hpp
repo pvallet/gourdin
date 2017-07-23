@@ -11,8 +11,9 @@ public:
 
 private:
   // The texture must be square of size x, pixels must be of size 4*x*x (rgba)
-  void saveToImage(const std::vector<sf::Uint8>& pixels, std::string filename) const;
+  void saveToImage(std::vector<uint8_t> pixels, std::string filename) const;
   void saveToImage(const std::vector<float>& pixels, std::string filename) const;
+  void addToDeleteList(std::string filename) const;
   // generates a black square on a white background
   static std::vector<float> generateTestSquare(size_t size);
   static std::vector<float> generateTestCircle(size_t size);
