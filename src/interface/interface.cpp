@@ -25,9 +25,10 @@ void Interface::init() {
   ))));
 #else
   _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-    cam.getWindowW() - _minimapTexture.getSize().x*2, cam.getWindowH() - _minimapTexture.getSize().y*2,
-    _minimapTexture.getSize().x*2,
-    _minimapTexture.getSize().y*2
+    cam.getWindowW() - _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
+    cam.getWindowH() - _minimapTexture.getSize().y * cam.getWindowH()/cam.getH(),
+    _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
+    _minimapTexture.getSize().y * cam.getWindowH()/cam.getH()
   ))));
 #endif
 }
@@ -150,27 +151,36 @@ void Interface::renderRectSelect() const {
 }
 
 void Interface::renderLifeBars(std::set<Lion*> selection) const {
-  // glm::ivec4 corners;
-  // float maxHeightFactor;
-  //
-  // for(auto it = selection.begin(); it != selection.end(); ++it) {
-  //   corners = (*it)->getScreenRect();
-  //   // Otherwise the selected element is outside the screen
-  //   if (corners.z != 0) {
-  //     maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
-  //
-  //     lifeBar.setSize({20.f* (*it)->getStamina() / 100.f, 2.f});
-  //
-  //     lifeBar.setPosition(corners.x + corners.z/2 - 10,
-  //       corners.y - corners.w*maxHeightFactor + corners.w - 5);
-  //     fullLifeBar.setPosition(corners.x + corners.z/2 - 10,
-  //       corners.y - corners.w*maxHeightFactor + corners.w - 5);
-  //
-  //     _window.draw(lifeBar);
-  //     _window.draw(fullLifeBar);
-  //     lifeBar.setSize({20.f, 2.f});
-  //   }
-  // }
+  std::vector<glm::vec4> staminaBarsRects;
+  std::vector<glm::vec4> outlinesRects;
+
+  for(auto it = selection.begin(); it != selection.end(); ++it) {
+    glm::uvec4 corners = (*it)->getScreenRect();
+
+    // Otherwise the selected element is outside the screen
+    if (corners.z != 0) {
+      float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
+
+      staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+        corners.x + corners.z/2 - 10,
+        corners.y - corners.w*maxHeightFactor + corners.w - 5,
+        20.f* (*it)->getStamina() / 100.f,
+        2
+      )));
+
+      outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+        corners.x + corners.z/2 - 10,
+        corners.y - corners.w*maxHeightFactor + corners.w - 5,
+        20,
+        4
+      )));
+    }
+  }
+
+  ColoredRectangles staminaBars(glm::vec4(0,1,0,1), staminaBarsRects);
+  ColoredRectangles outlines(glm::vec4(0,0,0,1), outlinesRects, false);
+  staminaBars.draw();
+  outlines.draw();
 }
 
 glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {

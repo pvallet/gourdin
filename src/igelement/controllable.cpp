@@ -32,10 +32,10 @@ void Controllable::stop() {
   igMovingElement::stop();
 }
 
-glm::ivec4 Controllable::getScreenRect() const {
+glm::uvec4 Controllable::getScreenRect() const {
 	Camera& cam = Camera::getInstance();
 
-	glm::ivec4 res;
+	glm::uvec4 res;
 
 	res.x =  (_projectedVertices[3] + 1.f) / 2.f * cam.getWindowW();
 	res.y = -(_projectedVertices[1] + 1.f) / 2.f * cam.getWindowH() + cam.getWindowH();
