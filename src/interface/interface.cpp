@@ -91,6 +91,15 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
   ));
 
   opaqueGrey.draw();
+
+  // Texture frame
+  ColoredRectangles frame(glm::vec4(1), std::vector<glm::vec4>(1,glm::vec4(
+    minimapTextureRect.x + 1e-5,
+    minimapTextureRect.y + 1e-5,
+    minimapTextureRect.z - 2e-5,
+    minimapTextureRect.w - 2e-5
+  )), false);
+  frame.draw();
 }
 
 void Interface::renderText() const {

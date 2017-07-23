@@ -8,8 +8,8 @@
 
 class ColoredRectangles {
 public:
-  ColoredRectangles (glm::vec4 color = glm::vec4(1));
-  ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles);
+  ColoredRectangles (glm::vec4 color, bool filled = true);
+  ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled = true);
   virtual ~ColoredRectangles();
   ColoredRectangles(ColoredRectangles const&) = delete;
   void operator=   (ColoredRectangles const&) = delete;
@@ -27,6 +27,7 @@ private:
 
   std::vector<float> _vertices;
   glm::vec4 _color;
+  bool _filled;
 
   size_t _nbRect;
 

@@ -3,8 +3,9 @@
 Shader ColoredRectangles::_plainColorShader;
 bool ColoredRectangles::_shaderLoaded = false;
 
-ColoredRectangles::ColoredRectangles (glm::vec4 color):
+ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
 	_color(color),
+	_filled(filled),
   _nbRect(0) {
 
 	glGenBuffers(1, &_vbo);
@@ -21,8 +22,8 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color):
 	glBindVertexArray(0);
 }
 
-ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles):
-  ColoredRectangles(color) {
+ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled):
+  ColoredRectangles(color, filled) {
   setRectangles(rectangles);
 }
 
@@ -41,7 +42,13 @@ void ColoredRectangles::loadShader() {
 void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) {
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
   _nbRect = rectangles.size();
-  size_t rectGLDataSize = 12 * sizeof(float);
+  size_t rectGLDataSize;
+
+	if (_filled)
+		rectGLDataSize = 12 * sizeof(float);
+	else
+		rectGLDataSize = 16 * sizeof(float);
+
   glBufferData(GL_ARRAY_BUFFER, _nbRect * rectGLDataSize, NULL, GL_DYNAMIC_DRAW);
 
   for (size_t i = 0; i < _nbRect; i++) {
@@ -50,12 +57,21 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
     float x1 = rectangles[i].x + rectangles[i].z;
     float y1 = rectangles[i].y + rectangles[i].w;
 
-    struct {float x, y;} data[6] = {
-      { x0, y0 }, { x1, y1 }, { x0, y1 },
-      { x0, y0 }, { x1, y0 }, { x1, y1 }
-    };
+		if (_filled) {
+		 	struct {float x, y;} data[6] = {
+	      { x0, y0 }, { x1, y1 }, { x0, y1 },
+	      { x0, y0 }, { x1, y0 }, { x1, y1 }
+	    };
+			glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
+		}
+		else {
+			struct {float x, y;} data[8] = {
+				{ x0, y0 }, { x0, y1 }, { x0, y1 }, { x1, y1 },
+				{ x1, y1 }, { x1, y0 }, { x1, y0 }, { x0, y0 }
+			};
+			glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
+		}
 
-    glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
   }
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -69,7 +85,10 @@ void ColoredRectangles::draw() const {
 	glUseProgram(_plainColorShader.getProgramID());
   glUniform4f(glGetUniformLocation(_plainColorShader.getProgramID(), "color"), _color.x, _color.y, _color.z, _color.w);
 
-  glDrawArrays(GL_TRIANGLES, 0, 6*_nbRect);
+	if (_filled)
+  	glDrawArrays(GL_TRIANGLES, 0, 6*_nbRect);
+	else
+		glDrawArrays(GL_LINES, 0, 8*_nbRect);
 
   glUseProgram(0);
   glDisable(GL_BLEND);
