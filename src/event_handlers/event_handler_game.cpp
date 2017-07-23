@@ -119,7 +119,7 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
     break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != glm::ivec2(0,0)) {
+      if (_beginDragLeft != glm::ivec2(-1,-1)) {
         if (_game.getPovCamera()) {
           _oldTheta = cam.getTheta();
           _oldPhi = cam.getPhi();

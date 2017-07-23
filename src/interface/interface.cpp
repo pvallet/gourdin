@@ -165,7 +165,7 @@ void Interface::renderLifeBars(std::set<Lion*> selection) const {
         corners.x + corners.z/2 - 10,
         corners.y - corners.w*maxHeightFactor + corners.w - 5,
         20.f* (*it)->getStamina() / 100.f,
-        2
+        4
       )));
 
       outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
