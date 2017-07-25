@@ -9,18 +9,15 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
 	_filled(filled),
   _nbRect(0) {
 
-	glGenBuffers(1, &_vbo);
-
-	glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	_vao.bind();
+	_vbo.bind();
 
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexBufferObject::unbind();
+	VertexArrayObject::unbind();
 }
 
 ColoredRectangles::ColoredRectangles (glm::vec4 color, const glm::vec4& rectangle, bool filled):
@@ -29,11 +26,6 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color, const glm::vec4& rectangl
 ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled):
   ColoredRectangles(color, filled) {
   setRectangles(rectangles);
-}
-
-ColoredRectangles::~ColoredRectangles() {
-	glDeleteBuffers(1, &_vbo);
-  glDeleteVertexArrays(1, &_vao);
 }
 
 void ColoredRectangles::loadShader() {
@@ -48,7 +40,7 @@ void ColoredRectangles::setRectangles(const glm::vec4& rectangle) {
 }
 
 void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) {
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  _vbo.bind();
   _nbRect = rectangles.size();
   size_t rectGLDataSize;
 
@@ -83,11 +75,11 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 		}
 
   }
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  VertexBufferObject::unbind();
 }
 
 void ColoredRectangles::draw() const {
-	glBindVertexArray(_vao);
+	_vao.bind();
 
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -102,5 +94,5 @@ void ColoredRectangles::draw() const {
 
   Shader::unbind();
   glDisable(GL_BLEND);
-	glBindVertexArray(0);
+	VertexArrayObject::unbind();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl.h"
+#include "basicGLObjects.h"
 #include "texArray.h"
 
 #include <vector>
@@ -13,10 +13,7 @@ enum DrawType {STATIC_DRAW, STREAM_DRAW};
 
 class igElementDisplay {
 public:
-  igElementDisplay();
-  virtual ~igElementDisplay();
-  igElementDisplay(igElementDisplay const&) = delete;
-  void operator=  (igElementDisplay const&) = delete;
+  igElementDisplay() {}
 
   void init(DrawType drawType = STREAM_DRAW, size_t capacity = IGE_BUFFER_SIZE);
 
@@ -31,9 +28,9 @@ protected:
 
   size_t _capacity;
 
-  GLuint _vao;
-  GLuint _vbo;
-  GLuint _ibo;
+  VertexArrayObject _vao;
+  VertexBufferObject _vbo;
+  IndexBufferObject _ibo;
   std::vector<const TextureArray*> _textures;
   std::vector<size_t> _nbElemsInSpree;
 };

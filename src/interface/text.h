@@ -2,8 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "basicGLObjects.h"
 #include "fontHandler.h"
-#include "opengl.h"
 #include "shader.h"
 #include "texture.h"
 
@@ -12,9 +12,6 @@
 class Text {
 public:
   Text ();
-  ~Text();
-	Text(Text const&)           = delete;
-	void operator=(Text const&) = delete;
 
   void setText(const std::string &str, float fontSize = _fontHandler.getFontSize());
   void setPosition(size_t X, size_t Y);
@@ -32,8 +29,8 @@ private:
   static Shader _textShader;
   static bool _shaderLoaded;
 
-  GLuint _vao;
-  GLuint _vbo;
+  VertexArrayObject _vao;
+  VertexBufferObject _vbo;
   Texture _texture;
 
   size_t _stringLength;

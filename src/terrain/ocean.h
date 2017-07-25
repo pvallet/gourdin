@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl.h"
+#include "basicGLObjects.h"
 #include "texture.h"
 
 #include <array>
@@ -9,9 +9,6 @@
 class Ocean {
 public:
 	Ocean(float oversizeFactor);
-	~Ocean();
-	Ocean(Ocean const&)          = delete;
-	void operator=(Ocean const&) = delete;
 
 	void draw() const;
 
@@ -23,9 +20,9 @@ private:
 	std::array<float,8>  _coord;
 	std::array<GLuint,4> _indices;
 
-	GLuint _vao;
-	GLuint _vbo;
-	GLuint _ibo;
+	VertexArrayObject _vao;
+	VertexBufferObject _vbo;
+	IndexBufferObject _ibo;
 
 	const Texture* _texture;
 };

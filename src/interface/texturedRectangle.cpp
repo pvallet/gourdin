@@ -14,35 +14,21 @@ TexturedRectangle::TexturedRectangle (const Texture* texture, float x, float y, 
 	},
 	_texture(texture) {
 
-  // vbo
-	glGenBuffers(1, &_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	_vao.bind();
+  _vbo.bind();
 
-  glBufferData(	GL_ARRAY_BUFFER, sizeof(_verticesAndCoord), &_verticesAndCoord[0], GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// vao
-
-	glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	glBufferData(	GL_ARRAY_BUFFER, sizeof(_verticesAndCoord), &_verticesAndCoord[0], GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	VertexBufferObject::unbind();
+	VertexArrayObject::unbind();
 }
 
 TexturedRectangle::TexturedRectangle (const Texture* texture, glm::vec4 rect):
 	TexturedRectangle(texture, rect.x, rect.y, rect.z, rect.w) {}
-
-TexturedRectangle::~TexturedRectangle() {
-	glDeleteBuffers(1, &_vbo);
-  glDeleteVertexArrays(1, &_vao);
-}
 
 void TexturedRectangle::loadShader() {
   if (!TexturedRectangle::_shaderLoaded) {
@@ -53,13 +39,13 @@ void TexturedRectangle::loadShader() {
 
 void TexturedRectangle::draw() const {
 	_2DShader.bind();
-	glBindVertexArray(_vao);
+	_vao.bind();
 	_texture->bind();
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
   Texture::unbind();
-	glBindVertexArray(0);
+	VertexArrayObject::unbind();
 	Shader::unbind();
 }
 

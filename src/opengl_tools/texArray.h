@@ -3,18 +3,15 @@
 #include <string>
 #include <vector>
 
+#include "glObjectInterface.h"
 #include "opengl.h"
 #include <glm/glm.hpp>
 
-class TextureArray {
+class TextureArray : public GLObjectInterface {
 public:
 	TextureArray();
-	TextureArray(TextureArray const&) = delete;
 	TextureArray(TextureArray&& other) noexcept;
 	~TextureArray();
-
-	TextureArray& operator=(TextureArray const&) = delete;
-  TextureArray& operator=(TextureArray&&) = delete;
 
 	void loadTextures(size_t count, std::string folderPath);
 

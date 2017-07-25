@@ -5,21 +5,20 @@
 #include <map>
 #include <vector>
 
+#include "basicGLObjects.h"
 #include "terrainGeometry.h"
 #include "terrainTexManager.h"
 #include "igElementDisplay.h"
 
 struct BiomeIndices {
 	std::vector<GLuint> indices;
-	GLuint ibo;
+	IndexBufferObject ibo;
 };
 
-class Buffers {
-public:
-	Buffers() : vao(0), vbo(0) {}
-
-	GLuint vao;
-	GLuint vbo;
+struct Buffers {
+	bool generated = false;
+	VertexArrayObject vao;
+	VertexBufferObject vbo;
 
 	std::vector<float> vertices;
 	std::vector<float> normals;
@@ -34,9 +33,6 @@ class Chunk {
 public:
 	Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 		                              TerrainGeometry& terrainGeometry);
-	~Chunk();
-	Chunk(Chunk const&)          = delete;
-	void operator=(Chunk const&) = delete;
 
 	void generate();
 	size_t draw() const;

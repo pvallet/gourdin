@@ -6,7 +6,6 @@
 class Controllable : public igMovingElement {
 public:
 	Controllable(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
-	virtual ~Controllable() {}
 
 	virtual void update(int msElapsed);
 	virtual void setTarget(glm::vec2 t, ANM_TYPE anim = WALK);

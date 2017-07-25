@@ -1,18 +1,15 @@
 #pragma once
 
+#include "glObjectInterface.h"
 #include "opengl.h"
 #include <string>
 
-class Shader {
+class Shader : public GLObjectInterface {
 public:
 
   Shader ();
-  Shader (Shader const&) = delete;
   Shader (Shader&& other) noexcept;
   ~Shader();
-
-  Shader& operator=(Shader const&) = delete;
-  Shader& operator=(Shader&&) = delete;
 
   bool load(std::string vertexSource, std::string fragmentSource);
 

@@ -6,30 +6,12 @@
 #include "tree.h"
 #include "utils.h"
 
-igElementDisplay::igElementDisplay() :
-  _vao(0),
-  _vbo(0),
-  _ibo(0) {}
-
-void igElementDisplay::reset() {
-  glDeleteBuffers(1, &_ibo);
-  glDeleteBuffers(1, &_vbo);
-  glDeleteVertexArrays(1, &_vao);
-  _ibo = 0;
-  _vbo = 0;
-  _vao = 0;
-}
-
 void igElementDisplay::init(DrawType drawType, size_t capacity) {
-
-  reset();
-
   _capacity = capacity;
 
   // vbo
 
-  glGenBuffers(1, &_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  _vbo.bind();
   // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
   if (drawType == STREAM_DRAW)
     glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
@@ -38,12 +20,11 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
     glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
       NULL, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  VertexBufferObject::unbind();
 
   // ibo
 
-  glGenBuffers(1, &_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+  _ibo.bind();
 
   std::vector<GLuint> indices(6*_capacity);
 
@@ -58,13 +39,12 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
 
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, _capacity * 6 * sizeof(indices[0]), NULL, GL_STATIC_DRAW);
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _capacity * 6 * sizeof(indices[0]), &indices[0]);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  IndexBufferObject::unbind();
 
   // vao
 
-  glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  _vao.bind();
+  _vbo.bind();
 
   size_t sizeVertices = _capacity * 12 * sizeof(float);
   size_t sizeCoord2D  = _capacity *  8 * sizeof(float);
@@ -79,12 +59,8 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
   glEnableVertexAttribArray(2);
   glEnableVertexAttribArray(3);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-}
-
-igElementDisplay::~igElementDisplay() {
-  reset();
+  VertexBufferObject::unbind();
+  VertexArrayObject::unbind();
 }
 
 void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDisplay,
@@ -153,7 +129,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   const TextureArray* currentTexture;
   Biome       currentBiome;
 
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  _vbo.bind();
 
   for (size_t i = 0; i < elemsToDisplay.size(); i++) {
     Tree* tree = dynamic_cast<Tree*>(elemsToDisplay[i]);
@@ -180,14 +156,14 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 
   processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  VertexBufferObject::unbind();
 }
 
 size_t igElementDisplay::drawElements() const {
   size_t cursor = 0;
 
-  glBindVertexArray(_vao);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+  _vao.bind();
+  _ibo.bind();
 
   for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
     _textures[i]->bind();
@@ -199,8 +175,8 @@ size_t igElementDisplay::drawElements() const {
     cursor += 6 * _nbElemsInSpree[i];
   }
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+  VertexBufferObject::unbind();
+  VertexArrayObject::unbind();
 
   return cursor / 6;
 }

@@ -2,19 +2,16 @@
 
 #include <glm/glm.hpp>
 
+#include "glObjectInterface.h"
 #include "opengl.h"
 
 #include <string>
 
-class Texture {
+class Texture : public GLObjectInterface {
 public:
   Texture ();
-  Texture (Texture const&) = delete;
   Texture (Texture&& other) noexcept;
   ~Texture ();
-
-  Texture& operator=(Texture const&) = delete;
-  Texture& operator=(Texture&&) = delete;
 
   void loadFromFile(std::string filePath);
 

@@ -10,7 +10,6 @@ enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
 class Lion : public Controllable {
 public:
 	Lion(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
-	virtual ~Lion() {}
 
 	virtual void update(int msElapsed);
 	// React to the environment

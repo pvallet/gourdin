@@ -4,9 +4,18 @@
 #include <iostream>
 
 FrameBufferObject::FrameBufferObject() :
-  _fboIndex(0) {
-  glGenFramebuffers(1, &_fboIndex);
+  _fboID(0) {
+  glGenFramebuffers(1, &_fboID);
 }
+
+FrameBufferObject::~FrameBufferObject () {
+  glDeleteFramebuffers(1, &_fboID);
+}
+
+FrameBufferObject::FrameBufferObject (FrameBufferObject&& other) noexcept:
+  _fboID(other._fboID),
+  _colorBuffer(std::move(other._colorBuffer)),
+  _depthBuffer(std::move(other._depthBuffer)) {}
 
 void FrameBufferObject::init(size_t width, size_t height,
   GLenum colorBufferInternalFormat, GLenum colorBufferFormat, GLenum colorBufferType) {

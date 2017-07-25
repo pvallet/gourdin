@@ -17,29 +17,6 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
   }
 }
 
-void Chunk::cleanSubdivLvl(size_t subdivLvl) {
-
-	glDeleteBuffers(1, &_subdivisionLevels[subdivLvl]->vbo);
-	_subdivisionLevels[subdivLvl]->vbo = 0;
-
-	for (auto it  = _subdivisionLevels[subdivLvl]->indicesInfo.begin();
-	          it != _subdivisionLevels[subdivLvl]->indicesInfo.end(); it++) {
-		glDeleteBuffers(1,&(it->second.ibo));
-		it->second.ibo = 0;
-		it->second.indices.clear();
-	}
-
-
-	glDeleteVertexArrays(1, &_subdivisionLevels[subdivLvl]->vao);
-	_subdivisionLevels[subdivLvl]->vao = 0;
-}
-
-Chunk::~Chunk() {
-	for (size_t i = 0; i < _subdivisionLevels.size(); i++) {
-		cleanSubdivLvl(i);
-	}
-}
-
 GLuint Chunk::addVertexInfo(Vertex* vertex) {
 	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
 
@@ -92,8 +69,7 @@ void Chunk::generateBuffers() {
 
 	// geometry VBO
 
-	glGenBuffers(1, &currentBuffers->vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, currentBuffers->vbo);
+	currentBuffers->vbo.bind();
 
 	size_t bufferSizeVertices = currentBuffers->vertices.size()*sizeof currentBuffers->vertices[0];
 	size_t bufferSizeNormals	= currentBuffers->normals. size()*sizeof currentBuffers->normals[0];
@@ -104,13 +80,12 @@ void Chunk::generateBuffers() {
   glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices , bufferSizeNormals, &currentBuffers->normals[0]);
 	glBufferSubData(GL_ARRAY_BUFFER,    bufferSizeVertices + bufferSizeNormals, bufferSizeCoords, &currentBuffers->coords[0]);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  VertexBufferObject::unbind();
 
 	// VAO
 
-	glGenVertexArrays(1, &currentBuffers->vao);
-	glBindVertexArray(currentBuffers->vao);
-	glBindBuffer(GL_ARRAY_BUFFER, currentBuffers->vbo);
+	currentBuffers->vao.bind();
+	currentBuffers->vbo.bind();
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
@@ -123,23 +98,23 @@ void Chunk::generateBuffers() {
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glBindVertexArray(0);
+	VertexBufferObject::unbind();
+	VertexArrayObject::unbind();
 
 	// IBO for each biome
 
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		size_t bufferSizeIndices = it->second.indices.size()*sizeof it->second.indices[0];
 
-		glGenBuffers(1, &(it->second.ibo));
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
+		it->second.ibo.bind();
 
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSizeIndices, NULL, GL_STATIC_DRAW);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, bufferSizeIndices, &(it->second.indices[0]));
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		IndexBufferObject::unbind();
 	}
+
+	currentBuffers->generated = true;
 }
 
 void Chunk::computeChunkBoundingBox() {
@@ -173,7 +148,7 @@ void Chunk::computeChunkBoundingBox() {
 }
 
 void Chunk::generate() {
-	if (_subdivisionLevels[_currentSubdivLvl]->vao == 0) {
+	if (!_subdivisionLevels[_currentSubdivLvl]->generated) {
 		fillBufferData();
 		generateBuffers();
 	}
@@ -184,25 +159,25 @@ void Chunk::generate() {
 size_t Chunk::draw() const {
 	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
 
-	glBindVertexArray(currentBuffers->vao);
+	currentBuffers->vao.bind();
 
 	size_t nbTriangles = 0;
 
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		_terrainTexManager.bindTexture(it->first);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.ibo);
+		it->second.ibo.bind();
 
 		glDrawElements(GL_TRIANGLES, it->second.indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		IndexBufferObject::unbind();
 
 		nbTriangles += it->second.indices.size() / 3;
 	}
 
 	Texture::unbind();
 
-	glBindVertexArray(0);
+	VertexArrayObject::unbind();
 
 	return nbTriangles;
 }

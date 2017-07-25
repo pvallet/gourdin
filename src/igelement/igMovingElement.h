@@ -9,7 +9,6 @@
 class igMovingElement : public igElement {
 public:
 	igMovingElement(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
-	virtual ~igMovingElement() {}
 
 	void launchAnimation (ANM_TYPE type);
 	virtual void updateDisplay(int msElapsed, float theta); // Update sprite

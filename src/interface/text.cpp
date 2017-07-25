@@ -8,8 +8,6 @@ Shader Text::_textShader;
 bool Text::_shaderLoaded = false;
 
 Text::Text() :
-  _vao(0),
-  _vbo(0),
   _stringLength(0) {
 
   _texture.bind();
@@ -24,23 +22,15 @@ Text::Text() :
 
   Texture::unbind();
 
-	glGenBuffers(1, &_vbo);
-
-	glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+	_vao.bind();
+  _vbo.bind();
 
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-Text::~Text() {
-	glDeleteBuffers(1, &_vbo);
-	glDeleteVertexArrays(1, &_vao);
+	VertexBufferObject::unbind();
+	VertexArrayObject::unbind();
 }
 
 void Text::loadShader() {
@@ -51,7 +41,7 @@ void Text::loadShader() {
 }
 
 void Text::setText(const std::string &str, float fontSize) {
-  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  _vbo.bind();
 
   Camera& cam = Camera::getInstance();
   float sx = 2 / (float) cam.getWindowW() * fontSize / _fontHandler.getFontSize();
@@ -111,7 +101,7 @@ void Text::setText(const std::string &str, float fontSize) {
   _bounds.x = maxX;
   _bounds.y = y;
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  VertexBufferObject::unbind();
 }
 
 void Text::setPosition(size_t X, size_t Y) {
@@ -126,7 +116,7 @@ void Text::setPosition(size_t X, size_t Y) {
 
 void Text::render() const {
   _textShader.bind();
-  glBindVertexArray(_vao);
+  _vao.bind();
   _texture.bind();
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -137,7 +127,7 @@ void Text::render() const {
 
   glDisable(GL_BLEND);
   Texture::unbind();
-  glBindVertexArray(0);
+  VertexBufferObject::unbind();
   Shader::unbind();
 }
 

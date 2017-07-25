@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "opengl.h"
+#include "basicGLObjects.h"
 #include "shader.h"
 
 class ColoredRectangles {
@@ -11,9 +11,6 @@ public:
   ColoredRectangles (glm::vec4 color, bool filled = true);
   ColoredRectangles (glm::vec4 color, const glm::vec4& rectangle, bool filled = true);
   ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled = true);
-  virtual ~ColoredRectangles();
-  ColoredRectangles(ColoredRectangles const&) = delete;
-  void operator=   (ColoredRectangles const&) = delete;
 
   void draw() const;
 
@@ -36,6 +33,6 @@ private:
 
   size_t _nbRect;
 
-  GLuint _vao;
-  GLuint _vbo;
+  VertexArrayObject _vao;
+  VertexBufferObject _vbo;
 };

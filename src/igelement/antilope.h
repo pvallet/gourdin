@@ -20,7 +20,6 @@ struct BoidsInfo {
 class Antilope : public igMovingElement {
 public:
 	Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
-	virtual ~Antilope() {}
 
 	// React to the environment
 	virtual void updateState(const std::list<igMovingElement*>& neighbors);
