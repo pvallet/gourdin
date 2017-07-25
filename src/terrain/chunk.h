@@ -38,7 +38,7 @@ public:
 	size_t draw() const;
 
 	// Set visible to false if there is no need to display the chunk
-	void computeCulling();
+	void computeCulling(const std::vector<glm::vec3>& planeNormals);
 	void computeSubdivisionLevel();
 	void setSubdivisionLevel(size_t newSubdLvl);
 
@@ -56,10 +56,11 @@ private:
 	void fillBufferData();
 	void generateBuffers();
 	void computeChunkBoundingBox();
-	bool theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const;
+	bool theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const;
 	void setTreesHeights();
 
 	glm::ivec2 _chunkPos;
+	glm::vec3 _centerOfChunk;
 
 	bool _visible;
 	size_t _currentSubdivLvl;

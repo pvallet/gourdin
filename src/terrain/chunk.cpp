@@ -2,8 +2,6 @@
 
 #include "camera.h"
 
-#include <glm/gtx/rotate_vector.hpp>
-
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	                                     TerrainGeometry&   terrainGeometry) :
 	_chunkPos(x,y),
@@ -145,15 +143,16 @@ void Chunk::computeChunkBoundingBox() {
 	currentBuffers->corners[5] = glm::vec3(maxCoord[0], minCoord[1], maxCoord[2]);
 	currentBuffers->corners[6] = glm::vec3(maxCoord[0], maxCoord[1], minCoord[2]);
 	currentBuffers->corners[7] = glm::vec3(maxCoord[0], maxCoord[1], maxCoord[2]);
+	_centerOfChunk = glm::vec3((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
+	    	 getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 }
 
 void Chunk::generate() {
 	if (!_subdivisionLevels[_currentSubdivLvl]->generated) {
 		fillBufferData();
 		generateBuffers();
+		computeChunkBoundingBox();
 	}
-
-	computeChunkBoundingBox();
 }
 
 size_t Chunk::draw() const {
@@ -182,7 +181,7 @@ size_t Chunk::draw() const {
 	return nbTriangles;
 }
 
-bool Chunk::theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const {
+bool Chunk::theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const {
   float dots[8];
 
   for (size_t i = 0 ; i < 8 ; i++) {
@@ -195,48 +194,16 @@ bool Chunk::theCornersAreOutside(glm::vec3 cam, glm::vec3 vec) const {
   return true;
 }
 
-void Chunk::computeCulling() {
+void Chunk::computeCulling(const std::vector<glm::vec3>& planeNormals) {
 	Camera& cam = Camera::getInstance();
-
-  float theta = cam.getTheta();
-  float phi   = cam.getPhi();
-  float alpha = cam.getFov() * cam.getRatio() / 2.f;
-
-  // Bottom of the view
-  glm::vec3 normal = ut::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f);
   glm::vec3 pos = cam.getPos();
 
-  if (theCornersAreOutside(pos,normal)) {
-    _visible = false;
-    return;
-  }
-
-  // Top
-  normal = ut::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f);
-  normal *= -1.f;
-
-  if (theCornersAreOutside(pos,normal)) {
-    _visible = false;
-    return;
-  }
-
-  // Right
-  normal = ut::carthesian(1.f, theta + 90.f, 90.f);
-  normal = glm::rotate(normal, (float) (- alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi));
-
-  if (theCornersAreOutside(pos,normal)) {
-    _visible = false;
-    return;
-  }
-
-  // Left
-  normal = ut::carthesian(1.f, theta - 90.f, 90.f);
-  normal = glm::rotate(normal, (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi));
-
-  if (theCornersAreOutside(pos,normal)) {
-    _visible = false;
-    return;
-  }
+	for (size_t i = 0; i < planeNormals.size(); i++) {
+		if (theCornersAreOutside(pos, planeNormals[i])) {
+			_visible = false;
+			return;
+		}
+	}
 
   _visible = true;
 }
@@ -255,10 +222,8 @@ void Chunk::setTrees(std::vector<igElement*> trees) {
 
 void Chunk::computeSubdivisionLevel() {
 	Camera& camera = Camera::getInstance();
-	glm::vec3 centerOfChunk((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE,
-	    getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 
-	float distanceToChunk = glm::length(camera.getPos()-centerOfChunk);
+	float distanceToChunk = glm::length(camera.getPos()-_centerOfChunk);
 
 	if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);

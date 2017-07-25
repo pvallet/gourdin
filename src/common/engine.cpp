@@ -3,6 +3,7 @@
 #include "opengl.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include "camera.h"
 #include "log.h"
@@ -250,14 +251,32 @@ void Engine::update(int msElapsed) {
   if (_chunkStatus[camPos.x][camPos.y] == NOT_GENERATED)
     generateChunk(camPos.x, camPos.y);
 
-  cam.setHeight( _terrain[camPos.x][camPos.y]->getHeight(cam.getPointedPos()));
+  cam.setHeight(_terrain[camPos.x][camPos.y]->getHeight(cam.getPointedPos()));
   cam.apply();
+
+  float theta = cam.getTheta();
+  float phi   = cam.getPhi();
+  float alpha = cam.getFov() * cam.getRatio() / 2.f;
+
+  std::vector<glm::vec3> camFrustumPlaneNormals;
+  // Bottom of the view
+  camFrustumPlaneNormals.push_back(ut::carthesian(1.f, theta, phi + 90.f - cam.getFov() / 2.f));
+  // Top
+  camFrustumPlaneNormals.push_back(ut::carthesian(1.f, theta, phi + 90.f + cam.getFov() / 2.f) * -1.f);
+  // Right
+  camFrustumPlaneNormals.push_back(glm::rotate(
+    ut::carthesian(1.f, theta + 90.f, 90.f),
+    (float) (- alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi)));
+  // Left
+  camFrustumPlaneNormals.push_back(glm::rotate(
+    ut::carthesian(1.f, theta - 90.f, 90.f),
+    (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi)));
 
   // Update terrains
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_chunkStatus[i][j] != NOT_GENERATED) {
-        _terrain[i][j]->computeCulling();
+        _terrain[i][j]->computeCulling(camFrustumPlaneNormals);
 
         if (_chunkStatus[i][j] == EDGE) {
           if (_terrain[i][j]->isVisible())
