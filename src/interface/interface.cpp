@@ -19,12 +19,12 @@ void Interface::init() {
   _minimapTexture.loadFromFile("res/map/map.png");
 
 #ifndef __ANDROID__
-  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::uvec4(
     0, cam.getWindowH() - _minimapTexture.getSize().y,
     _minimapTexture.getSize()
   ))));
 #else
-  _minimapRect.reset(new TexturedRectangle(_minimapTexture.getTexID(), cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::uvec4(
     cam.getWindowW() - _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
     cam.getWindowH() - _minimapTexture.getSize().y * cam.getWindowH()/cam.getH(),
     _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),

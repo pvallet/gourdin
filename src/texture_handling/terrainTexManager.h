@@ -17,9 +17,9 @@ public:
 	void loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);
 
-	void bindTexture(size_t index) const {glBindTexture(GL_TEXTURE_2D, _textures[index].getTexID());}
+	void bindTexture(size_t index) const {_textures[index].bind();}
 
-	inline GLuint getTexID(size_t index) const {return _textures[index].getTexID();}
+	inline const Texture* getTexture(size_t index) const {return &_textures[index];}
 
 private:
 	std::vector<Texture> _textures;

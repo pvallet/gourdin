@@ -200,7 +200,7 @@ size_t Chunk::draw() const {
 		nbTriangles += it->second.indices.size() / 3;
 	}
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::unbind();
 
 	glBindVertexArray(0);
 

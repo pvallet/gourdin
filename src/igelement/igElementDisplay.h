@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl.h"
+#include "texArray.h"
 
 #include <vector>
 
@@ -33,6 +34,6 @@ protected:
   GLuint _vao;
   GLuint _vbo;
   GLuint _ibo;
-  std::vector<GLuint> _texIDs;
-  std::vector<GLuint> _nbElemsInSpree;
+  std::vector<const TextureArray*> _textures;
+  std::vector<size_t> _nbElemsInSpree;
 };

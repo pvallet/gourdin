@@ -5,6 +5,7 @@
 #include "fontHandler.h"
 #include "opengl.h"
 #include "shader.h"
+#include "texture.h"
 
 #include <string>
 
@@ -14,8 +15,6 @@ public:
   ~Text();
 	Text(Text const&)           = delete;
 	void operator=(Text const&) = delete;
-
-  inline GLuint getTexID() const {return _texID;}
 
   void setText(const std::string &str, float fontSize = _fontHandler.getFontSize());
   void setPosition(size_t X, size_t Y);
@@ -35,7 +34,7 @@ private:
 
   GLuint _vao;
   GLuint _vbo;
-  GLuint _texID;
+  Texture _texture;
 
   size_t _stringLength;
   glm::vec2 _origin;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl.h"
+#include "texture.h"
 
 #include <array>
 
@@ -14,7 +15,7 @@ public:
 
 	void draw() const;
 
-	void setTexIndex(GLuint tex) {_tex = tex;}
+	void setTexture(const Texture* texture) {_texture = texture;}
 
 private:
 	std::array<float,12> _vertices;
@@ -25,5 +26,6 @@ private:
 	GLuint _vao;
 	GLuint _vbo;
 	GLuint _ibo;
-	GLuint _tex;
+
+	const Texture* _texture;
 };

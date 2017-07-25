@@ -5,11 +5,12 @@
 
 #include "opengl.h"
 #include "shader.h"
+#include "texture.h"
 
 class TexturedRectangle {
 public:
-  TexturedRectangle (GLuint texID, float x, float y, float w, float h);
-  TexturedRectangle (GLuint texID, glm::vec4 rect);
+  TexturedRectangle (const Texture* texture, float x, float y, float w, float h);
+  TexturedRectangle (const Texture* texture, glm::vec4 rect);
   virtual ~TexturedRectangle();
   TexturedRectangle(TexturedRectangle const&) = delete;
   void operator=   (TexturedRectangle const&) = delete;
@@ -27,7 +28,7 @@ private:
 
   std::array<float,16> _verticesAndCoord;
 
-  GLuint _texID;
+  const Texture* _texture;
   GLuint _vao;
   GLuint _vbo;
 };

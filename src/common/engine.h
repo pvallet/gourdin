@@ -60,7 +60,7 @@ public:
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
   inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
-	inline GLuint getColorBuffer() const {return _globalFBO.getTexID();}
+	inline const Texture* getColorBuffer() const {return _globalFBO.getColorBuffer();}
 
 	glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 

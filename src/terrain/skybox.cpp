@@ -89,12 +89,12 @@ void Skybox::load(std::string filename) {
 
 void Skybox::draw() const {
 	glBindVertexArray(_vao);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
+	_texArray.bind();
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
   glDrawElements(GL_TRIANGLES, _indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+  TextureArray::unbind();
 	glBindVertexArray(0);
 }

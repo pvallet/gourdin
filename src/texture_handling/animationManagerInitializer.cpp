@@ -68,7 +68,7 @@ void AnimationManagerInitializer::load(std::string folderPath) {
 
     std::ostringstream convert;
     convert << folderPath << i << ".png";
-    glm::vec2 texSize = _texArray.texSizes[i];
+    glm::vec2 texSize = _texArray.getTexSizes()[i];
     it->second.spriteAbsoluteSize = glm::vec2(texSize.x / it->second.steps,
                                               texSize.y / it->second.orientations);
 

@@ -2,26 +2,28 @@
 
 #include "opengl.h"
 #include <string>
-#include <fstream>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 class Shader {
 public:
 
-  Shader();
-  Shader(Shader const &shader);
-  virtual ~Shader();
+  Shader ();
+  Shader (Shader const&) = delete;
+  Shader (Shader&& other) noexcept;
+  ~Shader();
 
-  Shader& operator=(Shader const &shader);
+  Shader& operator=(Shader const&) = delete;
+  Shader& operator=(Shader&&) = delete;
 
   bool load(std::string vertexSource, std::string fragmentSource);
-  inline GLuint getProgramID() const {return _programID;}
+
+  inline GLint getUniformLocation(const GLchar* name) const {return glGetUniformLocation(_programID, name);}
+
+  inline void bind() const {glUseProgram(_programID);}
+
+  static void unbind() {glUseProgram(0);}
 
 private:
   bool compileShader(GLuint &shader, GLenum type, std::string const &sourceFile);
-  bool load();
 
   GLuint _vertexID;
   GLuint _fragmentID;

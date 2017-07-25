@@ -4,34 +4,22 @@
 #include <SDL_log.h>
 
 Texture::Texture ():
-  _texID(0) {}
+  _texID(0) {
+  glGenTextures(1, &_texID);
+}
 
 Texture::~Texture() {
-  deleteTexture();
+  glDeleteTextures(1, &_texID);
 }
 
 Texture::Texture(Texture&& other) noexcept :
   _size(other._size),
   _texID(other._texID) {
+
   other._texID = 0;
-}
-
-Texture& Texture::operator=(Texture&& other) noexcept {
-  _size = other._size;
-  _texID = other._texID;
-  other._texID = 0;
-
-  return *this;
-}
-
-void Texture::deleteTexture() {
-  if(glIsTexture(_texID) == GL_TRUE)
-    glDeleteTextures(1, &_texID);
 }
 
 void Texture::loadFromFile(std::string filePath) {
-  deleteTexture();
-
   SDL2pp::Surface img(filePath);
 
   // Will be same as internalFormat
@@ -55,15 +43,14 @@ void Texture::loadFromFile(std::string filePath) {
 
   flipPixelsUpsideDown(_size.x, _size.y, img.Get()->format->BytesPerPixel, (unsigned char*) img.Get()->pixels);
 
-  glGenTextures(1, &_texID);
-  glBindTexture(GL_TEXTURE_2D, _texID);
+  bind();
 
   glTexImage2D(GL_TEXTURE_2D, 0, format, _size.x, _size.y, 0, format, GL_UNSIGNED_BYTE, img.Get()->pixels);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  unbind();
 }
 
 void Texture::flipPixelsUpsideDown(size_t width, size_t height, size_t bytesPerPixel,

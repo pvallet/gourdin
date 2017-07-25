@@ -8,7 +8,7 @@ void TerrainTexManager::loadTexture(std::string path) {
 
 	texture.loadFromFile(path);
 
-	glBindTexture(GL_TEXTURE_2D, texture.getTexID());
+	texture.bind();
 
   glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -17,7 +17,7 @@ void TerrainTexManager::loadTexture(std::string path) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Texture::unbind();
 
 	_textures.push_back(std::move(texture));
 }

@@ -36,10 +36,8 @@ public:
 
   void load(std::string folderPath);
 
-  inline void bind() const {
-		glBindTexture(GL_TEXTURE_2D_ARRAY, _texArray.texID);
-	}
-	inline GLuint getTexID() const {return _texArray.texID;}
+  inline void bind() const {_texArray.bind();}
+	inline const TextureArray* getTexArray() const {return &_texArray;}
 
   inline int getMaxHeight() const {return _maxHeight;}
   inline const std::map<ANM_TYPE, AnimInfo>& getAnimInfo() const {return _animInfo;}

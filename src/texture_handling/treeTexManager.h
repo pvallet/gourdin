@@ -21,16 +21,14 @@ public:
 	void load(std::string path);
 
 	inline glm::vec2 getSize(Biome biome, int index) const {
-		return _flora[biome].texArray.texSizes[index] * _heightFactor;
+		return _flora[biome].texArray.getTexSizes()[index] * _heightFactor;
 	}
 	inline glm::vec4 getTexRectangle(Biome biome, int index) const {
 		return _flora[biome].texArray.getTexRectangle(index);
 	}
-	inline void bind(Biome biome) const {
-		glBindTexture(GL_TEXTURE_2D_ARRAY, _flora[biome].texArray.texID);
-	}
+	inline void bind(Biome biome) const {_flora[biome].texArray.bind();}
 
-	inline GLuint getTexID(Biome biome) const {return _flora[biome].texArray.texID;}
+	inline const TextureArray* getTexArray(Biome biome) const {return &_flora[biome].texArray;}
 
 	inline float getDensity(Biome biome) const {return _flora[biome].density;}
 	inline float getNBTrees(Biome biome) const {return _flora[biome].nbTrees;}

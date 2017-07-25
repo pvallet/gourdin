@@ -10,38 +10,23 @@ Shader::Shader() :
 	_fragmentID(0),
 	_programID(0) {}
 
-
-Shader::Shader(Shader const &shader) {
-  _vertexSource = shader._vertexSource;
-  _fragmentSource = shader._fragmentSource;
-
-  load();
-}
-
 Shader::~Shader() {
 	glDeleteShader(_vertexID);
 	glDeleteShader(_fragmentID);
   glDeleteProgram(_programID);
 }
 
+Shader::Shader(Shader&& other) noexcept :
+	_vertexID(other._vertexID),
+	_fragmentID(other._fragmentID),
+	_programID(other._programID) {
 
-Shader& Shader::operator=(Shader const &shader) {
-  _vertexSource = shader._vertexSource;
-  _fragmentSource = shader._fragmentSource;
-
-  load();
-
-  return *this;
+	other._vertexID = 0;
+	other._fragmentID = 0;
+	other._programID = 0;
 }
 
 bool Shader::load(std::string vertexSource, std::string fragmentSource) {
-	_vertexSource = vertexSource;
-	_fragmentSource = fragmentSource;
-
-	return load();
-}
-
-bool Shader::load() {
   if(glIsShader(_vertexID) == GL_TRUE)
   	glDeleteShader(_vertexID);
 
@@ -52,10 +37,10 @@ bool Shader::load() {
     glDeleteProgram(_programID);
 
 
-  if(!compileShader(_vertexID, GL_VERTEX_SHADER, _vertexSource))
+  if(!compileShader(_vertexID, GL_VERTEX_SHADER, vertexSource))
     return false;
 
-  if(!compileShader(_fragmentID, GL_FRAGMENT_SHADER, _fragmentSource))
+  if(!compileShader(_fragmentID, GL_FRAGMENT_SHADER, fragmentSource))
     return false;
 
   _programID = glCreateProgram();

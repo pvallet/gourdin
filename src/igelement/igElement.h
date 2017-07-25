@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "texArray.h"
+
 #include <array>
 #include <string>
 
@@ -16,7 +18,7 @@ public:
 
 	// Getters
 
-	virtual size_t getTexID() const = 0;
+	virtual const TextureArray* getTexArray() const = 0;
 
 	inline glm::vec2 getPos() const {return _pos;}
 	inline float getHeight() const {return _height;}

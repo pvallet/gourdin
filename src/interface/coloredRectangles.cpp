@@ -74,7 +74,7 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 		}
 		else {
 			x0 += _linesOffset; y0 += _linesOffset; x1 -= 2*_linesOffset; y1 -= 2*_linesOffset;
-			
+
 			struct {float x, y;} data[8] = {
 				{ x0, y0 }, { x0, y1 }, { x0, y1 }, { x1, y1 },
 				{ x1, y1 }, { x1, y0 }, { x1, y0 }, { x0, y0 }
@@ -92,15 +92,15 @@ void ColoredRectangles::draw() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glUseProgram(_plainColorShader.getProgramID());
-  glUniform4f(glGetUniformLocation(_plainColorShader.getProgramID(), "color"), _color.x, _color.y, _color.z, _color.w);
+	_plainColorShader.bind();
+  glUniform4fv(_plainColorShader.getUniformLocation("color"), 1, &_color[0]);
 
 	if (_filled)
   	glDrawArrays(GL_TRIANGLES, 0, 6*_nbRect);
 	else
 		glDrawArrays(GL_LINES, 0, 8*_nbRect);
 
-  glUseProgram(0);
+  Shader::unbind();
   glDisable(GL_BLEND);
 	glBindVertexArray(0);
 }

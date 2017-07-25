@@ -7,17 +7,29 @@
 
 #define MIPMAP_LVLS 4
 
+TextureArray::TextureArray(): _texID(0), _count(0) {
+	glGenTextures(1, &_texID);
+}
+
+TextureArray::~TextureArray() {
+	glDeleteTextures(1, &_texID);
+}
+
+TextureArray::TextureArray(TextureArray&& other) noexcept:
+ 	_texID(other._texID),
+	_count(other._texID) {
+	other._texID = 0;
+}
+
 void TextureArray::loadTextures(size_t count, std::string folderPath) {
 	_count = count;
 	_folderPath = folderPath;
 
 	if (count != 0) {
-		glDeleteTextures(1, &texID);
-
 		std::vector<SDL2pp::Surface> img;
-		maxTexSize.x = 0;
-		maxTexSize.y = 0;
-		texSizes.resize(count);
+		_maxTexSize.x = 0;
+		_maxTexSize.y = 0;
+		_texSizes.resize(count);
 
 		for (size_t i = 0; i < count; i++) {
 			std::ostringstream convert;
@@ -30,23 +42,21 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 				return;
 			}
 
-			texSizes[i] = glm::vec2(img[i].GetWidth(), img[i].GetHeight());
+			_texSizes[i] = glm::vec2(img[i].GetWidth(), img[i].GetHeight());
 
-			if (texSizes[i].x > maxTexSize.x)
-				maxTexSize.x = texSizes[i].x;
-			if (texSizes[i].y > maxTexSize.y)
-				maxTexSize.y = texSizes[i].y;
+			if (_texSizes[i].x > _maxTexSize.x)
+				_maxTexSize.x = _texSizes[i].x;
+			if (_texSizes[i].y > _maxTexSize.y)
+				_maxTexSize.y = _texSizes[i].y;
 		}
 
-		glGenTextures(1, &texID);
+		bind();
 
-		glBindTexture(GL_TEXTURE_2D_ARRAY, texID);
-
-		glTexStorage3D(GL_TEXTURE_2D_ARRAY, MIPMAP_LVLS, GL_RGBA8, maxTexSize.x, maxTexSize.y, count);
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, MIPMAP_LVLS, GL_RGBA8, _maxTexSize.x, _maxTexSize.y, count);
 
 		for (size_t i = 0; i < count; i++) {
 			glTexSubImage3D( GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
-											 texSizes[i].x, texSizes[i].y, 1,
+											 _texSizes[i].x, _texSizes[i].y, 1,
 											 GL_RGBA, GL_UNSIGNED_BYTE, img[i].Get()->pixels
 			);
 		}
@@ -58,6 +68,6 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+		unbind();
 	}
 }

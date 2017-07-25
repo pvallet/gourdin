@@ -65,12 +65,12 @@ Ocean::~Ocean() {
 
 void Ocean::draw() const {
 	glBindVertexArray(_vao);
-	glBindTexture(GL_TEXTURE_2D, _tex);
+	_texture->bind();
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Texture::unbind();
 	glBindVertexArray(0);
 }

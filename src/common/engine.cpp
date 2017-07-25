@@ -36,9 +36,9 @@ void Engine::init() {
   _skyboxShader.load("src/shaders/skybox.vert", "src/shaders/skybox.frag");
   _depthInColorBufferShader.load("src/shaders/2D_shaders/2D.vert", "src/shaders/2D_shaders/depthToColor.frag");
 
-  glUseProgram(_igEShader.getProgramID());
-  glUniform1f(glGetUniformLocation(_igEShader.getProgramID(), "elementNearPlane"), ELEMENT_NEAR_PLANE);
-  glUseProgram(0);
+  _igEShader.bind();
+  glUniform1f(_igEShader.getUniformLocation("elementNearPlane"), ELEMENT_NEAR_PLANE);
+  Shader::unbind();
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
@@ -64,7 +64,7 @@ void Engine::init() {
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
   _terrainGeometry.generateNewSubdivisionLevel();
 
-  _ocean.setTexIndex(_terrainTexManager.getTexID(OCEAN));
+  _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
 
   std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
@@ -81,8 +81,7 @@ void Engine::init() {
   Camera& cam = Camera::getInstance();
   _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
-  // _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getTexIDDepth(), -1, -1, 2, 2));
+  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
 
   resetCamera();
 
@@ -337,7 +336,7 @@ void Engine::renderToFBO() const {
   size_t nbTriangles = 0;
   size_t nbElements = 0;
 
-  glBindFramebuffer(GL_FRAMEBUFFER, _globalFBO.getID());
+  _globalFBO.bind();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -346,8 +345,8 @@ void Engine::renderToFBO() const {
 
   // Skybox
 
-  glUseProgram(_skyboxShader.getProgramID());
-	glUniformMatrix4fv(glGetUniformLocation(_skyboxShader.getProgramID(), "MVP"),
+  _skyboxShader.bind();
+	glUniformMatrix4fv(_skyboxShader.getUniformLocation("MVP"),
     1, GL_FALSE, &MVP[0][0]);
 
   glDisable(GL_DEPTH_TEST);
@@ -355,14 +354,14 @@ void Engine::renderToFBO() const {
   nbTriangles += 12;
   glEnable(GL_DEPTH_TEST);
 
-  glUseProgram(0);
+  Shader::unbind();
 
   // Terrain draws
 
   MVP = cam.getViewProjectionMatrix();
 
-  glUseProgram(_terrainShader.getProgramID());
-	glUniformMatrix4fv(glGetUniformLocation(_terrainShader.getProgramID(), "MVP"),
+  _terrainShader.bind();
+	glUniformMatrix4fv(_terrainShader.getUniformLocation("MVP"),
     1, GL_FALSE, &MVP[0][0]);
 
   // Background Ocean
@@ -391,7 +390,7 @@ void Engine::renderToFBO() const {
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 #endif
 
-  glUseProgram(0);
+  Shader::unbind();
 
   // igElements
 
@@ -403,17 +402,17 @@ void Engine::renderToFBO() const {
                                          ((float) M_PI / 180.f * cam.getPhi() - 90.f) / 2.f,
                                          glm::vec3(0, 1, 0));
 
-  glUseProgram(_igEShader.getProgramID());
-  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "VP"),
+  _igEShader.bind();
+  glUniformMatrix4fv(_igEShader.getUniformLocation("VP"),
     1, GL_FALSE, &MVP[0][0]);
-  glUniformMatrix4fv(glGetUniformLocation(_igEShader.getProgramID(), "MODEL"),
+  glUniformMatrix4fv(_igEShader.getUniformLocation("MODEL"),
     1, GL_FALSE, &rotateElements[0][0]);
-  glUniform3fv(glGetUniformLocation(_igEShader.getProgramID(), "camPos"),
+  glUniform3fv(_igEShader.getUniformLocation("camPos"),
     1, &cam.getPos()[0]);
 
   // Two passes to avoid artifacts due to alpha blending
 
-  glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), true);
+  glUniform1i(_igEShader.getUniformLocation("onlyOpaqueParts"), true);
   nbElements += _igElementDisplay.drawElements();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
@@ -423,7 +422,7 @@ void Engine::renderToFBO() const {
     }
   }
 
-  glUniform1i(glGetUniformLocation(_igEShader.getProgramID(), "onlyOpaqueParts"), false);
+  glUniform1i(_igEShader.getUniformLocation("onlyOpaqueParts"), false);
 
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -439,9 +438,8 @@ void Engine::renderToFBO() const {
 
   glDisable(GL_BLEND);
 
-  glUseProgram(0);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  Shader::unbind();
+  FrameBufferObject::unbind();
 
   Log& logText = Log::getInstance();
 
@@ -535,17 +533,17 @@ glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
 
   screenTarget.y = cam.getH() - screenTarget.y; // Inverted coordinates
 
-  glBindFramebuffer(GL_FRAMEBUFFER, _depthInColorBufferFBO.getID());
+  _depthInColorBufferFBO.bind();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glUseProgram(_depthInColorBufferShader.getProgramID());
+  _depthInColorBufferShader.bind();
   _depthTexturedRectangle->draw();
-  glUseProgram(0);
+  Shader::unbind();
 
   GLfloat depth;
   glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_RED, GL_FLOAT, &depth);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  FrameBufferObject::unbind();
 
   glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,depth),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),

@@ -10,11 +10,9 @@ bool Text::_shaderLoaded = false;
 Text::Text() :
   _vao(0),
   _vbo(0),
-  _texID(0),
   _stringLength(0) {
 
-  glGenTextures(1, &_texID);
-  glBindTexture(GL_TEXTURE_2D, _texID);
+  _texture.bind();
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -24,7 +22,7 @@ Text::Text() :
   glTexImage2D( GL_TEXTURE_2D, 0, GL_R8, _fontHandler.getWidth(), _fontHandler.getHeight(),
     0, GL_RED, GL_UNSIGNED_BYTE, _fontHandler.getPixelData());
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Texture::unbind();
 
 	glGenBuffers(1, &_vbo);
 
@@ -127,20 +125,20 @@ void Text::setPosition(size_t X, size_t Y) {
 }
 
 void Text::render() const {
-  glUseProgram(_textShader.getProgramID());
+  _textShader.bind();
+  glBindVertexArray(_vao);
+  _texture.bind();
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glBindVertexArray(_vao);
-  glBindTexture(GL_TEXTURE_2D, _texID);
 
-  glUniform2f(glGetUniformLocation(_textShader.getProgramID(), "offset"), _origin.x, _origin.y);
+  glUniform2fv(_textShader.getUniformLocation("offset"), 1, &_origin[0]);
 
   glDrawArrays(GL_TRIANGLES, 0, 6*_stringLength);
 
   glDisable(GL_BLEND);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Texture::unbind();
   glBindVertexArray(0);
-  glUseProgram(0);
+  Shader::unbind();
 }
 
 void Text::displayAtlas(glm::uvec2 windowCoords) const {
@@ -148,16 +146,16 @@ void Text::displayAtlas(glm::uvec2 windowCoords) const {
   glm::vec4 glCoords = cam.windowRectCoordsToGLRectCoords(glm::vec4(windowCoords,
     _fontHandler.getWidth(), _fontHandler.getHeight()));
 
-  TexturedRectangle atlas(_texID, glCoords.x, glCoords.y, glCoords.z, glCoords.w);
+  TexturedRectangle atlas(&_texture, glCoords.x, glCoords.y, glCoords.z, glCoords.w);
 
-  glUseProgram(_textShader.getProgramID());
+  _textShader.bind();
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   atlas.draw();
 
   glDisable(GL_BLEND);
-  glUseProgram(0);
+  Shader::unbind();
 }
 
 glm::uvec2 Text::getSize() const {

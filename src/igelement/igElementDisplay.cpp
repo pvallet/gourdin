@@ -92,7 +92,7 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
 
   if (currentSpreeLength != 0) { // otherwise first call, there is no spree yet
 
-    _texIDs.push_back(elemsToDisplay[firstIndexSpree]->getTexID());
+    _textures.push_back(elemsToDisplay[firstIndexSpree]->getTexArray());
     _nbElemsInSpree.push_back(currentSpreeLength);
 
     for (size_t i = firstIndexSpree; i < firstIndexSpree + currentSpreeLength; i++) {
@@ -135,7 +135,7 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
 enum CurrentType {NO_TYPE, ANIMAL, TREE};
 
 void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts) {
-  _texIDs.clear();
+  _textures.clear();
   _nbElemsInSpree.clear();
 
   std::vector<igElement*> elemsToDisplay;
@@ -150,7 +150,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   size_t firstIndexSpree = 0;
 
   CurrentType currentType = NO_TYPE;
-  GLuint      currentTexture;
+  const TextureArray* currentTexture;
   Biome       currentBiome;
 
   glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -168,10 +168,10 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
     }
 
     else if (animal) {
-      if (currentType != ANIMAL || currentTexture != animal->getTexID()) {
+      if (currentType != ANIMAL || currentTexture != animal->getTexArray()) {
         processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
         currentType   = ANIMAL;
-        currentTexture = animal->getTexID();
+        currentTexture = animal->getTexArray();
       }
     }
 
@@ -190,11 +190,11 @@ size_t igElementDisplay::drawElements() const {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
   for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _texIDs[i]);
+    _textures[i]->bind();
 
     glDrawElements(GL_TRIANGLES, 6 * _nbElemsInSpree[i], GL_UNSIGNED_INT, BUFFER_OFFSET(cursor * sizeof(GLuint)));
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    TextureArray::unbind();
 
     cursor += 6 * _nbElemsInSpree[i];
   }

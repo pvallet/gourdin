@@ -5,14 +5,14 @@
 Shader TexturedRectangle::_2DShader;
 bool TexturedRectangle::_shaderLoaded = false;
 
-TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, float h):
+TexturedRectangle::TexturedRectangle (const Texture* texture, float x, float y, float w, float h):
 	_verticesAndCoord {
      x,   y,   0, 0,
 		 x+w, y,   1, 0,
      x,   y+h, 0, 1,
      x+w, y+h, 1, 1
 	},
-	_texID(texID) {
+	_texture(texture) {
 
   // vbo
 	glGenBuffers(1, &_vbo);
@@ -36,8 +36,8 @@ TexturedRectangle::TexturedRectangle (GLuint texID, float x, float y, float w, f
 	glBindVertexArray(0);
 }
 
-TexturedRectangle::TexturedRectangle (GLuint texID, glm::vec4 rect):
-	TexturedRectangle(texID, rect.x, rect.y, rect.z, rect.w) {}
+TexturedRectangle::TexturedRectangle (const Texture* texture, glm::vec4 rect):
+	TexturedRectangle(texture, rect.x, rect.y, rect.z, rect.w) {}
 
 TexturedRectangle::~TexturedRectangle() {
 	glDeleteBuffers(1, &_vbo);
@@ -52,15 +52,15 @@ void TexturedRectangle::loadShader() {
 }
 
 void TexturedRectangle::draw() const {
-	glUseProgram(_2DShader.getProgramID());
+	_2DShader.bind();
 	glBindVertexArray(_vao);
-	glBindTexture(GL_TEXTURE_2D, _texID);
+	_texture->bind();
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Texture::unbind();
 	glBindVertexArray(0);
-	glUseProgram(0);
+	Shader::unbind();
 }
 
 glm::vec4 TexturedRectangle::getTextureRect() const {

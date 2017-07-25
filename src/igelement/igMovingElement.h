@@ -19,7 +19,7 @@ public:
 	virtual void die();
 	virtual void stop();
 
-	inline size_t getTexID() const {return _graphics.getTexID();}
+	inline const TextureArray* getTexArray() const {return _graphics.getTexArray();}
 
 	inline virtual float getMaxHeightFactor() const {return _graphics.getMaxHeightFactor();}
 	inline glm::vec2 getDirection() const {return _direction;}

@@ -10,7 +10,7 @@ public:
 
 	inline Biome getBiome() const {return _biome;}
 
-	inline size_t getTexID() const {return _manager.getTexID(_biome);}
+	inline const TextureArray* getTexArray() const {return _manager.getTexArray(_biome);}
 
 protected:
 	const TreeTexManager& _manager;

@@ -14,7 +14,7 @@ public:
 	void update(int msElapsed, float nOrientation);
 
 	inline void bindTexture() const {_texManager.bind();}
-	inline GLuint getTexID() const {return _texManager.getTexID();}
+	inline const TextureArray* getTexArray() const {return _texManager.getTexArray();}
 
 	glm::vec4 getCurrentSpriteRect() const;
 	inline float getMaxHeightFactor() const {
