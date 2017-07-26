@@ -61,7 +61,7 @@ void GameSandbox::render() const {
   _interface.renderEngine();
   _interface.renderLifeBars(_selection);
   _interface.renderRectSelect();
-  _interface.renderMinimap(_engine.getChunkStatus());
+  _interface.renderMinimap(_engine);
   _interface.renderText();
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }

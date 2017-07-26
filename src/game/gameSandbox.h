@@ -24,7 +24,6 @@ public:
   void interruptHunt();
   void startNewHunt();
 
-  inline void moveCamera(glm::vec2 newPos) {_engine.moveCamera(newPos);}
   inline void switchLog() {_displayLog = !_displayLog; clearLog();}
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}

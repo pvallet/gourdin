@@ -15,10 +15,11 @@ EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
 }
 
 void EventHandlerSandbox::handleClick(const SDL_Event& event) {
+  Camera& cam = Camera::getInstance();
   glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
 
   if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-    _game.moveCamera(MAX_COORD * minimapCoord);
+    cam.setPointedPos(MAX_COORD * minimapCoord);
   }
 
   else {

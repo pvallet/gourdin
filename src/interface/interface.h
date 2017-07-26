@@ -20,7 +20,7 @@ public:
   void init();
 
   void renderEngine() const;
-  void renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const;
+  void renderMinimap(const Engine& engine) const;
   void renderText() const;
   void renderRectSelect() const;
   void renderLifeBars(std::set<Lion*> selection) const;

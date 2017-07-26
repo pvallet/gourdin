@@ -225,14 +225,14 @@ void Chunk::computeSubdivisionLevel() {
 
 	float distanceToChunk = glm::length(camera.getPos()-_centerOfChunk);
 
-	if (distanceToChunk > 10000)
+	// if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);
-	else if (distanceToChunk > 4000)
-		setSubdivisionLevel(2);
-	else if (distanceToChunk > 1000)
-		setSubdivisionLevel(3);
-	else
-		setSubdivisionLevel(4);
+	// else if (distanceToChunk > 4000)
+	// 	setSubdivisionLevel(2);
+	// else if (distanceToChunk > 1000)
+	// 	setSubdivisionLevel(3);
+	// else
+	// 	setSubdivisionLevel(4);
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {

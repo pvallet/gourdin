@@ -11,8 +11,8 @@
 
 #include <ctime>
 
-#define CHUNK_BEGIN_X 14
-#define CHUNK_BEGIN_Y 20
+#define CHUNK_BEGIN_X 7
+#define CHUNK_BEGIN_Y 10
 
 Engine::Engine() :
   _wireframe(false),
@@ -68,21 +68,23 @@ void Engine::init() {
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
 
-  std::vector<ChunkStatus> initializer(NB_CHUNKS, NOT_GENERATED);
-  _chunkStatus.resize(NB_CHUNKS, initializer);
-
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    std::vector<std::unique_ptr<Chunk> > initializer2(NB_CHUNKS);
-    _terrain.push_back(std::move(initializer2));
-  }
-
-  _igElementDisplay.init();
-  _contentGenerator.init();
-
   Camera& cam = Camera::getInstance();
   _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
+
+  _igElementDisplay.init();
+  _contentGenerator.init();
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      _terrain.push_back(std::unique_ptr<Chunk>(new Chunk(i, j, _terrainTexManager, _terrainGeometry)));
+      _terrain.back()->generate();
+
+      std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(i,j);
+      _terrain.back()->setTrees(newTrees);
+    }
+  }
 
   resetCamera();
 
@@ -91,63 +93,6 @@ void Engine::init() {
                               CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
   appendNewElements(_contentGenerator.genHerds());
-}
-
-void Engine::generateChunk(size_t x, size_t y) {
-  Chunk* newChunk = new Chunk(x, y, _terrainTexManager, _terrainGeometry);
-  newChunk->generate();
-  _terrain[x][y] = std::unique_ptr<Chunk>(newChunk);
-  _chunkStatus[x][y] = EDGE;
-
-  std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x, y);
-  _terrain[x][y]->setTrees(newTrees);
-}
-
-glm::ivec2 Engine::neighbour(size_t x, size_t y, size_t index) const {
-  switch(index) {
-    case 0:
-      return glm::ivec2(x-1,y);
-      break;
-    case 1:
-      return glm::ivec2(x+1,y);
-      break;
-    case 2:
-      return glm::ivec2(x,y-1);
-      break;
-    case 3:
-      return glm::ivec2(x,y+1);
-      break;
-    default:
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in Engine::neighbour: Index out of bounds");
-      return glm::ivec2(x,y);
-      break;
-  }
-}
-
-void Engine::generateNeighbourChunks(size_t x, size_t y) {
-  if (_chunkStatus[x][y] == EDGE) {
-    glm::ivec2 tmp;
-    for (size_t i = 0; i < 4; i++) {
-      tmp = neighbour(x,y,i);
-
-      // We check if the neighbour chunk is within the map space.
-      if (tmp.x >= 0 && tmp.x < _chunkStatus.size() && tmp.y >= 0 && tmp.y < _chunkStatus.size()) {
-        if (_chunkStatus[tmp.x][tmp.y] == NOT_GENERATED) {
-          // If the chunk to be generated is not handled by the map, we don't do anything
-          if (tmp.x < 0 || tmp.x >= NB_CHUNKS || tmp.y < 0 || tmp.y >= NB_CHUNKS);
-
-
-          else if (_terrainGeometry.isOcean(tmp.x, tmp.y))
-            _chunkStatus[tmp.x][tmp.y] = NOT_GENERATED;
-
-          else
-            generateChunk(tmp.x,tmp.y);
-        }
-      }
-    }
-  }
-
-  _chunkStatus[x][y] = VISIBLE;
 }
 
 void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
@@ -248,10 +193,8 @@ void Engine::update(int msElapsed) {
   glm::uvec2 camPos = ut::convertToChunkCoords(cam.getPointedPos());
 
   // Update camera
-  if (_chunkStatus[camPos.x][camPos.y] == NOT_GENERATED)
-    generateChunk(camPos.x, camPos.y);
 
-  cam.setHeight(_terrain[camPos.x][camPos.y]->getHeight(cam.getPointedPos()));
+  cam.setHeight(_terrain[camPos.x * NB_CHUNKS + camPos.y]->getHeight(cam.getPointedPos()));
   cam.apply();
 
   float theta = cam.getTheta();
@@ -275,30 +218,16 @@ void Engine::update(int msElapsed) {
   // Update terrains
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] != NOT_GENERATED) {
-        _terrain[i][j]->computeCulling(camFrustumPlaneNormals);
+      _terrain[i*NB_CHUNKS + j]->computeCulling(camFrustumPlaneNormals);
 
-        if (_chunkStatus[i][j] == EDGE) {
-          if (_terrain[i][j]->isVisible())
-            generateNeighbourChunks(i,j);
-        }
-
-        else {
-          if (_terrain[i][j]->isVisible())
-            _chunkStatus[i][j] = VISIBLE;
-          else
-            _chunkStatus[i][j] = NOT_VISIBLE;
-        }
-      }
-
-      if (_chunkStatus[i][j] == VISIBLE)
-        _terrain[i][j]->computeSubdivisionLevel();
+      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+        _terrain[i*NB_CHUNKS + j]->computeSubdivisionLevel();
     }
   }
 
   Log& logText = Log::getInstance();
   std::ostringstream subdivLvl;
-  subdivLvl << "Current subdivision level: " << _terrain[camPos.x][camPos.y]->getSubdivisionLevel() << std::endl;
+  subdivLvl << "Current subdivision level: " << _terrain[camPos.x*NB_CHUNKS + camPos.y]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
 
   // Update positions of igMovingElement regardless of them being visible
@@ -324,9 +253,9 @@ void Engine::update(int msElapsed) {
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
 
-    if (_chunkStatus[chunkPos.x][chunkPos.y] == VISIBLE) {
+    if (_terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->isVisible()) {
       // No test yet to see if the element can move to its new pos (no collision)
-      float height = _terrain[chunkPos.x][chunkPos.y]->getHeight((*it)->getPos());
+      float height = _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getHeight((*it)->getPos());
 
       (*it)->setHeight(height);
       (*it)->updateDisplay(msElapsed, cam.getTheta());
@@ -399,8 +328,8 @@ void Engine::renderToFBO() const {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE)
-        nbTriangles += _terrain[i][j]->draw();
+      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+        nbTriangles += _terrain[i*NB_CHUNKS + j]->draw();
     }
   }
 
@@ -436,8 +365,8 @@ void Engine::renderToFBO() const {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE)
-        _terrain[i][j]->drawTrees();
+      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+        _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
 
@@ -450,8 +379,8 @@ void Engine::renderToFBO() const {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_chunkStatus[i][j] == VISIBLE)
-        nbElements += _terrain[i][j]->drawTrees();
+      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+        nbElements += _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
 
@@ -468,13 +397,6 @@ void Engine::renderToFBO() const {
 
   logText.addLine(renderStats.str());
 }
-
-void Engine::moveCamera(glm::vec2 newAimedPos) {
-  generateChunk(newAimedPos.x / CHUNK_SIZE, newAimedPos.y / CHUNK_SIZE);
-  Camera& cam = Camera::getInstance();
-  cam.setPointedPos(newAimedPos);
-}
-
 
 void Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
   glm::vec2 lionPos = get2DCoord(screenTarget);
@@ -575,8 +497,5 @@ glm::vec3 Engine::getNormalOnCameraPointedPos() const {
   Camera& cam = Camera::getInstance();
   glm::uvec2 chunkPos = ut::convertToChunkCoords(cam.getPointedPos());
 
-  if (_chunkStatus[chunkPos.x][chunkPos.y] == NOT_GENERATED)
-    return glm::vec3(0,0,1);
-  else
-    return _terrain[chunkPos.x][chunkPos.y]->getNorm(cam.getPointedPos());
+  return _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getNorm(cam.getPointedPos());
 }

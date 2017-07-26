@@ -37,16 +37,14 @@ void Interface::renderEngine() const {
   _texRectEngine->draw();
 }
 
-void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chunkStatus) const {
+void Interface::renderMinimap(const Engine& engine) const {
   glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
 
   // Background texture
   _minimapRect->draw();
 
-  // Highlight generated chunks
-  std::vector<glm::vec4> blackRects;
-  std::vector<glm::vec4> darkGreyRects;
-  std::vector<glm::vec4> lightGreyRects;
+  // Highlight visible chunks
+  std::vector<glm::vec4> greyRects;
 
   glm::vec2 miniChunkSize = glm::vec2(minimapTextureRect.z / (float) NB_CHUNKS,
                                       minimapTextureRect.w / (float) NB_CHUNKS);
@@ -56,30 +54,17 @@ void Interface::renderMinimap(const std::vector<std::vector<ChunkStatus> >& chun
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     miniChunk.y = minimapTextureRect.y;
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      switch (chunkStatus[i][j]) {
-        case NOT_GENERATED:
-          blackRects.push_back(miniChunk);
-          break;
 
-        case EDGE:
-          darkGreyRects.push_back(miniChunk);
-          break;
+      if (!engine.isChunkVisible(i,j))
+        greyRects.push_back(miniChunk);
 
-        case NOT_VISIBLE:
-          lightGreyRects.push_back(miniChunk);
-          break;
-      }
       miniChunk.y += miniChunkSize.y;
     }
     miniChunk.x += miniChunkSize.x;
   }
 
-  ColoredRectangles black(glm::vec4(0,0,0,1), blackRects);
-  ColoredRectangles darkGrey(glm::vec4(0,0,0,0.8), darkGreyRects);
-  ColoredRectangles lightGrey(glm::vec4(0,0,0,0.4), lightGreyRects);
-  black.draw();
-  darkGrey.draw();
-  lightGrey.draw();
+  ColoredRectangles grey(glm::vec4(0,0,0,0.4), greyRects);
+  grey.draw();
 
   // Position of the viewer
 

@@ -27,8 +27,6 @@
 #include "frameBufferObject.h"
 #include "shader.h"
 
-enum ChunkStatus {NOT_GENERATED, EDGE, NOT_VISIBLE, VISIBLE};
-
 #ifndef NDEBUG
 	class TestHandler;
 #endif
@@ -48,7 +46,6 @@ public:
 	void update(int msElapsed);
 	void renderToFBO() const;
 	void moveSelection(glm::ivec2 screenTarget);
-	void moveCamera(glm::vec2 newAimedPos);
 	void addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
 	std::vector<Controllable*> genTribe(glm::vec2 pos);
 	void deleteElements(const std::vector<igMovingElement*>& elementsToDelete);
@@ -59,16 +56,13 @@ public:
 
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
-  inline const std::vector<std::vector<ChunkStatus> >& getChunkStatus() const {return _chunkStatus;}
 	inline const Texture* getColorBuffer() const {return _globalFBO.getColorBuffer();}
+
+	inline bool isChunkVisible(size_t x, size_t y) const {return _terrain[x*NB_CHUNKS + y]->isVisible();}
 
 	glm::vec2 get2DCoord(glm::ivec2 screenTarget);
 
 private:
-  // When the coordinates are (size_t x, size_t y), they are coordinates of the chunk
-	glm::ivec2 neighbour      (size_t x, size_t y, size_t index) const;
-  void generateNeighbourChunks(size_t x, size_t y);
-	void generateChunk          (size_t x, size_t y);
   void appendNewElements(std::vector<igMovingElement*> elems);
 	// The parameter contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
   static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
@@ -99,9 +93,7 @@ private:
   Shader _igEShader;
 	Shader _skyboxShader;
 
-	std::vector<std::vector<std::unique_ptr<Chunk> > > _terrain;
-
-  std::vector<std::vector<ChunkStatus> > _chunkStatus;
+	std::vector<std::unique_ptr<Chunk> > _terrain;
 
 	Shader _depthInColorBufferShader;
 	FrameBufferObject _globalFBO;
