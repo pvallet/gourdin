@@ -216,8 +216,11 @@ void Chunk::setTreesHeights() {
 void Chunk::setTrees(std::vector<igElement*> trees) {
 	_trees = trees;
 	setTreesHeights();
-	_treeDrawer.init(STATIC_DRAW, trees.size());
-	_treeDrawer.loadElements(trees);
+}
+
+void Chunk::loadTrees() {
+	_treeDrawer.init(STATIC_DRAW, _trees.size());
+	_treeDrawer.loadElements(_trees);
 }
 
 void Chunk::computeDistanceOptimizations() {

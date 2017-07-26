@@ -49,6 +49,7 @@ public:
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 
 	void setTrees(std::vector<igElement*> trees);
+	void loadTrees();
 	inline size_t drawTrees() const {_treeDrawer.drawElements(); return _trees.size();}
 
 private:

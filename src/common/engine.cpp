@@ -19,7 +19,8 @@ Engine::Engine() :
   _contentGenerator(_terrainGeometry),
   _ocean(2),
   _mapInfoExtractor(_terrainGeometry),
-  _reliefGenerator(_mapInfoExtractor) {}
+  _reliefGenerator(_mapInfoExtractor),
+  _terrain(NB_CHUNKS*NB_CHUNKS) {}
 
 void Engine::resetCamera() {
   Camera& cam = Camera::getInstance();
@@ -33,6 +34,8 @@ void Engine::init() {
   Clock initTimer;
   srand(time(NULL));
 
+  int previousTime = initTimer.getElapsedTime();
+
   _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
   _igEShader.load("src/shaders/igElement.vert", "src/shaders/igElement.frag");
   _skyboxShader.load("src/shaders/skybox.vert", "src/shaders/skybox.frag");
@@ -42,9 +45,15 @@ void Engine::init() {
   glUniform1f(_igEShader.getUniformLocation("elementNearPlane"), ELEMENT_NEAR_PLANE);
   Shader::unbind();
 
+  SDL_Log("Loading shaders: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
+
+  SDL_Log("Loading terrain data: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
 
   GeneratedImage relief;
 
@@ -66,6 +75,9 @@ void Engine::init() {
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
   _terrainGeometry.generateNewSubdivisionLevel();
 
+  SDL_Log("Generate geometry: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
 
@@ -74,26 +86,51 @@ void Engine::init() {
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
 
+  resetCamera();
+
+  SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
   _igElementDisplay.init();
   _contentGenerator.init();
 
+  SDL_Log("Init igElementDisplay and ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
+  std::vector<Chunk*> newChunks;
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      _terrain.push_back(std::unique_ptr<Chunk>(new Chunk(i, j, _terrainTexManager, _terrainGeometry)));
-      _terrain.back()->generate();
-
-      std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(i,j);
-      _terrain.back()->setTrees(newTrees);
+      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry));
     }
   }
 
-  resetCamera();
+  #pragma omp parallel for
+  for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
+    size_t x = i / NB_CHUNKS;
+    size_t y = i - x * NB_CHUNKS;
+    std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
+    newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
+  }
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      newChunks[i*NB_CHUNKS + j]->generate();
+      newChunks[i*NB_CHUNKS + j]->loadTrees();
+      _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
+    }
+  }
+
+  SDL_Log("Generating chunks: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
 
   appendNewElements(_contentGenerator.genHerd(
                     glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
                               CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
   appendNewElements(_contentGenerator.genHerds());
+
+  SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
 
   SDL_Log("Initialization time: %d ms", initTimer.getElapsedTime());
 }
