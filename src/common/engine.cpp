@@ -30,6 +30,7 @@ void Engine::resetCamera() {
 }
 
 void Engine::init() {
+  Clock initTimer;
   srand(time(NULL));
 
   _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
@@ -93,6 +94,8 @@ void Engine::init() {
                               CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
 
   appendNewElements(_contentGenerator.genHerds());
+
+  SDL_Log("Initialization time: %d ms", initTimer.getElapsedTime());
 }
 
 void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
@@ -188,11 +191,9 @@ void Engine::compute2DCorners() {
   }
 }
 
-void Engine::update(int msElapsed) {
+void Engine::updateCameraAndCulling() {
   Camera& cam = Camera::getInstance();
   glm::uvec2 camPos = ut::convertToChunkCoords(cam.getPointedPos());
-
-  // Update camera
 
   cam.setHeight(_terrain[camPos.x * NB_CHUNKS + camPos.y]->getHeight(cam.getPointedPos()));
   cam.apply();
@@ -216,12 +217,13 @@ void Engine::update(int msElapsed) {
     (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi)));
 
   // Update terrains
+  #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       _terrain[i*NB_CHUNKS + j]->computeCulling(camFrustumPlaneNormals);
 
       if (_terrain[i*NB_CHUNKS + j]->isVisible())
-        _terrain[i*NB_CHUNKS + j]->computeSubdivisionLevel();
+        _terrain[i*NB_CHUNKS + j]->computeDistanceOptimizations();
     }
   }
 
@@ -229,6 +231,10 @@ void Engine::update(int msElapsed) {
   std::ostringstream subdivLvl;
   subdivLvl << "Current subdivision level: " << _terrain[camPos.x*NB_CHUNKS + camPos.y]->getSubdivisionLevel() << std::endl;
   logText.addLine(subdivLvl.str());
+}
+
+void Engine::update(int msElapsed) {
+  updateCameraAndCulling();
 
   // Update positions of igMovingElement regardless of them being visible
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
@@ -250,10 +256,13 @@ void Engine::update(int msElapsed) {
   updateMovingElementsStates(sortedElements);
 
   // Update graphics of visible elements
+  Camera& cam = Camera::getInstance();
+
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
 
-    if (_terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->isVisible()) {
+    if (_terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->isVisible() &&
+        _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getDisplayElements()) {
       // No test yet to see if the element can move to its new pos (no collision)
       float height = _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getHeight((*it)->getPos());
 
@@ -365,7 +374,8 @@ void Engine::renderToFBO() const {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+      if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
+          _terrain[i*NB_CHUNKS + j]->getDisplayElements())
         _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
@@ -379,7 +389,8 @@ void Engine::renderToFBO() const {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_terrain[i*NB_CHUNKS + j]->isVisible())
+      if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
+          _terrain[i*NB_CHUNKS + j]->getDisplayElements())
         nbElements += _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }

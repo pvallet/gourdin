@@ -66,6 +66,7 @@ private:
   void appendNewElements(std::vector<igMovingElement*> elems);
 	// The parameter contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
   static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
+	void updateCameraAndCulling();
 	void compute2DCorners();
 
 	bool _wireframe;

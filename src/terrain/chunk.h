@@ -39,12 +39,13 @@ public:
 
 	// Set visible to false if there is no need to display the chunk
 	void computeCulling(const std::vector<glm::vec3>& planeNormals);
-	void computeSubdivisionLevel();
+	void computeDistanceOptimizations();
 	void setSubdivisionLevel(size_t newSubdLvl);
 
 	float getHeight(glm::vec2 pos) const;
 	glm::vec3 getNorm(glm::vec2 pos) const;
 	inline bool isVisible() const {return _visible;}
+	inline bool getDisplayElements() const {return _displayElements;}
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 
 	void setTrees(std::vector<igElement*> trees);
@@ -63,6 +64,7 @@ private:
 	glm::vec3 _centerOfChunk;
 
 	bool _visible;
+	bool _displayElements;
 	size_t _currentSubdivLvl;
 	std::vector<std::unique_ptr<Buffers> > _subdivisionLevels;
 

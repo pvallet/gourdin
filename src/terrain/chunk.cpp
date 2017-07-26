@@ -220,10 +220,15 @@ void Chunk::setTrees(std::vector<igElement*> trees) {
 	_treeDrawer.loadElements(trees);
 }
 
-void Chunk::computeSubdivisionLevel() {
+void Chunk::computeDistanceOptimizations() {
 	Camera& camera = Camera::getInstance();
 
 	float distanceToChunk = glm::length(camera.getPos()-_centerOfChunk);
+
+	if (distanceToChunk > 20000)
+		_displayElements = false;
+	else
+		_displayElements = true;
 
 	// if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);
