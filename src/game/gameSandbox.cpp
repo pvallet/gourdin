@@ -21,7 +21,24 @@ void GameSandbox::init() {
   _interface.setTextTopCenter("Best score: 0");
 }
 
+void GameSandbox::updateCamera() const {
+  Camera& cam = Camera::getInstance();
+
+  cam.setAdditionalHeight(0);
+  cam.setHeight(_engine.getHeight(cam.getPointedPos()));
+  cam.apply();
+
+  // Check if the camera is in the ground and adjust accordingly
+
+  float heightOnCameraRealPos = _engine.getHeight(cam.getProjectedPos());
+  if (heightOnCameraRealPos > cam.getPos().z - 20) {
+    cam.setAdditionalHeight(heightOnCameraRealPos - cam.getPos().z + 20);
+    cam.apply();
+  }
+}
+
 void GameSandbox::update(int msElapsed) {
+  updateCamera();
   Game::update(msElapsed);
 
   Log& logText = Log::getInstance();
@@ -242,7 +259,7 @@ void GameSandbox::benchmark() {
   SDL_Log("Rendered 100 frames in %d milliseconds.",  msTotalElapsed);
   SDL_Log("Average FPS: %f", 1.f / msTotalElapsed * 100 * 1000);
 
-  _engine.resetCamera();
+  cam.reset();
 }
 
 void GameSandbox::interruptHunt() {

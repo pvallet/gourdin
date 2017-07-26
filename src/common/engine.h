@@ -40,7 +40,6 @@ class Engine {
 public:
 	Engine();
 
-	void resetCamera();
   void init();
 
 	void update(int msElapsed);
@@ -52,8 +51,6 @@ public:
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
 
-	glm::vec3 getNormalOnCameraPointedPos() const;
-
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}
 	inline const Texture* getColorBuffer() const {return _globalFBO.getColorBuffer();}
@@ -61,12 +58,14 @@ public:
 	inline bool isChunkVisible(size_t x, size_t y) const {return _terrain[x*NB_CHUNKS + y]->isVisible();}
 
 	glm::vec2 get2DCoord(glm::ivec2 screenTarget);
+	glm::vec3 getNormalOnCameraPointedPos() const;
+	float getHeight(glm::vec2 pos) const;
 
 private:
   void appendNewElements(std::vector<igMovingElement*> elems);
 	// The parameter contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
   static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
-	void updateCameraAndCulling();
+	void updateCulling();
 	void compute2DCorners();
 
 	bool _wireframe;

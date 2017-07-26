@@ -27,6 +27,8 @@ Controller::Controller(SDL2pp::Window& window) :
 #else
   cam.resize(window.GetWidth(),window.GetHeight());
 #endif
+
+  cam.reset();
 }
 
 void Controller::init() {

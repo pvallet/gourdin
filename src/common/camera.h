@@ -28,7 +28,7 @@ class EventHandler;
 class EventHandlerGame;
 class EventHandlerSandbox;
 class AndroidEventHandlerSandbox;
-class Engine;
+class Game;
 class GameSandbox;
 
 class Camera {
@@ -41,6 +41,8 @@ public:
 	Camera(Camera const&)          = delete;
 	void operator=(Camera const&)  = delete;
 
+	void reset();
+
 	glm::vec2 windowCoordsToGLCoords(glm::uvec2 windowCoords) const;
 	glm::uvec2 glCoordsToWindowCoords(glm::vec2 glCoords) const;
 	glm::vec4 windowRectCoordsToGLRectCoords(glm::uvec4 windowRect) const;
@@ -50,6 +52,7 @@ public:
 	inline unsigned int getWindowW() const {return _windowW;}
 	inline unsigned int getWindowH() const {return _windowH;}
   inline glm::vec3 getPos() const {return _pos;}
+	inline glm::vec2 getProjectedPos() const {return glm::vec2(_pos.x, _pos.y);}
   inline float getTheta() const {return _theta;}
   inline float getPhi() const {return _phi;}
   inline float getFov() const {return _fovAngle;}
@@ -65,7 +68,7 @@ public:
 	friend EventHandlerGame;
 	friend EventHandlerSandbox;
 	friend AndroidEventHandlerSandbox;
-	friend Engine;
+	friend Game;
 	friend GameSandbox;
 
 private:
@@ -84,7 +87,7 @@ private:
 	inline void setValues (float r, float theta, float phi) {_r = r; _theta = theta; _phi = phi;}
 
   inline void setPointedPos(glm::vec2 newPos) {_x = newPos.x; _y = newPos.y;}
-  inline void setHeight(float nHeight) {_height = nHeight + _additionalHeight;}
+  inline void setHeight(float nHeight) {_height = nHeight;}
 	inline void setAdditionalHeight(float nAddHeight) {_additionalHeight = nAddHeight;}
 
 	unsigned int _W, _H;

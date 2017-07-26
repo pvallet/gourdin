@@ -2,6 +2,9 @@
 
 #include "utils.h"
 
+#define CHUNK_BEGIN_X 7
+#define CHUNK_BEGIN_Y 10
+
 Camera::Camera() :
   _fovAngle(45),
 	_aspectRatio(1.f),
@@ -14,6 +17,13 @@ Camera::Camera() :
   _theta(INIT_THETA),
   _projection(1.f),
   _view(1.f) {}
+
+void Camera::reset() {
+  setPointedPos(glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
+                          CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
+
+  setValues(INIT_R, INIT_THETA, INIT_PHI);
+}
 
 void Camera::resize(unsigned int W, unsigned int H) {
 	_W = W;
@@ -29,11 +39,11 @@ void Camera::resize(unsigned int W, unsigned int H) {
 }
 
 void Camera::apply() {
-  _pos = glm::vec3(_x,_y,_height) + ut::carthesian(_r, _theta, _phi);
+  _pos = glm::vec3(_x,_y,_height + _additionalHeight) + ut::carthesian(_r, _theta, _phi);
 
   _view = glm::lookAt (
 	  _pos,
-    glm::vec3(_x, _y, _height),
+    glm::vec3(_x, _y, _height + _additionalHeight),
     ut::carthesian(1.f, _theta, _phi + _fovAngle/2.f - 90.f)
   );
 

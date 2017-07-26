@@ -17,6 +17,7 @@ public:
   inline const Engine& getEngine() const {return _engine;}
 
 protected:
+  virtual void updateCamera() const;
   virtual std::string getInfoText() const;
 
   Engine& _engine;

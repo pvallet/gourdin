@@ -11,9 +11,6 @@
 
 #include <ctime>
 
-#define CHUNK_BEGIN_X 7
-#define CHUNK_BEGIN_Y 10
-
 Engine::Engine() :
   _wireframe(false),
   _contentGenerator(_terrainGeometry),
@@ -21,14 +18,6 @@ Engine::Engine() :
   _mapInfoExtractor(_terrainGeometry),
   _reliefGenerator(_mapInfoExtractor),
   _terrain(NB_CHUNKS*NB_CHUNKS) {}
-
-void Engine::resetCamera() {
-  Camera& cam = Camera::getInstance();
-  cam.setPointedPos(glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                              CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2));
-
-  cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
-}
 
 void Engine::init() {
   Clock initTimer;
@@ -86,8 +75,6 @@ void Engine::init() {
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
 
-  resetCamera();
-
   SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
@@ -123,10 +110,7 @@ void Engine::init() {
   SDL_Log("Generating chunks: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
-  appendNewElements(_contentGenerator.genHerd(
-                    glm::vec2(CHUNK_BEGIN_X * CHUNK_SIZE + CHUNK_SIZE / 2,
-                              CHUNK_BEGIN_Y * CHUNK_SIZE + CHUNK_SIZE / 2), 20, DEER));
-
+  appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds());
 
   SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
@@ -228,12 +212,10 @@ void Engine::compute2DCorners() {
   }
 }
 
-void Engine::updateCameraAndCulling() {
+void Engine::updateCulling() {
   Camera& cam = Camera::getInstance();
-  glm::uvec2 camPos = ut::convertToChunkCoords(cam.getPointedPos());
 
-  cam.setHeight(_terrain[camPos.x * NB_CHUNKS + camPos.y]->getHeight(cam.getPointedPos()));
-  cam.apply();
+  // Compute frustum planes
 
   float theta = cam.getTheta();
   float phi   = cam.getPhi();
@@ -263,15 +245,10 @@ void Engine::updateCameraAndCulling() {
         _terrain[i*NB_CHUNKS + j]->computeDistanceOptimizations();
     }
   }
-
-  Log& logText = Log::getInstance();
-  std::ostringstream subdivLvl;
-  subdivLvl << "Current subdivision level: " << _terrain[camPos.x*NB_CHUNKS + camPos.y]->getSubdivisionLevel() << std::endl;
-  logText.addLine(subdivLvl.str());
 }
 
 void Engine::update(int msElapsed) {
-  updateCameraAndCulling();
+  updateCulling();
 
   // Update positions of igMovingElement regardless of them being visible
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
@@ -546,4 +523,13 @@ glm::vec3 Engine::getNormalOnCameraPointedPos() const {
   glm::uvec2 chunkPos = ut::convertToChunkCoords(cam.getPointedPos());
 
   return _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getNorm(cam.getPointedPos());
+}
+
+float Engine::getHeight(glm::vec2 pos) const {
+  if (pos.x < 0 || pos.y < 0 || pos.x > MAX_COORD || pos.y > MAX_COORD)
+    return 0.f;
+
+  glm::uvec2 chunkPos = ut::convertToChunkCoords(pos);
+
+  return _terrain[chunkPos.x * NB_CHUNKS + chunkPos.y]->getHeight(pos);
 }

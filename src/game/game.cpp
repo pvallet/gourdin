@@ -13,9 +13,16 @@ void Game::init() {
   _interface.setTextTopLeft(getInfoText());
 }
 
+void Game::updateCamera() const {
+  Camera& cam = Camera::getInstance();
+  cam.setHeight(_engine.getHeight(cam.getPointedPos()));
+  cam.apply();
+}
+
 void Game::update(int msElapsed) {
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
+  updateCamera();
   _engine.update(msElapsed);
 }
 

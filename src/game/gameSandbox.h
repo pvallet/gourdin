@@ -33,6 +33,7 @@ public:
   inline void displayError(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
 private:
+  void updateCamera() const;
   std::string getHuntText() const;
   std::string getInfoText() const;
 
