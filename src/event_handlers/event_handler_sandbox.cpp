@@ -183,7 +183,5 @@ bool EventHandlerSandbox::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
 
-  _game.clearLog();
-
   return true;
 }

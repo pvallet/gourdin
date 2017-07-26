@@ -89,7 +89,7 @@ void Text::setText(const std::string &str, float fontSize) {
         { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 }
       };
 
-      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize , glyphGLDataSize, data);
+      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize, glyphGLDataSize, data);
 
       x += (glyph->advance_x * sx);
     }

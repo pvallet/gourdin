@@ -39,10 +39,9 @@ void GameSandbox::updateCamera() const {
 
 void GameSandbox::update(int msElapsed) {
   updateCamera();
-  Game::update(msElapsed);
 
   Log& logText = Log::getInstance();
-  logText.addFPSandCamInfo(msElapsed);
+  logText.addFPSandCamInfo();
 
   // Remove the dead elements from the selected elements
   std::vector<Lion*> toDelete;
@@ -65,7 +64,7 @@ void GameSandbox::update(int msElapsed) {
   else
     _interface.setTextTopRight("");
 
-  logText.clear();
+  Game::update(msElapsed);
 }
 
 void GameSandbox::render() const {
@@ -232,11 +231,6 @@ void GameSandbox::killLion() {
     (*_selection.begin())->die();
     _nbLions--;
   }
-}
-
-void GameSandbox::clearLog() const {
-  Log& logText = Log::getInstance();
-  logText.clear();
 }
 
 void GameSandbox::benchmark() {

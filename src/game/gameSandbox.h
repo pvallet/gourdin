@@ -19,12 +19,11 @@ public:
   void makeLionsRun();
   void switchLionsRun();
   void killLion();
-  void clearLog() const;
   void benchmark();
   void interruptHunt();
   void startNewHunt();
 
-  inline void switchLog() {_displayLog = !_displayLog; clearLog();}
+  inline void switchLog() {_displayLog = !_displayLog;}
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}

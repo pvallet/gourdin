@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include "clock.h"
+
 /** Singleton class in which any function can store info to be displayed on the
   * screen
 	*/
@@ -15,12 +17,17 @@ public:
 
 	inline void clear() {_text.str("");}
 	inline void addLine(std::string newLine) { _text << newLine;}
-	void addFPSandCamInfo(int msElapsed);
+	void addFPSandCamInfo();
 	inline std::string getText() const {return _text.str();}
 
 
 private:
 	Log() {}
+
+	Clock _lastFPSupdate;
+
+	size_t _framesSinceLastUpdate;
+	std::ostringstream _lastFPS;
 
 	std::ostringstream _text;
 };

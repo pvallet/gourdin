@@ -1,5 +1,6 @@
 #include "game.h"
 #include "camera.h"
+#include "log.h"
 
 #include <sstream>
 
@@ -20,6 +21,9 @@ void Game::updateCamera() const {
 }
 
 void Game::update(int msElapsed) {
+  Log& logText = Log::getInstance();
+  logText.clear();
+
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
   updateCamera();
