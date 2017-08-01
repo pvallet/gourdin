@@ -95,8 +95,8 @@ std::string GameSandbox::getHuntText() const {
 std::string GameSandbox::getInfoText() const {
   std::ostringstream text;
 
-  text << "Left-Right / Q-D: " << "Rotate camera" << std::endl
-       << "Up-Down    / Z-S: " << "Go forwards/backwards" << std::endl
+  text << "Left-Right / A-D: " << "Rotate camera" << std::endl
+       << "Up-Down    / W-S: " << "Go forwards/backwards" << std::endl
        << "A/Return: " << "Select all lions" << std::endl
        << "B: " << "Launch benchmark" << std::endl
        << "E: " << "Change scroll speed" << std::endl;
@@ -105,7 +105,7 @@ std::string GameSandbox::getInfoText() const {
   else
     text << "H: " << "Interrupt current hunt" << std::endl;
   text << "L: " << "Hide/Display log" << std::endl
-       << "W: " << "Switch to wireframe display" << std::endl
+       << "Z: " << "Switch to wireframe display" << std::endl
        << std::endl
        << "Click on the minimap to jump there" << std::endl
        << "Right-click to make a lion appear" << std::endl
