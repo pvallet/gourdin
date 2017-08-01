@@ -26,8 +26,8 @@ void FrameBufferObject::init(size_t width, size_t height,
   glTexImage2D(GL_TEXTURE_2D, 0, colorBufferInternalFormat, width, height, 0, colorBufferFormat, colorBufferType, 0);
 
   _depthBuffer.bind();
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height,
-            0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height,
+            0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
