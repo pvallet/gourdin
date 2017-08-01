@@ -3,6 +3,8 @@
 #include "camera.h"
 #include "texturedRectangle.h"
 
+#include <vector>
+
 FontHandler Text::_fontHandler;
 Shader Text::_textShader;
 bool Text::_shaderLoaded = false;
@@ -62,6 +64,8 @@ void Text::setText(const std::string &str, float fontSize) {
     if (str[i] == '\n') {
       y -= _fontHandler.getFontSize() * sy;
       x = -1;
+      std::vector<float> clearChar(glyphGLDataSize,0);
+      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize, glyphGLDataSize, &clearChar[0]);
     }
 
     else {
