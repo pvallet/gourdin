@@ -3,6 +3,8 @@
 #include <SDL.h>
 #include <glm/glm.hpp>
 
+#include "game.h"
+
 #include <map>
 
 #define DOUBLECLICK_MS 200
@@ -11,7 +13,7 @@ enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
 class EventHandler {
 public:
-  EventHandler();
+  EventHandler(Game& game);
 
   // Returns whether the engine will stop or not
   virtual bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
@@ -29,4 +31,7 @@ public:
 
 protected:
   glm::ivec2 _beginDragLeft;
+
+private:
+  Game& _game;
 };

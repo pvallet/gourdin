@@ -23,7 +23,6 @@ public:
   void interruptHunt();
   void startNewHunt();
 
-  inline void switchLog() {_displayLog = !_displayLog;}
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
@@ -36,7 +35,6 @@ private:
   std::string getHuntText() const;
   std::string getInfoText() const;
 
-  bool _displayLog;
   bool _scrollSpeedSlow;
 
   bool _huntHasStarted;

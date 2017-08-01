@@ -5,6 +5,7 @@
 #include <sstream>
 
 Game::Game (Engine& engine):
+  _displayLog(true),
   _engine(engine),
   _interface() {}
 
@@ -23,6 +24,12 @@ void Game::updateCamera() const {
 void Game::update(int msElapsed) {
   Log& logText = Log::getInstance();
   logText.clear();
+  logText.addFPSandCamInfo();
+
+  if (_displayLog)
+    _interface.setTextTopRight(logText.getText());
+  else
+    _interface.setTextTopRight("");
 
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
@@ -35,7 +42,8 @@ std::string Game::getInfoText() const {
 
   text << "Esc: " << "Quit engine" << std::endl
        << "M: " << "Switch to Game mode" << std::endl
-       << "P: " << "Pause" << std::endl;
+       << "P: " << "Pause" << std::endl
+       << "L: " << "Hide/Display log" << std::endl;
 
   return text.str();
 }

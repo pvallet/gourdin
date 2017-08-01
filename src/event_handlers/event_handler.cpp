@@ -3,8 +3,9 @@
 #include "clock.h"
 #include "utils.h"
 
-EventHandler::EventHandler():
-  _beginDragLeft(-1,-1) {}
+EventHandler::EventHandler(Game& game):
+  _beginDragLeft(-1,-1),
+  _game(game) {}
 
 bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   bool running = true;
@@ -25,6 +26,10 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
       switch(event.key.keysym.sym) {
         case SDLK_ESCAPE:
           running = false;
+          break;
+
+        case SDLK_l:
+          _game.switchLog();
           break;
 
         case SDLK_m:

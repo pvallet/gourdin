@@ -8,7 +8,6 @@
 
 GameSandbox::GameSandbox(Engine& engine):
   Game::Game(engine),
-  _displayLog(true),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
@@ -40,9 +39,6 @@ void GameSandbox::updateCamera() const {
 void GameSandbox::update(int msElapsed) {
   updateCamera();
 
-  Log& logText = Log::getInstance();
-  logText.addFPSandCamInfo();
-
   // Remove the dead elements from the selected elements
   std::vector<Lion*> toDelete;
   for (auto it = _selection.begin(); it != _selection.end(); it++) {
@@ -57,14 +53,11 @@ void GameSandbox::update(int msElapsed) {
   if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
     interruptHunt();
 
+  Game::update(msElapsed);
+
   if (_huntHasStarted)
     _interface.setTextTopRight(getHuntText());
-  else if (_displayLog)
-    _interface.setTextTopRight(logText.getText());
-  else
-    _interface.setTextTopRight("");
 
-  Game::update(msElapsed);
 }
 
 void GameSandbox::render() const {
@@ -104,8 +97,7 @@ std::string GameSandbox::getInfoText() const {
     text << "H: " << "Start new hunt!" << std::endl;
   else
     text << "H: " << "Interrupt current hunt" << std::endl;
-  text << "L: " << "Hide/Display log" << std::endl
-       << "Z: " << "Switch to wireframe display" << std::endl
+  text << "Z: " << "Switch to wireframe display" << std::endl
        << std::endl
        << "Click on the minimap to jump there" << std::endl
        << "Right-click to make a lion appear" << std::endl

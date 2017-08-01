@@ -31,9 +31,8 @@ std::string GameGame::getInfoText() const {
     text << "Arrows: " << "Move camera around" << std::endl;
   else
     text << "A-E:  " << "Rotate camera" << std::endl;
-  text << "ZQSD: " << "Move focused character" << std::endl
-      << "LShift+ZQSD: " << "Change focused character to closest in given direction" << std::endl
-      << "(The engine is optimised for AZERTY keyboards)" << std::endl
+  text << "WASD: " << "Move focused character" << std::endl
+      << "LShift+WASD: " << "Change focused character to closest in given direction" << std::endl
       << std::endl
       << "Click to move the character in the center" << std::endl
       << "Click on another character to change the focus" << std::endl

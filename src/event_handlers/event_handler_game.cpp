@@ -11,7 +11,7 @@
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
 EventHandlerGame::EventHandlerGame(GameGame& game) :
-  EventHandler::EventHandler(),
+  EventHandler::EventHandler(game),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _draggingCamera(false),

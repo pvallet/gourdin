@@ -6,7 +6,7 @@
 #define ZOOM_FACTOR 10.f // Be careful the zoom function is not linear
 
 AndroidEventHandlerSandbox::AndroidEventHandlerSandbox(GameSandbox& game) :
-  EventHandler::EventHandler(),
+  EventHandler::EventHandler(game),
   _nbFingers(0) {
 
   SDL_SetEventFilter(AndroidEventHandlerSandbox::HandleAppEvents, NULL);
@@ -47,7 +47,7 @@ bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandle
 
 int AndroidEventHandlerSandbox::HandleAppEvents(void *userdata, SDL_Event *event) {
   (void) userdata;
-  
+
   switch (event->type) {
     case SDL_APP_DIDENTERFOREGROUND:
       Clock::resumeGlobalTimer();

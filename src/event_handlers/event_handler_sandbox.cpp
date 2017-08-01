@@ -7,7 +7,7 @@
 #define SCROLL_SPEED_FAST 250.f
 
 EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
-  EventHandler::EventHandler(),
+  EventHandler::EventHandler(game),
   _addSelect(false),
   _scrollSpeed(SCROLL_SPEED_SLOW),
   _game(game) {
@@ -80,10 +80,6 @@ void EventHandlerSandbox::handleKeyPressed(const SDL_Event& event) {
         _game.interruptHunt();
       else
         _game.startNewHunt();
-      break;
-
-    case SDL_SCANCODE_L:
-      _game.switchLog();
       break;
 
     case SDL_SCANCODE_E:
