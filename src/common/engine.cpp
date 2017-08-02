@@ -131,23 +131,42 @@ void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
   }
 }
 
-void Engine::updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements) {
-  for (int i = 0; i < NB_CHUNKS; i++) {
-    for (int j = 0; j < NB_CHUNKS; j++) {
-      if (!sortedElements[i*NB_CHUNKS + j].empty()) {
-        std::list<igMovingElement*> elmtsInSurroundingChunks;
+void Engine::updateMovingElementsStates() {
+  struct squareHashFunc{
+    size_t operator()(const glm::ivec2 &k) const {
+    size_t h1 = std::hash<int>()(k.x);
+    size_t h2 = std::hash<int>()(k.y);
+    return (h1 << 1) + h1 + h2;
+    }
+  };
 
-        for (int k = std::max(0, i-1); k < std::min(NB_CHUNKS-1, i+1); k++) {
-        for (int l = std::max(0, j-1); l < std::min(NB_CHUNKS-1, j+1); l++) {
-          elmtsInSurroundingChunks.insert(elmtsInSurroundingChunks.end(),
-            sortedElements[k*NB_CHUNKS + l].begin(), sortedElements[k*NB_CHUNKS + l].end());
-        }
-        }
+  float squareSize = Antilope::getStandardLineOfSight();
+  int nbSquares = MAX_COORD / squareSize;
 
-        for (auto it = sortedElements[i*NB_CHUNKS + j].begin(); it != sortedElements[i*NB_CHUNKS + j].end(); it++) {
-          (*it)->updateState(elmtsInSurroundingChunks);
-        }
-      }
+  std::unordered_map<glm::ivec2, std::list<igMovingElement*>, squareHashFunc> sortedElements;
+
+  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
+    glm::ivec2 square = glm::ivec2((*it)->getPos().x / squareSize, (*it)->getPos().y / squareSize);
+
+    sortedElements[square].push_back(it->get());
+  }
+
+  for (auto square = sortedElements.begin(); square != sortedElements.end(); square++) {
+    std::list<igMovingElement*> elmtsInSurroundingSquares;
+
+    for (int k = std::max(0, square->first.x-1); k < std::min(nbSquares-1, square->first.x+1); k++) {
+    for (int l = std::max(0, square->first.y-1); l < std::min(nbSquares-1, square->first.y+1); l++) {
+      elmtsInSurroundingSquares.insert(elmtsInSurroundingSquares.end(),
+        sortedElements[glm::ivec2(k,l)].begin(), sortedElements[glm::ivec2(k,l)].end());
+    }
+    }
+    #pragma omp parallel
+    #pragma omp single
+    {
+      for (auto elem = square->second.begin(); elem != square->second.end(); elem++)
+        #pragma omp task firstprivate(elem)
+        (*elem)->updateState(elmtsInSurroundingSquares);
+      #pragma omp taskwait
     }
   }
 }
@@ -255,19 +274,10 @@ void Engine::update(int msElapsed) {
     (*it)->update(msElapsed);
   }
 
+  updateMovingElementsStates();
+
   // Fill the visible elements
   std::vector<igElement*> visibleElmts;
-  // sortedElements contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
-  std::vector<std::list<igMovingElement*> > sortedElements(NB_CHUNKS*NB_CHUNKS);
-
-  for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
-
-    if (!(*it)->isDead())
-      sortedElements[chunkPos.x * NB_CHUNKS + chunkPos.y].push_back(it->get());
-  }
-
-  updateMovingElementsStates(sortedElements);
 
   // Update graphics of visible elements
   Camera& cam = Camera::getInstance();
@@ -276,7 +286,7 @@ void Engine::update(int msElapsed) {
     glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
 
     if (_terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->isVisible() &&
-        _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getDisplayElements()) {
+        _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getDisplayMovingElements()) {
       // No test yet to see if the element can move to its new pos (no collision)
       float height = _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getHeight((*it)->getPos());
 
@@ -389,7 +399,7 @@ void Engine::renderToFBO() const {
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
-          _terrain[i*NB_CHUNKS + j]->getDisplayElements())
+          _terrain[i*NB_CHUNKS + j]->getDisplayTrees())
         _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
@@ -404,7 +414,7 @@ void Engine::renderToFBO() const {
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
-          _terrain[i*NB_CHUNKS + j]->getDisplayElements())
+          _terrain[i*NB_CHUNKS + j]->getDisplayTrees())
         nbElements += _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }

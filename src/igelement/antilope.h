@@ -28,7 +28,7 @@ public:
 	void beginFleeing();
 	void beginRecovering();
 
-	inline float getLineOfSight() const {return _lineOfSight;}
+	static float getStandardLineOfSight() {return _standardLineOfSight;}
 
 protected:
 	void setDirection(glm::vec2 direction);
@@ -41,8 +41,9 @@ private:
 	void reactWhenFleeing   (const BoidsInfo& info);
 	void reactWhenRecovering(const BoidsInfo& info);
 
-	float _lineOfSight;
-	float _lineOfSightStandard; // * 1 for normal line of sight, * 1.1 for hysteresis
+	static const float _standardLineOfSight;
+
+	float _lineOfSight; // Changes the standard line of sight to add hysteresis
 
 	float _repulsionRadius; // r < o < a
 	float _orientationRadius;
@@ -51,8 +52,8 @@ private:
 	float _speedWalking;
 	float _speedRunning;
 
-	AntilopeStatus _aStatus;
-	BoidStatus _bStatus; // To control hysteresis
+	AntilopeStatus _antilopeStatus;
+	BoidStatus _boidStatus;
 	bool _moving;
 
 	const int _msAverageRecovering;

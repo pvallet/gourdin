@@ -64,7 +64,7 @@ public:
 private:
   void appendNewElements(std::vector<igMovingElement*> elems);
 	// The parameter contains a list of the moving elements in the chunk (x,y) in index x * NB_CHUNKS + y
-  static void updateMovingElementsStates(const std::vector<std::list<igMovingElement*> >& sortedElements);
+  void updateMovingElementsStates();
 	void updateCulling();
 	void compute2DCorners();
 

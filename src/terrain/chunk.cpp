@@ -229,9 +229,14 @@ void Chunk::computeDistanceOptimizations() {
 	float distanceToChunk = glm::length(camera.getPos()-_centerOfChunk);
 
 	if (distanceToChunk > 20000)
-		_displayElements = false;
+		_displayTrees = false;
 	else
-		_displayElements = true;
+		_displayTrees = true;
+
+	if (distanceToChunk > 4000)
+		_displayMovingElements = false;
+	else
+		_displayMovingElements = true;
 
 	// if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);
