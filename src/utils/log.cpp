@@ -1,7 +1,13 @@
 #include "log.h"
 
 #include "camera.h"
+
 #define LOG_REFRESH_RATE_MS 1000
+
+Log::Log() {
+  _text.precision(2);
+  _text.setf( std::ios::fixed, std:: ios::floatfield );
+}
 
 void Log::addFPSandCamInfo() {
   if (_lastFPSupdate.getElapsedTime() > LOG_REFRESH_RATE_MS) {
@@ -22,7 +28,7 @@ void Log::addFPSandCamInfo() {
   #ifndef __ANDROID__
     _text << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y << std::endl;
-    _text << "R: " << cam.getZoom() << "\n"
+    _text << "R: " << (int) cam.getZoom() << "\n"
           << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
                           (cam.getTheta() < 0 ? 360 : 0) << "\n"
           << "Phi: " << cam.getPhi() << std::endl;

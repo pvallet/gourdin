@@ -23,7 +23,6 @@ void Game::updateCamera() const {
 
 void Game::update(int msElapsed) {
   Log& logText = Log::getInstance();
-  logText.clear();
   logText.addFPSandCamInfo();
 
   if (_displayLog)
@@ -31,8 +30,11 @@ void Game::update(int msElapsed) {
   else
     _interface.setTextTopRight("");
 
+  logText.clear();
+
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
+
   updateCamera();
   _engine.update(msElapsed);
 }

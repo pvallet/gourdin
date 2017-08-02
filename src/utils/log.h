@@ -22,7 +22,7 @@ public:
 
 
 private:
-	Log() {}
+	Log();
 
 	Clock _lastFPSupdate;
 
