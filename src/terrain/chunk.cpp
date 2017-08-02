@@ -228,10 +228,10 @@ void Chunk::computeDistanceOptimizations() {
 
 	float distanceToChunk = glm::length(camera.getPos()-_centerOfChunk);
 
-	if (distanceToChunk > 20000)
-		_displayTrees = false;
+	if (distanceToChunk > 2000)
+		_treesNeedTwoPasses = false;
 	else
-		_displayTrees = true;
+		_treesNeedTwoPasses = true;
 
 	if (distanceToChunk > 4000)
 		_displayMovingElements = false;

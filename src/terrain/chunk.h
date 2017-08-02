@@ -45,7 +45,7 @@ public:
 	float getHeight(glm::vec2 pos) const;
 	glm::vec3 getNorm(glm::vec2 pos) const;
 	inline bool isVisible() const {return _visible;}
-	inline bool getDisplayTrees() const {return _displayTrees;}
+	inline bool getTreesNeedTwoPasses() const {return _treesNeedTwoPasses;}
 	inline bool getDisplayMovingElements() const {return _displayMovingElements;}
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 
@@ -66,7 +66,7 @@ private:
 	glm::vec3 _centerOfChunk;
 
 	bool _visible;
-	bool _displayTrees;
+	bool _treesNeedTwoPasses;
 	bool _displayMovingElements;
 	size_t _currentSubdivLvl;
 	std::vector<std::unique_ptr<Buffers> > _subdivisionLevels;

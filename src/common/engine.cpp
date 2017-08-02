@@ -394,12 +394,12 @@ void Engine::renderToFBO() const {
   // Two passes to avoid artifacts due to alpha blending
 
   glUniform1i(_igEShader.getUniformLocation("onlyOpaqueParts"), true);
-  nbElements += _igElementDisplay.drawElements();
+  _igElementDisplay.drawElements();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
-          _terrain[i*NB_CHUNKS + j]->getDisplayTrees())
+          _terrain[i*NB_CHUNKS + j]->getTreesNeedTwoPasses())
         _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
@@ -409,12 +409,11 @@ void Engine::renderToFBO() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  _igElementDisplay.drawElements();
+  nbElements += _igElementDisplay.drawElements();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
-          _terrain[i*NB_CHUNKS + j]->getDisplayTrees())
+      if (_terrain[i*NB_CHUNKS + j]->isVisible())
         nbElements += _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
   }
