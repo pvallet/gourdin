@@ -6,34 +6,11 @@
 #include "tree.h"
 #include "utils.h"
 
-void igElementDisplay::init(size_t capacity) {
-  _capacity = capacity;
-
-  if (capacity == 0)
-    _fixedCapacity = false;
-  else {
-    _fixedCapacity = true;
-    prepareBuffers(GL_STATIC_DRAW);
-  }
-
-  _vao.bind();
-  _vbo.bind();
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
-  glEnableVertexAttribArray(3);
-
-  VertexBufferObject::unbind();
-  VertexArrayObject::unbind();
-}
-
-void igElementDisplay::prepareBuffers(GLenum drawType) {
+void igElementDisplay::fillBufferData(GLenum drawType) {
   // vbo
 
   _vbo.bind();
-  // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
-  glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float), NULL, drawType);
+  glBufferData(GL_ARRAY_BUFFER, _data.size() * sizeof(float), &_data[0], drawType);
 
   VertexBufferObject::unbind();
 
@@ -67,6 +44,11 @@ void igElementDisplay::prepareBuffers(GLenum drawType) {
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices));
   glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices + sizeCoord2D));
 
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
+
   VertexBufferObject::unbind();
   VertexArrayObject::unbind();
 }
@@ -80,33 +62,15 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
     _nbElemsInSpree.push_back(currentSpreeLength);
 
     for (size_t i = firstIndexSpree; i < firstIndexSpree + currentSpreeLength; i++) {
-      std::array<float, 12> vertices;
-      std::array<float, 12> posArray;
-      std::array<float,  8> coord2D;
-      std::array<float,  4> layer;
+      const std::array<float, 12>& vertices = elemsToDisplay[i]->getVertices();
+      const std::array<float, 12>& posArray = elemsToDisplay[i]->getPosArray();
+      const std::array<float,  8>& coord2D = elemsToDisplay[i]->getCoord2D();
+      const std::array<float,  4>& layer = elemsToDisplay[i]->getLayer();
 
-      if (i < elemsToDisplay.size()) {
-        vertices = elemsToDisplay[i]->getVertices();
-        posArray = elemsToDisplay[i]->getPosArray();
-        coord2D  = elemsToDisplay[i]->getCoord2D();
-        layer    = elemsToDisplay[i]->getLayer();
-      }
-
-      glBufferSubData(GL_ARRAY_BUFFER,
-        i*sizeof(vertices),
-    		sizeof(vertices), &vertices[0]);
-
-      glBufferSubData(GL_ARRAY_BUFFER,
-        _capacity*sizeof(vertices) + i*sizeof(posArray),
-        sizeof(posArray), &posArray[0]);
-
-      glBufferSubData(GL_ARRAY_BUFFER,
-        _capacity*2*sizeof(vertices) + i*sizeof(coord2D),
-        sizeof(coord2D), &coord2D[0]);
-
-      glBufferSubData(GL_ARRAY_BUFFER,
-        _capacity*(2*sizeof(vertices) + sizeof(coord2D)) + i*sizeof(layer),
-    		sizeof(layer), &layer[0]);
+      std::copy(vertices.begin(), vertices.end(), _data.begin() + i*12);
+      std::copy(posArray.begin(), posArray.end(), _data.begin() + _capacity*12 + i*12);
+      std::copy(coord2D.begin(),  coord2D.end(),  _data.begin() + _capacity*24 + i*8);
+      std::copy(layer.begin(),    layer.end(),    _data.begin() + _capacity*32 + i*4);
     }
 
     // Update the spree infos for the next spree
@@ -118,12 +82,12 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
 
 enum CurrentType {NO_TYPE, ANIMAL, TREE};
 
-void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts) {
+void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts, bool onlyOnce) {
   _textures.clear();
   _nbElemsInSpree.clear();
 
   _capacity = visibleElmts.size();
-  prepareBuffers(GL_DYNAMIC_DRAW);
+  _data.resize(_capacity * 36);
 
   size_t currentSpreeLength = 0;
   size_t firstIndexSpree = 0;
@@ -131,13 +95,6 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   CurrentType currentType = NO_TYPE;
   const TextureArray* currentTexture;
   Biome       currentBiome;
-
-  _vbo.bind();
-
-  // Clock initTimer;
-  // int previousTime = initTimer.getElapsedTime();
-  // SDL_Log("spree: %d ms", initTimer.getElapsedTime() - previousTime);
-  // previousTime = initTimer.getElapsedTime();
 
   for (size_t i = 0; i < visibleElmts.size(); i++) {
     Tree* tree = dynamic_cast<Tree*>(visibleElmts[i]);
@@ -164,7 +121,10 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 
   processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
 
-  VertexBufferObject::unbind();
+  if (onlyOnce)
+    fillBufferData(GL_STATIC_DRAW);
+  else
+    fillBufferData(GL_DYNAMIC_DRAW);
 }
 
 size_t igElementDisplay::drawElements() const {

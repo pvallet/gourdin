@@ -11,13 +11,11 @@ class igElementDisplay {
 public:
   igElementDisplay() {}
 
-  void init(size_t capacity = 0);
-
-  void loadElements(const std::vector<igElement*>& visibleElmts);
+  void loadElements(const std::vector<igElement*>& visibleElmts, bool onlyOnce = false);
   size_t drawElements() const;
 
 protected:
-  void prepareBuffers(GLenum drawType);
+  void fillBufferData(GLenum drawType);
   void processSpree(const std::vector<igElement*>& visibleElmts,
     size_t& currentSpreeLength, size_t& firstIndexSpree);
 
@@ -25,6 +23,8 @@ protected:
 
   size_t _capacity;
   bool _fixedCapacity;
+
+  std::vector<float> _data;
 
   VertexArrayObject _vao;
   VertexBufferObject _vbo;

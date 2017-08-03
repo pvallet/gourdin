@@ -78,10 +78,9 @@ void Engine::init() {
   SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
-  _igElementDisplay.init();
   _contentGenerator.init();
 
-  SDL_Log("Init igElementDisplay and ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
+  SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
   std::vector<Chunk*> newChunks;
