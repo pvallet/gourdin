@@ -15,6 +15,7 @@ EventHandler::EventHandler(Game& game):
   _game(game) {}
 
 bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
+  Camera& cam = Camera::getInstance();
   bool running = true;
 
   switch (event.type) {
@@ -23,30 +24,35 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
       break;
 
     case SDL_WINDOWEVENT:
-      if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-        Camera& cam = Camera::getInstance();
+      if (event.window.event == SDL_WINDOWEVENT_RESIZED)
         cam.resize(event.window.data1, event.window.data2);
-      }
       break;
 
     case SDL_FINGERDOWN:
       _nbFingers++;
-      if (getNbFingers() == 1 && _pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD)
+
+      if (getNbFingers() == 1 && _pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD) {
+        _beginDragTouch.x = (event.tfinger.x * cam.getWindowW());
+        _beginDragTouch.y = (event.tfinger.y * cam.getWindowH());
         _doubleClickBegin.restart();
+      }
       break;
 
-    case SDL_FINGERUP:
+    case SDL_FINGERUP: {
       _nbFingers--;
 
-      if (_nbFingers == 0 && _doubleClickBegin.getElapsedTime() < DOUBLECLICK_MS) {
-        Camera& cam = Camera::getInstance();
+      glm::vec2 beginDragTouch(_beginDragTouch);
+      glm::vec2 releasedPos(event.tfinger.x * cam.getWindowW(), event.tfinger.y * cam.getWindowH());
 
-        if (_pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD) {
-          _pendingClick.x = (event.tfinger.x * cam.getWindowW());
-          _pendingClick.y = (event.tfinger.y * cam.getWindowH());
-        }
+      if (_nbFingers == 0 && _doubleClickBegin.getElapsedTime() < DOUBLECLICK_MS &&
+        glm::length(beginDragTouch - releasedPos) < MAX_DIST_FOR_CLICK) {
 
-        else {
+        glm::vec2 pendingClick(_pendingClick);
+
+        if (_pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD)
+          _pendingClick = _beginDragTouch;
+
+        else if (glm::length(pendingClick - releasedPos) < MAX_DIST_FOR_CLICK) {
           SDL_Event doubleClickEvent;
           SDL_zero(doubleClickEvent);
           doubleClickEvent.type = SDL_USER_FINGER_DOUBLE_CLICK;
@@ -58,7 +64,8 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
           _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
         }
       }
-      break;
+    }
+    break;
 
     case SDL_KEYDOWN:
       switch(event.key.keysym.sym) {

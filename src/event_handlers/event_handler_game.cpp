@@ -5,7 +5,6 @@
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define ROTATION_ANGLE_MOUSE 0.1f
 #define TIME_TRANSFER_MS 100
-#define MIN_DIST_TO_DEFINE_DRAG 40
 
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
@@ -113,23 +112,20 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
 
     case SDL_MOUSEMOTION:
       if (_beginDragLeft != DEFAULT_OUTSIDE_WINDOW_COORD) {
-        if (_game.getPovCamera()) {
-          _oldTheta = cam.getTheta();
-          _oldPhi = cam.getPhi();
-          cam.setTheta(_oldTheta + (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
-          cam.setPhi(_oldPhi + (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
-          _beginDragLeft.x = event.motion.x;
-          _beginDragLeft.y = event.motion.y;
+
+        glm::vec2 newMousePos(event.motion.x,event.motion.y);
+        glm::vec2 beginDragLeft(_beginDragLeft);
+
+        if (glm::length(beginDragLeft - newMousePos) > MAX_DIST_FOR_CLICK)
           _draggingCamera = true;
-        }
 
-        else {
-          glm::vec2 newMousePos(event.motion.x,event.motion.y);
-          glm::vec2 beginDragLeft(_beginDragLeft);
-          if (glm::length(beginDragLeft - newMousePos) > MIN_DIST_TO_DEFINE_DRAG)
-            _draggingCamera = true;
+        if (_draggingCamera) {
+          if (_game.getPovCamera()) {
+            cam.setTheta(_oldTheta + (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
+            cam.setPhi(_oldPhi + (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+          }
 
-          if (_draggingCamera) {
+          else {
             cam.setTheta(_oldTheta);
 
             // Dragging the camera must be coherent when the mouse goes around the central character

@@ -9,6 +9,8 @@
 
 #define DEFAULT_OUTSIDE_WINDOW_COORD glm::ivec2(-1,-1)
 
+#define MAX_DIST_FOR_CLICK 40.f
+
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
 class EventHandler {
@@ -32,6 +34,7 @@ public:
 protected:
   inline size_t getNbFingers() const {return _nbFingers;}
   glm::ivec2 _beginDragLeft;
+  glm::ivec2 _beginDragTouch;
 
   static Uint32 SDL_USER_FINGER_CLICK;
   static Uint32 SDL_USER_FINGER_DOUBLE_CLICK;
