@@ -24,14 +24,14 @@ void Log::addFPSandCamInfo() {
     _framesSinceLastUpdate++;
 
   Camera& cam = Camera::getInstance();
+  _text << "R: " << (int) cam.getZoom() << "\n";
 
   #ifndef __ANDROID__
+    _text << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
+                         (cam.getTheta() < 0 ? 360 : 0) << "\n"
+          << "Phi: " << cam.getPhi() << std::endl;
     _text << "X: " << cam.getPointedPos().x << "\n"
           << "Y: " << cam.getPointedPos().y << std::endl;
-    _text << "R: " << (int) cam.getZoom() << "\n"
-          << "Theta: " << cam.getTheta() - 360 * (int) (cam.getTheta() / 360) +
-                          (cam.getTheta() < 0 ? 360 : 0) << "\n"
-          << "Phi: " << cam.getPhi() << std::endl;
   #endif
 
   _text << _lastFPS.str();

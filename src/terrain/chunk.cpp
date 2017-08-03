@@ -219,7 +219,7 @@ void Chunk::setTrees(std::vector<igElement*> trees) {
 }
 
 void Chunk::loadTrees() {
-	_treeDrawer.init(STATIC_DRAW, _trees.size());
+	_treeDrawer.init(_trees.size());
 	_treeDrawer.loadElements(_trees);
 }
 
@@ -233,7 +233,11 @@ void Chunk::computeDistanceOptimizations() {
 	else
 		_treesNeedTwoPasses = true;
 
-	if (distanceToChunk > 4000)
+#ifdef __ANDROID__
+	if (distanceToChunk > 80000)
+#else
+	if (distanceToChunk > 80000)
+#endif
 		_displayMovingElements = false;
 	else
 		_displayMovingElements = true;

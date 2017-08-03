@@ -6,19 +6,34 @@
 #include "tree.h"
 #include "utils.h"
 
-void igElementDisplay::init(DrawType drawType, size_t capacity) {
+void igElementDisplay::init(size_t capacity) {
   _capacity = capacity;
 
+  if (capacity == 0)
+    _fixedCapacity = false;
+  else {
+    _fixedCapacity = true;
+    prepareBuffers(GL_STATIC_DRAW);
+  }
+
+  _vao.bind();
+  _vbo.bind();
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(3);
+
+  VertexBufferObject::unbind();
+  VertexArrayObject::unbind();
+}
+
+void igElementDisplay::prepareBuffers(GLenum drawType) {
   // vbo
 
   _vbo.bind();
   // 36 is 12 for vertices, 12 for posArray, 8 for texture coordinates and 4 for texture layer
-  if (drawType == STREAM_DRAW)
-    glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
-      NULL, GL_STREAM_DRAW);
-  else
-    glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float),
-      NULL, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, _capacity * 36 * sizeof(float), NULL, drawType);
 
   VertexBufferObject::unbind();
 
@@ -41,23 +56,16 @@ void igElementDisplay::init(DrawType drawType, size_t capacity) {
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _capacity * 6 * sizeof(indices[0]), &indices[0]);
   IndexBufferObject::unbind();
 
-  // vao
-
   _vao.bind();
   _vbo.bind();
 
   size_t sizeVertices = _capacity * 12 * sizeof(float);
-  size_t sizeCoord2D  = _capacity *  8 * sizeof(float);
+  size_t sizeCoord2D = _capacity * 8 * sizeof(float);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeVertices));
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices));
   glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(2*sizeVertices + sizeCoord2D));
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
-  glEnableVertexAttribArray(3);
 
   VertexBufferObject::unbind();
   VertexArrayObject::unbind();
@@ -114,13 +122,8 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
   _textures.clear();
   _nbElemsInSpree.clear();
 
-  std::vector<igElement*> elemsToDisplay;
-
-  if (visibleElmts.size() > _capacity)
-    elemsToDisplay = std::vector<igElement*>(visibleElmts.end() - _capacity, visibleElmts.end());
-
-  else
-    elemsToDisplay = visibleElmts;
+  _capacity = visibleElmts.size();
+  prepareBuffers(GL_DYNAMIC_DRAW);
 
   size_t currentSpreeLength = 0;
   size_t firstIndexSpree = 0;
@@ -131,13 +134,18 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 
   _vbo.bind();
 
-  for (size_t i = 0; i < elemsToDisplay.size(); i++) {
-    Tree* tree = dynamic_cast<Tree*>(elemsToDisplay[i]);
-    igMovingElement* animal = dynamic_cast<igMovingElement*>(elemsToDisplay[i]);
+  // Clock initTimer;
+  // int previousTime = initTimer.getElapsedTime();
+  // SDL_Log("spree: %d ms", initTimer.getElapsedTime() - previousTime);
+  // previousTime = initTimer.getElapsedTime();
+
+  for (size_t i = 0; i < visibleElmts.size(); i++) {
+    Tree* tree = dynamic_cast<Tree*>(visibleElmts[i]);
+    igMovingElement* animal = dynamic_cast<igMovingElement*>(visibleElmts[i]);
 
     if (tree) {
       if (currentType != TREE || currentBiome != tree->getBiome()) {
-        processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
+        processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
         currentType  = TREE;
         currentBiome = tree->getBiome();
       }
@@ -145,7 +153,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
 
     else if (animal) {
       if (currentType != ANIMAL || currentTexture != animal->getTexArray()) {
-        processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
+        processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
         currentType   = ANIMAL;
         currentTexture = animal->getTexArray();
       }
@@ -154,7 +162,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts)
     currentSpreeLength++;
   }
 
-  processSpree(elemsToDisplay, currentSpreeLength, firstIndexSpree);
+  processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
 
   VertexBufferObject::unbind();
 }

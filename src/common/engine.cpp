@@ -146,9 +146,11 @@ void Engine::updateMovingElementsStates() {
   std::unordered_map<glm::ivec2, std::list<igMovingElement*>, squareHashFunc> sortedElements;
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
-    glm::ivec2 square = glm::ivec2((*it)->getPos().x / squareSize, (*it)->getPos().y / squareSize);
+    if (!(*it)->isDead()) {
+      glm::ivec2 square = glm::ivec2((*it)->getPos().x / squareSize, (*it)->getPos().y / squareSize);
 
-    sortedElements[square].push_back(it->get());
+      sortedElements[square].push_back(it->get());
+    }
   }
 
   for (auto square = sortedElements.begin(); square != sortedElements.end(); square++) {
@@ -156,13 +158,22 @@ void Engine::updateMovingElementsStates() {
 
     for (int k = std::max(0, square->first.x-1); k < std::min(nbSquares-1, square->first.x+1); k++) {
     for (int l = std::max(0, square->first.y-1); l < std::min(nbSquares-1, square->first.y+1); l++) {
-      elmtsInSurroundingSquares.insert(elmtsInSurroundingSquares.end(),
-        sortedElements[glm::ivec2(k,l)].begin(), sortedElements[glm::ivec2(k,l)].end());
+      glm::ivec2 squareCoord(k,l);
+
+      if (sortedElements.find(squareCoord) != sortedElements.end())
+        elmtsInSurroundingSquares.insert(elmtsInSurroundingSquares.end(),
+          sortedElements.at(squareCoord).begin(), sortedElements.at(squareCoord).end());
     }
     }
 
-    for (auto elem = square->second.begin(); elem != square->second.end(); elem++)
-      (*elem)->updateState(elmtsInSurroundingSquares);
+    // #pragma omp parallel
+    // #pragma omp single
+    {
+      for (auto elem = square->second.begin(); elem != square->second.end(); elem++)
+        // #pragma omp task firstprivate(elem)
+        (*elem)->updateState(elmtsInSurroundingSquares);
+      // #pragma omp taskwait
+    }
   }
 }
 
@@ -282,7 +293,7 @@ void Engine::update(int msElapsed) {
 
     if (_terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->isVisible() &&
         _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getDisplayMovingElements()) {
-      // No test yet to see if the element can move to its new pos (no collision)
+
       float height = _terrain[chunkPos.x*NB_CHUNKS + chunkPos.y]->getHeight((*it)->getPos());
 
       (*it)->setHeight(height);
@@ -306,6 +317,11 @@ void Engine::update(int msElapsed) {
   }
 
   compute2DCorners();
+
+  Log& logText = Log::getInstance();
+  std::ostringstream renderStats;
+  renderStats << "Moving elements: " << visibleElmts.size() << std::endl;
+  logText.addLine(renderStats.str());
 }
 
 void Engine::renderToFBO() const {
@@ -404,7 +420,7 @@ void Engine::renderToFBO() const {
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  nbElements += _igElementDisplay.drawElements();
+  _igElementDisplay.drawElements();
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
@@ -422,7 +438,7 @@ void Engine::renderToFBO() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Elements:  " << nbElements << std::endl;
+              << "Trees:  " << nbElements << std::endl;
 
   logText.addLine(renderStats.str());
 }

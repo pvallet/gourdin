@@ -1,7 +1,6 @@
 #include "frameBufferObject.h"
 
 #include <SDL_log.h>
-#include <iostream>
 
 FrameBufferObject::FrameBufferObject() :
   _fboID(0) {
