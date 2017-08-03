@@ -120,7 +120,7 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != glm::ivec2(-1,-1)) {
+      if (_beginDragLeft != DEFAULT_OUTSIDE_WINDOW_COORD) {
         _rectSelect.z = event.motion.x - _rectSelect.x;
         _rectSelect.w = event.motion.y - _rectSelect.y;
         _game.getInterface().setRectSelect(_rectSelect);
@@ -137,6 +137,8 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
 }
 
 void EventHandlerSandbox::onGoingEvents(int msElapsed) {
+  EventHandler::onGoingEvents(msElapsed);
+
   Camera& cam = Camera::getInstance();
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   int mousePosX, mousePosY;

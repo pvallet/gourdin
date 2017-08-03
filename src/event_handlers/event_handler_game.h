@@ -13,6 +13,7 @@ public:
   bool gainFocus();
 
 private:
+  void handleClick(glm::ivec2 windowCoords);
   void handleKeyPressed(const SDL_Event& event);
   void handleKeyReleased(const SDL_Event& event);
   void handleCamBoundsGodMode(float& theta) const;
@@ -33,8 +34,6 @@ private:
 
   Clock _transferStart;
   glm::vec2 _previousFocusedPos;
-
-  Clock _doubleClickBegin;
 
   GameGame& _game;
 };

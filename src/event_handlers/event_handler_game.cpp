@@ -17,6 +17,16 @@ EventHandlerGame::EventHandlerGame(GameGame& game) :
   _draggingCamera(false),
   _game(game) {}
 
+void EventHandlerGame::handleClick(glm::ivec2 windowCoords) {
+  glm::vec2 previousPos = _game.getFocusedPos();
+  _game.moveCharacter(windowCoords);
+
+  if (previousPos != _game.getFocusedPos()) {
+    _transferStart.restart();
+    _previousFocusedPos = previousPos;
+  }
+}
+
 void EventHandlerGame::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
@@ -92,34 +102,17 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
     case SDL_MOUSEBUTTONDOWN:
       _oldPhi = cam.getPhi();
       _oldTheta = cam.getTheta();
-
-      if (_doubleClickBegin.getElapsedTime() < DOUBLECLICK_MS) {
-        if (_game.getPovCamera())
-          resetCamera(false);
-        else
-          resetCamera(true);
-      }
-
-      else
-        _doubleClickBegin.restart();
-    break;
+      break;
 
     case SDL_MOUSEBUTTONUP:
-      if (!_draggingCamera) {
-        glm::vec2 previousPos = _game.getFocusedPos();
-        _game.moveCharacter(glm::ivec2(event.button.x, event.button.y));
-
-        if (previousPos != _game.getFocusedPos()) {
-          _transferStart.restart();
-          _previousFocusedPos = previousPos;
-        }
-      }
+      if (!_draggingCamera && event.button.which != SDL_TOUCH_MOUSEID)
+        handleClick(glm::ivec2(event.button.x, event.button.y));
 
       _draggingCamera = false;
-    break;
+      break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != glm::ivec2(-1,-1)) {
+      if (_beginDragLeft != DEFAULT_OUTSIDE_WINDOW_COORD) {
         if (_game.getPovCamera()) {
           _oldTheta = cam.getTheta();
           _oldPhi = cam.getPhi();
@@ -168,6 +161,16 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
       break;
   }
 
+  if (event.type == SDL_USER_FINGER_CLICK)
+    handleClick(glm::ivec2((uintptr_t) event.user.data1, (uintptr_t) event.user.data2));
+
+  else if (event.type == SDL_USER_FINGER_DOUBLE_CLICK) {
+    if (_game.getPovCamera())
+      resetCamera(false);
+    else
+      resetCamera(true);
+  }
+
   return EventHandler::handleEvent(event, currentHandler);
 }
 
@@ -214,6 +217,8 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
 }
 
 void EventHandlerGame::onGoingEvents(int msElapsed) {
+  EventHandler::onGoingEvents(msElapsed);
+
   Camera& cam = Camera::getInstance();
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
 

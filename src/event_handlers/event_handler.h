@@ -7,7 +7,7 @@
 
 #include <map>
 
-#define DOUBLECLICK_MS 200
+#define DEFAULT_OUTSIDE_WINDOW_COORD glm::ivec2(-1,-1)
 
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
@@ -17,7 +17,7 @@ public:
 
   // Returns whether the engine will stop or not
   virtual bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
-  virtual void onGoingEvents(int msElapsed) = 0;
+  virtual void onGoingEvents(int msElapsed);
 
   virtual bool gainFocus() = 0;
 
@@ -30,8 +30,17 @@ public:
   static void makeThetaFitInAllowedZone(float& theta, const glm::vec3& normal, float minDotProduct);
 
 protected:
+  inline size_t getNbFingers() const {return _nbFingers;}
   glm::ivec2 _beginDragLeft;
 
+  static Uint32 SDL_USER_FINGER_CLICK;
+  static Uint32 SDL_USER_FINGER_DOUBLE_CLICK;
+
 private:
+  static size_t _nbFingers;
+
+  glm::ivec2 _pendingClick;
+  Clock _doubleClickBegin;
+
   Game& _game;
 };

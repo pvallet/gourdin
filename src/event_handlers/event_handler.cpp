@@ -3,8 +3,15 @@
 #include "clock.h"
 #include "utils.h"
 
+#define DOUBLECLICK_MS 300
+
+Uint32 EventHandler::SDL_USER_FINGER_CLICK = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_FINGER_DOUBLE_CLICK = SDL_RegisterEvents(1);
+size_t EventHandler::_nbFingers = 0;
+
 EventHandler::EventHandler(Game& game):
-  _beginDragLeft(-1,-1),
+  _beginDragLeft(DEFAULT_OUTSIDE_WINDOW_COORD),
+  _pendingClick(DEFAULT_OUTSIDE_WINDOW_COORD),
   _game(game) {}
 
 bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
@@ -19,6 +26,37 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
       if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
         Camera& cam = Camera::getInstance();
         cam.resize(event.window.data1, event.window.data2);
+      }
+      break;
+
+    case SDL_FINGERDOWN:
+      _nbFingers++;
+      if (getNbFingers() == 1 && _pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD)
+        _doubleClickBegin.restart();
+      break;
+
+    case SDL_FINGERUP:
+      _nbFingers--;
+
+      if (_nbFingers == 0 && _doubleClickBegin.getElapsedTime() < DOUBLECLICK_MS) {
+        Camera& cam = Camera::getInstance();
+
+        if (_pendingClick == DEFAULT_OUTSIDE_WINDOW_COORD) {
+          _pendingClick.x = (event.tfinger.x * cam.getWindowW());
+          _pendingClick.y = (event.tfinger.y * cam.getWindowH());
+        }
+
+        else {
+          SDL_Event doubleClickEvent;
+          SDL_zero(doubleClickEvent);
+          doubleClickEvent.type = SDL_USER_FINGER_DOUBLE_CLICK;
+
+          doubleClickEvent.user.data1 = (void*) ((uintptr_t) _pendingClick.x);
+          doubleClickEvent.user.data2 = (void*) ((uintptr_t) _pendingClick.y);
+          SDL_PushEvent(&doubleClickEvent);
+
+          _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+        }
       }
       break;
 
@@ -55,11 +93,26 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
 
     case SDL_MOUSEBUTTONUP:
       if (event.button.button == SDL_BUTTON_LEFT)
-        _beginDragLeft = glm::ivec2(-1,-1);
+        _beginDragLeft = DEFAULT_OUTSIDE_WINDOW_COORD;
       break;
   }
 
   return running;
+}
+
+void EventHandler::onGoingEvents(int msElapsed) {
+  if (_pendingClick != DEFAULT_OUTSIDE_WINDOW_COORD && _doubleClickBegin.getElapsedTime() > DOUBLECLICK_MS) {
+    SDL_Event clickEvent;
+    SDL_zero(clickEvent);
+    clickEvent.type = SDL_USER_FINGER_CLICK;
+
+    clickEvent.user.data1 = (void*) ((uintptr_t) _pendingClick.x);
+    clickEvent.user.data2 = (void*) ((uintptr_t) _pendingClick.y);
+    SDL_PushEvent(&clickEvent);
+    _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+  }
+
+  (void) msElapsed;
 }
 
 std::pair<float, float> EventHandler::solveAcosXplusBsinXequalC(float a, float b, float c) {
