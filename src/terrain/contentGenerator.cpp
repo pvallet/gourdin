@@ -74,7 +74,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   glm::vec2 chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
   std::vector<igElement*> res;
 
-  for (size_t i = 0; i < 1500; i++) {
+  for (size_t i = 0; i < 2400; i++) {
     glm::vec2 pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 

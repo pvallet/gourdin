@@ -49,9 +49,9 @@ void igMovingElement::updateDisplay(int msElapsed, float theta) {
 void igMovingElement::update(int msElapsed) {
 	glm::vec2 newPos = _pos + _direction * _speed * (msElapsed / 1000.f);
 
-	if (_terrainGeometry.isWater(newPos, 0))
-		stop();
-	else
+	// if (_terrainGeometry.isWater(newPos, 0))
+	// 	stop();
+	// else
 		_pos = newPos;
 }
 

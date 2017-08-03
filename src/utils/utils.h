@@ -10,11 +10,11 @@
 
 #define RAD (M_PI / 180.f)
 
-#define CHUNK_SIZE 1024.f
-#define NB_CHUNKS 25
+#define CHUNK_SIZE 1600.f
+#define NB_CHUNKS 16
 #define MAX_COORD (CHUNK_SIZE*NB_CHUNKS)
 
-#define TEX_FACTOR 12.f // Number of times the texture is repeated per chunk
+#define TEX_FACTOR 20.f // Number of times the texture is repeated per chunk
 
 #define RANDOMF (rand() / (float) RAND_MAX)
 

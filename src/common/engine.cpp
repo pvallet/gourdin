@@ -132,7 +132,7 @@ void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
 }
 
 void Engine::updateMovingElementsStates() {
-  struct squareHashFunc{
+  struct squareHashFunc {
     size_t operator()(const glm::ivec2 &k) const {
     size_t h1 = std::hash<int>()(k.x);
     size_t h2 = std::hash<int>()(k.y);
@@ -160,14 +160,9 @@ void Engine::updateMovingElementsStates() {
         sortedElements[glm::ivec2(k,l)].begin(), sortedElements[glm::ivec2(k,l)].end());
     }
     }
-    #pragma omp parallel
-    #pragma omp single
-    {
-      for (auto elem = square->second.begin(); elem != square->second.end(); elem++)
-        #pragma omp task firstprivate(elem)
-        (*elem)->updateState(elmtsInSurroundingSquares);
-      #pragma omp taskwait
-    }
+
+    for (auto elem = square->second.begin(); elem != square->second.end(); elem++)
+      (*elem)->updateState(elmtsInSurroundingSquares);
   }
 }
 

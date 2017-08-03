@@ -2,8 +2,8 @@
 
 #include "utils.h"
 
-#define CHUNK_BEGIN_X 7
-#define CHUNK_BEGIN_Y 10
+#define CHUNK_BEGIN_X 4
+#define CHUNK_BEGIN_Y 6
 
 Camera::Camera() :
   _fovAngle(45),
