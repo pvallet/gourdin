@@ -10,6 +10,8 @@
 #define DEFAULT_OUTSIDE_WINDOW_COORD glm::ivec2(-1,-1)
 
 #define MAX_DIST_FOR_CLICK 40.f
+#define LONGCLICK_MS 500
+#define DOUBLECLICK_MS 250
 
 enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
 
@@ -37,13 +39,22 @@ protected:
   glm::ivec2 _beginDragTouch;
 
   static Uint32 SDL_USER_FINGER_CLICK;
+  static Uint32 SDL_USER_FINGER_LONG_CLICK_BEGIN;
+  static Uint32 SDL_USER_FINGER_LONG_CLICK_MOTION;
+  static Uint32 SDL_USER_FINGER_LONG_CLICK_END;
   static Uint32 SDL_USER_FINGER_DOUBLE_CLICK;
 
+  static bool _duringLongClick;
+
 private:
+  bool isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const;
+
   static size_t _nbFingers;
 
   glm::ivec2 _pendingClick;
-  Clock _doubleClickBegin;
+  glm::ivec2 _currentCursorPos;
+  Clock _clickBegin;
+  bool _gonnaBeDoubleClick;
 
   Game& _game;
 };

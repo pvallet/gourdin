@@ -16,8 +16,6 @@ AndroidEventHandlerSandbox::AndroidEventHandlerSandbox(GameSandbox& game) :
 bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
   Camera& cam = Camera::getInstance();
 
-  EventHandler::handleEvent(event, currentHandler);
-
   switch (event.type) {
     case SDL_FINGERMOTION:
       if (getNbFingers() == 1)
@@ -32,7 +30,22 @@ bool AndroidEventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandle
   }
 
   if (event.type == SDL_USER_FINGER_DOUBLE_CLICK)
-    currentHandler = HDLR_GAME;
+    // currentHandler = HDLR_GAME;
+    SDL_Log("Double click (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_CLICK)
+    SDL_Log("Click (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_BEGIN)
+    SDL_Log("Long click begin (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_MOTION)
+    SDL_Log("Long click motion (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_END)
+    SDL_Log("Long click end (%d,%d)", event.user.data1, event.user.data2);
+
+  EventHandler::handleEvent(event, currentHandler);
 
   return true;
 }
