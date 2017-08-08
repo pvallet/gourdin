@@ -11,11 +11,9 @@
 Controller::Controller(SDL2pp::Window& window) :
   _running(true),
   _engine(),
-  _gameGame(_engine),
-  _gameSandbox(_engine),
-  _currentHandlerType(HDLR_SANDBOX),
-  _eHandlerGame(_gameGame),
-  _eHandlerSandbox(_gameSandbox),
+  _game(_engine),
+  _eventHandlerLockedView(_game),
+  _eventHandlerGlobalView(_game),
   _window(window) {
 
   Camera& cam = Camera::getInstance();
@@ -33,8 +31,7 @@ Controller::Controller(SDL2pp::Window& window) :
 
 void Controller::init() {
   _engine.init();
-  _gameGame.init();
-  _gameSandbox.init();
+  _game.init();
 }
 
 void Controller::run() {
@@ -45,39 +42,22 @@ void Controller::run() {
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-      EventHandlerType lastHandlerType = _currentHandlerType;
-
-      if (_currentHandlerType == HDLR_GAME)
-        _running = _eHandlerGame.handleEvent(event,_currentHandlerType);
+      if (_game.isViewLocked())
+        _running = _eventHandlerLockedView.handleEvent(event);
       else
-        _running = _eHandlerSandbox.handleEvent(event,_currentHandlerType);
+        _running = _eventHandlerGlobalView.handleEvent(event);
 
       if (!_running)
         break;
-
-      if (_currentHandlerType != lastHandlerType) {
-        if (_currentHandlerType == HDLR_GAME) {
-          // If we can spawn a tribe we go back to sandbox mode
-          if (!_eHandlerGame.gainFocus()) {
-            _currentHandlerType = HDLR_SANDBOX;
-            _gameSandbox.displayError("Can't spawn a tribe here");
-          }
-        }
-        else
-          _eHandlerSandbox.gainFocus();
-      }
     }
 
-    if (_currentHandlerType == HDLR_GAME) {
-      _eHandlerGame.onGoingEvents(_msElapsed);
-      _gameGame.update(_msElapsed);
-      _gameGame.render();
-    }
-    else {
-      _eHandlerSandbox.onGoingEvents(_msElapsed);
-      _gameSandbox.update(_msElapsed);
-      _gameSandbox.render();
-    }
+    if (_game.isViewLocked())
+      _eventHandlerLockedView.onGoingEvents(_msElapsed);
+    else
+      _eventHandlerGlobalView.onGoingEvents(_msElapsed);
+
+    _game.update(_msElapsed);
+    _game.render();
     SDL_GL_SwapWindow(_window.Get());
   }
 }

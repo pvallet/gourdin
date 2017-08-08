@@ -1,4 +1,4 @@
-#include "event_handler_sandbox.h"
+#include "eventHandlerGlobalView.h"
 #include "camera.h"
 
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
@@ -6,15 +6,19 @@
 #define SCROLL_SPEED_SLOW 30.f
 #define SCROLL_SPEED_FAST 250.f
 
-EventHandlerSandbox::EventHandlerSandbox(GameSandbox& game) :
+// For android event handling
+#define ROTATION_FACTOR 100.f
+#define TRANSLATION_FACTOR 2.f
+#define ZOOM_FACTOR 10.f // Be careful the zoom function is not linear
+
+EventHandlerGlobalView::EventHandlerGlobalView(Game& game) :
   EventHandler::EventHandler(game),
   _addSelect(false),
-  _scrollSpeed(SCROLL_SPEED_SLOW),
-  _game(game) {
+  _scrollSpeed(SCROLL_SPEED_SLOW) {
   _game.setScrollSpeedToSlow(true);
 }
 
-void EventHandlerSandbox::handleClick(const SDL_Event& event) {
+void EventHandlerGlobalView::handleClick(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
   glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
 
@@ -50,7 +54,7 @@ void EventHandlerSandbox::handleClick(const SDL_Event& event) {
   }
 }
 
-void EventHandlerSandbox::handleKeyPressed(const SDL_Event& event) {
+void EventHandlerGlobalView::handleKeyPressed(const SDL_Event& event) {
   switch(event.key.keysym.scancode) {
     case SDL_SCANCODE_SPACE:
       _game.goBackToSelection();
@@ -93,13 +97,18 @@ void EventHandlerSandbox::handleKeyPressed(const SDL_Event& event) {
       }
       break;
 
+    case SDL_SCANCODE_T:
+      _game.deleteTribe();
+      _game.genTribe();
+      break;
+
     case SDL_SCANCODE_Z:
       _game.switchWireframe();
       break;
   }
 }
 
-bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
+bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
   switch (event.type) {
@@ -131,12 +140,39 @@ bool EventHandlerSandbox::handleEvent(const SDL_Event& event, EventHandlerType& 
       if (!Clock::isGlobalTimerPaused())
         handleKeyPressed(event);
       break;
+
+    case SDL_FINGERMOTION:
+      if (getNbFingers() == 1)
+        cam.translate(- event.tfinger.dx * TRANSLATION_FACTOR * cam.getZoom(),
+                      - event.tfinger.dy * TRANSLATION_FACTOR * cam.getZoom());
+      break;
+
+    case SDL_MULTIGESTURE:
+      cam.zoom(-event.mgesture.dDist * ZOOM_FACTOR * cam.getZoom());
+      cam.rotate(event.mgesture.dTheta * ROTATION_FACTOR, 0);
+      break;
   }
 
-  return EventHandler::handleEvent(event, currentHandler);
+  if (event.type == SDL_USER_FINGER_DOUBLE_CLICK)
+    // currentHandler = HDLR_GAME;
+    SDL_Log("Double click (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_CLICK)
+    SDL_Log("Click (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_BEGIN)
+    SDL_Log("Long click begin (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_MOTION)
+    SDL_Log("Long click motion (%d,%d)", event.user.data1, event.user.data2);
+
+  else if (event.type == SDL_USER_FINGER_LONG_CLICK_END)
+    SDL_Log("Long click end (%d,%d)", event.user.data1, event.user.data2);
+
+  return EventHandler::handleEvent(event);
 }
 
-void EventHandlerSandbox::onGoingEvents(int msElapsed) {
+void EventHandlerGlobalView::onGoingEvents(int msElapsed) {
   EventHandler::onGoingEvents(msElapsed);
 
   Camera& cam = Camera::getInstance();
@@ -175,11 +211,4 @@ void EventHandlerSandbox::onGoingEvents(int msElapsed) {
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
   cam.setTheta(theta);
-}
-
-bool EventHandlerSandbox::gainFocus() {
-  Camera& cam = Camera::getInstance();
-  cam.setValues(INIT_R, INIT_THETA, INIT_PHI);
-
-  return true;
 }

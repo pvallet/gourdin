@@ -13,17 +13,13 @@
 #define LONGCLICK_MS 500
 #define DOUBLECLICK_MS 250
 
-enum EventHandlerType {HDLR_GAME, HDLR_SANDBOX};
-
 class EventHandler {
 public:
   EventHandler(Game& game);
 
   // Returns whether the engine will stop or not
-  virtual bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
+  virtual bool handleEvent(const SDL_Event& event);
   virtual void onGoingEvents(int msElapsed);
-
-  virtual bool gainFocus() = 0;
 
   // Returns two solutions in the range [0,360) in ascending order
   static std::pair<float, float> solveAcosXplusBsinXequalC(float a, float b, float c);
@@ -32,6 +28,8 @@ public:
   static float absDistBetweenAngles(float a, float b);
 
   static void makeThetaFitInAllowedZone(float& theta, const glm::vec3& normal, float minDotProduct);
+
+  static int HandleAppEvents(void *userdata, SDL_Event *event);
 
 protected:
   inline size_t getNbFingers() const {return _nbFingers;}
@@ -46,6 +44,8 @@ protected:
 
   static bool _duringLongClick;
 
+  Game& _game;
+
 private:
   bool isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const;
 
@@ -55,6 +55,4 @@ private:
   glm::ivec2 _currentCursorPos;
   Clock _clickBegin;
   bool _gonnaBeDoubleClick;
-
-  Game& _game;
 };

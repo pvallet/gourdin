@@ -1,4 +1,4 @@
-#include "event_handler_game.h"
+#include "eventHandlerLockedView.h"
 
 #include "camera.h"
 
@@ -9,14 +9,13 @@
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
-EventHandlerGame::EventHandlerGame(GameGame& game) :
+EventHandlerLockedView::EventHandlerLockedView(Game& game) :
   EventHandler::EventHandler(game),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
-  _draggingCamera(false),
-  _game(game) {}
+  _draggingCamera(false) {}
 
-void EventHandlerGame::handleClick(glm::ivec2 windowCoords) {
+void EventHandlerLockedView::handleClick(glm::ivec2 windowCoords) {
   glm::vec2 previousPos = _game.getFocusedPos();
   _game.moveCharacter(windowCoords);
 
@@ -26,7 +25,7 @@ void EventHandlerGame::handleClick(glm::ivec2 windowCoords) {
   }
 }
 
-void EventHandlerGame::handleKeyPressed(const SDL_Event& event) {
+void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
   glm::vec2 moveFocused = _game.getFocusedPos();
@@ -72,7 +71,7 @@ void EventHandlerGame::handleKeyPressed(const SDL_Event& event) {
   }
 }
 
-void EventHandlerGame::handleKeyReleased(const SDL_Event& event) {
+void EventHandlerLockedView::handleKeyReleased(const SDL_Event& event) {
   switch(event.key.keysym.scancode) {
     case SDL_SCANCODE_Z:
     case SDL_SCANCODE_Q:
@@ -90,12 +89,12 @@ void EventHandlerGame::handleKeyReleased(const SDL_Event& event) {
   }
 }
 
-bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
+bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
   switch (event.type) {
     case SDL_MULTIGESTURE:
-      currentHandler = HDLR_SANDBOX;
+      _game.setLockedView(false);
       break;
 
     case SDL_MOUSEBUTTONDOWN:
@@ -167,10 +166,10 @@ bool EventHandlerGame::handleEvent(const SDL_Event& event, EventHandlerType& cur
       resetCamera(true);
   }
 
-  return EventHandler::handleEvent(event, currentHandler);
+  return EventHandler::handleEvent(event);
 }
 
-void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
+void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) const {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // The steeper the slope, the less the user can move around
@@ -179,7 +178,7 @@ void EventHandlerGame::handleCamBoundsGodMode(float& theta) const {
   makeThetaFitInAllowedZone(theta, normal, actualMinScalarProduct);
 }
 
-void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
+void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi) const {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
@@ -212,7 +211,7 @@ void EventHandlerGame::handleCamBoundsPOVMode(float& theta, float& phi) const {
     phi = 180;
 }
 
-void EventHandlerGame::onGoingEvents(int msElapsed) {
+void EventHandlerLockedView::onGoingEvents(int msElapsed) {
   EventHandler::onGoingEvents(msElapsed);
 
   Camera& cam = Camera::getInstance();
@@ -279,7 +278,7 @@ void EventHandlerGame::onGoingEvents(int msElapsed) {
   }
 }
 
-void EventHandlerGame::resetCamera(bool pov) {
+void EventHandlerLockedView::resetCamera(bool pov) {
   Camera& cam = Camera::getInstance();
 
   _game.setPovCamera(pov);
@@ -297,23 +296,20 @@ void EventHandlerGame::resetCamera(bool pov) {
   }
 }
 
-bool EventHandlerGame::gainFocus() {
-  _game.deleteTribe();
-
-  if (!_game.genTribe())
-    return false;
+bool EventHandlerLockedView::gainFocus() {
+  // TODO send selected
 
   resetCamera(false);
 
   return true;
 }
 
-float EventHandlerGame::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
+float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
   return solveAcosXplusBsinXequalC(
     normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
 }
 
-bool EventHandlerGame::firstIsOnPositiveSideOfSecond(float first, float second) {
+bool EventHandlerLockedView::firstIsOnPositiveSideOfSecond(float first, float second) {
   float secondAnglePlus90 = second + 90;
   if (secondAnglePlus90 > 360)
     secondAnglePlus90 -= 360;

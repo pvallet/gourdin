@@ -1,13 +1,17 @@
-#include "gameSandbox.h"
-
+#include "game.h"
 #include "camera.h"
 #include "log.h"
-#include "texturedRectangle.h"
+
+#include <sstream>
 
 #define LION_MIN_SPAWN_DIST 20
 
-GameSandbox::GameSandbox(Engine& engine):
-  Game::Game(engine),
+Game::Game (Engine& engine):
+  _lockedView(false),
+  _displayLog(true),
+  _engine(engine),
+  _interface(),
+  _povCamera(false),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
@@ -15,29 +19,58 @@ GameSandbox::GameSandbox(Engine& engine):
   _msHuntDuration(120000),
   _msCenterTextDisplayDuration(1000) {}
 
-void GameSandbox::init() {
-  Game::init();
-  _interface.setTextTopCenter("Best score: 0");
+void Game::init() {
+  _interface.setEngineTexture(_engine.getColorBuffer());
+  _interface.init();
+
+  if (_lockedView)
+    _interface.setTextTopLeft(getInfoTextLockedView());
+
+  else {
+    _interface.setTextTopLeft(getInfoTextGlobalView());
+    _interface.setTextTopCenter("Best score: 0");
+  }
 }
 
-void GameSandbox::updateCamera() const {
+void Game::updateCamera() const {
   Camera& cam = Camera::getInstance();
 
-  cam.setAdditionalHeight(0);
+  if (!_lockedView)
+    cam.setAdditionalHeight(0);
+
   cam.setHeight(_engine.getHeight(cam.getPointedPos()));
   cam.apply();
 
   // Check if the camera is in the ground and adjust accordingly
-
-  float heightOnCameraRealPos = _engine.getHeight(cam.getProjectedPos());
-  if (heightOnCameraRealPos > cam.getPos().z - 20) {
-    cam.setAdditionalHeight(heightOnCameraRealPos - cam.getPos().z + 20);
-    cam.apply();
+  if (!_lockedView) {
+    float heightOnCameraRealPos = _engine.getHeight(cam.getProjectedPos());
+    if (heightOnCameraRealPos > cam.getPos().z - 20) {
+      cam.setAdditionalHeight(heightOnCameraRealPos - cam.getPos().z + 20);
+      cam.apply();
+    }
   }
 }
 
-void GameSandbox::update(int msElapsed) {
-  updateCamera();
+void Game::update(int msElapsed) {
+  Log& logText = Log::getInstance();
+  logText.addFPSandCamInfo();
+
+  if (_displayLog)
+    _interface.setTextTopRight(logText.getText());
+  else
+    _interface.setTextTopRight("");
+
+  logText.clear();
+
+  if (Clock::isGlobalTimerPaused())
+    _interface.setTextCenter("PAUSED", 1);
+
+  // Check if the hunt has ended
+  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
+    interruptHunt();
+
+  if (_huntHasStarted)
+    _interface.setTextTopRight(getHuntText());
 
   // Remove the dead elements from the selected elements
   std::vector<Lion*> toDelete;
@@ -49,43 +82,61 @@ void GameSandbox::update(int msElapsed) {
    _selection.erase(toDelete[i]);
   }
 
-  // Check if the hunt has ended
-  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
-    interruptHunt();
-
-  Game::update(msElapsed);
-
-  if (_huntHasStarted)
-    _interface.setTextTopRight(getHuntText());
-
+  updateCamera();
+  _engine.update(msElapsed);
 }
 
-void GameSandbox::render() const {
+void Game::render() const {
   Camera& cam = Camera::getInstance();
 
   _engine.renderToFBO();
 
   glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   _interface.renderEngine();
   _interface.renderLifeBars(_selection);
-  _interface.renderRectSelect();
+
+  if (!_lockedView)
+    _interface.renderRectSelect();
+
   _interface.renderMinimap(_engine);
   _interface.renderText();
+
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }
 
-std::string GameSandbox::getHuntText() const {
+std::string Game::getInfoTextCommon() const {
   std::ostringstream text;
 
-  text << "Predators: " << _nbLions << "/" << _maxSimultaneousLions << std::endl
-       << "Kills: " << Lion::getNbKilled() << std::endl
-       << "Time left: " << (_msHuntDuration - _huntStart.getElapsedTime()) / 1000 << std::endl;
+  text << "Esc: " << "Quit engine" << std::endl
+       << "M: " << "Switch to Game mode" << std::endl
+       << "P: " << "Pause" << std::endl
+       << "L: " << "Hide/Display log" << std::endl;
 
   return text.str();
 }
 
-std::string GameSandbox::getInfoText() const {
+std::string Game::getInfoTextLockedView() const {
+  std::ostringstream text;
+
+  text << "1: " << "God camera" << std::endl
+       << "2: " << "POV camera" << std::endl;
+  if (_povCamera)
+    text << "Arrows: " << "Move camera around" << std::endl;
+  else
+    text << "A-E:  " << "Rotate camera" << std::endl;
+  text << "WASD: " << "Move focused character" << std::endl
+      << "LShift+WASD: " << "Change focused character to closest in given direction" << std::endl
+      << std::endl
+      << "Click to move the character in the center" << std::endl
+      << "Click on another character to change the focus" << std::endl
+      << "Click and drag to rotate the camera" << std::endl;
+
+  return getInfoTextCommon() + text.str();
+}
+
+std::string Game::getInfoTextGlobalView() const {
   std::ostringstream text;
 
   text << "Left-Right / A-D: " << "Rotate camera" << std::endl
@@ -108,10 +159,71 @@ std::string GameSandbox::getInfoText() const {
        << std::endl
        << "Go hunt them juicy antilopes!" << std::endl;
 
-  return Game::getInfoText() + text.str();
+  return getInfoTextCommon() + text.str();
 }
 
-void GameSandbox::select(glm::ivec4 rect, bool add) {
+std::string Game::getHuntText() const {
+  std::ostringstream text;
+
+  text << "Predators: " << _nbLions << "/" << _maxSimultaneousLions << std::endl
+       << "Kills: " << Lion::getNbKilled() << std::endl
+       << "Time left: " << (_msHuntDuration - _huntStart.getElapsedTime()) / 1000 << std::endl;
+
+  return text.str();
+}
+
+void Game::changeFocusInDirection(glm::vec2 direction) {
+  Camera& cam = Camera::getInstance();
+  float threshold = sqrt(2)/2.f;
+
+  Controllable* closestMovingElement = _focusedCharacter;
+  float closestDist = MAX_COORD;
+
+  for (auto ctrl = _engine.getControllableElements().begin(); ctrl != _engine.getControllableElements().end(); ctrl++) {
+    glm::vec2 toChar = (*ctrl)->getPos() - _focusedCharacter->getPos();
+    float distance = glm::length(toChar);
+
+    // Character is in the right direction, with +- M_PI/4 margin
+    if (glm::dot(toChar, direction)/distance > threshold) {
+
+      // Checks whether the character is visible on the screen
+      glm::ivec4 screenRect = (*ctrl)->getScreenRect();
+      if (screenRect.y > (int) cam.getH())
+        continue;
+      if (screenRect.x > (int) cam.getW())
+        continue;
+      if (screenRect.y + screenRect.w < 0)
+        continue;
+      if (screenRect.x + screenRect.z < 0)
+        continue;
+
+
+      if (distance < closestDist) {
+        closestDist = distance;
+        closestMovingElement = (*ctrl);
+      }
+    }
+  }
+
+  _focusedCharacter = closestMovingElement;
+}
+
+void Game::moveCharacter(glm::ivec2 screenTarget) {
+  for (auto ctrl = _engine.getControllableElements().begin(); ctrl != _engine.getControllableElements().end(); ctrl++) {
+
+    glm::ivec4 spriteRect = (*ctrl)->getScreenRect();
+
+    if (ut::contains(spriteRect,screenTarget)) {
+      _focusedCharacter = *ctrl;
+      return;
+    }
+  }
+
+  if (_focusedCharacter != nullptr)
+    _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));
+}
+
+void Game::select(glm::ivec4 rect, bool add) {
   if (!add)
     _selection.clear();
 
@@ -142,7 +254,7 @@ void GameSandbox::select(glm::ivec4 rect, bool add) {
   }
 }
 
-void GameSandbox::selectAllLions() {
+void Game::selectAllLions() {
   _selection.clear();
   const std::set<Controllable*> controllableElements = _engine.getControllableElements();
   for (auto it = controllableElements.begin(); it != controllableElements.end(); it++) {
@@ -153,7 +265,7 @@ void GameSandbox::selectAllLions() {
   }
 }
 
-void GameSandbox::createLion(glm::ivec2 screenTarget) {
+void Game::createLion(glm::ivec2 screenTarget) {
   try {
     if (!_huntHasStarted)
       _engine.addLion(screenTarget);
@@ -170,7 +282,7 @@ void GameSandbox::createLion(glm::ivec2 screenTarget) {
   }
 }
 
-void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
+void Game::moveSelection(glm::ivec2 screenTarget) {
   glm::vec2 target = _engine.get2DCoord(screenTarget);
 
   for(auto it = _selection.begin(); it != _selection.end(); ++it) {
@@ -181,7 +293,7 @@ void GameSandbox::moveSelection(glm::ivec2 screenTarget) {
   }
 }
 
-void GameSandbox::goBackToSelection() {
+void Game::goBackToSelection() {
   if (!_selection.empty()) {
     glm::vec2 barycenter;
     float nbSelected = 0;
@@ -195,13 +307,13 @@ void GameSandbox::goBackToSelection() {
   }
 }
 
-void GameSandbox::makeLionsRun() {
+void Game::makeLionsRun() {
   for (auto it = _selection.begin(); it != _selection.end(); ++it) {
     (*it)->beginRunning();
   }
 }
 
-void GameSandbox::switchLionsRun() {
+void Game::switchLionsRun() {
   bool makeThemAllRun = false;
   bool generalStrategyChosen = false;
   for (auto it = _selection.begin(); it != _selection.end(); ++it) {
@@ -218,14 +330,14 @@ void GameSandbox::switchLionsRun() {
   }
 }
 
-void GameSandbox::killLion() {
+void Game::killLion() {
   if (!_selection.empty()) {
     (*_selection.begin())->die();
     _nbLions--;
   }
 }
 
-void GameSandbox::benchmark() {
+void Game::benchmark() {
   Camera& cam = Camera::getInstance();
 
   cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
@@ -248,7 +360,7 @@ void GameSandbox::benchmark() {
   cam.reset();
 }
 
-void GameSandbox::interruptHunt() {
+void Game::interruptHunt() {
   if (_huntHasStarted) {
     _huntHasStarted = false;
     if (Lion::getNbKilled() > _bestScore)
@@ -262,7 +374,11 @@ void GameSandbox::interruptHunt() {
     _interface.setTextTopCenter(bestScoreText.str());
 
     _interface.setTextTopRight("");
-    _interface.setTextTopLeft(getInfoText());
+
+    if (_lockedView)
+      _interface.setTextTopLeft(getInfoTextLockedView());
+    else
+      _interface.setTextTopLeft(getInfoTextGlobalView());
 
     std::ostringstream scoreText;
     scoreText << "Kills: " << Lion::getNbKilled();
@@ -270,7 +386,7 @@ void GameSandbox::interruptHunt() {
   }
 }
 
-void GameSandbox::startNewHunt() {
+void Game::startNewHunt() {
   if (!_huntHasStarted) {
     std::vector<igMovingElement*> toDelete;
 
@@ -293,7 +409,29 @@ void GameSandbox::startNewHunt() {
     _huntHasStarted = true;
     _huntStart.restart();
 
-    _interface.setTextTopLeft(getInfoText());
+    _interface.setTextTopLeft(getInfoTextGlobalView());
     _interface.setTextCenter("Hunt Starts!", _msCenterTextDisplayDuration);
   }
+}
+
+void Game::genTribe() {
+  Camera& cam = Camera::getInstance();
+  if (_tribe.size() == 0) {
+    _tribe = _engine.genTribe(cam.getPointedPos());
+
+    if (_tribe.size() == 0)
+      displayError("Can't spawn a tribe here");
+  }
+}
+
+void Game::deleteTribe() {
+  std::vector<igMovingElement*> tribe(_tribe.size());
+
+  #pragma omp parallel for
+  for (size_t i = 0; i < _tribe.size(); i++) {
+    tribe[i] = (igMovingElement*) _tribe[i];
+  }
+
+  _engine.deleteElements(tribe);
+  _tribe.clear();
 }

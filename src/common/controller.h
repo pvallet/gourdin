@@ -3,12 +3,10 @@
 #include <SDL2pp/SDL2pp.hh>
 #include "opengl.h"
 
-#include "android_event_handler_sandbox.h"
-#include "event_handler_game.h"
-#include "event_handler_sandbox.h"
+#include "eventHandlerLockedView.h"
+#include "eventHandlerGlobalView.h"
 #include "engine.h"
-#include "gameGame.h"
-#include "gameSandbox.h"
+#include "game.h"
 
 #ifndef NDEBUG
 	class TestHandler;
@@ -34,17 +32,10 @@ private:
 	int _msElapsed;
 
 	Engine _engine;
-	GameGame _gameGame;
-	GameSandbox _gameSandbox;
+	Game _game;
 
-	EventHandlerType    _currentHandlerType;
-	EventHandlerGame    _eHandlerGame;
-
-#ifdef __ANDROID__
-	AndroidEventHandlerSandbox _eHandlerSandbox;
-#else
-	EventHandlerSandbox _eHandlerSandbox;
-#endif
+	EventHandlerLockedView _eventHandlerLockedView;
+	EventHandlerGlobalView _eventHandlerGlobalView;
 
 	SDL2pp::Window& _window;
 };

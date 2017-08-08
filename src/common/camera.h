@@ -25,11 +25,9 @@
 
 class Controller;
 class EventHandler;
-class EventHandlerGame;
-class EventHandlerSandbox;
-class AndroidEventHandlerSandbox;
+class EventHandlerLockedView;
+class EventHandlerGlobalView;
 class Game;
-class GameSandbox;
 
 class Camera {
 public:
@@ -65,11 +63,9 @@ public:
 
 	friend Controller;
 	friend EventHandler;
-	friend EventHandlerGame;
-	friend EventHandlerSandbox;
-	friend AndroidEventHandlerSandbox;
+	friend EventHandlerLockedView;
+	friend EventHandlerGlobalView;
 	friend Game;
-	friend GameSandbox;
 
 private:
 	Camera();

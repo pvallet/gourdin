@@ -1,13 +1,12 @@
 #pragma once
 
-#include "event_handler.h"
-#include "gameGame.h"
+#include "eventHandler.h"
 
-class EventHandlerGame : public EventHandler {
+class EventHandlerLockedView : public EventHandler {
 public:
-  EventHandlerGame(GameGame& game);
+  EventHandlerLockedView(Game& game);
 
-  bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
+  bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);
 
   bool gainFocus();
@@ -34,6 +33,4 @@ private:
 
   Clock _transferStart;
   glm::vec2 _previousFocusedPos;
-
-  GameGame& _game;
 };

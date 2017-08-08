@@ -1,13 +1,12 @@
 #pragma once
 
-#include "event_handler.h"
-#include "gameSandbox.h"
+#include "eventHandler.h"
 
-class EventHandlerSandbox : public EventHandler {
+class EventHandlerGlobalView : public EventHandler {
 public:
-  EventHandlerSandbox(GameSandbox& game);
+  EventHandlerGlobalView(Game& game);
 
-  bool handleEvent(const SDL_Event& event, EventHandlerType& currentHandler);
+  bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);
 
   bool gainFocus();
@@ -20,6 +19,4 @@ private:
   float _scrollSpeed;
 
   glm::ivec4 _rectSelect;
-
-  GameSandbox& _game;
 };

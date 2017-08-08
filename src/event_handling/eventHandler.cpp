@@ -1,4 +1,4 @@
-#include "event_handler.h"
+#include "eventHandler.h"
 #include "camera.h"
 #include "clock.h"
 #include "utils.h"
@@ -13,9 +13,12 @@ size_t EventHandler::_nbFingers = 0;
 
 EventHandler::EventHandler(Game& game):
   _beginDragLeft(DEFAULT_OUTSIDE_WINDOW_COORD),
+  _game(game),
   _pendingClick(DEFAULT_OUTSIDE_WINDOW_COORD),
-  _gonnaBeDoubleClick(false),
-  _game(game) {}
+  _gonnaBeDoubleClick(false) {
+
+  SDL_SetEventFilter(EventHandler::HandleAppEvents, NULL);
+}
 
 bool EventHandler::isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const {
   glm::vec2 beginDragTouch(_beginDragTouch);
@@ -24,7 +27,7 @@ bool EventHandler::isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const 
   return glm::length(beginDragTouch - posFloat) < MAX_DIST_FOR_CLICK;
 }
 
-bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& currentHandler) {
+bool EventHandler::handleEvent(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
   bool running = true;
 
@@ -146,13 +149,6 @@ bool EventHandler::handleEvent(const SDL_Event& event, EventHandlerType& current
           _game.switchLog();
           break;
 
-        case SDLK_m:
-          if (currentHandler == HDLR_GAME)
-            currentHandler = HDLR_SANDBOX;
-          else
-            currentHandler = HDLR_GAME;
-          break;
-
         case SDLK_p:
           if (Clock::isGlobalTimerPaused())
             Clock::resumeGlobalTimer();
@@ -244,5 +240,22 @@ void EventHandler::makeThetaFitInAllowedZone(float& theta, const glm::vec3& norm
       theta = thetasLim.first;
     else
       theta = thetasLim.second;
+  }
+}
+
+int EventHandler::HandleAppEvents(void *userdata, SDL_Event *event) {
+  (void) userdata;
+
+  switch (event->type) {
+    case SDL_APP_DIDENTERFOREGROUND:
+      Clock::resumeGlobalTimer();
+      return 0;
+
+    case SDL_APP_WILLENTERBACKGROUND:
+      Clock::pauseGlobalTimer();
+      return 0;
+
+    default:
+        return 1;
   }
 }
