@@ -113,14 +113,9 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       break;
   }
 
-  if (event.type == SDL_USER_DOUBLE_CLICK) {
-    if (_game.hasFocusedCharacter())
-      _game.setLockedView(true);
-  }
-
-  else if (event.type == SDL_USER_CLICK) {
+  if (event.type == SDL_USER_CLICK) {
     Camera& cam = Camera::getInstance();
-    glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
+    glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords((intptr_t) event.user.data1, (intptr_t) event.user.data2);
 
     if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
       cam.setPointedPos(MAX_COORD * minimapCoord);
@@ -131,6 +126,11 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
 
     else
       _game.unselect();
+  }
+
+  else if (event.type == SDL_USER_DOUBLE_CLICK) {
+    if (_game.hasFocusedCharacter())
+      _game.setLockedView(true);
   }
 
   else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
