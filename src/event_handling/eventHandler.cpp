@@ -4,11 +4,15 @@
 #include "utils.h"
 
 Uint32 EventHandler::SDL_USER_CLICK = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_DOUBLE_CLICK = SDL_RegisterEvents(1);
 Uint32 EventHandler::SDL_USER_LONG_CLICK_BEGIN = SDL_RegisterEvents(1);
 Uint32 EventHandler::SDL_USER_LONG_CLICK_MOTION = SDL_RegisterEvents(1);
 Uint32 EventHandler::SDL_USER_LONG_CLICK_END = SDL_RegisterEvents(1);
-Uint32 EventHandler::SDL_USER_DOUBLE_CLICK = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_DRAG_BEGIN = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_DRAG_MOTION = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_DRAG_END = SDL_RegisterEvents(1);
 bool EventHandler::_duringLongClick = false;
+bool EventHandler::_duringDrag = false;
 size_t EventHandler::_nbFingers = 0;
 
 EventHandler::EventHandler(Game& game):
@@ -25,6 +29,16 @@ bool EventHandler::isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const 
   glm::vec2 posFloat(pos);
 
   return glm::length(beginDrag - posFloat) < MAX_DIST_FOR_CLICK;
+}
+
+void EventHandler::sendEvent(Uint32 type, glm::ivec2 pos) const {
+  SDL_Event event;
+  SDL_zero(event);
+  event.type = type;
+
+  event.user.data1 = (void*) ((intptr_t) pos.x);
+  event.user.data2 = (void*) ((intptr_t) pos.y);
+  SDL_PushEvent(&event);
 }
 
 bool EventHandler::handleEvent(const SDL_Event& event) {
@@ -68,16 +82,16 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       _currentCursorPos.y = event.button.y;
 
       if (getNbFingers() == 1) {
-        // Send longClickEventMotion
-        if (_duringLongClick) {
-          SDL_Event longClickEventMotion;
-          SDL_zero(longClickEventMotion);
-          longClickEventMotion.type = SDL_USER_LONG_CLICK_MOTION;
+        if (isDuringLongClick())
+          sendEvent(SDL_USER_LONG_CLICK_MOTION, _currentCursorPos);
 
-          longClickEventMotion.user.data1 = (void*) ((intptr_t) _currentCursorPos.x);
-          longClickEventMotion.user.data2 = (void*) ((intptr_t) _currentCursorPos.y);
-          SDL_PushEvent(&longClickEventMotion);
+        else if (!isCloseEnoughToBeginClickToDefineClick(_currentCursorPos) && !isDraggingCursor()) {
+          sendEvent(SDL_USER_DRAG_BEGIN, _currentCursorPos);
+          _duringDrag = true;
         }
+
+        else if (isDraggingCursor())
+          sendEvent(SDL_USER_DRAG_MOTION, _currentCursorPos);
       }
       break;
 
@@ -92,46 +106,28 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
 
           if (_clickBegin.getElapsedTime() < LONGCLICK_MS) {
 
-            // Send doubleClickEvent
             if (_gonnaBeDoubleClick) {
-              SDL_Event doubleClickEvent;
-              SDL_zero(doubleClickEvent);
-              doubleClickEvent.type = SDL_USER_DOUBLE_CLICK;
-
-              doubleClickEvent.user.data1 = (void*) ((intptr_t) _pendingClick.x);
-              doubleClickEvent.user.data2 = (void*) ((intptr_t) _pendingClick.y);
-              SDL_PushEvent(&doubleClickEvent);
-
+              sendEvent(SDL_USER_DOUBLE_CLICK, _pendingClick);
               _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
             }
 
-            // Send clickEvent
             else {
-              SDL_Event clickEvent;
-              SDL_zero(clickEvent);
-              clickEvent.type = SDL_USER_CLICK;
-
-              clickEvent.user.data1 = (void*) ((intptr_t) _beginDrag.x);
-              clickEvent.user.data2 = (void*) ((intptr_t) _beginDrag.y);
-              SDL_PushEvent(&clickEvent);
-
+              sendEvent(SDL_USER_CLICK, _beginDrag);
               _pendingClick = _beginDrag;
             }
           }
         }
 
-        // Send longClickEventEnd
-        if (_duringLongClick) {
-          SDL_Event longClickEventEnd;
-          SDL_zero(longClickEventEnd);
-          longClickEventEnd.type = SDL_USER_LONG_CLICK_END;
-
-          longClickEventEnd.user.data1 = (void*) ((intptr_t) releasedPos.x);
-          longClickEventEnd.user.data2 = (void*) ((intptr_t) releasedPos.y);
-          SDL_PushEvent(&longClickEventEnd);
+        if (isDuringLongClick()) {
+          sendEvent(SDL_USER_LONG_CLICK_END, releasedPos);
 
           _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
           _duringLongClick = false;
+        }
+
+        else if (isDraggingCursor()) {
+          sendEvent(SDL_USER_DRAG_END, releasedPos);
+          _duringDrag = false;
         }
 
         _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
@@ -161,22 +157,16 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       break;
   }
 
+  // userEventLog(event);
+
   return running;
 }
 
 void EventHandler::onGoingEvents(int msElapsed) {
-  if (!_duringLongClick && getNbFingers() == 1) {
-    if (_clickBegin.getElapsedTime() > LONGCLICK_MS &&
-        isCloseEnoughToBeginClickToDefineClick(_currentCursorPos)) {
+  if (!isDuringLongClick() && getNbFingers() == 1) {
+    if (_clickBegin.getElapsedTime() > LONGCLICK_MS && !isDraggingCursor()) {
 
-      SDL_Event longClickEventBegin;
-      SDL_zero(longClickEventBegin);
-      longClickEventBegin.type = SDL_USER_LONG_CLICK_BEGIN;
-
-      longClickEventBegin.user.data1 = (void*) ((intptr_t) _currentCursorPos.x);
-      longClickEventBegin.user.data2 = (void*) ((intptr_t) _currentCursorPos.y);
-      SDL_PushEvent(&longClickEventBegin);
-
+      sendEvent(SDL_USER_LONG_CLICK_BEGIN, _currentCursorPos);
       _duringLongClick = true;
     }
   }
@@ -233,6 +223,25 @@ void EventHandler::makeThetaFitInAllowedZone(float& theta, const glm::vec3& norm
     else
       theta = thetasLim.second;
   }
+}
+
+void EventHandler::userEventLog(const SDL_Event& event) const {
+  if (event.type == SDL_USER_CLICK)
+    SDL_Log("Click: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_DOUBLE_CLICK)
+    SDL_Log("Double click: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_LONG_CLICK_BEGIN)
+    SDL_Log("Long click begin: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_LONG_CLICK_MOTION)
+    SDL_Log("Long click motion: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_LONG_CLICK_END)
+    SDL_Log("Long click end: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_DRAG_BEGIN)
+    SDL_Log("Drag begin: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_DRAG_MOTION)
+    SDL_Log("Drag motion: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
+  if (event.type == SDL_USER_DRAG_END)
+    SDL_Log("Drag end: (%d,%d)", (int) ((intptr_t) event.user.data1), (int) ((intptr_t) event.user.data2));
 }
 
 int EventHandler::HandleAppEvents(void *userdata, SDL_Event *event) {

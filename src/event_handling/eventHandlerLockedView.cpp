@@ -12,8 +12,7 @@
 EventHandlerLockedView::EventHandlerLockedView(Game& game) :
   EventHandler::EventHandler(game),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
-  _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
-  _draggingCamera(false) {}
+  _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)) {}
 
 void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
@@ -88,55 +87,6 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       _game.setLockedView(false);
       break;
 
-    case SDL_MOUSEBUTTONDOWN:
-      _oldPhi = cam.getPhi();
-      _oldTheta = cam.getTheta();
-      break;
-
-    case SDL_MOUSEBUTTONUP:
-      _draggingCamera = false;
-      break;
-
-    case SDL_MOUSEMOTION:
-      if (getBeginDrag() != DEFAULT_OUTSIDE_WINDOW_COORD) {
-
-        glm::vec2 newMousePos(event.motion.x,event.motion.y);
-        glm::vec2 beginDrag(getBeginDrag());
-
-        if (!_draggingCamera && glm::length(beginDrag - newMousePos) > MAX_DIST_FOR_CLICK) {
-          _draggingCamera = true;
-          _beginDrag = getBeginDrag();
-        }
-
-        if (_draggingCamera) {
-          if (_game.getPovCamera()) {
-            cam.setTheta(_oldTheta + (event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
-            cam.setPhi(_oldPhi + (event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
-          }
-
-          else {
-            cam.setTheta(_oldTheta);
-
-            // Dragging the camera must be coherent when the mouse goes around the central character
-            // The sense of rotation depends inwhich quarter of the screen the cursor is
-            // If the quarter changes, we reset the origin of the dragging
-            if (_beginDrag.x > cam.getW() / 2.f)
-                cam.rotate( (event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
-            else
-                cam.rotate(-(event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
-
-            if (_beginDrag.y < cam.getH() / 2.f)
-                cam.rotate( (event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
-            else
-                cam.rotate(-(event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
-
-            _beginDrag = newMousePos;
-            _oldTheta = cam.getTheta();
-          }
-        }
-      }
-    break;
-
     case SDL_KEYDOWN:
       handleKeyPressed(event);
       break;
@@ -162,7 +112,41 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_DOUBLE_CLICK)
-    _game.makeLionsRun();
+    _game.switchLionsRun();
+
+  else if (event.type == SDL_USER_DRAG_BEGIN) {
+    _oldPhi = cam.getPhi();
+    _oldTheta = cam.getTheta();
+    _beginDrag = getBeginDrag();
+  }
+
+  else if (event.type == SDL_USER_DRAG_MOTION) {
+    if (_game.getPovCamera()) {
+      cam.setTheta(_oldTheta + ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
+      cam.setPhi  (_oldPhi   + ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
+    }
+
+    else {
+      cam.setTheta(_oldTheta);
+
+      // Dragging the camera must be coherent when the mouse goes around the central character
+      // The sense of rotation depends on which quarter of the screen the cursor is
+      // If the quarter changes, we reset the origin of the dragging
+      if (_beginDrag.x > cam.getW() / 2.f)
+          cam.rotate( ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
+      else
+          cam.rotate(-((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
+
+      if (_beginDrag.y < cam.getH() / 2.f)
+          cam.rotate( ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
+      else
+          cam.rotate(-((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
+
+      _beginDrag.x = (intptr_t) event.user.data1;
+      _beginDrag.y = (intptr_t) event.user.data2;
+      _oldTheta = cam.getTheta();
+    }
+  }
 
   return EventHandler::handleEvent(event);
 }
@@ -227,7 +211,7 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
   float phi   = cam.getPhi();
 
   if (_game.getPovCamera()) {
-    if (!_draggingCamera) {
+    if (!EventHandler::isDraggingCursor()) {
       _oldPhi = phi; _oldTheta = theta;
 
       if (keyboardState[SDL_SCANCODE_LEFT])

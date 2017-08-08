@@ -12,7 +12,6 @@ public:
   void gainFocus();
 
 private:
-  void handleClick(const SDL_Event& event);
   void handleKeyPressed(const SDL_Event& event);
 
   bool _addSelect;

@@ -18,42 +18,6 @@ EventHandlerGlobalView::EventHandlerGlobalView(Game& game) :
   _game.setScrollSpeedToSlow(true);
 }
 
-void EventHandlerGlobalView::handleClick(const SDL_Event& event) {
-  Camera& cam = Camera::getInstance();
-  glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
-
-  if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-    cam.setPointedPos(MAX_COORD * minimapCoord);
-  }
-
-  else {
-    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-
-    // Begin selection
-    if (event.button.button == SDL_BUTTON_LEFT) {
-      if (keyboardState[SDL_SCANCODE_LSHIFT])
-          _addSelect = true;
-      else
-          _addSelect = false;
-
-      _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
-      _game.getInterface().setRectSelect(_rectSelect);
-    }
-
-    // Move selection
-    if (event.button.button == SDL_BUTTON_RIGHT) {
-      if (_game.isSelectionEmpty())
-        _game.createLion(glm::ivec2(event.button.x, event.button.y));
-      else {
-        _game.moveSelection(glm::ivec2(event.button.x, event.button.y));
-        if (keyboardState[SDL_SCANCODE_LSHIFT] ||
-            keyboardState[SDL_SCANCODE_RSHIFT])
-          _game.makeLionsRun();
-      }
-    }
-  }
-}
-
 void EventHandlerGlobalView::handleKeyPressed(const SDL_Event& event) {
   switch(event.key.keysym.scancode) {
     case SDL_SCANCODE_SPACE:
@@ -116,24 +80,20 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       cam.zoom(- _scrollSpeed * event.wheel.y);
       break;
 
-    case SDL_MOUSEBUTTONDOWN:
-      handleClick(event);
-      break;
+    case SDL_MOUSEBUTTONDOWN: {
+      const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
 
-    case SDL_MOUSEBUTTONUP:
-      if (event.button.button == SDL_BUTTON_LEFT) {
-        _game.select(_rectSelect, _addSelect);
-        _rectSelect = glm::ivec4(event.button.x, event.button.y,0,0);
-        _game.getInterface().setRectSelect(_rectSelect);
+      if (event.button.button == SDL_BUTTON_RIGHT) {
+        if (_game.isSelectionEmpty())
+          _game.createLion(glm::ivec2(event.button.x, event.button.y));
+        else {
+          _game.moveSelection(glm::ivec2(event.button.x, event.button.y));
+          if (keyboardState[SDL_SCANCODE_LSHIFT] ||
+              keyboardState[SDL_SCANCODE_RSHIFT])
+            _game.makeLionsRun();
+        }
       }
-      break;
-
-    case SDL_MOUSEMOTION:
-      if (getBeginDrag() != DEFAULT_OUTSIDE_WINDOW_COORD && event.button.which != SDL_TOUCH_MOUSEID) {
-        _rectSelect.z = event.motion.x - _rectSelect.x;
-        _rectSelect.w = event.motion.y - _rectSelect.y;
-        _game.getInterface().setRectSelect(_rectSelect);
-      }
+    }
       break;
 
     case SDL_KEYDOWN:
@@ -159,13 +119,49 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_CLICK) {
-    if (_game.pickCharacter(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
+    Camera& cam = Camera::getInstance();
+    glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(event.button.x, event.button.y);
+
+    if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
+      cam.setPointedPos(MAX_COORD * minimapCoord);
+    }
+
+    else if (_game.pickCharacter(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
       _game.setLockedView(true);
+
+    else
+      _game.unselect();
   }
 
   else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
     _game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
     _game.displayInfo("Created predator");
+  }
+
+  else if (event.type == SDL_USER_DRAG_BEGIN) {
+    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+
+    if (keyboardState[SDL_SCANCODE_LSHIFT])
+      _addSelect = true;
+    else
+      _addSelect = false;
+
+    _rectSelect = glm::ivec4((intptr_t) event.user.data1, (intptr_t) event.user.data2,0,0);
+    _game.getInterface().setRectSelect(_rectSelect);
+  }
+
+#ifndef __ANDROID__
+  else if (event.type == SDL_USER_DRAG_MOTION) {
+    _rectSelect.z = (intptr_t) event.user.data1 - _rectSelect.x;
+    _rectSelect.w = (intptr_t) event.user.data2 - _rectSelect.y;
+    _game.getInterface().setRectSelect(_rectSelect);
+  }
+#endif
+
+  else if (event.type == SDL_USER_DRAG_END) {
+    _game.select(_rectSelect, _addSelect);
+    _rectSelect = glm::ivec4((intptr_t) event.user.data1, (intptr_t) event.user.data2,0,0);
+    _game.getInterface().setRectSelect(_rectSelect);
   }
 
   return EventHandler::handleEvent(event);
@@ -218,5 +214,5 @@ void EventHandlerGlobalView::gainFocus() {
   Camera& cam = Camera::getInstance();
   cam.setValues(cam.getZoom(), cam.getTheta(), INIT_PHI);
 
-  _game.select(glm::ivec4(-1,-1,0,0), false);
+  _game.unselect();
 }

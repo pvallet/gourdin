@@ -25,6 +25,8 @@ public:
 
   // Returns true if there is a controllable element containing screenTarget
   bool pickCharacter(glm::ivec2 screenTarget);
+  void makeLionsRun();
+  void switchLionsRun();
 
   // -------------------------- Locked view ------------------------------------
 
@@ -47,11 +49,10 @@ public:
 
   void select(glm::ivec4 rect, bool add);
   void selectAllLions();
+  inline void unselect() {select(glm::ivec4(-1,-1,0,0), false);}
   void createLion(glm::ivec2 screenTarget);
   void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
-  void makeLionsRun();
-  void switchLionsRun();
   void killLion();
   void benchmark();
   void interruptHunt();

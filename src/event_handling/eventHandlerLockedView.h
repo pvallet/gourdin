@@ -28,7 +28,6 @@ private:
   float _oldTheta;
   float _oldPhi;
 
-  bool _draggingCamera;
   glm::ivec2 _beginDrag;
 
   Clock _transferStart;
