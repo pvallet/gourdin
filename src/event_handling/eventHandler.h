@@ -33,7 +33,8 @@ public:
 
 protected:
   inline size_t getNbFingers() const {return _nbFingers;}
-  glm::ivec2 _beginDrag;
+  inline glm::ivec2 getBeginDrag() const {return _beginDrag;}
+
 
   static Uint32 SDL_USER_CLICK;
   static Uint32 SDL_USER_LONG_CLICK_BEGIN;
@@ -49,6 +50,7 @@ private:
   bool isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const;
 
   static size_t _nbFingers;
+  glm::ivec2 _beginDrag;
 
   glm::ivec2 _pendingClick;
   glm::ivec2 _currentCursorPos;

@@ -12,8 +12,8 @@ bool EventHandler::_duringLongClick = false;
 size_t EventHandler::_nbFingers = 0;
 
 EventHandler::EventHandler(Game& game):
-  _beginDrag(DEFAULT_OUTSIDE_WINDOW_COORD),
   _game(game),
+  _beginDrag(DEFAULT_OUTSIDE_WINDOW_COORD),
   _pendingClick(DEFAULT_OUTSIDE_WINDOW_COORD),
   _gonnaBeDoubleClick(false) {
 
@@ -21,10 +21,10 @@ EventHandler::EventHandler(Game& game):
 }
 
 bool EventHandler::isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const {
-  glm::vec2 beginDragTouch(_beginDrag);
+  glm::vec2 beginDrag(_beginDrag);
   glm::vec2 posFloat(pos);
 
-  return glm::length(beginDragTouch - posFloat) < MAX_DIST_FOR_CLICK;
+  return glm::length(beginDrag - posFloat) < MAX_DIST_FOR_CLICK;
 }
 
 bool EventHandler::handleEvent(const SDL_Event& event) {
@@ -64,19 +64,18 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEMOTION:
-    if (getNbFingers() == 1) {
+      _currentCursorPos.x = event.button.x;
+      _currentCursorPos.y = event.button.y;
 
-        _currentCursorPos.x = event.button.x;
-        _currentCursorPos.y = event.button.y;
-
+      if (getNbFingers() == 1) {
         // Send longClickEventMotion
         if (_duringLongClick) {
           SDL_Event longClickEventMotion;
           SDL_zero(longClickEventMotion);
           longClickEventMotion.type = SDL_USER_LONG_CLICK_MOTION;
 
-          longClickEventMotion.user.data1 = (void*) ((uintptr_t) _currentCursorPos.x);
-          longClickEventMotion.user.data2 = (void*) ((uintptr_t) _currentCursorPos.y);
+          longClickEventMotion.user.data1 = (void*) ((intptr_t) _currentCursorPos.x);
+          longClickEventMotion.user.data2 = (void*) ((intptr_t) _currentCursorPos.y);
           SDL_PushEvent(&longClickEventMotion);
         }
       }
@@ -99,8 +98,8 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
               SDL_zero(doubleClickEvent);
               doubleClickEvent.type = SDL_USER_DOUBLE_CLICK;
 
-              doubleClickEvent.user.data1 = (void*) ((uintptr_t) _pendingClick.x);
-              doubleClickEvent.user.data2 = (void*) ((uintptr_t) _pendingClick.y);
+              doubleClickEvent.user.data1 = (void*) ((intptr_t) _pendingClick.x);
+              doubleClickEvent.user.data2 = (void*) ((intptr_t) _pendingClick.y);
               SDL_PushEvent(&doubleClickEvent);
 
               _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
@@ -112,8 +111,8 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
               SDL_zero(clickEvent);
               clickEvent.type = SDL_USER_CLICK;
 
-              clickEvent.user.data1 = (void*) ((uintptr_t) _beginDrag.x);
-              clickEvent.user.data2 = (void*) ((uintptr_t) _beginDrag.y);
+              clickEvent.user.data1 = (void*) ((intptr_t) _beginDrag.x);
+              clickEvent.user.data2 = (void*) ((intptr_t) _beginDrag.y);
               SDL_PushEvent(&clickEvent);
 
               _pendingClick = _beginDrag;
@@ -127,8 +126,8 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
           SDL_zero(longClickEventEnd);
           longClickEventEnd.type = SDL_USER_LONG_CLICK_END;
 
-          longClickEventEnd.user.data1 = (void*) ((uintptr_t) releasedPos.x);
-          longClickEventEnd.user.data2 = (void*) ((uintptr_t) releasedPos.y);
+          longClickEventEnd.user.data1 = (void*) ((intptr_t) releasedPos.x);
+          longClickEventEnd.user.data2 = (void*) ((intptr_t) releasedPos.y);
           SDL_PushEvent(&longClickEventEnd);
 
           _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
@@ -174,8 +173,8 @@ void EventHandler::onGoingEvents(int msElapsed) {
       SDL_zero(longClickEventBegin);
       longClickEventBegin.type = SDL_USER_LONG_CLICK_BEGIN;
 
-      longClickEventBegin.user.data1 = (void*) ((uintptr_t) _currentCursorPos.x);
-      longClickEventBegin.user.data2 = (void*) ((uintptr_t) _currentCursorPos.y);
+      longClickEventBegin.user.data1 = (void*) ((intptr_t) _currentCursorPos.x);
+      longClickEventBegin.user.data2 = (void*) ((intptr_t) _currentCursorPos.y);
       SDL_PushEvent(&longClickEventBegin);
 
       _duringLongClick = true;

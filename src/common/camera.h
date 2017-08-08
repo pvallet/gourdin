@@ -12,7 +12,7 @@
 // r, theta, phi follows the mathematical convention: theta is the azimuthal and phi the polar angle
 
 #ifdef __ANDROID__
-	#define MIN_R 50.f
+	#define MIN_R 80.f
 	#define INIT_R 100.f
 #else
 	#define MIN_R 120.f

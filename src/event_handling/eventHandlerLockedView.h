@@ -9,10 +9,9 @@ public:
   bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);
 
-  bool gainFocus();
+  inline void gainFocus() {resetCamera(false);}
 
 private:
-  void handleClick(glm::ivec2 windowCoords);
   void handleKeyPressed(const SDL_Event& event);
   void handleKeyReleased(const SDL_Event& event);
   void handleCamBoundsGodMode(float& theta) const;
@@ -30,6 +29,7 @@ private:
   float _oldPhi;
 
   bool _draggingCamera;
+  glm::ivec2 _beginDrag;
 
   Clock _transferStart;
   glm::vec2 _previousFocusedPos;

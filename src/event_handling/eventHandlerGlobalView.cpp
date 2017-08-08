@@ -129,7 +129,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDrag != DEFAULT_OUTSIDE_WINDOW_COORD) {
+      if (getBeginDrag() != DEFAULT_OUTSIDE_WINDOW_COORD && event.button.which != SDL_TOUCH_MOUSEID) {
         _rectSelect.z = event.motion.x - _rectSelect.x;
         _rectSelect.w = event.motion.y - _rectSelect.y;
         _game.getInterface().setRectSelect(_rectSelect);
@@ -153,21 +153,20 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       break;
   }
 
-  if (event.type == SDL_USER_DOUBLE_CLICK)
-    // currentHandler = HDLR_GAME;
-    SDL_Log("Double click (%d,%d)", event.user.data1, event.user.data2);
+  if (event.type == SDL_USER_DOUBLE_CLICK) {
+    if (_game.hasFocusedCharacter())
+      _game.setLockedView(true);
+  }
 
-  else if (event.type == SDL_USER_CLICK)
-    SDL_Log("Click (%d,%d)", event.user.data1, event.user.data2);
+  else if (event.type == SDL_USER_CLICK) {
+    if (_game.pickCharacter(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
+      _game.setLockedView(true);
+  }
 
-  else if (event.type == SDL_USER_LONG_CLICK_BEGIN)
-    SDL_Log("Long click begin (%d,%d)", event.user.data1, event.user.data2);
-
-  else if (event.type == SDL_USER_LONG_CLICK_MOTION)
-    SDL_Log("Long click motion (%d,%d)", event.user.data1, event.user.data2);
-
-  else if (event.type == SDL_USER_LONG_CLICK_END)
-    SDL_Log("Long click end (%d,%d)", event.user.data1, event.user.data2);
+  else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
+    _game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
+    _game.displayInfo("Created predator");
+  }
 
   return EventHandler::handleEvent(event);
 }
@@ -175,6 +174,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
 void EventHandlerGlobalView::onGoingEvents(int msElapsed) {
   EventHandler::onGoingEvents(msElapsed);
 
+#ifndef __ANDROID__
   Camera& cam = Camera::getInstance();
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   int mousePosX, mousePosY;
@@ -211,4 +211,12 @@ void EventHandlerGlobalView::onGoingEvents(int msElapsed) {
     theta -= ROTATION_ANGLE_PMS * msElapsed;
 
   cam.setTheta(theta);
+#endif
+}
+
+void EventHandlerGlobalView::gainFocus() {
+  Camera& cam = Camera::getInstance();
+  cam.setValues(cam.getZoom(), cam.getTheta(), INIT_PHI);
+
+  _game.select(glm::ivec4(-1,-1,0,0), false);
 }

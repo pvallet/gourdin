@@ -9,7 +9,7 @@ public:
   bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);
 
-  bool gainFocus();
+  void gainFocus();
 
 private:
   void handleClick(const SDL_Event& event);

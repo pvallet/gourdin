@@ -15,16 +15,6 @@ EventHandlerLockedView::EventHandlerLockedView(Game& game) :
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _draggingCamera(false) {}
 
-void EventHandlerLockedView::handleClick(glm::ivec2 windowCoords) {
-  glm::vec2 previousPos = _game.getFocusedPos();
-  _game.moveCharacter(windowCoords);
-
-  if (previousPos != _game.getFocusedPos()) {
-    _transferStart.restart();
-    _previousFocusedPos = previousPos;
-  }
-}
-
 void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
 
@@ -94,6 +84,7 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
 
   switch (event.type) {
     case SDL_MULTIGESTURE:
+    case SDL_MOUSEWHEEL:
       _game.setLockedView(false);
       break;
 
@@ -103,20 +94,19 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEBUTTONUP:
-      if (!_draggingCamera && event.button.which != SDL_TOUCH_MOUSEID)
-        handleClick(glm::ivec2(event.button.x, event.button.y));
-
       _draggingCamera = false;
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDrag != DEFAULT_OUTSIDE_WINDOW_COORD) {
+      if (getBeginDrag() != DEFAULT_OUTSIDE_WINDOW_COORD) {
 
         glm::vec2 newMousePos(event.motion.x,event.motion.y);
-        glm::vec2 beginDrag(_beginDrag);
+        glm::vec2 beginDrag(getBeginDrag());
 
-        if (glm::length(beginDrag - newMousePos) > MAX_DIST_FOR_CLICK)
+        if (!_draggingCamera && glm::length(beginDrag - newMousePos) > MAX_DIST_FOR_CLICK) {
           _draggingCamera = true;
+          _beginDrag = getBeginDrag();
+        }
 
         if (_draggingCamera) {
           if (_game.getPovCamera()) {
@@ -156,15 +146,23 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       break;
   }
 
-  if (event.type == SDL_USER_CLICK)
-    handleClick(glm::ivec2((uintptr_t) event.user.data1, (uintptr_t) event.user.data2));
+  if (event.type == SDL_USER_CLICK) {
+    glm::ivec2 windowCoords((intptr_t) event.user.data1, (intptr_t) event.user.data2);
 
-  else if (event.type == SDL_USER_DOUBLE_CLICK) {
-    if (_game.getPovCamera())
-      resetCamera(false);
+    glm::vec2 previousPos = _game.getFocusedPos();
+    bool newSelectedCharacter = _game.pickCharacter(windowCoords);
+
+    if (newSelectedCharacter) {
+      _transferStart.restart();
+      _previousFocusedPos = previousPos;
+    }
+
     else
-      resetCamera(true);
+      _game.moveFocused(windowCoords);
   }
+
+  else if (event.type == SDL_USER_DOUBLE_CLICK)
+    _game.makeLionsRun();
 
   return EventHandler::handleEvent(event);
 }
@@ -294,14 +292,6 @@ void EventHandlerLockedView::resetCamera(bool pov) {
     cam.setValues(MIN_R, terrainNormal.y, INIT_PHI);
     cam.setAdditionalHeight(0);
   }
-}
-
-bool EventHandlerLockedView::gainFocus() {
-  // TODO send selected
-
-  resetCamera(false);
-
-  return true;
 }
 
 float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {

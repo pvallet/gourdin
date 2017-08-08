@@ -36,6 +36,7 @@ void Controller::init() {
 
 void Controller::run() {
   Clock frameClock;
+  bool previousViewWasLocked = false;
 
   while (_running) {
     _msElapsed = frameClock.restart();
@@ -49,6 +50,15 @@ void Controller::run() {
 
       if (!_running)
         break;
+    }
+
+    if (_game.isViewLocked() != previousViewWasLocked) {
+      if (_game.isViewLocked())
+        _eventHandlerLockedView.gainFocus();
+      else
+        _eventHandlerGlobalView.gainFocus();
+
+      previousViewWasLocked = _game.isViewLocked();
     }
 
     if (_game.isViewLocked())

@@ -21,21 +21,23 @@ public:
   inline const Engine& getEngine() const {return _engine;}
 
   inline bool isViewLocked() const {return _lockedView;}
-  inline void setLockedView(bool lockedView) {_lockedView = lockedView;}
+  void setLockedView(bool lockedView);
+
+  // Returns true if there is a controllable element containing screenTarget
+  bool pickCharacter(glm::ivec2 screenTarget);
 
   // -------------------------- Locked view ------------------------------------
 
   void changeFocusInDirection(glm::vec2 direction);
-  // Changes the character to the one on which the player has clicked if so, otherwise returns focusedCharacter
-  void moveCharacter(glm::ivec2 screenTarget);
 
+  inline bool hasFocusedCharacter() const {return _focusedCharacter != nullptr;}
   inline glm::vec2 getFocusedPos() const {if (!_focusedCharacter) return glm::vec2(0,0);
     return _focusedCharacter->getPos();}
   inline float getCharacterHeight() const {if (!_focusedCharacter) return 0;
     return _focusedCharacter->getSize().y;}
 
-  inline void setFocusedCharacter(Controllable* focusedCharacter) {_focusedCharacter = focusedCharacter;}
   inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
+  inline void moveFocused(glm::ivec2 screenTarget) {if (_focusedCharacter) _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));}
   inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}
 
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoTextLockedView());}
@@ -63,7 +65,7 @@ public:
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
   inline bool huntHasStarted() const {return _huntHasStarted;}
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
-  inline void displayError(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
+  inline void displayInfo(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
 protected:
   virtual void updateCamera() const;
@@ -71,6 +73,7 @@ protected:
   std::string getInfoTextLockedView() const;
   std::string getInfoTextGlobalView() const;
   std::string getHuntText() const;
+  void setFocusedCharacter(Controllable* focusedCharacter);
 
   Controllable* _focusedCharacter;
   std::vector<Controllable*> _tribe;

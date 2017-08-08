@@ -7,6 +7,7 @@
 #define LION_MIN_SPAWN_DIST 20
 
 Game::Game (Engine& engine):
+  _focusedCharacter(nullptr),
   _lockedView(false),
   _displayLog(true),
   _engine(engine),
@@ -82,6 +83,9 @@ void Game::update(int msElapsed) {
    _selection.erase(toDelete[i]);
   }
 
+  if (_focusedCharacter != nullptr && _focusedCharacter->isDead())
+    _focusedCharacter = nullptr;
+
   updateCamera();
   _engine.update(msElapsed);
 }
@@ -104,6 +108,13 @@ void Game::render() const {
   _interface.renderText();
 
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
+}
+
+void Game::setLockedView(bool lockedView) {
+  _lockedView = lockedView;
+
+  if (_lockedView)
+    setFocusedCharacter(_focusedCharacter);
 }
 
 std::string Game::getInfoTextCommon() const {
@@ -205,22 +216,30 @@ void Game::changeFocusInDirection(glm::vec2 direction) {
     }
   }
 
-  _focusedCharacter = closestMovingElement;
+  setFocusedCharacter(closestMovingElement);
 }
 
-void Game::moveCharacter(glm::ivec2 screenTarget) {
+void Game::setFocusedCharacter(Controllable* focusedCharacter) {
+  _focusedCharacter = focusedCharacter;
+
+  _selection.clear();
+  Lion* focusedLion = dynamic_cast<Lion*>(_focusedCharacter);
+  if (focusedLion)
+    _selection.insert(focusedLion);
+}
+
+bool Game::pickCharacter(glm::ivec2 screenTarget) {
   for (auto ctrl = _engine.getControllableElements().begin(); ctrl != _engine.getControllableElements().end(); ctrl++) {
 
     glm::ivec4 spriteRect = (*ctrl)->getScreenRect();
 
     if (ut::contains(spriteRect,screenTarget)) {
-      _focusedCharacter = *ctrl;
-      return;
+      setFocusedCharacter(*ctrl);
+      return true;
     }
   }
 
-  if (_focusedCharacter != nullptr)
-    _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));
+  return false;
 }
 
 void Game::select(glm::ivec4 rect, bool add) {
@@ -278,7 +297,7 @@ void Game::createLion(glm::ivec2 screenTarget) {
       _nbLions++;
     }
   } catch (const std::runtime_error& e) {
-    displayError(e.what());
+    displayInfo(e.what());
   }
 }
 
@@ -420,7 +439,7 @@ void Game::genTribe() {
     _tribe = _engine.genTribe(cam.getPointedPos());
 
     if (_tribe.size() == 0)
-      displayError("Can't spawn a tribe here");
+      displayInfo("Can't spawn a tribe here");
   }
 }
 
