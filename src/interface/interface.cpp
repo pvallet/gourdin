@@ -1,5 +1,13 @@
 #include "interface.h"
 
+#ifdef __ANDROID__
+  #define STAMINA_BAR_WIDTH 60.f
+  #define STAMINA_BAR_HEIGHT 8.f
+#else
+  #define STAMINA_BAR_WIDTH 20.f
+  #define STAMINA_BAR_HEIGHT 4.f
+#endif
+
 Interface::Interface():
   cam(Camera::getInstance()),
   _rectSelect(glm::vec4(1), false) {}
@@ -71,10 +79,12 @@ void Interface::renderMinimap(const Engine& engine) const {
   glm::vec2 viewerPos( minimapTextureRect.x + (float) minimapTextureRect.z * cam.getPointedPos().x / MAX_COORD,
                        minimapTextureRect.y + (float) minimapTextureRect.w * cam.getPointedPos().y / MAX_COORD);
 
+  glm::vec2 viewer = glm::vec2(minimapTextureRect.z, minimapTextureRect.w) / 10.f;
+
   ColoredRectangles opaqueGrey(glm::vec4(0.2,0.2,0.2,1), std::vector<glm::vec4>(1,
-    glm::vec4(viewerPos.x - miniChunkSize.x/2.f,
-              viewerPos.y - miniChunkSize.y/2.f,
-              miniChunkSize*2.f)
+    glm::vec4(viewerPos.x - viewer.x/2.f,
+              viewerPos.y - viewer.y/2.f,
+              viewer)
   ));
 
   opaqueGrey.draw();
@@ -135,7 +145,7 @@ void Interface::renderRectSelect() const {
   _rectSelect.draw();
 }
 
-void Interface::renderLifeBars(std::set<Lion*> selection) const {
+void Interface::renderStaminaBars(std::set<Lion*> selection) const {
   std::vector<glm::vec4> staminaBarsRects;
   std::vector<glm::vec4> outlinesRects;
 
@@ -147,17 +157,17 @@ void Interface::renderLifeBars(std::set<Lion*> selection) const {
       float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
       staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-        corners.x + corners.z/2 - 10,
-        corners.y - corners.w*maxHeightFactor + corners.w - 5,
-        20.f* (*it)->getStamina() / 100.f,
-        4
+        corners.x + corners.z/2 - STAMINA_BAR_WIDTH / 2.f,
+        corners.y - corners.w*maxHeightFactor + corners.w - STAMINA_BAR_WIDTH / 4.f,
+        STAMINA_BAR_WIDTH * (*it)->getStamina() / 100.f,
+        STAMINA_BAR_HEIGHT
       )));
 
       outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-        corners.x + corners.z/2 - 10,
-        corners.y - corners.w*maxHeightFactor + corners.w - 5,
-        20,
-        4
+        corners.x + corners.z/2 - STAMINA_BAR_WIDTH / 2.f,
+        corners.y - corners.w*maxHeightFactor + corners.w - STAMINA_BAR_WIDTH / 4.f,
+        STAMINA_BAR_WIDTH,
+        STAMINA_BAR_HEIGHT
       )));
     }
   }

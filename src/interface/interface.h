@@ -23,7 +23,7 @@ public:
   void renderMinimap(const Engine& engine) const;
   void renderText() const;
   void renderRectSelect() const;
-  void renderLifeBars(std::set<Lion*> selection) const;
+  void renderStaminaBars(std::set<Lion*> selection) const;
 
   glm::vec2 getMinimapClickCoords(size_t x, size_t y) const;
   void setTextTopLeft(const std::string& string);

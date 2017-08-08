@@ -99,7 +99,7 @@ void Game::render() const {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   _interface.renderEngine();
-  _interface.renderLifeBars(_selection);
+  _interface.renderStaminaBars(_selection);
 
   if (!_lockedView)
     _interface.renderRectSelect();
