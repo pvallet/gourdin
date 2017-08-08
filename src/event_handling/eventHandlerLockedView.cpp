@@ -110,18 +110,18 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != DEFAULT_OUTSIDE_WINDOW_COORD) {
+      if (_beginDrag != DEFAULT_OUTSIDE_WINDOW_COORD) {
 
         glm::vec2 newMousePos(event.motion.x,event.motion.y);
-        glm::vec2 beginDragLeft(_beginDragLeft);
+        glm::vec2 beginDrag(_beginDrag);
 
-        if (glm::length(beginDragLeft - newMousePos) > MAX_DIST_FOR_CLICK)
+        if (glm::length(beginDrag - newMousePos) > MAX_DIST_FOR_CLICK)
           _draggingCamera = true;
 
         if (_draggingCamera) {
           if (_game.getPovCamera()) {
-            cam.setTheta(_oldTheta + (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE);
-            cam.setPhi(_oldPhi + (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE);
+            cam.setTheta(_oldTheta + (event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
+            cam.setPhi(_oldPhi + (event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
           }
 
           else {
@@ -130,17 +130,17 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
             // Dragging the camera must be coherent when the mouse goes around the central character
             // The sense of rotation depends inwhich quarter of the screen the cursor is
             // If the quarter changes, we reset the origin of the dragging
-            if (_beginDragLeft.x > cam.getW() / 2.f)
-                cam.rotate( (event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+            if (_beginDrag.x > cam.getW() / 2.f)
+                cam.rotate( (event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
             else
-                cam.rotate(-(event.motion.y - _beginDragLeft.y) * ROTATION_ANGLE_MOUSE, 0);
+                cam.rotate(-(event.motion.y - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
 
-            if (_beginDragLeft.y < cam.getH() / 2.f)
-                cam.rotate( (event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+            if (_beginDrag.y < cam.getH() / 2.f)
+                cam.rotate( (event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
             else
-                cam.rotate(-(event.motion.x - _beginDragLeft.x) * ROTATION_ANGLE_MOUSE, 0);
+                cam.rotate(-(event.motion.x - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
 
-            _beginDragLeft = newMousePos;
+            _beginDrag = newMousePos;
             _oldTheta = cam.getTheta();
           }
         }
@@ -156,10 +156,10 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       break;
   }
 
-  if (event.type == SDL_USER_FINGER_CLICK)
+  if (event.type == SDL_USER_CLICK)
     handleClick(glm::ivec2((uintptr_t) event.user.data1, (uintptr_t) event.user.data2));
 
-  else if (event.type == SDL_USER_FINGER_DOUBLE_CLICK) {
+  else if (event.type == SDL_USER_DOUBLE_CLICK) {
     if (_game.getPovCamera())
       resetCamera(false);
     else

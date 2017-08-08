@@ -129,7 +129,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEMOTION:
-      if (_beginDragLeft != DEFAULT_OUTSIDE_WINDOW_COORD) {
+      if (_beginDrag != DEFAULT_OUTSIDE_WINDOW_COORD) {
         _rectSelect.z = event.motion.x - _rectSelect.x;
         _rectSelect.w = event.motion.y - _rectSelect.y;
         _game.getInterface().setRectSelect(_rectSelect);
@@ -153,20 +153,20 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       break;
   }
 
-  if (event.type == SDL_USER_FINGER_DOUBLE_CLICK)
+  if (event.type == SDL_USER_DOUBLE_CLICK)
     // currentHandler = HDLR_GAME;
     SDL_Log("Double click (%d,%d)", event.user.data1, event.user.data2);
 
-  else if (event.type == SDL_USER_FINGER_CLICK)
+  else if (event.type == SDL_USER_CLICK)
     SDL_Log("Click (%d,%d)", event.user.data1, event.user.data2);
 
-  else if (event.type == SDL_USER_FINGER_LONG_CLICK_BEGIN)
+  else if (event.type == SDL_USER_LONG_CLICK_BEGIN)
     SDL_Log("Long click begin (%d,%d)", event.user.data1, event.user.data2);
 
-  else if (event.type == SDL_USER_FINGER_LONG_CLICK_MOTION)
+  else if (event.type == SDL_USER_LONG_CLICK_MOTION)
     SDL_Log("Long click motion (%d,%d)", event.user.data1, event.user.data2);
 
-  else if (event.type == SDL_USER_FINGER_LONG_CLICK_END)
+  else if (event.type == SDL_USER_LONG_CLICK_END)
     SDL_Log("Long click end (%d,%d)", event.user.data1, event.user.data2);
 
   return EventHandler::handleEvent(event);

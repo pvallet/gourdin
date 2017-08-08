@@ -3,16 +3,16 @@
 #include "clock.h"
 #include "utils.h"
 
-Uint32 EventHandler::SDL_USER_FINGER_CLICK = SDL_RegisterEvents(1);
-Uint32 EventHandler::SDL_USER_FINGER_LONG_CLICK_BEGIN = SDL_RegisterEvents(1);
-Uint32 EventHandler::SDL_USER_FINGER_LONG_CLICK_MOTION = SDL_RegisterEvents(1);
-Uint32 EventHandler::SDL_USER_FINGER_LONG_CLICK_END = SDL_RegisterEvents(1);
-Uint32 EventHandler::SDL_USER_FINGER_DOUBLE_CLICK = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_CLICK = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_LONG_CLICK_BEGIN = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_LONG_CLICK_MOTION = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_LONG_CLICK_END = SDL_RegisterEvents(1);
+Uint32 EventHandler::SDL_USER_DOUBLE_CLICK = SDL_RegisterEvents(1);
 bool EventHandler::_duringLongClick = false;
 size_t EventHandler::_nbFingers = 0;
 
 EventHandler::EventHandler(Game& game):
-  _beginDragLeft(DEFAULT_OUTSIDE_WINDOW_COORD),
+  _beginDrag(DEFAULT_OUTSIDE_WINDOW_COORD),
   _game(game),
   _pendingClick(DEFAULT_OUTSIDE_WINDOW_COORD),
   _gonnaBeDoubleClick(false) {
@@ -21,14 +21,13 @@ EventHandler::EventHandler(Game& game):
 }
 
 bool EventHandler::isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const {
-  glm::vec2 beginDragTouch(_beginDragTouch);
+  glm::vec2 beginDragTouch(_beginDrag);
   glm::vec2 posFloat(pos);
 
   return glm::length(beginDragTouch - posFloat) < MAX_DIST_FOR_CLICK;
 }
 
 bool EventHandler::handleEvent(const SDL_Event& event) {
-  Camera& cam = Camera::getInstance();
   bool running = true;
 
   switch (event.type) {
@@ -37,16 +36,19 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_WINDOWEVENT:
-      if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+      if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+        Camera& cam = Camera::getInstance();
         cam.resize(event.window.data1, event.window.data2);
+      }
       break;
 
-    case SDL_FINGERDOWN:
-      _nbFingers++;
+    case SDL_MOUSEBUTTONDOWN:
+      if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
+        _nbFingers++;
 
       if (getNbFingers() == 1) {
-        _beginDragTouch.x = (event.tfinger.x * cam.getWindowW());
-        _beginDragTouch.y = (event.tfinger.y * cam.getWindowH());
+        _beginDrag.x = event.button.x;
+        _beginDrag.y = event.button.y;
 
         if (_pendingClick != DEFAULT_OUTSIDE_WINDOW_COORD) {
 
@@ -61,19 +63,17 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       }
       break;
 
-    case SDL_FINGERMOTION:
-      if (getNbFingers() == 1) {
+    case SDL_MOUSEMOTION:
+    if (getNbFingers() == 1) {
 
-        Camera& cam = Camera::getInstance();
-
-        _currentCursorPos.x = event.tfinger.x * cam.getWindowW();
-        _currentCursorPos.y = event.tfinger.y * cam.getWindowH();
+        _currentCursorPos.x = event.button.x;
+        _currentCursorPos.y = event.button.y;
 
         // Send longClickEventMotion
         if (_duringLongClick) {
           SDL_Event longClickEventMotion;
           SDL_zero(longClickEventMotion);
-          longClickEventMotion.type = SDL_USER_FINGER_LONG_CLICK_MOTION;
+          longClickEventMotion.type = SDL_USER_LONG_CLICK_MOTION;
 
           longClickEventMotion.user.data1 = (void*) ((uintptr_t) _currentCursorPos.x);
           longClickEventMotion.user.data2 = (void*) ((uintptr_t) _currentCursorPos.y);
@@ -82,10 +82,11 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       }
       break;
 
-    case SDL_FINGERUP: {
-      _nbFingers--;
+    case SDL_MOUSEBUTTONUP: {
+      if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
+        _nbFingers--;
 
-      glm::ivec2 releasedPos(event.tfinger.x * cam.getWindowW(), event.tfinger.y * cam.getWindowH());
+      glm::ivec2 releasedPos(event.button.x, event.button.y);
 
       if (getNbFingers() == 0) {
         if (isCloseEnoughToBeginClickToDefineClick(releasedPos)) {
@@ -96,7 +97,7 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
             if (_gonnaBeDoubleClick) {
               SDL_Event doubleClickEvent;
               SDL_zero(doubleClickEvent);
-              doubleClickEvent.type = SDL_USER_FINGER_DOUBLE_CLICK;
+              doubleClickEvent.type = SDL_USER_DOUBLE_CLICK;
 
               doubleClickEvent.user.data1 = (void*) ((uintptr_t) _pendingClick.x);
               doubleClickEvent.user.data2 = (void*) ((uintptr_t) _pendingClick.y);
@@ -109,13 +110,13 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
             else {
               SDL_Event clickEvent;
               SDL_zero(clickEvent);
-              clickEvent.type = SDL_USER_FINGER_CLICK;
+              clickEvent.type = SDL_USER_CLICK;
 
-              clickEvent.user.data1 = (void*) ((uintptr_t) _beginDragTouch.x);
-              clickEvent.user.data2 = (void*) ((uintptr_t) _beginDragTouch.y);
+              clickEvent.user.data1 = (void*) ((uintptr_t) _beginDrag.x);
+              clickEvent.user.data2 = (void*) ((uintptr_t) _beginDrag.y);
               SDL_PushEvent(&clickEvent);
 
-              _pendingClick = _beginDragTouch;
+              _pendingClick = _beginDrag;
             }
           }
         }
@@ -124,7 +125,7 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
         if (_duringLongClick) {
           SDL_Event longClickEventEnd;
           SDL_zero(longClickEventEnd);
-          longClickEventEnd.type = SDL_USER_FINGER_LONG_CLICK_END;
+          longClickEventEnd.type = SDL_USER_LONG_CLICK_END;
 
           longClickEventEnd.user.data1 = (void*) ((uintptr_t) releasedPos.x);
           longClickEventEnd.user.data2 = (void*) ((uintptr_t) releasedPos.y);
@@ -133,6 +134,8 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
           _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
           _duringLongClick = false;
         }
+
+        _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
       }
 
       _gonnaBeDoubleClick = false;
@@ -157,16 +160,6 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
           break;
       }
       break;
-
-    case SDL_MOUSEBUTTONDOWN:
-      if (event.button.button == SDL_BUTTON_LEFT)
-        _beginDragLeft = glm::ivec2(event.button.x, event.button.y);
-      break;
-
-    case SDL_MOUSEBUTTONUP:
-      if (event.button.button == SDL_BUTTON_LEFT)
-        _beginDragLeft = DEFAULT_OUTSIDE_WINDOW_COORD;
-      break;
   }
 
   return running;
@@ -179,7 +172,7 @@ void EventHandler::onGoingEvents(int msElapsed) {
 
       SDL_Event longClickEventBegin;
       SDL_zero(longClickEventBegin);
-      longClickEventBegin.type = SDL_USER_FINGER_LONG_CLICK_BEGIN;
+      longClickEventBegin.type = SDL_USER_LONG_CLICK_BEGIN;
 
       longClickEventBegin.user.data1 = (void*) ((uintptr_t) _currentCursorPos.x);
       longClickEventBegin.user.data2 = (void*) ((uintptr_t) _currentCursorPos.y);

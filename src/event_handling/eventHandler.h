@@ -33,14 +33,13 @@ public:
 
 protected:
   inline size_t getNbFingers() const {return _nbFingers;}
-  glm::ivec2 _beginDragLeft;
-  glm::ivec2 _beginDragTouch;
+  glm::ivec2 _beginDrag;
 
-  static Uint32 SDL_USER_FINGER_CLICK;
-  static Uint32 SDL_USER_FINGER_LONG_CLICK_BEGIN;
-  static Uint32 SDL_USER_FINGER_LONG_CLICK_MOTION;
-  static Uint32 SDL_USER_FINGER_LONG_CLICK_END;
-  static Uint32 SDL_USER_FINGER_DOUBLE_CLICK;
+  static Uint32 SDL_USER_CLICK;
+  static Uint32 SDL_USER_LONG_CLICK_BEGIN;
+  static Uint32 SDL_USER_LONG_CLICK_MOTION;
+  static Uint32 SDL_USER_LONG_CLICK_END;
+  static Uint32 SDL_USER_DOUBLE_CLICK;
 
   static bool _duringLongClick;
 
