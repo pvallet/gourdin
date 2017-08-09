@@ -5,7 +5,7 @@
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define ROTATION_ANGLE_MOUSE 0.1f
 #define CHARACTER_TIME_TRANSFER_MS 100
-#define CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS 500
+#define CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS 200
 
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
@@ -48,11 +48,15 @@ void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
       moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
       break;
 
+    case SDL_SCANCODE_LSHIFT:
+      _game.makeLionsRun();
+      break;
+
   }
 
   // Switch selection to closest character in the direction given by moveFocused
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-  if (keyboardState[SDL_SCANCODE_LSHIFT] &&
+  if (keyboardState[SDL_SCANCODE_SPACE] &&
       moveFocused != _game.getFocusedPos()) {
 
     _previousFocusedPos = _game.getFocusedPos();
@@ -62,19 +66,23 @@ void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
 }
 
 void EventHandlerLockedView::handleKeyReleased(const SDL_Event& event) {
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   switch(event.key.keysym.scancode) {
-    case SDL_SCANCODE_Z:
-    case SDL_SCANCODE_Q:
+    case SDL_SCANCODE_W:
+    case SDL_SCANCODE_A:
     case SDL_SCANCODE_S:
     case SDL_SCANCODE_D:
     // The user is not moving the character any more
-    const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-      if (!keyboardState[SDL_SCANCODE_Z] &&
-          !keyboardState[SDL_SCANCODE_Q] &&
+      if (!keyboardState[SDL_SCANCODE_W] &&
+          !keyboardState[SDL_SCANCODE_A] &&
           !keyboardState[SDL_SCANCODE_S] &&
           !keyboardState[SDL_SCANCODE_D] &&
-          !keyboardState[SDL_SCANCODE_LSHIFT])
+          !keyboardState[SDL_SCANCODE_SPACE])
         _game.stopMoving();
+      break;
+
+    case SDL_SCANCODE_LSHIFT:
+      _game.stopLionsRun();
       break;
   }
 }
@@ -270,7 +278,7 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
 
     cam.setValues(cam.getZoom(), theta, phi);
 
-    if (!keyboardState[SDL_SCANCODE_LSHIFT]) {
+    if (!keyboardState[SDL_SCANCODE_SPACE]) {
       glm::vec2 moveFocused = _game.getFocusedPos();
       float theta = cam.getTheta()*M_PI/180.f;
 
@@ -288,8 +296,6 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
     }
   }
 }
-
-#include <iostream>
 
 void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
   Camera& cam = Camera::getInstance();

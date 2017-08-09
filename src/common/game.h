@@ -26,6 +26,7 @@ public:
   // Returns true if there is a controllable element containing screenTarget
   bool pickCharacter(glm::ivec2 screenTarget);
   void makeLionsRun();
+  void stopLionsRun();
   void switchLionsRun();
 
   // -------------------------- Locked view ------------------------------------

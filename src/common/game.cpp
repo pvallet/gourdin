@@ -332,6 +332,12 @@ void Game::makeLionsRun() {
   }
 }
 
+void Game::stopLionsRun() {
+  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
+    (*it)->beginWalking();
+  }
+}
+
 void Game::switchLionsRun() {
   bool makeThemAllRun = false;
   bool generalStrategyChosen = false;
