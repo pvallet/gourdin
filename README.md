@@ -1,39 +1,20 @@
 # gourdin
 
-This project is a 3D/2D engine developped under SFML and OpenGL for educational
+This project is a 3D/2D engine developped under SDL and OpenGL for educational
 purposes.
 
----
+The structure of the map is taken from the map generator of this tutorial:
+http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
 
-Two modes are featured in gourdin, a Sandbox mode and a Game mode.
-
-The **Sandbox** mode is made to be able to see the whole structure of the island and navigate through the different biomes easily. This is still a work in progress so there is still obvious work to be done on texture transitions and forests structure.
-
-There are some antilope and deer herds scattered over the island, which appear only on certain biomes. The antilopes appear only on the biome with small plants with big leaves (making the environment more consistent is on the TO-DO list). The deers are easier to find.
-
-As a remnant from the earlier development stages, you can hunt them by spawning predators with the right click in the adequate biomes, and control them as in a classic RTS. Up to you to find where you can spawn wolves, lions and leopards ;) You can launch a hunt session where your number of kills will be recorded. In this mode you cannot spawn predators too close to the deers.
-
-Any feedback on the structure of the island and the environment is much appreciated (the controls of the predators is not the main purpose of this mode).
-
-The **Game** mode is made to show how would be the controls and the camera for a game using this engine. In this mode you control a small tribe that you can move around, switching focus among characters. There are two camera types, a 'God' camera and a point-of-view one.
-
-You can move around using the mouse or the keyboard. The main purpose is to see if this type of controls would be suitable for portable devices.
-
-Any feedback on the global ergonomy of the controls and camera would be much appreciated. If that also gives you gamedesign ideas, tell me about it!
+Any feedback be much appreciated. If that also gives you gamedesign ideas, tell me about it!
 
 ---
 
 ## Installation
 
-On **Windows** you have two options:
-* Download the [installer](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-setup_0.1.0.exe) to install gourdin on your computer. You will be able to run it through the windows menu and create a desktop icon if you want. If you have an error telling you that you don't have the permissions to run it, right ctrl-click on it and choose "Run as administrator".
-* Download [gourdin-windows-folder.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0/gourdin-windows-folder_0.1.0.zip) that contains the directory with all the game info. You can unzip it and run it directly by double-clicking on `gourdin.exe`
+This version has been migrated from SFML to SDL and is thus not available yet as binaries.
 
-On **Mac OS** you should download [gourdin-mac.app.zip](https://github.com/pvallet/gourdin/releases/download/v0.1.0-rc/gourdin-mac.app.zip). Then you only have to `ctrl-click` on it and choose open to allow executing from an unidentifed developer (me).
-
-On **Linux** there is no pre-built package, you have to build it from source.
-
-All the files are available here: https://github.com/pvallet/gourdin/releases/
+All the previous versions are available here: https://github.com/pvallet/gourdin/releases/
 
 ---
 
@@ -101,5 +82,3 @@ Go in Project -> Properties, then on the tab "Build targets"
 * Type: "GUI application"
 * Output filename: "path/to/out.exe" (eg "bin/Release/out.exe")
 * Execution working dir: "\.\."
-
-Then you should be able to build and run gourdin :)

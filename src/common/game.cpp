@@ -24,13 +24,11 @@ void Game::init() {
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
 
-  if (_lockedView)
-    _interface.setTextTopLeft(getInfoTextLockedView());
+  setLockedView(false);
 
-  else {
-    _interface.setTextTopLeft(getInfoTextGlobalView());
-    _interface.setTextTopCenter("Best score: 0");
-  }
+#ifndef __ANDROID__
+  _interface.setTextTopCenter("Best score: 0");
+#endif
 }
 
 void Game::updateCamera() const {
@@ -63,8 +61,10 @@ void Game::update(int msElapsed) {
 
   logText.clear();
 
+#ifndef __ANDROID__
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
+#endif
 
   // Check if the hunt has ended
   if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
@@ -113,17 +113,23 @@ void Game::render() const {
 void Game::setLockedView(bool lockedView) {
   _lockedView = lockedView;
 
-  if (_lockedView)
+  if (_lockedView) {
     setFocusedCharacter(_focusedCharacter);
+    _interface.setTextTopLeft(getInfoTextLockedView());
+  }
+
+  else
+    _interface.setTextTopLeft(getInfoTextGlobalView());
 }
 
 std::string Game::getInfoTextCommon() const {
   std::ostringstream text;
 
+#ifndef __ANDROID__
   text << "Esc: " << "Quit engine" << std::endl
-       << "M: " << "Switch to Game mode" << std::endl
        << "P: " << "Pause" << std::endl
        << "L: " << "Hide/Display log" << std::endl;
+#endif
 
   return text.str();
 }
@@ -131,6 +137,7 @@ std::string Game::getInfoTextCommon() const {
 std::string Game::getInfoTextLockedView() const {
   std::ostringstream text;
 
+#ifndef __ANDROID__
   text << "1: " << "God camera" << std::endl
        << "2: " << "POV camera" << std::endl;
   if (_povCamera)
@@ -138,11 +145,20 @@ std::string Game::getInfoTextLockedView() const {
   else
     text << "A-E:  " << "Rotate camera" << std::endl;
   text << "WASD: " << "Move focused character" << std::endl
-      << "LShift+WASD: " << "Change focused character to closest in given direction" << std::endl
-      << std::endl
-      << "Click to move the character in the center" << std::endl
-      << "Click on another character to change the focus" << std::endl
-      << "Click and drag to rotate the camera" << std::endl;
+       << "LShift: " << "Make the focused character run" << std::endl
+       << "SPACE+WASD: " << "Change focused character to closest in given direction" << std::endl
+       << std::endl
+       << "Click to move the character in the center" << std::endl
+       << "Click on another character to change the focus" << std::endl
+       << "Click and drag to rotate the camera" << std::endl;
+#else
+  text << "Click to another character to change focus" << std::endl
+       << "Double click to make the predator run" << std::endl;
+  if (_povCamera)
+    text << "Click on the minimap to switch back to the external camera" << std::endl;
+  else
+    text << "Click on the minimap to switch to POV camera" << std::endl;
+#endif
 
   return getInfoTextCommon() + text.str();
 }
@@ -150,25 +166,31 @@ std::string Game::getInfoTextLockedView() const {
 std::string Game::getInfoTextGlobalView() const {
   std::ostringstream text;
 
+#ifndef __ANDROID__
   text << "Left-Right / A-D: " << "Rotate camera" << std::endl
        << "Up-Down    / W-S: " << "Go forwards/backwards" << std::endl
        << "A/Return: " << "Select all lions" << std::endl
-       << "B: " << "Launch benchmark" << std::endl
-       << "E: " << "Change scroll speed" << std::endl;
+       << "E: " << "Change scroll speed" << std::endl
+       << "T: " << "Create tribe" << std::endl;
   if (!_huntHasStarted)
     text << "H: " << "Start new hunt!" << std::endl;
   else
     text << "H: " << "Interrupt current hunt" << std::endl;
   text << "Z: " << "Switch to wireframe display" << std::endl
        << std::endl
-       << "Click on the minimap to jump there" << std::endl
-       << "Right-click to make a lion appear" << std::endl
+       << "Click on the minimap to change position" << std::endl
+       << "Right-click to create a lion" << std::endl
        << "Select it with the left mouse button" << std::endl
        << "Move it around with the right button" << std::endl
        << "Lshift/Rshift: " << "Make it run" << std::endl
        << "Delete: " << "Kill selected lion" << std::endl
        << std::endl
        << "Go hunt them juicy antilopes!" << std::endl;
+#else
+  text << "Long click to make a predator appear" << std::endl
+       << "Click on it to select it" << std::endl
+       << "Double click to go back to last selected predator" << std::endl;
+#endif
 
   return getInfoTextCommon() + text.str();
 }

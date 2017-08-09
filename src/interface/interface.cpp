@@ -107,8 +107,7 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  if (!_androidBuild)
-    _textTopLeft.setText(string, 12);
+  _textTopLeft.setText(string, _androidBuild ? 30 : 12);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
@@ -117,20 +116,16 @@ void Interface::setTextTopRight(const std::string& string) {
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-  if (!_androidBuild) {
     _textTopCenter.setText(string, 12);
     _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
-  }
 }
 
 void Interface::setTextCenter(const std::string& string, int msDuration) {
-  if (!_androidBuild) {
-    _textCenter.setText(string);
-    _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
-                            cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
+  _textCenter.setText(string);
+  _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
+                          cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
 
-    _textCenterChrono.reset(msDuration);
-  }
+  _textCenterChrono.reset(msDuration);
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
