@@ -4,15 +4,14 @@
 
 Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
  	igMovingElement(position, graphics, terrainGeometry),
-  _target(position) {
-
-}
+  _target(position),
+  _alwaysInSameDirection(false) {}
 
 void Controllable::update(int msElapsed) {
   if (!_dead) {
     igMovingElement::update(msElapsed);
     // The element has gone too far
-    if (glm::dot((_target - _pos), getDirection()) < 0) {
+    if (!_alwaysInSameDirection && glm::dot((_target - _pos), getDirection()) < 0) {
       _pos = _target;
       stop();
     }
@@ -24,11 +23,17 @@ void Controllable::setTarget(glm::vec2 t, ANM_TYPE anim) {
 		_target = t;
 		setDirection(t-_pos);
     launchAnimation(anim);
+    _alwaysInSameDirection = false;
 	}
+}
+
+void Controllable::setMovingDirection(glm::vec2 direction) {
+  setTarget(glm::normalize(direction) * MAX_COORD);
 }
 
 void Controllable::stop() {
   _target = _pos;
+  _alwaysInSameDirection = false;
   igMovingElement::stop();
 }
 

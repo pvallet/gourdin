@@ -152,8 +152,11 @@ std::string Game::getInfoTextLockedView() const {
        << "Click on another character to change the focus" << std::endl
        << "Click and drag to rotate the camera" << std::endl;
 #else
-  text << "Click to another character to change focus" << std::endl
-       << "Double click to make the predator run" << std::endl;
+  text << "Click to make the character move in the given direction" << std::endl
+       << "Long click to make the character move to the click" << std::endl
+       << "Double click to make a predator run" << std::endl
+       << "Click on another character to change focus" << std::endl
+       << "Click on the focused character to stop moving" << std::endl;
   if (_povCamera)
     text << "Click on the minimap to switch back to the external camera" << std::endl;
   else
@@ -262,6 +265,15 @@ bool Game::pickCharacter(glm::ivec2 screenTarget) {
   }
 
   return false;
+}
+
+void Game::moveFocused(glm::ivec2 screenTarget, bool perpetualMotion) {
+  if (_focusedCharacter) {
+    if (perpetualMotion)
+      _focusedCharacter->setMovingDirection(_engine.get2DCoord(screenTarget) - _focusedCharacter->getPos());
+    else
+      _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));
+  }
 }
 
 void Game::select(glm::ivec4 rect, bool add) {

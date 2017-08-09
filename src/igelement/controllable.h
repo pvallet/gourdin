@@ -9,6 +9,7 @@ public:
 
 	virtual void update(int msElapsed);
 	virtual void setTarget(glm::vec2 t, ANM_TYPE anim = WALK);
+	void setMovingDirection(glm::vec2 direction);
 	virtual void stop();
 
 	inline void setProjectedVertices(std::array<float,12> nVertices) {_projectedVertices = nVertices;}
@@ -17,6 +18,8 @@ public:
 
 protected:
 	glm::vec2 _target;
+
+	bool _alwaysInSameDirection;
 
 	std::array<float, 12> _projectedVertices;
 };

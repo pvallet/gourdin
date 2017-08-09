@@ -122,17 +122,25 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       bool newSelectedCharacter = _game.pickCharacter(windowCoords);
 
       if (newSelectedCharacter) {
-        _characterTransferTimer.reset(CHARACTER_TIME_TRANSFER_MS);
-        _previousFocusedPos = previousPos;
+        if (_game.getFocusedPos() == previousPos)
+          _game.stopMoving();
+
+        else {
+          _characterTransferTimer.reset(CHARACTER_TIME_TRANSFER_MS);
+          _previousFocusedPos = previousPos;
+        }
       }
 
       else
-        _game.moveFocused(windowCoords);
+        _game.moveFocused(windowCoords, true);
     }
   }
 
   else if (event.type == SDL_USER_DOUBLE_CLICK)
     _game.switchLionsRun();
+
+  else if (event.type == SDL_USER_LONG_CLICK_END)
+    _game.moveFocused(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
 
   else if (event.type == SDL_USER_DRAG_BEGIN) {
     _oldPhi = cam.getPhi();

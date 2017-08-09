@@ -40,8 +40,8 @@ public:
     return _focusedCharacter->getSize().y;}
 
   inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
-  inline void moveFocused(glm::ivec2 screenTarget) {if (_focusedCharacter) _focusedCharacter->setTarget(_engine.get2DCoord(screenTarget));}
   inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}
+  void moveFocused(glm::ivec2 screenTarget, bool perpetualMotion = false);
 
   inline void setPovCamera(bool povCamera) {_povCamera = povCamera; _interface.setTextTopLeft(getInfoTextLockedView());}
   inline bool getPovCamera() const {return _povCamera;}
