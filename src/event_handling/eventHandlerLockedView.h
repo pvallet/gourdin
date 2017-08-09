@@ -36,4 +36,6 @@ private:
   Chronometer _camTransferTimer;
   glm::vec4 _previousCameraParams;
   glm::vec4 _nextCameraParams;
+  float _thetaInPreviousView;
+  float _phiInPreviousView;
 };

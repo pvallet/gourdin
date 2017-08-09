@@ -302,19 +302,22 @@ void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
 
   _game.setPovCamera(pov);
 
-  glm::vec3 terrainNormal = ut::spherical(_game.getEngine().getNormalOnCameraPointedPos());
-
   if (pov) {
-    float theta = terrainNormal.y + 180;
-    float phi = 90.f - cam.getFov() / 2.f;
+    float theta = _thetaInPreviousView;
+    float phi = _phiInPreviousView;
     handleCamBoundsPOVMode(theta, phi);
     _nextCameraParams = glm::vec4(0.1, theta, phi, _game.getCharacterHeight());
+
+    _thetaInPreviousView = cam.getTheta();
   }
 
   else {
-    float theta =  terrainNormal.y;
+    float theta = _thetaInPreviousView;
     handleCamBoundsGodMode(theta);
     _nextCameraParams = glm::vec4(MIN_R, theta, INIT_PHI, 0);
+
+    _thetaInPreviousView = cam.getTheta();
+    _phiInPreviousView = cam.getPhi();
   }
 
   float newTheta = cam.getTheta();
@@ -335,8 +338,16 @@ void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
 
 void EventHandlerLockedView::gainFocus() {
   Camera& cam = Camera::getInstance();
+
   float distanceCamHasToTravel = glm::length(cam.getPointedPos() - _game.getFocusedPos());
+
+  _thetaInPreviousView = cam.getTheta();
+
   resetCamera(false, std::max(CHARACTER_TIME_TRANSFER_MS, (int) (10 * std::sqrt(distanceCamHasToTravel))));
+
+  glm::vec3 terrainNormal = ut::spherical(_game.getEngine().getNormalOnCameraPointedPos());
+  _thetaInPreviousView = terrainNormal.y + 180;
+  _phiInPreviousView = 90.f - cam.getFov() / 2.f;
 }
 
 float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
