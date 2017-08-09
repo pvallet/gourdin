@@ -57,6 +57,7 @@ public:
   inline float getRatio() const {return _aspectRatio;}
   inline glm::vec2 getPointedPos() const {return glm::vec2(_x, _y);}
 	inline float getHeight() const {return _height;}
+	inline float getAdditionalHeight() const {return _additionalHeight;}
   inline glm::mat4 getViewProjectionMatrix() const {return _viewProjection;}
 	inline glm::mat4 getSkyboxViewProjectionMatrix() const {return _skyboxViewProjection;}
 	inline float getZoom() const {return _r;}

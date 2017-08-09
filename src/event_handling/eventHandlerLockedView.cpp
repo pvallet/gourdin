@@ -4,7 +4,8 @@
 
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
 #define ROTATION_ANGLE_MOUSE 0.1f
-#define TIME_TRANSFER_MS 100
+#define CHARACTER_TIME_TRANSFER_MS 100
+#define CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS 500
 
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
@@ -23,12 +24,12 @@ void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   switch(event.key.keysym.scancode) {
     case SDL_SCANCODE_1:
       if (_game.getPovCamera())
-        resetCamera(false);
+        resetCamera(false, CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS);
       break;
 
     case SDL_SCANCODE_2:
       if (!_game.getPovCamera())
-        resetCamera(true);
+        resetCamera(true, CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS);
       break;
 
     case SDL_SCANCODE_S:
@@ -56,7 +57,7 @@ void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
 
     _previousFocusedPos = _game.getFocusedPos();
     _game.changeFocusInDirection(moveFocused - _game.getFocusedPos());
-    _transferStart.restart();
+    _characterTransferTimer.reset(CHARACTER_TIME_TRANSFER_MS);
   }
 }
 
@@ -103,9 +104,9 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
 
     if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
       if (_game.getPovCamera())
-        resetCamera(false);
+        resetCamera(false, CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS);
       else
-        resetCamera(true);
+        resetCamera(true, CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS);
     }
 
     else {
@@ -113,7 +114,7 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       bool newSelectedCharacter = _game.pickCharacter(windowCoords);
 
       if (newSelectedCharacter) {
-        _transferStart.restart();
+        _characterTransferTimer.reset(CHARACTER_TIME_TRANSFER_MS);
         _previousFocusedPos = previousPos;
       }
 
@@ -210,68 +211,87 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
   Camera& cam = Camera::getInstance();
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
 
-  float transferProgress = _transferStart.getElapsedTime() / (float) TIME_TRANSFER_MS;
+  float characterTransferProgress = _characterTransferTimer.getPercentageElapsed();
 
-  if (transferProgress > 1)
+  if (characterTransferProgress == 1.f)
     cam.setPointedPos(_game.getFocusedPos());
   else
-    cam.setPointedPos(_previousFocusedPos + transferProgress *
+    cam.setPointedPos(_previousFocusedPos + characterTransferProgress *
       (_game.getFocusedPos() - _previousFocusedPos));
 
-  float theta = cam.getTheta();
-  float phi   = cam.getPhi();
+  float camTransferProgress = _camTransferTimer.getPercentageElapsed();
 
-  if (_game.getPovCamera()) {
-    if (!EventHandler::isDraggingCursor()) {
-      _oldPhi = phi; _oldTheta = theta;
+  if (camTransferProgress < 1.f) {
+    glm::vec4 currentParams = _previousCameraParams + camTransferProgress *
+      (_nextCameraParams - _previousCameraParams);
 
-      if (keyboardState[SDL_SCANCODE_LEFT])
-        theta += ROTATION_ANGLE_PMS * msElapsed;
+    cam.setValues(currentParams.x, currentParams.y, currentParams.z);
+    cam.setAdditionalHeight(currentParams.w);
+  }
 
-      if (keyboardState[SDL_SCANCODE_RIGHT])
-        theta -= ROTATION_ANGLE_PMS * msElapsed;
-
-      if (keyboardState[SDL_SCANCODE_UP])
-        phi += ROTATION_ANGLE_PMS * msElapsed;
-
-      if (keyboardState[SDL_SCANCODE_DOWN])
-        phi -= ROTATION_ANGLE_PMS * msElapsed;
-    }
-
-    handleCamBoundsPOVMode(theta, phi);
+  else if (_camTransferTimer.firstTimeFinished()) {
+    cam.setValues(_nextCameraParams.x, _nextCameraParams.y, _nextCameraParams.z);
+    cam.setAdditionalHeight(_nextCameraParams.w);
   }
 
   else {
-    if (keyboardState[SDL_SCANCODE_E])
-      theta += ROTATION_ANGLE_PMS * msElapsed;
+    float theta = cam.getTheta();
+    float phi   = cam.getPhi();
 
-    if (keyboardState[SDL_SCANCODE_Q])
-      theta -= ROTATION_ANGLE_PMS * msElapsed;
+    if (_game.getPovCamera()) {
+      if (!EventHandler::isDraggingCursor()) {
+        _oldPhi = phi; _oldTheta = theta;
 
-    handleCamBoundsGodMode(theta);
-  }
+        if (keyboardState[SDL_SCANCODE_LEFT])
+          theta += ROTATION_ANGLE_PMS * msElapsed;
 
-  cam.setValues(cam.getZoom(), theta, phi);
+        if (keyboardState[SDL_SCANCODE_RIGHT])
+          theta -= ROTATION_ANGLE_PMS * msElapsed;
 
-  if (!keyboardState[SDL_SCANCODE_LSHIFT]) {
-    glm::vec2 moveFocused = _game.getFocusedPos();
-    float theta = cam.getTheta()*M_PI/180.f;
+        if (keyboardState[SDL_SCANCODE_UP])
+          phi += ROTATION_ANGLE_PMS * msElapsed;
 
-    if (keyboardState[SDL_SCANCODE_S])
-      moveFocused += glm::vec2(cos(theta), sin(theta));
-    if (keyboardState[SDL_SCANCODE_D])
-      moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
-    if (keyboardState[SDL_SCANCODE_W])
-      moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
-    if (keyboardState[SDL_SCANCODE_A])
-      moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+        if (keyboardState[SDL_SCANCODE_DOWN])
+          phi -= ROTATION_ANGLE_PMS * msElapsed;
+      }
 
-    if (moveFocused != _game.getFocusedPos())
-      _game.setTarget(moveFocused);
+      handleCamBoundsPOVMode(theta, phi);
+    }
+
+    else {
+      if (keyboardState[SDL_SCANCODE_E])
+        theta += ROTATION_ANGLE_PMS * msElapsed;
+
+      if (keyboardState[SDL_SCANCODE_Q])
+        theta -= ROTATION_ANGLE_PMS * msElapsed;
+
+      handleCamBoundsGodMode(theta);
+    }
+
+    cam.setValues(cam.getZoom(), theta, phi);
+
+    if (!keyboardState[SDL_SCANCODE_LSHIFT]) {
+      glm::vec2 moveFocused = _game.getFocusedPos();
+      float theta = cam.getTheta()*M_PI/180.f;
+
+      if (keyboardState[SDL_SCANCODE_S])
+        moveFocused += glm::vec2(cos(theta), sin(theta));
+      if (keyboardState[SDL_SCANCODE_D])
+        moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
+      if (keyboardState[SDL_SCANCODE_W])
+        moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
+      if (keyboardState[SDL_SCANCODE_A])
+        moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+
+      if (moveFocused != _game.getFocusedPos())
+        _game.setTarget(moveFocused);
+    }
   }
 }
 
-void EventHandlerLockedView::resetCamera(bool pov) {
+#include <iostream>
+
+void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
   Camera& cam = Camera::getInstance();
 
   _game.setPovCamera(pov);
@@ -279,14 +299,38 @@ void EventHandlerLockedView::resetCamera(bool pov) {
   glm::vec3 terrainNormal = ut::spherical(_game.getEngine().getNormalOnCameraPointedPos());
 
   if (pov) {
-    cam.setValues(0.1, terrainNormal.y + 180, 90.f - cam.getFov() / 2.f);
-    cam.setAdditionalHeight(_game.getCharacterHeight());
+    float theta = terrainNormal.y + 180;
+    float phi = 90.f - cam.getFov() / 2.f;
+    handleCamBoundsPOVMode(theta, phi);
+    _nextCameraParams = glm::vec4(0.1, theta, phi, _game.getCharacterHeight());
   }
 
   else {
-    cam.setValues(MIN_R, terrainNormal.y, INIT_PHI);
-    cam.setAdditionalHeight(0);
+    float theta =  terrainNormal.y;
+    handleCamBoundsGodMode(theta);
+    _nextCameraParams = glm::vec4(MIN_R, theta, INIT_PHI, 0);
   }
+
+  float newTheta = cam.getTheta();
+
+  if (absDistBetweenAngles(_nextCameraParams.y, newTheta) < std::abs(_nextCameraParams.y - newTheta)) {
+    if (_nextCameraParams.y > newTheta)
+      newTheta += 360;
+    else
+      newTheta -= 360;
+  }
+
+  _previousCameraParams = glm::vec4(cam.getZoom(), newTheta, cam.getPhi(), cam.getAdditionalHeight());
+
+  _camTransferTimer.reset(msTransferDuration);
+  _previousFocusedPos = cam.getPointedPos();
+  _characterTransferTimer.reset(msTransferDuration);
+}
+
+void EventHandlerLockedView::gainFocus() {
+  Camera& cam = Camera::getInstance();
+  float distanceCamHasToTravel = glm::length(cam.getPointedPos() - _game.getFocusedPos());
+  resetCamera(false, std::max(CHARACTER_TIME_TRANSFER_MS, (int) (10 * std::sqrt(distanceCamHasToTravel))));
 }
 
 float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {

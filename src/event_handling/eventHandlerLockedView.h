@@ -9,7 +9,7 @@ public:
   bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);
 
-  inline void gainFocus() {resetCamera(false);}
+  void gainFocus();
 
 private:
   void handleKeyPressed(const SDL_Event& event);
@@ -17,7 +17,7 @@ private:
   void handleCamBoundsGodMode(float& theta) const;
   void handleCamBoundsPOVMode(float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal
-  void resetCamera(bool pov);
+  void resetCamera(bool pov, int msTransferDuration = 0);
   static float getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct);
   static bool firstIsOnPositiveSideOfSecond(float first, float second);
 
@@ -30,6 +30,10 @@ private:
 
   glm::ivec2 _beginDrag;
 
-  Clock _transferStart;
+  Chronometer _characterTransferTimer;
   glm::vec2 _previousFocusedPos;
+
+  Chronometer _camTransferTimer;
+  glm::vec4 _previousCameraParams;
+  glm::vec4 _nextCameraParams;
 };
