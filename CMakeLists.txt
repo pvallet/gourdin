@@ -3,7 +3,9 @@ cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
 
-project(gourdin)
+set(PROJECT_NAME gourdin)
+
+project(${PROJECT_NAME})
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING
@@ -31,9 +33,17 @@ if (NOT ANDROID)
   set (CMAKE_CXX_STANDARD 11)
   set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
+  set(SDL2_PATH ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
+  set(SDL2_IMAGE_PATH ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
+
   find_package(OpenGL)
   find_package(SDL2)
   find_package(SDL2_image)
+
+  if (WIN32)
+    set(GLEW_LOCATION  ${CMAKE_SOURCE_DIR}/external/glew)
+    find_package(GLEW)
+  endif()
 
 # Include SDL2 libraries for android
 else()
@@ -95,6 +105,7 @@ endif()
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
+  ${GLEW_INCLUDE_DIRS}
   ${SDL2_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
   ${SDL2PP_INCLUDE_DIRS}
@@ -153,12 +164,39 @@ if (ANDROID)
   )
 
 else()
-  add_executable(gourdin ${SOURCE_FILES})
+  add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-  target_link_libraries(gourdin
-    ${OPENGL_LIBRARIES}
-    ${SDL2_LIBRARY}
-    ${SDL2_IMAGE_LIBRARIES}
-    ${SDL2PP_LIBRARIES}
+  if (WIN32)
+    target_link_libraries(${PROJECT_NAME}
+      ${OPENGL_LIBRARIES}
+      ${GLEW_LIBRARIES}
+      ${SDL2_LIBRARY}
+      ${SDL2_IMAGE_LIBRARIES}
+      ${SDL2PP_LIBRARIES}
+    )
+  else()
+    target_link_libraries(${PROJECT_NAME}
+      ${OPENGL_LIBRARIES}
+      ${SDL2_LIBRARY}
+      ${SDL2_IMAGE_LIBRARIES}
+      ${SDL2PP_LIBRARIES}
+    )
+  endif()
+endif()
+
+# At the end we need to copy the dlls to the output directory
+
+if (WIN32)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    "${GLEW_LOCATION}/bin/glew32.dll"
+    "${SDL2_PATH}/bin/SDL2.dll"
+    "${SDL2_IMAGE_PATH}/bin/SDL2_image.dll"
+    "${SDL2_IMAGE_PATH}/bin/libjpeg-9.dll"
+    "${SDL2_IMAGE_PATH}/bin/libpng16-16.dll"
+    "${SDL2_IMAGE_PATH}/bin/libtiff-5.dll"
+    "${SDL2_IMAGE_PATH}/bin/libwebp-4.dll"
+    "${SDL2_IMAGE_PATH}/bin/zlib1.dll"
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>
   )
 endif()

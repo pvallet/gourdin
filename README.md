@@ -62,20 +62,69 @@ cd android
 ./gradlew assembleDebug
 ./gradlew installDebug
 ```
+
+## Windows
+
+#### 1. SDL
+
+Download SDL2 development library corresponding to your compiler at the bottom of the following page:
+https://www.libsdl.org/download-2.0.php
+
+If you already use MinGW, make sure you have the version provided on the SDL website (next to the development library download).
+
+Then download SDL2 image development library: https://www.libsdl.org/projects/SDL_image/
+
+Unzip the two folders in `external\SDL2` and rename them so that your directory structure looks like this:
+
+```
+gourdin
++-- external
+|   +-- SDL2
+|   |   +-- SDL2
+|   |   |   +-- bin
+|   |   |   +-- include
+|   |   |   +-- lib
+|   |   +-- SDL2_image
+|   |   |   +-- bin
+|   |   |   +-- include
+|   |   |   +-- lib
+|   |   +-- Android.mk
+|   +-- glew              (See below)
+|   |   +-- bin
+|   |   +-- lib
+|   +-- glm               (See below)
+|   |   +-- include
+|   +-- libSDL2pp         (See below)
+```
+
+Make sure to copy the `bin`, `include` and `lib` corresponding to your compiler / platform to the roots of `SDL2` and `SDL2_image`.
+
+#### 2. GLEW
+
+http://glew.sourceforge.net/
+
+The binaries provided on the official webpage are built for Visual Studio. If you use MinGW instead, you will need to build them from source. Before building glew, make sure that you have a compiler compatible with SDL (see previous section).
+
+In order to do that, download the source and unzip it in `external`. You can build it with cmake, and then copy the folders `glew\build\bin` and `glew\build\lib` respectively to `glew\bin` and `glew\lib`.
+
+#### 3. GLM and SDL2pp
+
+GLM is a header-only library and thus does not need to be built. You can simply download it, unzip it and rename it in `external` as shown below.
+
+https://github.com/g-truc/glm/releases
+
+SDL2pp is a C++ wrapper for SDL and will be built statically while building gourdin via cmake. You also only have to unzip it and rename it in `external`.
+
+https://github.com/libSDL2pp/libSDL2pp/releases
+
+
+You can now create a new directory named `build` at the root of `gourdin`. And build the project with CMake.
+
 ---
 
 ## (Optional) Configure your Code::Blocks project
 
-Same as for building the dependencies, you need to generate the Code::Blocks project first with CMake.
-
-```
-Source code:  C:/path/to/gourdin/
-Build folder: C:/path/to/gourdin/build
-```
-
-Click on 'yes' when asked whether CMake should create the `build` directory.
-
-To be able to compile and run your project directly, you have to change some project parameters in Code::Blocks
+To be able to run your project, you have to change some project parameters in Code::Blocks
 
 Go in Project -> Properties, then on the tab "Build targets"
 

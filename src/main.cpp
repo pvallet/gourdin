@@ -4,6 +4,7 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "opengl.h"
 #include "controller.h"
 
 #ifndef NDEBUG
@@ -58,6 +59,11 @@ int main(int argc, char* argv[]) try {
 #endif
 
   glContext = SDL_GL_CreateContext(window.Get());
+
+#ifdef _WIN32
+  if (glewInit() != GLEW_OK)
+    throw std::runtime_error("Failed to initialize GLEW");
+#endif
 
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
