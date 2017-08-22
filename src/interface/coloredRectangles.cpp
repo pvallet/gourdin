@@ -45,11 +45,11 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
   size_t rectGLDataSize;
 
 	if (_filled)
-		rectGLDataSize = 12 * sizeof(float);
+		rectGLDataSize = 12;
 	else
-		rectGLDataSize = 16 * sizeof(float);
+		rectGLDataSize = 16;
 
-  glBufferData(GL_ARRAY_BUFFER, _nbRect * rectGLDataSize, NULL, GL_DYNAMIC_DRAW);
+	std::vector<float> bufferData(rectGLDataSize * _nbRect);
 
   for (size_t i = 0; i < _nbRect; i++) {
     float x0 = rectangles[i].x;
@@ -62,7 +62,7 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 	      { x0, y0 }, { x1, y1 }, { x0, y1 },
 	      { x0, y0 }, { x1, y0 }, { x1, y1 }
 	    };
-			glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
+			VertexBufferObject::cpuBufferSubData(bufferData, i * rectGLDataSize , rectGLDataSize, data);
 		}
 		else {
 			x0 += _linesOffset; y0 += _linesOffset; x1 -= 2*_linesOffset; y1 -= 2*_linesOffset;
@@ -71,10 +71,13 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 				{ x0, y0 }, { x0, y1 }, { x0, y1 }, { x1, y1 },
 				{ x1, y1 }, { x1, y0 }, { x1, y0 }, { x0, y0 }
 			};
-			glBufferSubData(GL_ARRAY_BUFFER, i * rectGLDataSize , rectGLDataSize, data);
+			VertexBufferObject::cpuBufferSubData(bufferData, i * rectGLDataSize , rectGLDataSize, data);
 		}
 
   }
+
+	glBufferData(GL_ARRAY_BUFFER, bufferData.size() * sizeof(float), &bufferData[0], GL_DYNAMIC_DRAW);
+
   VertexBufferObject::unbind();
 }
 

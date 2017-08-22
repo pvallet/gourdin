@@ -29,8 +29,7 @@ void igElementDisplay::fillBufferData(GLenum drawType) {
     indices[6*i + 5] = 3 + 4*i;
   }
 
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, _capacity * 6 * sizeof(indices[0]), NULL, GL_STATIC_DRAW);
-  glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, _capacity * 6 * sizeof(indices[0]), &indices[0]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, _capacity * 6 * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
   IndexBufferObject::unbind();
 
   _vao.bind();

@@ -56,16 +56,16 @@ void Text::setText(const std::string &str, float fontSize) {
   float maxX = -1;
 
   _stringLength = str.size();
-  size_t glyphGLDataSize = 24 * sizeof(float);
+  size_t glyphGLDataSize = 24;
 
-  glBufferData(GL_ARRAY_BUFFER, _stringLength * glyphGLDataSize, NULL, GL_DYNAMIC_DRAW);
+  std::vector<float> bufferData(_stringLength * glyphGLDataSize);
 
   for (size_t i = 0; i < str.size(); i++) {
     if (str[i] == '\n') {
       y -= _fontHandler.getFontSize() * sy;
       x = -1;
       std::vector<float> clearChar(glyphGLDataSize,0);
-      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize, glyphGLDataSize, &clearChar[0]);
+      VertexBufferObject::cpuBufferSubData(bufferData, i * glyphGLDataSize, glyphGLDataSize, &clearChar[0]);
     }
 
     else {
@@ -93,7 +93,7 @@ void Text::setText(const std::string &str, float fontSize) {
         { x0, y0, s0, t0 }, { x1, y1, s1, t1 }, { x1, y0, s1, t0 }
       };
 
-      glBufferSubData(GL_ARRAY_BUFFER, i * glyphGLDataSize, glyphGLDataSize, data);
+      VertexBufferObject::cpuBufferSubData(bufferData, i * glyphGLDataSize, glyphGLDataSize, data);
 
       x += (glyph->advance_x * sx);
     }
@@ -101,6 +101,8 @@ void Text::setText(const std::string &str, float fontSize) {
     if (x > maxX)
       maxX = x;
   }
+
+  glBufferData(GL_ARRAY_BUFFER, bufferData.size() * sizeof(float), &bufferData[0], GL_DYNAMIC_DRAW);
 
   _bounds.x = maxX;
   _bounds.y = y;

@@ -8,6 +8,8 @@
 #include "opengl.h"
 #include "glObjectInterface.h"
 
+#include <vector>
+
 class VertexArrayObject : public GLObjectInterface {
 public:
   VertexArrayObject ();
@@ -29,6 +31,9 @@ public:
 
   inline void bind() const {glBindBuffer(GL_ARRAY_BUFFER, _vboID);}
   inline static void unbind() {glBindBuffer(GL_ARRAY_BUFFER, 0);}
+
+  // Mimics glBufferSubData on the CPU as OpenGL ES drivers sometimes send the whole buffer each time
+  static void cpuBufferSubData(std::vector<float>& bufferData, size_t offset, size_t size, const void* data);
 
 private:
   GLuint _vboID;
