@@ -9,12 +9,12 @@ enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
 enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 struct BoidsInfo {
-	glm::vec2 closestRep;
+	glm::vec2 closestRep, closestFlee;
 	glm::vec2 sumPosAttract, sumPosFlee, sumOfDirs;
 	int nbDir = 0;
 	int nbAttract = 0;
 	int nbFlee = 0;
-	float minRepDst;
+	float minRepDst, minFleeDst;
 };
 
 class Antilope : public igMovingElement {
@@ -44,6 +44,7 @@ private:
 	static const float _standardLineOfSight;
 
 	float _lineOfSight; // Changes the standard line of sight to add hysteresis
+	float _panicFleeRadius;
 
 	float _repulsionRadius; // r < o < a
 	float _orientationRadius;
@@ -63,4 +64,5 @@ private:
 
 	Chronometer _noDirectionChange;
 	const int _msAverageTimeBeforeChangingDir;
+	int _timesChangedDir;
 };

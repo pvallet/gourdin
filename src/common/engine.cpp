@@ -155,8 +155,8 @@ void Engine::updateMovingElementsStates() {
   for (auto square = sortedElements.begin(); square != sortedElements.end(); square++) {
     std::list<igMovingElement*> elmtsInSurroundingSquares;
 
-    for (int k = std::max(0, square->first.x-1); k < std::min(nbSquares-1, square->first.x+1); k++) {
-    for (int l = std::max(0, square->first.y-1); l < std::min(nbSquares-1, square->first.y+1); l++) {
+    for (int k = std::max(0, square->first.x-1); k <= std::min(nbSquares-1, square->first.x+1); k++) {
+    for (int l = std::max(0, square->first.y-1); l <= std::min(nbSquares-1, square->first.y+1); l++) {
       glm::ivec2 squareCoord(k,l);
 
       if (sortedElements.find(squareCoord) != sortedElements.end())

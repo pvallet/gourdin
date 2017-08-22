@@ -9,6 +9,7 @@ const float Antilope::_standardLineOfSight = 60.f;
 
 Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igMovingElement(position, graphics, terrainGeometry),
+	_panicFleeRadius(20.f),
 	_repulsionRadius(8.f),
 	_orientationRadius(15.f),
 	_attractionRadius(50.f),
@@ -18,7 +19,8 @@ Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainG
 	_msAverageRecovering(3000),
 	_msAverageEating(7000),
 	_msAverageFindingFood(2000),
-	_msAverageTimeBeforeChangingDir(500) {
+	_msAverageTimeBeforeChangingDir(500),
+	_timesChangedDir(0) {
 
 	beginIdle();
 
@@ -27,24 +29,30 @@ Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainG
 
 
 void Antilope::beginIdle() {
-	_lineOfSight = _standardLineOfSight * 0.8;
+	if (_antilopeStatus != IDLE)
+		_timesChangedDir = 0;
 	_antilopeStatus = IDLE;
+	_lineOfSight = _standardLineOfSight * 0.8;
 	_speed = 0.f;
 	_moving = false;
 	launchAnimation(WAIT);
 }
 
 void Antilope::beginFleeing() {
-	_lineOfSight = _standardLineOfSight;
+	if (_antilopeStatus != FLEEING)
+		_timesChangedDir = 0;
 	_antilopeStatus = FLEEING;
+	_lineOfSight = _standardLineOfSight;
 	_speed = _speedRunning;
 	_moving = true;
 	launchAnimation(RUN);
 }
 
 void Antilope::beginRecovering() {
-	_lineOfSight = _standardLineOfSight * 0.9;
+	if (_antilopeStatus != RECOVERING)
+		_timesChangedDir = 0;
 	_antilopeStatus = RECOVERING;
+	_lineOfSight = _standardLineOfSight * 0.9;
 	_speed = _speedWalking;
 	_moving = true;
 	launchAnimation(WALK);
@@ -59,11 +67,13 @@ BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neig
 	BoidsInfo res;
 	float distance;
 	res.minRepDst = _repulsionRadius;
+	res.minFleeDst = _panicFleeRadius;
 
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 		if ((*it) != this) {
+			distance = glm::length(_pos - (*it)->getPos());
+
 			if (dynamic_cast<Antilope*>(*it)) {
-				distance = glm::length(_pos - (*it)->getPos());
 
 				if (distance < _repulsionRadius) {
 					if (distance < res.minRepDst) {
@@ -84,9 +94,13 @@ BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neig
 			}
 
 			else if (dynamic_cast<Lion*>((*it))) {
-				distance = glm::length(_pos - (*it)->getPos());
 
 				if (distance < _lineOfSight) {
+					if (distance < res.minFleeDst) {
+						res.closestFlee = (*it)->getPos();
+						res.minFleeDst = distance;
+					}
+
 					res.sumPosFlee += (*it)->getPos();
 					res.nbFlee++;
 				}
@@ -130,8 +144,13 @@ void Antilope::reactWhenIdle(const BoidsInfo& info) {
 }
 
 void Antilope::reactWhenFleeing(const BoidsInfo& info) {
-	if (info.nbFlee != 0)
-		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
+	if (info.nbFlee != 0) {
+		if (info.minFleeDst != _panicFleeRadius)
+			setDirection(_pos - (info.closestFlee + info.sumPosFlee) / (float) (info.nbFlee+1));
+
+		else
+			setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
+	}
 
 	else if (info.minRepDst != _repulsionRadius)
 		setDirection(_pos - info.closestRep);
@@ -148,11 +167,7 @@ void Antilope::reactWhenFleeing(const BoidsInfo& info) {
 	else if (info.nbAttract != 0)
 		setDirection(info.sumPosAttract / (float) info.nbAttract - _pos);
 
-	// Take into account the hunter for half as much
-	if (info.nbFlee != 0)
-		setDirection(_pos - info.sumPosFlee / (float) info.nbFlee);
-
-	else
+	if (info.nbFlee == 0)
 		beginRecovering();
 }
 
@@ -213,7 +228,9 @@ void Antilope::setDirection(glm::vec2 direction) {
 		// if the antilope has been fleeing for a long time, it will try its luck
 		// by going for a longer time towards the same direction
 		if (_antilopeStatus == FLEEING)
-			msTimeBeforeChangingDir += 0.5f * _currentPhase.getElapsedTime();
+			msTimeBeforeChangingDir += 200.f * _timesChangedDir;
+
+		_timesChangedDir++;
 
 		_noDirectionChange.reset(msTimeBeforeChangingDir);
 	}
