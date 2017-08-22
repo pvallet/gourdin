@@ -45,10 +45,10 @@ bool ContentGenerator::isInForestMask(glm::vec2 pos) const {
 }
 
 bool ContentGenerator::notTooCloseToOtherTrees(glm::vec2 pos, float distance) const {
-  for (size_t i = std::max((int) ((pos.x - distance)/CHUNK_SIZE), 0);
-              i < std::min((int) ((pos.x + distance)/CHUNK_SIZE), NB_CHUNKS); i++) {
-  for (size_t j = std::max((int) ((pos.y - distance)/CHUNK_SIZE), 0);
-              j < std::min((int) ((pos.y + distance)/CHUNK_SIZE), NB_CHUNKS); j++) {
+  for (int i = std::max((int) ((pos.x - distance)/CHUNK_SIZE), 0);
+           i < std::min((int) ((pos.x + distance)/CHUNK_SIZE), NB_CHUNKS); i++) {
+  for (int j = std::max((int) ((pos.y - distance)/CHUNK_SIZE), 0);
+           j < std::min((int) ((pos.y + distance)/CHUNK_SIZE), NB_CHUNKS); j++) {
 
     for (auto it = _treesInChunk[i*NB_CHUNKS +j].begin();
              it != _treesInChunk[i*NB_CHUNKS +j].end(); it++) {

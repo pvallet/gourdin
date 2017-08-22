@@ -29,7 +29,7 @@ void AnimationManager::update(int msElapsed, float nOrientation) {
 	int msTotalAnimDuration = getAnimationTime(_currentAnim);
 	_msAlreadyElapsed = _msAlreadyElapsed % msTotalAnimDuration;
 
-	size_t nextSprite = getNextSprite(_currentSprite, _msAlreadyElapsed);
+	int nextSprite = getNextSprite(_currentSprite, _msAlreadyElapsed);
 
 	// Simple case, no restart to handle
 	if (nextSprite < curAnm.steps) {

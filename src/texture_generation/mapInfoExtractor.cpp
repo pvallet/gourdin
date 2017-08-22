@@ -94,20 +94,20 @@ void MapInfoExtractor::computeLakesElevations(
         float pixelHeight = smoother.getHeight(pos);
         pixelHeight = HEIGHT_FUNCTION(pixelHeight);
 
-        if (i > 0 && lakes[i-1][j] != -1) {
+        if (i > 0 && lakes[i-1][j] != (size_t) -1) {
           size_t abovePixel = lakes[i-1][j];
           lakesTotalElevation[abovePixel] += pixelHeight;
           lakesNumberOfPixels[abovePixel] += 1;
           lakes[i][j] = abovePixel;
 
-          if (j > 0 && lakes[i][j-1] != -1 && lakes[i][j-1] != abovePixel) {
+          if (j > 0 && lakes[i][j-1] != (size_t) -1 && lakes[i][j-1] != abovePixel) {
             size_t max = std::max(lakes[i][j-1], abovePixel);
             size_t min = std::min(lakes[i][j-1], abovePixel);
             adjacentLakes[max].insert(min);
             adjacentLakes[min].insert(max);
           }
         }
-        else if (j > 0 && lakes[i][j-1] != -1) {
+        else if (j > 0 && lakes[i][j-1] != (size_t) -1) {
           lakesTotalElevation[lakes[i][j-1]] += pixelHeight;
           lakesNumberOfPixels[lakes[i][j-1]] += 1;
           lakes[i][j] = lakes[i][j-1];
@@ -129,7 +129,7 @@ void MapInfoExtractor::computeLakesElevations(
   // Simplify lakes adjacency to point always to the lowest one
   // (e.g. if lake 2 is lake 1 and lake 3 is lake 2, put lake 3 is lake 1)
   for (int i = baseLakes.size()-1; i >= 0; i--) {
-    if (baseLakes[i] == -1) {
+    if (baseLakes[i] == (size_t) -1) {
       std::set<size_t> nodesSeen;
       size_t baseLakeValue = getLowestIndexAdjacentLake(adjacentLakes, nodesSeen, i);
       for (auto it = nodesSeen.begin(); it != nodesSeen.end(); it++) {
@@ -141,7 +141,7 @@ void MapInfoExtractor::computeLakesElevations(
   // Fix lakes stats according to adjacency
   for (size_t i = 0; i < size; i++) {
     for (size_t j = 0; j < size; j++) {
-      if (lakes[i][j] != -1 && baseLakes[lakes[i][j]] != lakes[i][j]) {
+      if (lakes[i][j] != (size_t) -1 && baseLakes[lakes[i][j]] != lakes[i][j]) {
         lakesTotalElevation[baseLakes[lakes[i][j]]] += lakesTotalElevation[lakes[i][j]];
         lakesNumberOfPixels[baseLakes[lakes[i][j]]] += lakesNumberOfPixels[lakes[i][j]];
         lakes[i][j] = baseLakes[lakes[i][j]];
@@ -158,7 +158,7 @@ void MapInfoExtractor::computeLakesElevations(
   #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < size; i++) {
     for (size_t j = 0; j < size; j++) {
-      if (lakes[i][j] != -1)
+      if (lakes[i][j] != (size_t) -1)
         _lakesElevations[i*size + j] = lakesTotalElevation[lakes[i][j]];
     }
   }
@@ -173,15 +173,15 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
   #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < dilSize; i++) {
-    for (size_t j = 0; j < dilSize; j++) {
+  for (size_t i = 0; i < (size_t) dilSize; i++) {
+    for (size_t j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = std::max(0., 1 - sqrt(i*i + j*j) / transitionSize);
     }
   }
 
   #pragma omp parallel for collapse(2)
-  for (int i = 0; i < _size; i++) {
-  for (int j = 0; j < _size; j++) {
+  for (int i = 0; i < (int) _size; i++) {
+  for (int j = 0; j < (int) _size; j++) {
     Biome biome = _biomes[i*_size + j];
 
     for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {

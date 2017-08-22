@@ -102,7 +102,7 @@ void GeneratedImage::combine(const std::vector<float>& img, const std::vector<fl
 }
 
 void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
-  int filterSize = sqrt(filter.size());
+  size_t filterSize = sqrt(filter.size());
 
   assert(filterSize % 2 == 1);
   assert(filter.size() == filterSize*filterSize);
@@ -110,21 +110,21 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   std::vector<float> nPixels(_size*_size, 0);
 
   #pragma omp parallel for collapse(2)
-  for (int i = 0; i < _size; i++) {
-  for (int j = 0; j < _size; j++) {
-    for (int k = 0; k < filterSize; k++) {
-    for (int l = 0; l < filterSize; l++) {
+  for (size_t i = 0; i < _size; i++) {
+  for (size_t j = 0; j < _size; j++) {
+    for (size_t k = 0; k < filterSize; k++) {
+    for (size_t l = 0; l < filterSize; l++) {
       int curI = i - filterSize/2 + k;
       int curJ = j - filterSize/2 + l;
 
       if (curI < 0)
         curI += _size;
-      else if (curI >= _size)
+      else if (curI >= (int) _size)
         curI -= _size;
 
       if (curJ < 0)
         curJ += _size;
-      else if (curJ >= _size)
+      else if (curJ >= (int) _size)
         curJ -= _size;
 
       nPixels[i*_size + j] += _pixels[curI*_size + curJ] * filter[k*filterSize + l];
@@ -143,8 +143,8 @@ void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongs
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
   #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < dilSize; i++) {
-    for (size_t j = 0; j < dilSize; j++) {
+  for (size_t i = 0; i < (size_t) dilSize; i++) {
+    for (size_t j = 0; j < (size_t) dilSize; j++) {
       if (sqrt(i*i + j*j) <= radius)
         dilMask[i*dilSize + j] = 1;
     }
@@ -152,8 +152,8 @@ void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongs
 
   std::vector<float> result = _pixels;
   #pragma omp parallel for collapse (2)
-  for (int i = 0; i < _size; i++) {
-  for (int j = 0; j < _size; j++) {
+  for (int i = 0; i < (int) _size; i++) {
+  for (int j = 0; j < (int) _size; j++) {
 
     if (belongsToExpandedRegion(_pixels[i*_size + j])) {
       for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {
@@ -177,15 +177,15 @@ void GeneratedImage::smoothBlackDilatation(float radius) {
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
   #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < dilSize; i++) {
-    for (size_t j = 0; j < dilSize; j++) {
+  for (size_t i = 0; i < (size_t) dilSize; i++) {
+    for (size_t j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = sqrt(i*i + j*j) / radius;
     }
   }
 
   #pragma omp parallel for collapse (2)
-  for (int i = 0; i < _size; i++) {
-  for (int j = 0; j < _size; j++) {
+  for (int i = 0; i < (int) _size; i++) {
+  for (int j = 0; j < (int) _size; j++) {
     // Mask is only applied to expand black regions
     if (_pixels[i*_size + j] == 0.f) {
       for (int k = std::max(0, i-dilSize+1); k < std::min((int)_size, i+dilSize); k++) {

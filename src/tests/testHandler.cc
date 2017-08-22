@@ -84,8 +84,8 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 
   std::vector<uint8_t> pixels(forestsMask.size() * forestsMask.size() * 4, 255);
 
-	for (int i = 0 ; i < forestsMask.size() ; i++) { // Convert mask to array of pixels
-		for (int j = 0 ; j < forestsMask.size() ; j++) {
+	for (size_t i = 0 ; i < forestsMask.size() ; i++) { // Convert mask to array of pixels
+		for (size_t j = 0 ; j < forestsMask.size() ; j++) {
       if (forestsMask[i][j]) {
         pixels[i*4*forestsMask.size() + j*4] = 0;
         pixels[i*4*forestsMask.size() + j*4 + 2] = 0;
