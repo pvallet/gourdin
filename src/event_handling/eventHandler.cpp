@@ -49,12 +49,14 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       running = false;
       break;
 
+#ifndef __ANDROID__
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
         Camera& cam = Camera::getInstance();
         cam.resize(event.window.data1, event.window.data2);
       }
       break;
+#endif
 
     case SDL_MOUSEBUTTONDOWN:
       if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
