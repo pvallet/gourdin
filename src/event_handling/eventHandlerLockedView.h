@@ -2,6 +2,10 @@
 
 #include "eventHandler.h"
 
+// When not on POV, the camera can be locked in two positions, with an angle either
+// positive or negative to the angle of steepest slope of the current pointed position
+enum PreviousCameraLock {NO_LOCK, TRIGO_POS, TRIGO_NEG};
+
 class EventHandlerLockedView : public EventHandler {
 public:
   EventHandlerLockedView(Game& game);
@@ -14,7 +18,7 @@ public:
 private:
   void handleKeyPressed(const SDL_Event& event);
   void handleKeyReleased(const SDL_Event& event);
-  void handleCamBoundsGodMode(float& theta) const;
+  void handleCamBoundsGodMode(float& theta);
   void handleCamBoundsPOVMode(float& theta, float& phi) const;
   // The initial camera orientations are chosen according to the terrain normal
   void resetCamera(bool pov, int msTransferDuration = 0);
@@ -27,6 +31,8 @@ private:
 
   float _oldTheta;
   float _oldPhi;
+
+  PreviousCameraLock _previousCameraLock;
 
   glm::ivec2 _beginDrag;
 

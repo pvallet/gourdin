@@ -13,7 +13,8 @@
 EventHandlerLockedView::EventHandlerLockedView(Game& game) :
   EventHandler::EventHandler(game),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
-  _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)) {}
+  _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
+  _previousCameraLock(NO_LOCK) {}
 
 void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
@@ -155,8 +156,6 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
     }
 
     else {
-      cam.setTheta(_oldTheta);
-
       // Dragging the camera must be coherent when the mouse goes around the central character
       // The sense of rotation depends on which quarter of the screen the cursor is
       // If the quarter changes, we reset the origin of the dragging
@@ -172,20 +171,50 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
 
       _beginDrag.x = (intptr_t) event.user.data1;
       _beginDrag.y = (intptr_t) event.user.data2;
-      _oldTheta = cam.getTheta();
     }
   }
 
   return EventHandler::handleEvent(event);
 }
 
-void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) const {
+void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // The steeper the slope, the less the user can move around
   float actualMinScalarProduct = 1 - (1 - _minScalarProductWithGroundGod) * (1-sin(acos(normal.z)));
 
-  makeThetaFitInAllowedZone(theta, normal, actualMinScalarProduct);
+  if (glm::dot(normal, ut::carthesian(1, theta, 90)) < actualMinScalarProduct) {
+    // New theta with given phi
+    std::pair<float,float> thetasLim = ut::solveAcosXplusBsinXequalC(
+      normal.x, normal.y, actualMinScalarProduct);
+
+    glm::vec3 normalSpherical = ut::spherical(normal);
+
+    if (ut::angleIsPositive(normalSpherical.y, thetasLim.first))
+      std::swap(thetasLim.first, thetasLim.second);
+
+    if (_previousCameraLock == TRIGO_NEG)
+      theta = thetasLim.first;
+    else if (_previousCameraLock == TRIGO_POS)
+      theta = thetasLim.second;
+    else {
+      std::pair<float,float> distsToThetasLim;
+      distsToThetasLim.first  = ut::absDistBetweenAngles(theta, thetasLim.first);
+      distsToThetasLim.second = ut::absDistBetweenAngles(theta, thetasLim.second);
+
+      if (distsToThetasLim.first < distsToThetasLim.second) {
+        _previousCameraLock = TRIGO_NEG;
+        theta = thetasLim.first;
+      }
+      else {
+        _previousCameraLock = TRIGO_POS;
+        theta = thetasLim.second;
+      }
+    }
+  }
+
+  else if (theta != _oldTheta)
+    _previousCameraLock = NO_LOCK;
 }
 
 void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi) const {
@@ -207,7 +236,7 @@ void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi) co
 
       if (firstIsOnPositiveSideOfSecond(theta, normalTheta) !=
           firstIsOnPositiveSideOfSecond(_oldTheta, normalTheta) &&
-          absDistBetweenAngles(theta, normalTheta + 180) < 90 &&
+          ut::absDistBetweenAngles(theta, normalTheta + 180) < 90 &&
           phi != _oldPhi)
         theta = normalTheta + 180;
 
@@ -256,8 +285,6 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
 
     if (_game.getPovCamera()) {
       if (!EventHandler::isDraggingCursor()) {
-        _oldPhi = phi; _oldTheta = theta;
-
         if (keyboardState[SDL_SCANCODE_LEFT])
           theta += ROTATION_ANGLE_PMS * msElapsed;
 
@@ -303,6 +330,9 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
         _game.setTarget(moveFocused);
     }
   }
+
+  if (!_game.getPovCamera())
+    _oldTheta = cam.getTheta();
 }
 
 void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
@@ -330,7 +360,7 @@ void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
 
   float newTheta = cam.getTheta();
 
-  if (absDistBetweenAngles(_nextCameraParams.y, newTheta) < std::abs(_nextCameraParams.y - newTheta)) {
+  if (ut::absDistBetweenAngles(_nextCameraParams.y, newTheta) < std::abs(_nextCameraParams.y - newTheta)) {
     if (_nextCameraParams.y > newTheta)
       newTheta += 360;
     else
@@ -359,7 +389,7 @@ void EventHandlerLockedView::gainFocus() {
 }
 
 float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
-  return solveAcosXplusBsinXequalC(
+  return ut::solveAcosXplusBsinXequalC(
     normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
 }
 
@@ -367,5 +397,5 @@ bool EventHandlerLockedView::firstIsOnPositiveSideOfSecond(float first, float se
   float secondAnglePlus90 = second + 90;
   if (secondAnglePlus90 > 360)
     secondAnglePlus90 -= 360;
-  return absDistBetweenAngles(first, secondAnglePlus90) < 90;
+  return ut::absDistBetweenAngles(first, secondAnglePlus90) < 90;
 }

@@ -21,14 +21,6 @@ public:
   virtual bool handleEvent(const SDL_Event& event);
   virtual void onGoingEvents(int msElapsed);
 
-  // Returns two solutions in the range [0,360) in ascending order
-  static std::pair<float, float> solveAcosXplusBsinXequalC(float a, float b, float c);
-  // Takes two angles in [0,360)
-  // Returns the distance between two angles in degrees mod 360
-  static float absDistBetweenAngles(float a, float b);
-
-  static void makeThetaFitInAllowedZone(float& theta, const glm::vec3& normal, float minDotProduct);
-
   void userEventLog(const SDL_Event& event) const;
 
   static int HandleAppEvents(void *userdata, SDL_Event *event);

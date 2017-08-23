@@ -50,6 +50,16 @@ namespace ut {
 	inline glm::vec3 spherical (glm::vec3 u) {return spherical (u.x,u.y,u.z);}
 
 	std::string textFileToString(const std::string& path);
+
+	// Clamps given angle to [0,360)
+	float clampAngle(float angle);
+	// Returns two solutions in the range [0,360) in ascending order
+	std::pair<float, float> solveAcosXplusBsinXequalC(float a, float b, float c);
+	// Takes two angles in [0,360)
+	// Returns the distance between two angles in degrees mod 360
+	float absDistBetweenAngles(float a, float b);
+	// Takes two angles in [0,360)
+	inline bool angleIsPositive(float a, float b) {return b-a >= 0 ? b-a <= 180 : b-a+360 <= 180;}
 }
 
 bool glCheckError(const char *file, int line);

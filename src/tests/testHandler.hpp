@@ -24,7 +24,7 @@ private:
   void testVecUtils() const;
   void testPerlin() const;
   void testGeneratedImage() const;
-  void testEventHandler() const;
+  void testAngleFunctions() const;
 
   const Clock& _beginningOfProg;
 };

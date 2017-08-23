@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl.h"
+#include "utils.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -78,10 +79,10 @@ private:
 	void translate (float dWinX, float dWinY);
 	void rotate (float dtheta, float dphi);
 	inline void zoom (float dr) {_r += dr; _r = _r < MIN_R ? MIN_R : _r; _r = _r > MAX_R ? MAX_R : _r;}
-	inline void setTheta(float theta) {_theta = theta;}
+	inline void setTheta(float theta) {_theta = ut::clampAngle(theta);}
 	inline void setPhi  (float phi) {_phi = phi;}
 	inline void setZoom (float r) {_r = r;}
-	inline void setValues (float r, float theta, float phi) {_r = r; _theta = theta; _phi = phi;}
+	inline void setValues (float r, float theta, float phi) {setZoom(r); setTheta(theta); setPhi(phi);}
 
   inline void setPointedPos(glm::vec2 newPos) {_x = newPos.x; _y = newPos.y;}
   inline void setHeight(float nHeight) {_height = nHeight;}

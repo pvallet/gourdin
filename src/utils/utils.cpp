@@ -72,6 +72,48 @@ std::string ut::textFileToString(const std::string& path) {
   return res;
 }
 
+float ut::clampAngle(float angle) {
+  if (angle < 0)
+    return angle + ((int) std::abs(angle) / 360 + 1) * 360;
+  else
+    return angle - ((int) angle / 360) * 360;
+}
+
+std::pair<float, float> ut::solveAcosXplusBsinXequalC(float a, float b, float c) {
+  // The code is a transcription of Wolfram Alpha solution
+  std::pair<float,float> res(0,0);
+
+  if (a == -c) {
+    res.first = 180;
+    res.second = 180;
+  }
+
+  else {
+    float underRoot = a*a + b*b - c*c;
+    if (underRoot >= 0) {
+      res.first  = 2 * atan((b - sqrt(underRoot)) / (a + c)) / RAD;
+      res.second = 2 * atan((b + sqrt(underRoot)) / (a + c)) / RAD;
+
+      // Results are in range (-180, 180], make them in range [0,360)
+      if (res.first < 0)
+        res.first += 360;
+      if (res.second < 0)
+        res.second += 360;
+    }
+
+    // Ensure the ascending order
+    if (res.second < res.first)
+      std::swap(res.first,res.second);
+
+  }
+  return res;
+}
+
+float ut::absDistBetweenAngles(float a, float b) {
+  return std::min(std::abs(a-b),std::abs(std::abs(a-b)-360));
+}
+
+
 bool glCheckError(const char *file, int line) {
   GLenum err (glGetError());
 

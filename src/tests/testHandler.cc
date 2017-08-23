@@ -227,8 +227,8 @@ void TestHandler::testGeneratedImage() const {
   addToDeleteList("testSave.png");
 }
 
-void TestHandler::testEventHandler() const {
-  std::pair<float,float> solutions = EventHandler::solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
+void TestHandler::testAngleFunctions() const {
+  std::pair<float,float> solutions = ut::solveAcosXplusBsinXequalC(3, sqrt(3), -sqrt(6));
 
   float precision = 1e-4;
 
@@ -244,15 +244,38 @@ void TestHandler::testEventHandler() const {
   float angle1 = 350;
   float angle2 = 20;
 
-  if (EventHandler::absDistBetweenAngles(angle1, angle2) == 30 &&
-      EventHandler::absDistBetweenAngles(angle2, angle1) == 30)
+  if (ut::absDistBetweenAngles(angle1, angle2) == 30 &&
+      ut::absDistBetweenAngles(angle2, angle1) == 30)
     std::cout << "OK     - Absolute distance between two angles mod 360" << '\n';
 
   else {
     std::cout << "FAILED - Absolute distance between two angles mod 360" << '\n';
-    std::cout << "         Distance is " << EventHandler::absDistBetweenAngles(angle1,angle2)
+    std::cout << "         Distance is " << ut::absDistBetweenAngles(angle1,angle2)
               << ", should be " << 30 << '\n';
   }
+
+  angle1 = 350;
+  angle2 = 20;
+  float angle3 = 180;
+  float angle4 = 10;
+
+  if (ut::angleIsPositive(angle1, angle2) &&
+     !ut::angleIsPositive(angle2, angle1) &&
+     !ut::angleIsPositive(angle3, angle4) &&
+      ut::angleIsPositive(angle4, angle3))
+    std::cout << "OK     - Check if difference of two angle is positive or negative" << '\n';
+  else
+    std::cout << "FAILED - Check if difference of two angle is positive or negative" << '\n';
+
+  angle1 = 952;
+  angle2 = -750;
+
+  if (ut::clampAngle(angle1) != 232)
+    std::cout << "FAILED - Clamp angles: returned " << ut::clampAngle(angle1) << " for 952 instead of 232" << '\n';
+  else if (ut::clampAngle(angle2) != 330)
+    std::cout << "FAILED - Clamp angles: returned " << ut::clampAngle(angle2) << " for -750 instead of 330" << '\n';
+  else
+    std::cout << "OK     - Clamp angles" << '\n';
 }
 
 void TestHandler::runTests(const Controller& controller) const {
@@ -261,7 +284,7 @@ void TestHandler::runTests(const Controller& controller) const {
   testVecUtils();
   testPerlin();
   testGeneratedImage();
-  testEventHandler();
+  testAngleFunctions();
 }
 
 void TestHandler::clean() const {
