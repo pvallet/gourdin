@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL.h>
+#include <SDL2pp/SDL2pp.hh>
 #include <glm/glm.hpp>
 
 #include "game.h"
@@ -15,7 +15,7 @@
 
 class EventHandler {
 public:
-  EventHandler(Game& game);
+  EventHandler(Game& game, SDL2pp::Window& window);
 
   // Returns whether the engine will stop or not
   virtual bool handleEvent(const SDL_Event& event);
@@ -41,10 +41,13 @@ protected:
   static Uint32 SDL_USER_DRAG_END;
 
   Game& _game;
+  SDL2pp::Window& _window;
 
 private:
   bool isCloseEnoughToBeginClickToDefineClick(glm::ivec2 pos) const;
   void sendEvent(Uint32 type, glm::ivec2 pos) const;
+
+  bool _fullscreen;
 
   static bool _duringLongClick;
   static bool _duringDrag;

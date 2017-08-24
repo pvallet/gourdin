@@ -8,7 +8,7 @@ enum PreviousCameraLock {NO_LOCK, TRIGO_POS, TRIGO_NEG};
 
 class EventHandlerLockedView : public EventHandler {
 public:
-  EventHandlerLockedView(Game& game);
+  EventHandlerLockedView(Game& game, SDL2pp::Window& window);
 
   bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);

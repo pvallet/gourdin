@@ -128,6 +128,7 @@ std::string Game::getInfoTextCommon() const {
 #ifndef __ANDROID__
   text << "Esc: " << "Quit engine" << std::endl
        << "P: " << "Pause" << std::endl
+       << "F: " << "Fullscreen/Windowed" << std::endl
        << "L: " << "Hide/Display log" << std::endl;
 #endif
 

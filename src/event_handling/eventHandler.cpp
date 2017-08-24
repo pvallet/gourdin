@@ -15,8 +15,10 @@ bool EventHandler::_duringLongClick = false;
 bool EventHandler::_duringDrag = false;
 size_t EventHandler::_nbFingers = 0;
 
-EventHandler::EventHandler(Game& game):
+EventHandler::EventHandler(Game& game, SDL2pp::Window& window):
   _game(game),
+  _window(window),
+  _fullscreen(true),
   _beginDrag(DEFAULT_OUTSIDE_WINDOW_COORD),
   _pendingClick(DEFAULT_OUTSIDE_WINDOW_COORD),
   _gonnaBeDoubleClick(false) {
@@ -143,6 +145,14 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       switch(event.key.keysym.sym) {
         case SDLK_ESCAPE:
           running = false;
+          break;
+
+        case SDLK_f:
+          if (_fullscreen)
+            SDL_SetWindowFullscreen(_window.Get(), 0);
+          else
+            SDL_SetWindowFullscreen(_window.Get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+          _fullscreen = !_fullscreen;
           break;
 
         case SDLK_l:

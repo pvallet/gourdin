@@ -4,7 +4,7 @@
 
 class EventHandlerGlobalView : public EventHandler {
 public:
-  EventHandlerGlobalView(Game& game);
+  EventHandlerGlobalView(Game& game, SDL2pp::Window& window);
 
   bool handleEvent(const SDL_Event& event);
   void onGoingEvents(int msElapsed);

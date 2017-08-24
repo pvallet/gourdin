@@ -10,8 +10,8 @@
 #define MAX_GROUND_ANGLE_FOR_CAM_POV (-10.f)
 #define GROUND_ANGLE_TOLERANCE_GOD 15.f
 
-EventHandlerLockedView::EventHandlerLockedView(Game& game) :
-  EventHandler::EventHandler(game),
+EventHandlerLockedView::EventHandlerLockedView(Game& game, SDL2pp::Window& window) :
+  EventHandler::EventHandler(game, window),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _previousCameraLock(NO_LOCK) {}

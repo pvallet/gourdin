@@ -12,8 +12,8 @@ Controller::Controller(SDL2pp::Window& window) :
   _running(true),
   _engine(),
   _game(_engine),
-  _eventHandlerLockedView(_game),
-  _eventHandlerGlobalView(_game),
+  _eventHandlerLockedView(_game, window),
+  _eventHandlerGlobalView(_game, window),
   _window(window) {
 
   Camera& cam = Camera::getInstance();

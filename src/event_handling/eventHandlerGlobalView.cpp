@@ -11,8 +11,8 @@
 #define TRANSLATION_FACTOR 2.f
 #define ZOOM_FACTOR 10.f // Be careful the zoom function is not linear
 
-EventHandlerGlobalView::EventHandlerGlobalView(Game& game) :
-  EventHandler::EventHandler(game),
+EventHandlerGlobalView::EventHandlerGlobalView(Game& game, SDL2pp::Window& window) :
+  EventHandler::EventHandler(game, window),
   _addSelect(false),
   _scrollSpeed(SCROLL_SPEED_SLOW) {
   _game.setScrollSpeedToSlow(true);
