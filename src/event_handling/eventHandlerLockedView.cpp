@@ -144,15 +144,20 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
     _game.moveFocused(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
 
   else if (event.type == SDL_USER_DRAG_BEGIN) {
-    _oldPhi = cam.getPhi();
-    _oldTheta = cam.getTheta();
+    _initialDragTheta = cam.getTheta();
+    _initialDragPhi = cam.getPhi();
     _beginDrag = getBeginDrag();
   }
 
   else if (event.type == SDL_USER_DRAG_MOTION) {
     if (_game.getPovCamera()) {
-      cam.setTheta(_oldTheta + ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
-      cam.setPhi  (_oldPhi   + ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
+      cam.setTheta(_initialDragTheta + ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
+      cam.setPhi  (_initialDragPhi   + ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
+
+      float theta = cam.getTheta();
+      float phi = cam.getPhi();
+      handleCamBoundsPOVMode(theta, phi, false);
+      cam.setValues(cam.getZoom(), theta, phi);
     }
 
     else {
@@ -213,35 +218,40 @@ void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) {
     }
   }
 
-  else if (theta != _oldTheta)
+  else if (theta != _previousTheta)
     _previousCameraLock = NO_LOCK;
 }
 
-void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi) const {
+void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi, bool slideCameraWhenGoingDownwards) const {
   glm::vec3 normal = _game.getEngine().getNormalOnCameraPointedPos();
 
   // We make the camera move only if the new pointed direction is not too close to the ground in angle
   if (glm::dot(normal, ut::carthesian(1, theta, phi)) > _maxScalarProductWithGroundPOV) {
 
-    float nPhi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
-    float phiIsTooFarByAmount = nPhi - phi;
+    float phiLim = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
+    float phiIsTooFarByAmount = phiLim - phi;
 
-    if (phiIsTooFarByAmount > 0) {
-      float normalTheta = ut::spherical(normal).y;
+    if (slideCameraWhenGoingDownwards) {
+      if (phiIsTooFarByAmount > 0) {
+        float normalTheta = ut::spherical(normal).y;
 
-      if (firstIsOnPositiveSideOfSecond(theta, normalTheta))
-        theta += phiIsTooFarByAmount;
-      else
-        theta -= phiIsTooFarByAmount;
+        if (ut::angleIsPositive(normalTheta, theta))
+          theta += phiIsTooFarByAmount;
+        else
+          theta -= phiIsTooFarByAmount;
 
-      if (firstIsOnPositiveSideOfSecond(theta, normalTheta) !=
-          firstIsOnPositiveSideOfSecond(_oldTheta, normalTheta) &&
-          ut::absDistBetweenAngles(theta, normalTheta + 180) < 90 &&
-          phi != _oldPhi)
-        theta = normalTheta + 180;
+        if (ut::angleIsPositive(normalTheta, theta) !=
+            ut::angleIsPositive(normalTheta, _previousTheta) &&
+            ut::absDistBetweenAngles(theta, normalTheta + 180) < 90 &&
+            phi != _previousPhi)
+          theta = normalTheta + 180;
 
-      phi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
+        phi = getPhiLimForGivenTheta(theta, normal, _maxScalarProductWithGroundPOV);
+      }
     }
+
+    else
+      phi = phiLim;
   }
 
   if (phi < 0)
@@ -296,9 +306,9 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
 
         if (keyboardState[SDL_SCANCODE_DOWN])
           phi -= ROTATION_ANGLE_PMS * msElapsed;
-      }
 
-      handleCamBoundsPOVMode(theta, phi);
+        handleCamBoundsPOVMode(theta, phi, true);
+      }
     }
 
     else {
@@ -331,8 +341,8 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
     }
   }
 
-  if (!_game.getPovCamera())
-    _oldTheta = cam.getTheta();
+  _previousPhi = cam.getPhi();
+  _previousTheta = cam.getTheta();
 }
 
 void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
@@ -343,7 +353,7 @@ void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
   if (pov) {
     float theta = _thetaInPreviousView;
     float phi = _phiInPreviousView;
-    handleCamBoundsPOVMode(theta, phi);
+    handleCamBoundsPOVMode(theta, phi, false);
     _nextCameraParams = glm::vec4(0.1, theta, phi, _game.getCharacterHeight());
 
     _thetaInPreviousView = cam.getTheta();
@@ -391,11 +401,4 @@ void EventHandlerLockedView::gainFocus() {
 float EventHandlerLockedView::getPhiLimForGivenTheta(float theta, glm::vec3 normal, float maxDotProduct) {
   return ut::solveAcosXplusBsinXequalC(
     normal.z, cos(theta*RAD)*normal.x + sin(theta*RAD)*normal.y, maxDotProduct).first;
-}
-
-bool EventHandlerLockedView::firstIsOnPositiveSideOfSecond(float first, float second) {
-  float secondAnglePlus90 = second + 90;
-  if (secondAnglePlus90 > 360)
-    secondAnglePlus90 -= 360;
-  return ut::absDistBetweenAngles(first, secondAnglePlus90) < 90;
 }
