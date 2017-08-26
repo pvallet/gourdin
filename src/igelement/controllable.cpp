@@ -28,7 +28,7 @@ void Controllable::setTarget(glm::vec2 t, ANM_TYPE anim) {
 }
 
 void Controllable::setMovingDirection(glm::vec2 direction) {
-  setTarget(glm::normalize(direction) * MAX_COORD);
+  setTarget(_pos + glm::normalize(direction) * MAX_COORD);
 }
 
 void Controllable::stop() {
