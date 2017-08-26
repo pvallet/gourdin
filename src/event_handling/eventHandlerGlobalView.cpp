@@ -134,8 +134,8 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
-    _game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
-    _game.displayInfo("Created predator");
+    if (_game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
+      _game.displayInfo("Created predator");
   }
 
   else if (event.type == SDL_USER_DRAG_BEGIN) {

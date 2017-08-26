@@ -319,7 +319,7 @@ void Game::selectAllLions() {
   }
 }
 
-void Game::createLion(glm::ivec2 screenTarget) {
+bool Game::createLion(glm::ivec2 screenTarget) {
   try {
     if (!_huntHasStarted)
       _engine.addLion(screenTarget);
@@ -331,8 +331,11 @@ void Game::createLion(glm::ivec2 screenTarget) {
       _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
       _nbLions++;
     }
+
+    return true;
   } catch (const std::runtime_error& e) {
     displayInfo(e.what());
+    return false;
   }
 }
 
