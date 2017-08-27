@@ -146,6 +146,12 @@ void Chunk::generate() {
 		fillBufferData();
 		generateBuffers();
 		computeChunkBoundingBox();
+
+		for (size_t i = 0; i < _trees.size(); i++) {
+			_trees[i]->setHeight(getHeight(_trees[i]->getPos()));
+		}
+
+		_subdivisionLevels[_currentSubdivLvl]->treeDrawer.loadElements(_trees, true);
 	}
 }
 
@@ -201,21 +207,6 @@ void Chunk::computeCulling(const std::vector<glm::vec3>& planeNormals) {
 
   _visible = true;
 }
-void Chunk::setTreesHeights() {
-	for (size_t i = 0; i < _trees.size(); i++) {
-		_trees[i]->setHeight(getHeight(_trees[i]->getPos()));
-	}
-}
-
-void Chunk::setTrees(std::vector<igElement*> trees) {
-	_trees = trees;
-	setTreesHeights();
-	loadTrees();
-}
-
-void Chunk::loadTrees() {
-	_treeDrawer.loadElements(_trees, true);
-}
 
 void Chunk::computeDistanceOptimizations() {
 	Camera& camera = Camera::getInstance();
@@ -250,7 +241,6 @@ void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	if (newSubdLvl != _currentSubdivLvl) {
 		_currentSubdivLvl = newSubdLvl;
 		generate();
-		setTrees(_trees);
 	}
 }
 

@@ -24,6 +24,8 @@ struct Buffers {
 
 	glm::vec3 corners[8]; // For frustum culling
 
+	igElementDisplay treeDrawer;
+
 	std::map<Biome, BiomeIndices> indicesInfo;
 };
 
@@ -47,9 +49,8 @@ public:
 	inline bool getDisplayMovingElements() const {return _displayMovingElements;}
 	size_t getSubdivisionLevel() const {return _currentSubdivLvl;}
 
-	void setTrees(std::vector<igElement*> trees);
-	void loadTrees();
-	inline size_t drawTrees() const {_treeDrawer.drawElements(); return _trees.size();}
+	inline void setTrees(std::vector<igElement*> trees) {_trees = trees;}
+	inline size_t drawTrees() const {_subdivisionLevels[_currentSubdivLvl]->treeDrawer.drawElements(); return _trees.size();}
 
 private:
 	void cleanSubdivLvl(size_t subdivLvl);
@@ -57,7 +58,6 @@ private:
 	void generateBuffers();
 	void computeChunkBoundingBox();
 	bool theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const;
-	void setTreesHeights();
 
 	glm::ivec2 _chunkPos;
 	glm::vec3 _centerOfChunk;
@@ -72,5 +72,4 @@ private:
 	TerrainGeometry&   _terrainGeometry;
 
 	std::vector<igElement*> _trees;
-	igElementDisplay _treeDrawer;
 };
