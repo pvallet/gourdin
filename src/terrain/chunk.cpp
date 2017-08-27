@@ -216,6 +216,7 @@ void Chunk::setTreesHeights() {
 void Chunk::setTrees(std::vector<igElement*> trees) {
 	_trees = trees;
 	setTreesHeights();
+	loadTrees();
 }
 
 void Chunk::loadTrees() {

@@ -260,7 +260,6 @@ void Engine::updateCulling() {
     (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi)));
 
   // Update terrains
-  #pragma omp parallel for collapse(2)
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
       _terrain[i*NB_CHUNKS + j]->computeCulling(camFrustumPlaneNormals);
