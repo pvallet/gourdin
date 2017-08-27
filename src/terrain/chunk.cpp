@@ -15,49 +15,43 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
   }
 }
 
-GLuint Chunk::addVertexInfo(Vertex* vertex) {
-	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
-
-	GLuint vertexIndex = currentBuffers->vertices.size()/3;
-
-	for (size_t i = 0; i < currentBuffers->vertices.size(); i+=3) {
-		if (currentBuffers->vertices[i] == vertex->pos.x &&
-		    currentBuffers->vertices[i+1] == vertex->pos.y &&
-				currentBuffers->vertices[i+2] == vertex->pos.z) {
-
-			vertexIndex = i/3;
-			break;
-		}
-	}
-
-	if (vertexIndex == currentBuffers->vertices.size()/3) {
-		currentBuffers->vertices.resize(currentBuffers->vertices.size() + 3);
-		currentBuffers->normals.resize(currentBuffers->normals.size() + 3);
-		currentBuffers->coords.resize(currentBuffers->coords.size() + 2);
-
-		currentBuffers->vertices[currentBuffers->vertices.size()-3] = vertex->pos.x;
-		currentBuffers->vertices[currentBuffers->vertices.size()-2] = vertex->pos.y;
-		currentBuffers->vertices[currentBuffers->vertices.size()-1] = vertex->pos.z;
-		currentBuffers->normals [currentBuffers->normals.size()-3] = vertex->normal.x;
-		currentBuffers->normals [currentBuffers->normals.size()-2] = vertex->normal.y;
-		currentBuffers->normals [currentBuffers->normals.size()-1] = vertex->normal.z;
-
-		currentBuffers->coords[currentBuffers->coords.size()-2] =
-		(vertex->pos.x - CHUNK_SIZE*_chunkPos.x)/CHUNK_SIZE*TEX_FACTOR;
-		currentBuffers->coords[currentBuffers->coords.size()-1] =
-		(vertex->pos.y - CHUNK_SIZE*_chunkPos.y)/CHUNK_SIZE*TEX_FACTOR;
-	}
-
-	return vertexIndex;
-}
-
 void Chunk::fillBufferData() {
 	std::list<const Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _currentSubdivLvl);
+	std::list<Vertex*> vertices = TerrainGeometry::SubdivisionLevel::getVertices(triangles);
+
+	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+
+	currentBuffers->vertices.resize(vertices.size() * 3);
+	currentBuffers->normals.resize(vertices.size() * 3);
+	currentBuffers->coords.resize(vertices.size() * 2);
+
+	std::map<Vertex*, size_t> verticesArrayIndices;
+
+	size_t vertIndex = 0;
+
+	for (auto vert = vertices.begin(); vert != vertices.end(); vert++) {
+		for (size_t i = 0; i < 3; i++) {
+			currentBuffers->vertices[3*vertIndex + i] = (*vert)->pos[i];
+			currentBuffers->normals[3*vertIndex + i] = (*vert)->normal[i];
+		}
+
+		currentBuffers->coords[2*vertIndex] =
+		((*vert)->pos.x - CHUNK_SIZE*_chunkPos.x)/CHUNK_SIZE*TEX_FACTOR;
+		currentBuffers->coords[2*vertIndex + 1] =
+		((*vert)->pos.y - CHUNK_SIZE*_chunkPos.y)/CHUNK_SIZE*TEX_FACTOR;
+
+		verticesArrayIndices[*vert] = vertIndex;
+
+		vertIndex++;
+	}
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
+		std::vector<GLuint>& currentIndices = currentBuffers->indicesInfo[(*tri)->biome].indices;
+
+		currentIndices.resize(currentIndices.size() + 3);
+
 		for (size_t i = 0; i < 3; i++) {
-			_subdivisionLevels[_currentSubdivLvl]->indicesInfo[(*tri)->biome]
-				.indices.push_back(addVertexInfo((*tri)->vertices[i]));
+			currentIndices[currentIndices.size()-3+i] = verticesArrayIndices.at((*tri)->vertices[i]);
 		}
 	}
 }
@@ -242,14 +236,14 @@ void Chunk::computeDistanceOptimizations() {
 	else
 		_displayMovingElements = true;
 
-	// if (distanceToChunk > 10000)
+	if (distanceToChunk > 10000)
 		setSubdivisionLevel(1);
-	// else if (distanceToChunk > 4000)
-	// 	setSubdivisionLevel(2);
-	// else if (distanceToChunk > 1000)
-	// 	setSubdivisionLevel(3);
-	// else
-	// 	setSubdivisionLevel(4);
+	else if (distanceToChunk > 4000)
+		setSubdivisionLevel(2);
+	else if (distanceToChunk > 1000)
+		setSubdivisionLevel(3);
+	else
+		setSubdivisionLevel(4);
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {

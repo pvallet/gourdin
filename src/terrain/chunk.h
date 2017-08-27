@@ -1,7 +1,5 @@
 #pragma once
 
-#include "opengl.h"
-
 #include <map>
 #include <vector>
 
@@ -55,7 +53,6 @@ public:
 
 private:
 	void cleanSubdivLvl(size_t subdivLvl);
-	GLuint addVertexInfo(Vertex* vertex);
 	void fillBufferData();
 	void generateBuffers();
 	void computeChunkBoundingBox();

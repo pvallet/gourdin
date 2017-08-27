@@ -408,6 +408,7 @@ std::list<Vertex*> TerrainGeometry::SubdivisionLevel::getVertices(const std::lis
     }
   }
 
+  res.sort();
   res.unique();
 
   return res;
