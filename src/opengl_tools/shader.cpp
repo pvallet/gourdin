@@ -62,7 +62,8 @@ bool Shader::load(std::string vertexSource, std::string fragmentSource) {
     glGetShaderInfoLog(_programID, sizeError, &sizeError, error);
     error[sizeError] = '\0';
 
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in shader linking: %s", error);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "(%s,%s): Error in shader linking: %s",
+			vertexSource.c_str(), fragmentSource.c_str(), error);
 
     delete[] error;
    	glDeleteProgram(_programID);
@@ -88,7 +89,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
   const GLchar* str = sourceCode.c_str();
 
 #ifdef __ANDROID__
-	const char *sources[2] = { "#version 300 es\n", str };
+	const char *sources[2] = {"#version 300 es\nprecision highp float;\nprecision mediump sampler2DArray;\n", str };
 #else
 	const char *sources[2] = { "#version 330\n", str };
 #endif
@@ -109,7 +110,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
     glGetShaderInfoLog(shader, errorLength, &errorLength, error);
     error[errorLength] = '\0';
 
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in shader compilation: %s", error);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s: Error in shader compilation: %s", source.c_str(), error);
 
     delete[] error;
 		glDeleteShader(shader);
