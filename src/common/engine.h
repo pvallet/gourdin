@@ -14,6 +14,7 @@
 #include "texturedRectangle.h"
 
 #include "chunk.h"
+#include "chunkSubdivider.h"
 #include "contentGenerator.h"
 #include "map.h"
 #include "ocean.h"
@@ -93,6 +94,7 @@ private:
   Shader _igEShader;
 	Shader _skyboxShader;
 
+	ChunkSubdivider _chunkSubdivider;
 	std::vector<std::unique_ptr<Chunk> > _terrain;
 
 	Shader _depthInColorBufferShader;

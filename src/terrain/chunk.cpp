@@ -3,13 +3,15 @@
 #include "camera.h"
 
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
-	                                     TerrainGeometry&   terrainGeometry) :
+	                                     TerrainGeometry&   terrainGeometry,
+																		 	 ChunkSubdivider&   chunkSubdivider) :
 	_chunkPos(x,y),
 	_visible(false),
 	_currentSubdivLvl(1),
 	_maxSubdivLvl(1),
   _terrainTexManager(terrainTexManager),
-  _terrainGeometry(terrainGeometry) {
+  _terrainGeometry(terrainGeometry),
+	_chunkSubdivider(chunkSubdivider) {
 
 	for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
     _subdivisionLevels.push_back(std::unique_ptr<Buffers>(new Buffers()));

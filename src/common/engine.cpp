@@ -86,7 +86,7 @@ void Engine::init() {
   std::vector<Chunk*> newChunks;
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry));
+      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
     }
   }
 

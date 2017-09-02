@@ -6,6 +6,7 @@
 #include "basicGLObjects.h"
 #include "terrainGeometry.h"
 #include "terrainTexManager.h"
+#include "chunkSubdivider.h"
 #include "igElementDisplay.h"
 
 struct BiomeIndices {
@@ -32,7 +33,8 @@ struct Buffers {
 class Chunk {
 public:
 	Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
-		                              TerrainGeometry& terrainGeometry);
+		                              TerrainGeometry& terrainGeometry,
+																	ChunkSubdivider& chunkSubdivider);
 
 	void generateSubdivisionLevel(size_t level);
 	size_t draw() const;
@@ -72,7 +74,8 @@ private:
 	std::vector<std::unique_ptr<Buffers> > _subdivisionLevels;
 
 	const TerrainTexManager& _terrainTexManager;
-	TerrainGeometry&   _terrainGeometry;
+	TerrainGeometry& _terrainGeometry;
+	ChunkSubdivider& _chunkSubdivider;
 
 	std::vector<igElement*> _trees;
 };
