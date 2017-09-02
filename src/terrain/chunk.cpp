@@ -7,6 +7,7 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	_chunkPos(x,y),
 	_visible(false),
 	_currentSubdivLvl(1),
+	_maxSubdivLvl(1),
   _terrainTexManager(terrainTexManager),
   _terrainGeometry(terrainGeometry) {
 
@@ -15,11 +16,11 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
   }
 }
 
-void Chunk::fillBufferData() {
-	std::list<const Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, _currentSubdivLvl);
+void Chunk::fillBufferData(size_t subdivLvl) {
+	std::list<const Triangle*> triangles = _terrainGeometry.getTrianglesInChunk(_chunkPos.x, _chunkPos.y, subdivLvl);
 	std::list<Vertex*> vertices = TerrainGeometry::SubdivisionLevel::getVertices(triangles);
 
-	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+	Buffers* currentBuffers = _subdivisionLevels[subdivLvl].get();
 
 	currentBuffers->vertices.resize(vertices.size() * 3);
 	currentBuffers->normals.resize(vertices.size() * 3);
@@ -109,8 +110,8 @@ void Chunk::generateBuffers() {
 	currentBuffers->generated = true;
 }
 
-void Chunk::computeChunkBoundingBox() {
-	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+void Chunk::computeChunkBoundingBox(size_t subdivLvl) {
+	Buffers* currentBuffers = _subdivisionLevels[subdivLvl].get();
 
 	float minCoord[3];
 	float maxCoord[3];
@@ -141,17 +142,12 @@ void Chunk::computeChunkBoundingBox() {
 	    	 getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 }
 
-void Chunk::generate() {
-	if (!_subdivisionLevels[_currentSubdivLvl]->generated) {
-		fillBufferData();
-		generateBuffers();
-		computeChunkBoundingBox();
+void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
+	fillBufferData(subdivLvl);
+	computeChunkBoundingBox(subdivLvl);
 
-		for (size_t i = 0; i < _trees.size(); i++) {
-			_trees[i]->setHeight(getHeight(_trees[i]->getPos()));
-		}
-
-		_subdivisionLevels[_currentSubdivLvl]->treeDrawer.loadElements(_trees, true);
+	for (size_t i = 0; i < _trees.size(); i++) {
+		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
 	}
 }
 
@@ -238,14 +234,27 @@ void Chunk::computeDistanceOptimizations() {
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
-	if (newSubdLvl != _currentSubdivLvl) {
+	if (newSubdLvl > _maxSubdivLvl) {
+		generateSubdivisionLevel(_maxSubdivLvl + 1);
+		_maxSubdivLvl++;
+		_currentSubdivLvl = _maxSubdivLvl-1;
+	}
+
+	else
 		_currentSubdivLvl = newSubdLvl;
-		generate();
+
+	if (!_subdivisionLevels[_currentSubdivLvl]->generated) {
+		generateBuffers();
+		_subdivisionLevels[_currentSubdivLvl]->treeDrawer.loadElements(_trees, true);
 	}
 }
 
 float Chunk::getHeight(glm::vec2 pos) const {
-  return _terrainGeometry.getHeight(pos, _currentSubdivLvl);
+  return getHeight(pos, _currentSubdivLvl);
+}
+
+float Chunk::getHeight(glm::vec2 pos, size_t subdivLvl) const {
+  return _terrainGeometry.getHeight(pos, subdivLvl);
 }
 
 glm::vec3 Chunk::getNorm(glm::vec2 pos) const {

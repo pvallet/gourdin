@@ -100,7 +100,7 @@ void Engine::init() {
 
   for (size_t i = 0; i < NB_CHUNKS; i++) {
     for (size_t j = 0; j < NB_CHUNKS; j++) {
-      newChunks[i*NB_CHUNKS + j]->generate();
+      newChunks[i*NB_CHUNKS + j]->generateSubdivisionLevel(1);
       _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
     }
   }

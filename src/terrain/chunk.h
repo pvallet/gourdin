@@ -34,7 +34,7 @@ public:
 	Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 		                              TerrainGeometry& terrainGeometry);
 
-	void generate();
+	void generateSubdivisionLevel(size_t level);
 	size_t draw() const;
 
 	// Set visible to false if there is no need to display the chunk
@@ -54,10 +54,12 @@ public:
 
 private:
 	void cleanSubdivLvl(size_t subdivLvl);
-	void fillBufferData();
+	void fillBufferData(size_t subdivLvl);
 	void generateBuffers();
-	void computeChunkBoundingBox();
+	void computeChunkBoundingBox(size_t subdivLvl);
 	bool theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const;
+
+	float getHeight(glm::vec2 pos, size_t subdivLvl) const;
 
 	glm::ivec2 _chunkPos;
 	glm::vec3 _centerOfChunk;
@@ -66,6 +68,7 @@ private:
 	bool _treesNeedTwoPasses;
 	bool _displayMovingElements;
 	size_t _currentSubdivLvl;
+	size_t _maxSubdivLvl;
 	std::vector<std::unique_ptr<Buffers> > _subdivisionLevels;
 
 	const TerrainTexManager& _terrainTexManager;
