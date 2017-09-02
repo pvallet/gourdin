@@ -52,6 +52,8 @@ private:
   static bool _duringLongClick;
   static bool _duringDrag;
 
+  static bool _cantSendLongClick;
+  static bool _mouseDown;
   static size_t _nbFingers;
   glm::ivec2 _beginDrag;
 

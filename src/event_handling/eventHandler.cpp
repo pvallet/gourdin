@@ -13,6 +13,8 @@ Uint32 EventHandler::SDL_USER_DRAG_MOTION = SDL_RegisterEvents(1);
 Uint32 EventHandler::SDL_USER_DRAG_END = SDL_RegisterEvents(1);
 bool EventHandler::_duringLongClick = false;
 bool EventHandler::_duringDrag = false;
+bool EventHandler::_cantSendLongClick = false;
+bool EventHandler::_mouseDown = false;
 size_t EventHandler::_nbFingers = 0;
 
 EventHandler::EventHandler(Game& game, SDL2pp::Window& window):
@@ -60,32 +62,42 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       break;
 #endif
 
+    case SDL_FINGERDOWN:
+      _nbFingers++;
+      if (_nbFingers >= 2)
+        _cantSendLongClick = true;
+      break;
+
+    case SDL_FINGERUP:
+      _nbFingers--;
+      if (_nbFingers == 0)
+        _cantSendLongClick = false;
+      break;
+
     case SDL_MOUSEBUTTONDOWN:
       if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
-        _nbFingers++;
+        _mouseDown = true;
 
-      if (getNbFingers() == 1) {
-        _beginDrag.x = event.button.x;
-        _beginDrag.y = event.button.y;
+      _beginDrag.x = event.button.x;
+      _beginDrag.y = event.button.y;
 
-        if (_pendingClick != DEFAULT_OUTSIDE_WINDOW_COORD) {
+      if (_pendingClick != DEFAULT_OUTSIDE_WINDOW_COORD) {
 
-          if (_clickBegin.getElapsedTime() < DOUBLECLICK_MS &&
-            isCloseEnoughToBeginClickToDefineClick(_pendingClick)) {
+        if (_clickBegin.getElapsedTime() < DOUBLECLICK_MS &&
+          isCloseEnoughToBeginClickToDefineClick(_pendingClick)) {
 
-            _gonnaBeDoubleClick = true;
-          }
+          _gonnaBeDoubleClick = true;
         }
-
-        _clickBegin.restart();
       }
+
+      _clickBegin.restart();
       break;
 
     case SDL_MOUSEMOTION:
       _currentCursorPos.x = event.button.x;
       _currentCursorPos.y = event.button.y;
 
-      if (getNbFingers() == 1) {
+      if (_mouseDown && getNbFingers() < 2) {
         if (isDuringLongClick())
           sendEvent(SDL_USER_LONG_CLICK_MOTION, _currentCursorPos);
 
@@ -101,44 +113,42 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
 
     case SDL_MOUSEBUTTONUP: {
       if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
-        _nbFingers--;
+        _mouseDown = false;
 
       glm::ivec2 releasedPos(event.button.x, event.button.y);
 
-      if (getNbFingers() == 0) {
-        if (isCloseEnoughToBeginClickToDefineClick(releasedPos)) {
+      if (isCloseEnoughToBeginClickToDefineClick(releasedPos)) {
 
-          if (_clickBegin.getElapsedTime() < LONGCLICK_MS) {
+        if (_clickBegin.getElapsedTime() < LONGCLICK_MS) {
 
-            if (_gonnaBeDoubleClick) {
-              sendEvent(SDL_USER_DOUBLE_CLICK, _pendingClick);
-              _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
-            }
+          if (_gonnaBeDoubleClick) {
+            sendEvent(SDL_USER_DOUBLE_CLICK, _pendingClick);
+            _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+          }
 
-            else {
-              sendEvent(SDL_USER_CLICK, _beginDrag);
-              _pendingClick = _beginDrag;
-            }
+          else {
+            sendEvent(SDL_USER_CLICK, _beginDrag);
+            _pendingClick = _beginDrag;
           }
         }
-
-        if (isDuringLongClick()) {
-          sendEvent(SDL_USER_LONG_CLICK_END, releasedPos);
-
-          _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
-          _duringLongClick = false;
-        }
-
-        else if (isDraggingCursor()) {
-          sendEvent(SDL_USER_DRAG_END, releasedPos);
-          _duringDrag = false;
-        }
-
-        _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
       }
 
-      _gonnaBeDoubleClick = false;
+      if (isDuringLongClick()) {
+        sendEvent(SDL_USER_LONG_CLICK_END, releasedPos);
+
+        _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+        _duringLongClick = false;
+      }
+
+      else if (isDraggingCursor()) {
+        sendEvent(SDL_USER_DRAG_END, releasedPos);
+        _duringDrag = false;
+      }
+
+      _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
     }
+
+    _gonnaBeDoubleClick = false;
     break;
 
     case SDL_KEYDOWN:
@@ -175,7 +185,7 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
 }
 
 void EventHandler::onGoingEvents(int msElapsed) {
-  if (!isDuringLongClick() && getNbFingers() == 1) {
+  if (!isDuringLongClick() && _mouseDown && !_cantSendLongClick) {
     if (_clickBegin.getElapsedTime() > LONGCLICK_MS && !isDraggingCursor()) {
 
       sendEvent(SDL_USER_LONG_CLICK_BEGIN, _currentCursorPos);
