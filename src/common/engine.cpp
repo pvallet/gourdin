@@ -435,7 +435,8 @@ void Engine::renderToFBO() const {
 
   std::ostringstream renderStats;
   renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Trees:  " << nbElements << std::endl;
+              << "Trees:  " << nbElements << std::endl
+              << "Chunks waiting for subdivision: " << _chunkSubdivider.getNbTasksInQueue() << std::endl;
 
   logText.addLine(renderStats.str());
 }

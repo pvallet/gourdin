@@ -23,16 +23,11 @@ void ChunkSubdivider::executeTasks() {
 }
 
 void ChunkSubdivider::addTask(Chunk* chunk, size_t subdivLvl) {
-  bool needToNotifyWorker = false;
-
-  if (_taskQueue.empty())
-    needToNotifyWorker = true;
-
   _mutexQueue.lock();
   _taskQueue.push({chunk, subdivLvl});
   _mutexQueue.unlock();
 
-  if (needToNotifyWorker) {
+  if (_taskQueue.size() == 1) {
     std::unique_lock<std::mutex> lock(_mutexCVQueueNotEmpty);
     _cvQueueNotEmpty.notify_one();
   }

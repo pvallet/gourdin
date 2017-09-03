@@ -18,6 +18,8 @@ public:
 
   void addTask(Chunk* chunk, size_t subdivLvl);
 
+  inline size_t getNbTasksInQueue() const {return _taskQueue.size();}
+
 private:
   void executeTasks();
 
