@@ -67,6 +67,24 @@ void Engine::init() {
   SDL_Log("Generate geometry: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
+  std::vector<Chunk*> newChunks;
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
+    }
+  }
+
+  for (size_t i = 0; i < NB_CHUNKS; i++) {
+    for (size_t j = 0; j < NB_CHUNKS; j++) {
+      _chunkSubdivider.addTask(newChunks[i*NB_CHUNKS + j], 1);
+      _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
+    }
+  }
+
+  SDL_Log("Launching chunk subdivision: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
+
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
 
@@ -83,13 +101,6 @@ void Engine::init() {
   SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
-  std::vector<Chunk*> newChunks;
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
-    }
-  }
-
   #pragma omp parallel for
   for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
     size_t x = i / NB_CHUNKS;
@@ -98,14 +109,7 @@ void Engine::init() {
     newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
   }
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      newChunks[i*NB_CHUNKS + j]->generateSubdivisionLevel(1);
-      _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
-    }
-  }
-
-  SDL_Log("Generating chunks: %d ms", initTimer.getElapsedTime() - previousTime);
+  SDL_Log("Generating trees: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));

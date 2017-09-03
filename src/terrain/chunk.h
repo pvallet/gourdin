@@ -36,13 +36,11 @@ public:
 		                              TerrainGeometry& terrainGeometry,
 																	ChunkSubdivider& chunkSubdivider);
 
-	void generateSubdivisionLevel(size_t level);
 	size_t draw() const;
 
 	// Set visible to false if there is no need to display the chunk
 	void computeCulling(const std::vector<glm::vec3>& planeNormals);
 	void computeDistanceOptimizations();
-	void setSubdivisionLevel(size_t newSubdLvl);
 
 	float getHeight(glm::vec2 pos) const;
 	glm::vec3 getNorm(glm::vec2 pos) const;
@@ -54,12 +52,16 @@ public:
 	inline void setTrees(std::vector<igElement*> trees) {_trees = trees;}
 	inline size_t drawTrees() const {_subdivisionLevels[_currentSubdivLvl]->treeDrawer.drawElements(); return _trees.size();}
 
+	friend ChunkSubdivider;
+
 private:
 	void cleanSubdivLvl(size_t subdivLvl);
 	void fillBufferData(size_t subdivLvl);
 	void generateBuffers();
 	void computeChunkBoundingBox(size_t subdivLvl);
 	bool theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const;
+	void generateSubdivisionLevel(size_t level);
+	void setSubdivisionLevel(size_t newSubdLvl);
 
 	float getHeight(glm::vec2 pos, size_t subdivLvl) const;
 

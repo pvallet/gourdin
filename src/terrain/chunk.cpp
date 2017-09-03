@@ -149,18 +149,6 @@ void Chunk::computeChunkBoundingBox(size_t subdivLvl) {
 	    	 getHeight(glm::vec2((_chunkPos.x+0.5)*CHUNK_SIZE, (_chunkPos.y+0.5)*CHUNK_SIZE)));
 }
 
-void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
-	fillBufferData(subdivLvl);
-	computeChunkBoundingBox(subdivLvl);
-
-	for (size_t i = 0; i < _trees.size(); i++) {
-		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
-	}
-
-	if (_maxSubdivLvlAvailable < subdivLvl)
-		_maxSubdivLvlAvailable = subdivLvl;
-}
-
 size_t Chunk::draw() const {
 	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
 
@@ -241,6 +229,18 @@ void Chunk::computeDistanceOptimizations() {
 		setSubdivisionLevel(3);
 	else
 		setSubdivisionLevel(4);
+}
+
+void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
+	fillBufferData(subdivLvl);
+	computeChunkBoundingBox(subdivLvl);
+
+	for (size_t i = 0; i < _trees.size(); i++) {
+		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
+	}
+
+	if (_maxSubdivLvlAvailable < subdivLvl)
+		_maxSubdivLvlAvailable = subdivLvl;
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
