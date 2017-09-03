@@ -5,6 +5,11 @@ VertexArrayObject::VertexArrayObject():
   glGenVertexArrays(1, &_vaoID);
 }
 
+void VertexArrayObject::generate() {
+  glDeleteVertexArrays(1, &_vaoID);
+  glGenVertexArrays(1, &_vaoID);
+}
+
 VertexArrayObject::~VertexArrayObject() {
   glDeleteVertexArrays(1, &_vaoID);
 }
@@ -18,6 +23,11 @@ VertexArrayObject::VertexArrayObject (VertexArrayObject&& other) noexcept:
 
 VertexBufferObject::VertexBufferObject():
   _vboID(0) {
+  glGenBuffers(1, &_vboID);
+}
+
+void VertexBufferObject::generate() {
+  glDeleteBuffers(1, &_vboID);
   glGenBuffers(1, &_vboID);
 }
 
@@ -41,6 +51,11 @@ void VertexBufferObject::cpuBufferSubData(std::vector<float>& bufferData, size_t
 
 IndexBufferObject::IndexBufferObject():
   _iboID(0) {
+  glGenBuffers(1, &_iboID);
+}
+
+void IndexBufferObject::generate() {
+  glDeleteBuffers(1, &_iboID);
   glGenBuffers(1, &_iboID);
 }
 

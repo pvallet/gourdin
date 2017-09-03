@@ -1,6 +1,8 @@
 #pragma once
 
+#include <mutex>
 #include <queue>
+#include <thread>
 
 class Chunk;
 
@@ -11,10 +13,14 @@ struct Task {
 
 class ChunkSubdivider {
 public:
-  ChunkSubdivider () {}
+  ChunkSubdivider ();
 
-  inline void addTask(Chunk* chunk, size_t subdivLvl) {_taskQueue.push({chunk, subdivLvl});}
+  void addTask(Chunk* chunk, size_t subdivLvl);
 
 private:
+  void executeTasks();
+
+  std::mutex _mutexQueue;
+  std::thread _computingThread;
   std::queue<Task> _taskQueue;
 };

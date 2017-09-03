@@ -8,7 +8,8 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 	_chunkPos(x,y),
 	_visible(false),
 	_currentSubdivLvl(1),
-	_maxSubdivLvl(1),
+	_maxSubdivLvlAvailable(1),
+	_maxSubdivLvlAsked(1),
   _terrainTexManager(terrainTexManager),
   _terrainGeometry(terrainGeometry),
 	_chunkSubdivider(chunkSubdivider) {
@@ -49,6 +50,8 @@ void Chunk::fillBufferData(size_t subdivLvl) {
 	}
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
+		// This call generates a new IBO, but at is called from another thread than
+		// the main thread, its initialization will fail and needs to be done once again
 		std::vector<GLuint>& currentIndices = currentBuffers->indicesInfo[(*tri)->biome].indices;
 
 		currentIndices.resize(currentIndices.size() + 3);
@@ -101,6 +104,8 @@ void Chunk::generateBuffers() {
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		size_t bufferSizeIndices = it->second.indices.size()*sizeof it->second.indices[0];
 
+		// The IBO was constructed from another thread and thus needs to be generated again
+		it->second.ibo.generate();
 		it->second.ibo.bind();
 
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSizeIndices, NULL, GL_STATIC_DRAW);
@@ -151,6 +156,9 @@ void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
 	for (size_t i = 0; i < _trees.size(); i++) {
 		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
 	}
+
+	if (_maxSubdivLvlAvailable < subdivLvl)
+		_maxSubdivLvlAvailable = subdivLvl;
 }
 
 size_t Chunk::draw() const {
@@ -236,11 +244,13 @@ void Chunk::computeDistanceOptimizations() {
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
-	if (newSubdLvl > _maxSubdivLvl) {
-		generateSubdivisionLevel(_maxSubdivLvl + 1);
-		_maxSubdivLvl++;
-		_currentSubdivLvl = _maxSubdivLvl-1;
+	if (newSubdLvl > _maxSubdivLvlAsked) {
+		_chunkSubdivider.addTask(this, _maxSubdivLvlAsked + 1);
+		_maxSubdivLvlAsked++;
 	}
+
+	if (newSubdLvl > _maxSubdivLvlAvailable)
+		_currentSubdivLvl = _maxSubdivLvlAvailable;
 
 	else
 		_currentSubdivLvl = newSubdLvl;

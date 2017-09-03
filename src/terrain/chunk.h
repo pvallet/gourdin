@@ -70,7 +70,8 @@ private:
 	bool _treesNeedTwoPasses;
 	bool _displayMovingElements;
 	size_t _currentSubdivLvl;
-	size_t _maxSubdivLvl;
+	size_t _maxSubdivLvlAvailable;
+	size_t _maxSubdivLvlAsked;
 	std::vector<std::unique_ptr<Buffers> > _subdivisionLevels;
 
 	const TerrainTexManager& _terrainTexManager;
