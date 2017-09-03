@@ -231,13 +231,16 @@ void Chunk::computeDistanceOptimizations() {
 		setSubdivisionLevel(4);
 }
 
-void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
-	fillBufferData(subdivLvl);
-	computeChunkBoundingBox(subdivLvl);
-
+void Chunk::setTreesHeight(size_t subdivLvl) {
 	for (size_t i = 0; i < _trees.size(); i++) {
 		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
 	}
+}
+
+void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
+	fillBufferData(subdivLvl);
+	computeChunkBoundingBox(subdivLvl);
+	setTreesHeight(subdivLvl);
 
 	if (_maxSubdivLvlAvailable < subdivLvl)
 		_maxSubdivLvlAvailable = subdivLvl;
