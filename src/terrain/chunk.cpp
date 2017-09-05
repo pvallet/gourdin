@@ -248,8 +248,11 @@ void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	if (newSubdLvl > _maxSubdivLvlAsked) {
-		_chunkSubdivider.addTask(this, _maxSubdivLvlAsked + 1);
-		_maxSubdivLvlAsked++;
+		for (size_t i = _maxSubdivLvlAsked + 1; i <= newSubdLvl; i++) {
+			_chunkSubdivider.addTask(this, i);
+		}
+
+		_maxSubdivLvlAsked = newSubdLvl;
 	}
 
 	if (newSubdLvl > _maxSubdivLvlAvailable)

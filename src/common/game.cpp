@@ -29,6 +29,9 @@ void Game::init() {
 #ifndef __ANDROID__
   _interface.setTextTopCenter("Best score: 0");
 #endif
+
+  update(0);
+  _engine.waitForTasksToFinish();
 }
 
 void Game::updateCamera() const {

@@ -51,6 +51,7 @@ public:
 	void deleteElements(const std::vector<igMovingElement*>& elementsToDelete);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}
+	inline void waitForTasksToFinish() {_chunkSubdivider.waitForTasksToFinish();}
 
 	inline const std::set<Controllable*>& getControllableElements() {return _controllableElements;}
 	inline const std::set<Controllable*>& getDeadControllableElements() {return _deadControllableElements;}

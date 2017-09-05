@@ -19,6 +19,15 @@ void ChunkSubdivider::executeTasks() {
 
     lockQueue.lock();
     _taskQueue.pop();
+    if (_taskQueue.size() == 0)
+      _cvTasksCompleted.notify_one();
+  }
+}
+
+void ChunkSubdivider::waitForTasksToFinish() {
+  std::unique_lock<std::mutex> lockQueue(_mutexQueue);
+  while (!_taskQueue.empty()) {
+    _cvTasksCompleted.wait(lockQueue);
   }
 }
 

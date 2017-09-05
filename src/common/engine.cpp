@@ -81,7 +81,7 @@ void Engine::init() {
     }
   }
 
-  SDL_Log("Launching chunk subdivision: %d ms", initTimer.getElapsedTime() - previousTime);
+  SDL_Log("Launching chunks subdivisions: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
 
@@ -116,6 +116,11 @@ void Engine::init() {
   appendNewElements(_contentGenerator.genHerds());
 
   SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
+  _chunkSubdivider.waitForTasksToFinish();
+
+  SDL_Log("Waiting for basic subdivisions to finish: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
   SDL_Log("Initialization time: %d ms", initTimer.getElapsedTime());

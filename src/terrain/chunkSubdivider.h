@@ -18,12 +18,15 @@ public:
 
   void addTask(Chunk* chunk, size_t subdivLvl);
 
+  void waitForTasksToFinish();
+
   inline size_t getNbTasksInQueue() const {return _taskQueue.size();}
 
 private:
   void executeTasks();
 
   std::condition_variable _cvQueueNotEmpty;
+  std::condition_variable _cvTasksCompleted;
   std::mutex _mutexQueue;
   std::queue<Task> _taskQueue;
   std::thread _computingThread;
