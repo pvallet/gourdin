@@ -19,6 +19,10 @@ Engine::Engine() :
   _reliefGenerator(_mapInfoExtractor),
   _terrain(NB_CHUNKS*NB_CHUNKS) {}
 
+Engine::~Engine() {
+  _chunkSubdivider.join();
+}
+
 void Engine::init() {
   Clock initTimer;
   srand(time(NULL));

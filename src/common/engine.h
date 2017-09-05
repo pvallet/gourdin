@@ -40,6 +40,9 @@ class Engine {
 
 public:
 	Engine();
+	~Engine();
+	Engine        (Engine const&) = delete;
+	void operator=(Engine const&) = delete;
 
   void init();
 

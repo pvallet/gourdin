@@ -11,8 +11,6 @@
 class TerrainTexManager {
 public:
 	TerrainTexManager() {}
-	TerrainTexManager(TerrainTexManager const&) = delete;
-	void operator=   (TerrainTexManager const&) = delete;
 
 	void loadTexture(std::string path);
 	void loadFolder(size_t nbTextures, std::string folderPath);

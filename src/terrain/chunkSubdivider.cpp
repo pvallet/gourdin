@@ -3,13 +3,16 @@
 #include "chunk.h"
 
 ChunkSubdivider::ChunkSubdivider ():
+  _continue(true),
   _computingThread(&ChunkSubdivider::executeTasks, this) {}
 
 void ChunkSubdivider::executeTasks() {
-  while (true) {
+  while (_continue) {
     std::unique_lock<std::mutex> lockQueue(_mutexQueue);
     while (_taskQueue.empty()) {
       _cvQueueNotEmpty.wait(lockQueue);
+      if (!_continue)
+        return;
     }
     lockQueue.unlock();
 
@@ -22,6 +25,12 @@ void ChunkSubdivider::executeTasks() {
     if (_taskQueue.size() == 0)
       _cvTasksCompleted.notify_one();
   }
+}
+
+void ChunkSubdivider::join() {
+  _continue = false;
+  _cvQueueNotEmpty.notify_one();
+  _computingThread.join();
 }
 
 void ChunkSubdivider::waitForTasksToFinish() {
