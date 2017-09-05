@@ -112,40 +112,41 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
       break;
 
     case SDL_MOUSEBUTTONUP: {
-      if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT)
+      if (event.button.which == SDL_TOUCH_MOUSEID || event.button.button == SDL_BUTTON_LEFT) {
         _mouseDown = false;
 
-      glm::ivec2 releasedPos(event.button.x, event.button.y);
+        glm::ivec2 releasedPos(event.button.x, event.button.y);
 
-      if (isCloseEnoughToBeginClickToDefineClick(releasedPos)) {
+        if (isCloseEnoughToBeginClickToDefineClick(releasedPos)) {
 
-        if (_clickBegin.getElapsedTime() < LONGCLICK_MS) {
+          if (_clickBegin.getElapsedTime() < LONGCLICK_MS) {
 
-          if (_gonnaBeDoubleClick) {
-            sendEvent(SDL_USER_DOUBLE_CLICK, _pendingClick);
-            _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
-          }
+            if (_gonnaBeDoubleClick) {
+              sendEvent(SDL_USER_DOUBLE_CLICK, _pendingClick);
+              _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+            }
 
-          else {
-            sendEvent(SDL_USER_CLICK, _beginDrag);
-            _pendingClick = _beginDrag;
+            else {
+              sendEvent(SDL_USER_CLICK, _beginDrag);
+              _pendingClick = _beginDrag;
+            }
           }
         }
+
+        if (isDuringLongClick()) {
+          sendEvent(SDL_USER_LONG_CLICK_END, releasedPos);
+
+          _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
+          _duringLongClick = false;
+        }
+
+        else if (isDraggingCursor()) {
+          sendEvent(SDL_USER_DRAG_END, releasedPos);
+          _duringDrag = false;
+        }
+
+        _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
       }
-
-      if (isDuringLongClick()) {
-        sendEvent(SDL_USER_LONG_CLICK_END, releasedPos);
-
-        _pendingClick = DEFAULT_OUTSIDE_WINDOW_COORD;
-        _duringLongClick = false;
-      }
-
-      else if (isDraggingCursor()) {
-        sendEvent(SDL_USER_DRAG_END, releasedPos);
-        _duringDrag = false;
-      }
-
-      _beginDrag = DEFAULT_OUTSIDE_WINDOW_COORD;
     }
 
     _gonnaBeDoubleClick = false;
