@@ -377,6 +377,15 @@ std::array<glm::uvec2, 2> TerrainGeometry::SubdivisionLevel::getSubChunkInfo(glm
   res[1].x = (pos.x - res[0].x * CHUNK_SIZE) / (CHUNK_SIZE / GRID_SUBDIV);
   res[1].y = (pos.y - res[0].y * CHUNK_SIZE) / (CHUNK_SIZE / GRID_SUBDIV);
 
+  if (res[0].x == NB_CHUNKS)
+    res[0].x--;
+  if (res[0].y == NB_CHUNKS)
+    res[0].y--;
+  if (res[1].x == GRID_SUBDIV)
+    res[1].x--;
+  if (res[1].y == GRID_SUBDIV)
+    res[1].y--;
+
   return res;
 }
 

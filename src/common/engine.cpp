@@ -88,7 +88,6 @@ void Engine::init() {
   SDL_Log("Launching chunks subdivisions: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
-
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
 
@@ -105,17 +104,6 @@ void Engine::init() {
   SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
-  #pragma omp parallel for
-  for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
-    size_t x = i / NB_CHUNKS;
-    size_t y = i - x * NB_CHUNKS;
-    std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
-    newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
-  }
-
-  SDL_Log("Generating trees: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
-
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds());
 
@@ -125,6 +113,17 @@ void Engine::init() {
   _chunkSubdivider.waitForTasksToFinish();
 
   SDL_Log("Waiting for basic subdivisions to finish: %d ms", initTimer.getElapsedTime() - previousTime);
+  previousTime = initTimer.getElapsedTime();
+
+  #pragma omp parallel for
+  for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
+    size_t x = i / NB_CHUNKS;
+    size_t y = i - x * NB_CHUNKS;
+    std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
+    newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
+  }
+
+  SDL_Log("Generating trees: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
 
   SDL_Log("Initialization time: %d ms", initTimer.getElapsedTime());
