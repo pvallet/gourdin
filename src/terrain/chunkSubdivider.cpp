@@ -3,7 +3,7 @@
 #include "chunk.h"
 
 ChunkSubdivider::ChunkSubdivider ():
-  _computingThread(&ChunkSubdivider::executeTasks, std::ref(*this)) {}
+  _computingThread(&ChunkSubdivider::executeTasks, this) {}
 
 void ChunkSubdivider::executeTasks() {
   std::unique_lock<std::mutex> lock(_mutexCVQueueNotEmpty);
