@@ -2,6 +2,7 @@ package pvallet.com.github.gourdin;
 
 import org.libsdl.app.SDLActivity;
 import android.view.View;
+import android.util.DisplayMetrics;
 
 public class GourdinSDL2Activity extends SDLActivity
 {
@@ -35,5 +36,11 @@ public class GourdinSDL2Activity extends SDLActivity
                                       | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                                       | View.SYSTEM_UI_FLAG_FULLSCREEN
                                       | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    }
+
+    float getXDPI() {
+      DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+      return metrics.xdpi;
     }
 }

@@ -159,12 +159,12 @@ std::string Game::getInfoTextLockedView() const {
   text << "Click to make the character move in the given direction" << std::endl
        << "Long click to make the character move to the click" << std::endl
        << "Double click to make a predator run" << std::endl
-       << "Click on another character to change focus" << std::endl
-       << "Click on the focused character to stop moving" << std::endl;
+       << "Click on another character to change focus" << std::endl;
   if (_povCamera)
     text << "Click on the minimap to switch back to the external camera" << std::endl;
   else
-    text << "Click on the minimap to switch to POV camera" << std::endl;
+    text << "Click on the focused character to stop moving" << std::endl
+         << "Click on the minimap to switch to POV camera" << std::endl;
 #endif
 
   return getInfoTextCommon() + text.str();

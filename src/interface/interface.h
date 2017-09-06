@@ -39,7 +39,7 @@ public:
 private:
   const Camera& cam;
 
-  bool _androidBuild;
+  float _screenHorizontalDPI;
 
   ColoredRectangles _rectSelect;
   Text _textTopLeft;

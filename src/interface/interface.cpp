@@ -1,15 +1,27 @@
 #include "interface.h"
 
 #ifdef __ANDROID__
-  #define STAMINA_BAR_WIDTH 60.f
-  #define STAMINA_BAR_HEIGHT 8.f
+  #include <jni.h>
+
+  #define NORMALIZATION_DPI_VALUE 537.882019
+
+  #define STAMINA_BAR_WIDTH (60.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
+  #define STAMINA_BAR_HEIGHT (8.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
+
+  #define SIZE_SMALL_TEXT (30.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
+  #define SIZE_MEDIUM_TEXT (38.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
+
 #else
   #define STAMINA_BAR_WIDTH 20.f
   #define STAMINA_BAR_HEIGHT 4.f
+
+  #define SIZE_SMALL_TEXT 12
+  #define SIZE_MEDIUM_TEXT 17
 #endif
 
 Interface::Interface():
   cam(Camera::getInstance()),
+  _screenHorizontalDPI(0),
   _rectSelect(glm::vec4(1), false) {}
 
 void Interface::init() {
@@ -18,9 +30,16 @@ void Interface::init() {
   TexturedRectangle::loadShader();
 
 #ifdef __ANDROID__
-  _androidBuild = true;
-#else
-  _androidBuild = false;
+  // Get the screen DPI from the android application
+  JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
+  jobject activity = (jobject)SDL_AndroidGetActivity();
+  jclass clazz(env->GetObjectClass(activity));
+  jmethodID method_id = env->GetMethodID(clazz, "getXDPI", "()F");
+
+  _screenHorizontalDPI = env->CallFloatMethod(activity, method_id);
+
+  env->DeleteLocalRef(activity);
+  env->DeleteLocalRef(clazz);
 #endif
 
   // Minimap
@@ -107,16 +126,16 @@ void Interface::renderText() const {
 }
 
 void Interface::setTextTopLeft(const std::string& string) {
-  _textTopLeft.setText(string, _androidBuild ? 30 : 12);
+  _textTopLeft.setText(string, SIZE_SMALL_TEXT);
 }
 
 void Interface::setTextTopRight(const std::string& string) {
-  _textTopRight.setText(string, _androidBuild ? 30 : 12);
+  _textTopRight.setText(string, SIZE_SMALL_TEXT);
   _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
 void Interface::setTextTopCenter(const std::string& string) {
-    _textTopCenter.setText(string, 12);
+    _textTopCenter.setText(string, SIZE_SMALL_TEXT);
     _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
 }
 
@@ -129,7 +148,7 @@ void Interface::setTextCenter(const std::string& string, int msDuration) {
 }
 
 void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
-  _textBottomCenter.setText(string, _androidBuild ? 38 : 17);
+  _textBottomCenter.setText(string, SIZE_MEDIUM_TEXT);
   _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
                                 cam.getWindowH() - _textBottomCenter.getSize().y);
 
