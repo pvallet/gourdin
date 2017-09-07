@@ -11,7 +11,7 @@
 
 struct BiomeIndices {
 	std::vector<GLuint> indices;
-	IndexBufferObject ibo;
+	std::unique_ptr<IndexBufferObject> ibo;
 };
 
 struct Buffers {

@@ -50,8 +50,6 @@ void Chunk::fillBufferData(size_t subdivLvl) {
 	}
 
 	for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
-		// This call generates a new IBO, but at is called from another thread than
-		// the main thread, its initialization will fail and needs to be done once again
 		std::vector<GLuint>& currentIndices = currentBuffers->indicesInfo[(*tri)->biome].indices;
 
 		currentIndices.resize(currentIndices.size() + 3);
@@ -104,9 +102,8 @@ void Chunk::generateBuffers() {
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		size_t bufferSizeIndices = it->second.indices.size()*sizeof it->second.indices[0];
 
-		// The IBO was constructed from another thread and thus needs to be generated again
-		it->second.ibo.generate();
-		it->second.ibo.bind();
+		it->second.ibo = std::unique_ptr<IndexBufferObject>(new IndexBufferObject());
+		it->second.ibo->bind();
 
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSizeIndices, NULL, GL_STATIC_DRAW);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, bufferSizeIndices, &(it->second.indices[0]));
@@ -159,7 +156,7 @@ size_t Chunk::draw() const {
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
 		_terrainTexManager.bindTexture(it->first);
 
-		it->second.ibo.bind();
+		it->second.ibo->bind();
 
 		glDrawElements(GL_TRIANGLES, it->second.indices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
 

@@ -101,6 +101,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
         handleKeyPressed(event);
       break;
 
+#ifdef __ANDROID__
     case SDL_FINGERMOTION:
       if (getNbFingers() == 1)
         cam.translate(- event.tfinger.dx * TRANSLATION_FACTOR * cam.getZoom(),
@@ -111,6 +112,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       cam.zoom(-event.mgesture.dDist * ZOOM_FACTOR * cam.getZoom());
       cam.rotate(event.mgesture.dTheta * ROTATION_FACTOR, 0);
       break;
+#endif
   }
 
   if (event.type == SDL_USER_CLICK) {

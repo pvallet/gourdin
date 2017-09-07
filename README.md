@@ -1,6 +1,6 @@
 # gourdin
 
-This project is a 3D/2D engine developped under SDL and OpenGL for educational
+This project is a 3D/2D engine developed under SDL and OpenGL for educational
 purposes.
 
 The structure of the map is taken from the map generator of this tutorial:
@@ -30,7 +30,7 @@ Firstly, install the dependencies for the building environment.
 ```
 sudo apt-get install build-essential libgl1-mesa-dev libgomp1 cmake
 ```
-Then you will need the dependencies of the project. `./get_dependencies` is a small script that dowloads locally the dependencies you might need. Under linux, the two valid entries are `glm` and `SDL2pp`.
+Then you will need the dependencies of the project. `./get_dependencies` is a small script that downloads locally the dependencies you might need. Under linux, the two valid entries are `glm` and `SDL2pp`.
 ```
 sudo apt-get install libglm-dev libsdl2-dev libsdl2-image-dev
 ./get_dependencies SDL2pp
@@ -44,6 +44,35 @@ mkdir build && cd build
 cmake ..
 make -j4
 ```
+
+## OS X
+
+#### 1. Homebrew
+
+In order to easily install the dependencies, we recommend to use Homebrew, a package manager similar to apt-get in linux.
+```
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+#### 2. Dependencies
+
+You then need CMake to generate your project and Clang (C++ compiler) to build it, and `wget` to retrieve your dependencies easily:
+```
+brew install cmake llvm wget
+```
+Finally install the dependencies of the project:
+```
+brew install glm sdl2 sdl2_image
+./get_dependencies SDL2pp
+```
+
+`./get_dependencies` is a small script that downloads locally the dependencies you might need. Under OS X, the two valid entries are `glm` and `SDL2pp`.
+
+#### 2. Building the project
+
+In order to build the project, please refer to the section Linux -> 2. Building the project.
+
+Please note that cmake might throw some errors about testing OpenMP. You can ignore them, the CMake config file is not up to date with the compiler Clang, that features OpenMP natively.
 
 ## Android (under linux)
 

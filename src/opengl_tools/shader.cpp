@@ -80,7 +80,7 @@ bool Shader::compileShader(GLuint &shader, GLenum type, std::string const &sourc
   shader = glCreateShader(type);
 
   if(shader == 0) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: There is no (%d) shader type", type);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error: could not create shader %s", source.c_str());
     return false;
   }
 

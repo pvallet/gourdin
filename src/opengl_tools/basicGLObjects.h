@@ -16,7 +16,6 @@ public:
   VertexArrayObject (VertexArrayObject&& other) noexcept;
   ~VertexArrayObject ();
 
-  void generate();
   inline void bind() const {glBindVertexArray(_vaoID);}
   inline static void unbind() {glBindVertexArray(0);}
 
@@ -30,7 +29,6 @@ public:
   VertexBufferObject (VertexBufferObject&& other) noexcept;
   ~VertexBufferObject ();
 
-  void generate();
   inline void bind() const {glBindBuffer(GL_ARRAY_BUFFER, _vboID);}
   inline static void unbind() {glBindBuffer(GL_ARRAY_BUFFER, 0);}
 
@@ -47,7 +45,6 @@ public:
   IndexBufferObject (IndexBufferObject&& other) noexcept;
   ~IndexBufferObject ();
 
-  void generate();
   inline void bind() const {glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboID);}
   inline static void unbind() {glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);}
 
