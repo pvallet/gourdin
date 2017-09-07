@@ -12,9 +12,17 @@ Any feedback be much appreciated. If that also gives you gamedesign ideas, tell 
 
 ## Installation
 
-This version has been migrated from SFML to SDL and is thus not available yet as binaries.
+On **Windows** you have two options:
+* Download the [installer](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-windows-setup_0.2.0.exe) to install gourdin on your computer. You will be able to run it through the windows menu and create a desktop icon if you want. If you have an error telling you that you don't have the permissions to run it, right ctrl-click on it and choose "Run as administrator".
+* Download [gourdin-windows-folder.zip](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-windows-folder_0.2.0.zip) that contains the directory with all the game info. You can unzip it and run it directly by double-clicking on `gourdin.exe`
 
-All the previous versions are available here: https://github.com/pvallet/gourdin/releases/
+On **Mac OS X** you should download [gourdin-mac.app.zip](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-mac_0.2.0.app.zip). Then you only have to `ctrl-click` on it and choose open to allow executing from an unidentified developer (me).
+
+On **Linux** there is no pre-built package, you have to build it from source.
+
+On **Android** you can download the [apk](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-android_0.2.0.apk), or download gourdin directly from the play store.
+
+All the files are available here: https://github.com/pvallet/gourdin/releases/
 
 ---
 
