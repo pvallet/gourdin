@@ -6,7 +6,7 @@ purposes.
 The structure of the map is taken from the map generator of this tutorial:
 http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/
 
-Any feedback be much appreciated. If that also gives you gamedesign ideas, tell me about it!
+Any feedback is much appreciated. If that also gives you gamedesign ideas, tell me about it!
 
 ---
 
