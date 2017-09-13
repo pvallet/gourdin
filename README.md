@@ -2,6 +2,8 @@
 
 [![Gourdin](http://img.youtube.com/vi/DIJxMQXnvy0/0.jpg)](http://www.youtube.com/watch?v=DIJxMQXnvy0 "Gourdin")
 
+Click on the image to go to a YouTube video presenting the project.
+
 This project is a 3D/2D engine developed under SDL and OpenGL for educational
 purposes.
 
