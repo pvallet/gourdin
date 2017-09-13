@@ -1,5 +1,7 @@
 # gourdin
 
+[![Gourdin](http://img.youtube.com/vi/DIJxMQXnvy0/0.jpg)](http://www.youtube.com/watch?v=DIJxMQXnvy0 "Gourdin")
+
 This project is a 3D/2D engine developed under SDL and OpenGL for educational
 purposes.
 
@@ -20,7 +22,7 @@ On **Mac OS X** you should download [gourdin-mac.app.zip](https://github.com/pva
 
 On **Linux** there is no pre-built package, you have to build it from source.
 
-On **Android** you can download the [apk](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-android_0.2.0.apk), or download gourdin directly from the play store.
+On **Android** you can download the [apk](https://github.com/pvallet/gourdin/releases/download/v0.2.0/gourdin-android_0.2.0.apk), or download [gourdin](https://play.google.com/store/apps/details?id=pvallet.com.github.gourdin) directly from the play store.
 
 All the files are available here: https://github.com/pvallet/gourdin/releases/
 
