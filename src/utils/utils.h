@@ -64,6 +64,6 @@ namespace ut {
 
 bool glCheckError(const char *file, int line);
 
-// regex to replace gl calls: ([_a-zA-Z]* = )?(gl[^ :;>]*\([^;]*\));
-// replace with _glCheck($2);
-#define _glCheck(expr) {expr; glCheckError(__FILE__,__LINE__);}
+// regex to replace gl calls: ([_a-zA-Z]* = )?(\bgl[^ :;>]*\([^;]*\));
+// replace with GL_CHECK($2)
+#define GL_CHECK(expr) {expr; glCheckError(__FILE__,__LINE__);}
