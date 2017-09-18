@@ -12,30 +12,32 @@
 
 FontHandler::FontHandler():
   _fontSize(FONT_SIZE) {
-  
+
   Texture::flipPixelsUpsideDown(font.tex_width, font.tex_height, 1, font.tex_data);
 
   // Fill the glyph data with the glyphs from the font
   for (size_t i = 0; i < font.glyphs_count; i++) {
     char codepoint = font.glyphs[i].codepoint;
-    _glyphs[codepoint].reset(new Glyph);
+    if (codepoint > 0) {
+      _glyphs[codepoint].reset(new Glyph);
 
-    _glyphs[codepoint]->width = font.glyphs[i].width;
-    _glyphs[codepoint]->height = font.glyphs[i].height;
-    _glyphs[codepoint]->offset_x = font.glyphs[i].offset_x;
-    _glyphs[codepoint]->offset_y = font.glyphs[i].offset_y;
-    _glyphs[codepoint]->advance_x = font.glyphs[i].advance_x;
-    _glyphs[codepoint]->s0 = font.glyphs[i].s0;
-    _glyphs[codepoint]->t0 = 1-font.glyphs[i].t0;
-    _glyphs[codepoint]->s1 = font.glyphs[i].s1;
-    _glyphs[codepoint]->t1 = 1-font.glyphs[i].t1;
+      _glyphs[codepoint]->width = font.glyphs[i].width;
+      _glyphs[codepoint]->height = font.glyphs[i].height;
+      _glyphs[codepoint]->offset_x = font.glyphs[i].offset_x;
+      _glyphs[codepoint]->offset_y = font.glyphs[i].offset_y;
+      _glyphs[codepoint]->advance_x = font.glyphs[i].advance_x;
+      _glyphs[codepoint]->s0 = font.glyphs[i].s0;
+      _glyphs[codepoint]->t0 = 1-font.glyphs[i].t0;
+      _glyphs[codepoint]->s1 = font.glyphs[i].s1;
+      _glyphs[codepoint]->t1 = 1-font.glyphs[i].t1;
 
-    for (size_t i = 0; i < 128; i++) {
-      _glyphs[codepoint]->kerning[i] = 0;
-    }
+      for (size_t i = 0; i < 128; i++) {
+        _glyphs[codepoint]->kerning[i] = 0;
+      }
 
-    for (size_t j = 0; j < font.glyphs[i].kerning_count; j++) {
-      _glyphs[codepoint]->kerning[font.glyphs[i].kerning[j].codepoint] = font.glyphs[i].kerning[j].kerning;
+      for (size_t j = 0; j < font.glyphs[i].kerning_count; j++) {
+        _glyphs[codepoint]->kerning[font.glyphs[i].kerning[j].codepoint] = font.glyphs[i].kerning[j].kerning;
+      }
     }
   }
 }
