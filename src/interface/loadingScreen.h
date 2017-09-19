@@ -8,10 +8,8 @@ class LoadingScreen {
 public:
   LoadingScreen (SDL2pp::Window& window);
 
-  void updateAndRender();
+  void updateAndRender(float progress);
 
 private:
-  // Text _textProgressBar;
-
   SDL2pp::Window& _window;
 };
