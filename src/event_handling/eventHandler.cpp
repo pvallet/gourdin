@@ -158,6 +158,12 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
           running = false;
           break;
 
+#ifdef __ANDROID__
+        case SDLK_AC_BACK:
+          running = false;
+          break;
+#endif
+
         case SDLK_f:
           if (_fullscreen)
             SDL_SetWindowFullscreen(_window.Get(), 0);

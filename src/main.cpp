@@ -83,14 +83,29 @@ int main(int argc, char* argv[]) try {
 
   SDL_GL_DeleteContext(glContext);
 
+  // Needed to kill the application
+#ifdef __ANDROID__
+  exit(0);
+#endif
+
   return 0;
 }
 catch (SDL2pp::Exception& e) {
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in: %s", e.GetSDLFunction().c_str());
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "  Reason: %s", e.GetSDLError().c_str());
+
+#ifdef __ANDROID__
+  exit(1);
+#endif
+
   return 1;
 }
 catch (std::exception& e) {
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", e.what());
+
+#ifdef __ANDROID__
+  exit(1);
+#endif
+
   return 1;
 }
