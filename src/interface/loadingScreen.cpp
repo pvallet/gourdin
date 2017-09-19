@@ -1,26 +1,34 @@
 #include "loadingScreen.h"
 
 #include "camera.h"
-
-// #include <SDL2/SDL_log.h>
+#include "coloredRectangles.h"
+#include "text.h"
 
 LoadingScreen::LoadingScreen(SDL2pp::Window& window):
-  _loadingProgress(0),
   _window(window) {}
 
 void LoadingScreen::updateAndRender() {
   Camera& cam = Camera::getInstance();
-  _textCenter.setText("Loading");
+  Text textCenter;
+  textCenter.setText("Loading");
 
-  _textCenter.setPosition(cam.getWindowW() / 2 - (_textCenter.getSize().x / 2),
-                          cam.getWindowH() / 2 - (_textCenter.getSize().y / 2));
+  textCenter.setPosition(cam.getWindowW() / 2 - (textCenter.getSize().x / 2),
+                         cam.getWindowH() / 2 - (textCenter.getSize().y / 2));
+
+  glm::vec4 progressBarFrameRect(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+    cam.getWindowW() / 2 - 1.5 * textCenter.getSize().x / 2,
+    cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2,
+    textCenter.getSize().x * 1.5,
+    12 + 4
+  )));
+
+  ColoredRectangles progressBarFrame(glm::vec4(0.52, 0.34, 0.138, 1), progressBarFrameRect, false);
 
   glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  _textCenter.draw();
-  // _progressBar.draw();
-  // _textProgressBar.draw();
+  textCenter.draw();
+  progressBarFrame.draw();
 
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 
