@@ -10,6 +10,12 @@ LoadingScreen::LoadingScreen(SDL2pp::Window& window):
 void LoadingScreen::updateAndRender(std::string task, float progress) {
   assert(progress <= 100 && progress >= 0);
 
+  if (!_previousTask.empty())
+    SDL_Log("%s: %d ms", _previousTask.c_str(), _timeSincePreviousTaskWasLaunched.getElapsedTime());
+
+  _previousTask = task;
+  _timeSincePreviousTaskWasLaunched.restart();
+
   Camera& cam = Camera::getInstance();
   Text textCenter;
   textCenter.setText("Loading");

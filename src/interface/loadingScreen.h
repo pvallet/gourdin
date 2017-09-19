@@ -2,6 +2,8 @@
 
 #include <SDL2pp/SDL2pp.hh>
 
+#include "clock.h"
+
 #include <string>
 
 class LoadingScreen {
@@ -11,5 +13,8 @@ public:
   void updateAndRender(std::string task, float progress);
 
 private:
+  std::string _previousTask;
+  Clock _timeSincePreviousTaskWasLaunched;
+
   SDL2pp::Window& _window;
 };

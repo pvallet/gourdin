@@ -24,12 +24,9 @@ Engine::~Engine() {
 }
 
 void Engine::init(LoadingScreen& loadingScreen) {
-  Clock initTimer;
   srand(time(NULL));
 
   loadingScreen.updateAndRender("Loading shaders", 0);
-
-  int previousTime = initTimer.getElapsedTime();
 
   _terrainShader.load("src/shaders/heightmap.vert", "src/shaders/heightmap.frag");
   _igEShader.load("src/shaders/igElement.vert", "src/shaders/igElement.frag");
@@ -40,16 +37,11 @@ void Engine::init(LoadingScreen& loadingScreen) {
   glUniform1f(_igEShader.getUniformLocation("elementNearPlane"), ELEMENT_NEAR_PLANE);
   Shader::unbind();
 
-  SDL_Log("Loading shaders: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
   loadingScreen.updateAndRender("Loading terrain data", 1);
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
-
-  SDL_Log("Loading terrain data: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
 
   GeneratedImage relief;
 
@@ -59,7 +51,6 @@ void Engine::init(LoadingScreen& loadingScreen) {
   }
 
   else {
-    SDL_Log("Generating relief");
     loadingScreen.updateAndRender("Generating relief", 25);
 
     _mapInfoExtractor.convertMapData(512);
@@ -68,7 +59,6 @@ void Engine::init(LoadingScreen& loadingScreen) {
     _reliefGenerator.generateRelief();
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
-    SDL_Log("Done Generating relief mask");
   }
 
   loadingScreen.updateAndRender("Generate terrain geometry", 30);
@@ -76,8 +66,6 @@ void Engine::init(LoadingScreen& loadingScreen) {
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
   _terrainGeometry.generateNewSubdivisionLevel();
 
-  SDL_Log("Generate geometry: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
   loadingScreen.updateAndRender("Launching chunks subdivisions", 33);
 
   std::vector<Chunk*> newChunks;
@@ -94,8 +82,6 @@ void Engine::init(LoadingScreen& loadingScreen) {
     }
   }
 
-  SDL_Log("Launching chunks subdivisions: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
   loadingScreen.updateAndRender("Loading ocean and skybox", 34);
 
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
@@ -106,26 +92,16 @@ void Engine::init(LoadingScreen& loadingScreen) {
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
 
-  SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
   loadingScreen.updateAndRender("Initializing content generator", 38);
 
   _contentGenerator.init();
 
-  SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
   loadingScreen.updateAndRender("Generating herds", 60);
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds());
 
-  SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
-
   _chunkSubdivider.waitForTasksToFinish();
-
-  SDL_Log("Waiting for basic subdivisions to finish: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
 
   #pragma omp parallel for
   for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
@@ -134,11 +110,6 @@ void Engine::init(LoadingScreen& loadingScreen) {
     std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
     newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
   }
-
-  SDL_Log("Generating trees: %d ms", initTimer.getElapsedTime() - previousTime);
-  previousTime = initTimer.getElapsedTime();
-
-  SDL_Log("Initialization time: %d ms", initTimer.getElapsedTime());
 }
 
 void Engine::appendNewElements(std::vector<igMovingElement*> elems) {

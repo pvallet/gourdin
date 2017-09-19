@@ -21,7 +21,7 @@ Game::Game (Engine& engine):
   _msCenterTextDisplayDuration(1000) {}
 
 void Game::init(LoadingScreen& loadingScreen) {
-  loadingScreen.updateAndRender("Initializint interface", 80);
+  loadingScreen.updateAndRender("Initializing interface", 80);
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
 
