@@ -165,10 +165,14 @@ bool EventHandler::handleEvent(const SDL_Event& event) {
 #endif
 
         case SDLK_f:
-          if (_fullscreen)
+          if (_fullscreen) {
             SDL_SetWindowFullscreen(_window.Get(), 0);
-          else
+            SDL_SetWindowGrab(_window.Get(), SDL_FALSE);
+          }
+          else {
             SDL_SetWindowFullscreen(_window.Get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+            SDL_SetWindowGrab(_window.Get(), SDL_TRUE);
+          }
           _fullscreen = !_fullscreen;
           break;
 

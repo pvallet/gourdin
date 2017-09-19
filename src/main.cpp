@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) try {
   SDL_GetDesktopDisplayMode(0, &displayMode);
 
   SDL2pp::Window window("gourdin", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h,
-    SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE);
+    SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_INPUT_GRABBED);
 
   glContext = SDL_GL_CreateContext(window.Get());
 
