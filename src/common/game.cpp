@@ -21,11 +21,11 @@ Game::Game (Engine& engine):
   _msCenterTextDisplayDuration(1000) {}
 
 void Game::init(LoadingScreen& loadingScreen) {
-  loadingScreen.updateAndRender(80);
+  loadingScreen.updateAndRender("Initializint interface", 80);
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
 
-  loadingScreen.updateAndRender(85);
+  loadingScreen.updateAndRender("Waiting for subdivision tasks to finish", 85);
 
   setLockedView(false);
 
@@ -35,7 +35,7 @@ void Game::init(LoadingScreen& loadingScreen) {
 
   update(0);
   _engine.waitForTasksToFinish();
-  loadingScreen.updateAndRender(100);
+  loadingScreen.updateAndRender("Finished initialization", 100);
 }
 
 void Game::updateCamera() const {

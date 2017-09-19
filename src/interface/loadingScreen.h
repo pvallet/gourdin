@@ -8,7 +8,7 @@ class LoadingScreen {
 public:
   LoadingScreen (SDL2pp::Window& window);
 
-  void updateAndRender(float progress);
+  void updateAndRender(std::string task, float progress);
 
 private:
   SDL2pp::Window& _window;

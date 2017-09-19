@@ -7,7 +7,7 @@
 LoadingScreen::LoadingScreen(SDL2pp::Window& window):
   _window(window) {}
 
-void LoadingScreen::updateAndRender(float progress) {
+void LoadingScreen::updateAndRender(std::string task, float progress) {
   assert(progress <= 100 && progress >= 0);
 
   Camera& cam = Camera::getInstance();
@@ -17,17 +17,22 @@ void LoadingScreen::updateAndRender(float progress) {
   textCenter.setPosition(cam.getWindowW() / 2 - (textCenter.getSize().x / 2),
                          cam.getWindowH() / 2 - (textCenter.getSize().y / 2));
 
+  Text textProgressBar;
+  textProgressBar.setText(task, 12);
+  textProgressBar.setPosition(cam.getWindowW() / 2 - (textProgressBar.getSize().x / 2),
+                              cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2);
+
   glm::vec4 progressBarRect(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-   cam.getWindowW() / 2 - 1.5 * textCenter.getSize().x / 2,
+   cam.getWindowW() / 2 - 2 * textCenter.getSize().x / 2,
    cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2,
-   textCenter.getSize().x * 1.5 * progress / 100.f,
+   textCenter.getSize().x * 2 * progress / 100.f,
    12 + 4
   )));
 
   glm::vec4 progressBarFrameRect(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-    cam.getWindowW() / 2 - 1.5 * textCenter.getSize().x / 2,
+    cam.getWindowW() / 2 - 2 * textCenter.getSize().x / 2,
     cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2,
-    textCenter.getSize().x * 1.5,
+    textCenter.getSize().x * 2,
     12 + 4
   )));
 
@@ -39,6 +44,7 @@ void LoadingScreen::updateAndRender(float progress) {
 
   textCenter.draw();
   progressBar.draw();
+  textProgressBar.draw();
   progressBarFrame.draw();
 
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());

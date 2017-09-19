@@ -27,7 +27,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
   Clock initTimer;
   srand(time(NULL));
 
-  loadingScreen.updateAndRender(0);
+  loadingScreen.updateAndRender("Loading shaders", 0);
 
   int previousTime = initTimer.getElapsedTime();
 
@@ -42,7 +42,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   SDL_Log("Loading shaders: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(1);
+  loadingScreen.updateAndRender("Loading terrain data", 1);
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
@@ -54,13 +54,13 @@ void Engine::init(LoadingScreen& loadingScreen) {
   GeneratedImage relief;
 
   if (relief.loadFromFile("res/map/relief.png")) {
-    loadingScreen.updateAndRender(25);
+    loadingScreen.updateAndRender("Loading relief", 25);
     _terrainGeometry.setReliefGenerator(relief);
   }
 
   else {
-    SDL_Log("Generating relief mask");
-    loadingScreen.updateAndRender(25);
+    SDL_Log("Generating relief");
+    loadingScreen.updateAndRender("Generating relief", 25);
 
     _mapInfoExtractor.convertMapData(512);
     _mapInfoExtractor.generateBiomesTransitions(7);
@@ -69,15 +69,16 @@ void Engine::init(LoadingScreen& loadingScreen) {
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
     SDL_Log("Done Generating relief mask");
-    loadingScreen.updateAndRender(30);
   }
+
+  loadingScreen.updateAndRender("Generate terrain geometry", 30);
 
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
   _terrainGeometry.generateNewSubdivisionLevel();
 
   SDL_Log("Generate geometry: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(33);
+  loadingScreen.updateAndRender("Launching chunks subdivisions", 33);
 
   std::vector<Chunk*> newChunks;
   for (size_t i = 0; i < NB_CHUNKS; i++) {
@@ -95,7 +96,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   SDL_Log("Launching chunks subdivisions: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(34);
+  loadingScreen.updateAndRender("Loading ocean and skybox", 34);
 
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
@@ -107,20 +108,19 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(38);
+  loadingScreen.updateAndRender("Initializing content generator", 38);
 
   _contentGenerator.init();
 
   SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(60);
+  loadingScreen.updateAndRender("Generating herds", 60);
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds());
 
   SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
-  loadingScreen.updateAndRender(60);
 
   _chunkSubdivider.waitForTasksToFinish();
 
