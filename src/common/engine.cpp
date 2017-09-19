@@ -23,9 +23,11 @@ Engine::~Engine() {
   _chunkSubdivider.join();
 }
 
-void Engine::init() {
+void Engine::init(LoadingScreen& loadingScreen) {
   Clock initTimer;
   srand(time(NULL));
+
+  loadingScreen.updateAndRender();
 
   int previousTime = initTimer.getElapsedTime();
 
@@ -40,6 +42,7 @@ void Engine::init() {
 
   SDL_Log("Loading shaders: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
@@ -47,6 +50,7 @@ void Engine::init() {
 
   SDL_Log("Loading terrain data: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   GeneratedImage relief;
 
@@ -55,6 +59,7 @@ void Engine::init() {
 
   else {
     SDL_Log("Generating relief mask");
+    loadingScreen.updateAndRender();
 
     _mapInfoExtractor.convertMapData(512);
     _mapInfoExtractor.generateBiomesTransitions(7);
@@ -63,6 +68,7 @@ void Engine::init() {
     _reliefGenerator.saveToFile("res/map/relief.png");
     _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
     SDL_Log("Done Generating relief mask");
+    loadingScreen.updateAndRender();
   }
 
   // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
@@ -70,6 +76,7 @@ void Engine::init() {
 
   SDL_Log("Generate geometry: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   std::vector<Chunk*> newChunks;
   for (size_t i = 0; i < NB_CHUNKS; i++) {
@@ -87,6 +94,7 @@ void Engine::init() {
 
   SDL_Log("Launching chunks subdivisions: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
@@ -98,22 +106,26 @@ void Engine::init() {
 
   SDL_Log("Camera skybox and ocean: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   _contentGenerator.init();
 
   SDL_Log("Init ContentGenerator: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds());
 
   SDL_Log("Generating herds: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   _chunkSubdivider.waitForTasksToFinish();
 
   SDL_Log("Waiting for basic subdivisions to finish: %d ms", initTimer.getElapsedTime() - previousTime);
   previousTime = initTimer.getElapsedTime();
+  loadingScreen.updateAndRender();
 
   #pragma omp parallel for
   for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {

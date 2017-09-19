@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "interface.h"
+#include "loadingScreen.h"
 
 class Game {
 public:
@@ -9,7 +10,7 @@ public:
 
   // ---------------------------- Common ---------------------------------------
 
-  void init();
+  void init(LoadingScreen& loadingScreen);
   void mainLoop();
 
   void update(int msElapsed);

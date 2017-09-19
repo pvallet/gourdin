@@ -20,9 +20,12 @@ Game::Game (Engine& engine):
   _msHuntDuration(120000),
   _msCenterTextDisplayDuration(1000) {}
 
-void Game::init() {
+void Game::init(LoadingScreen& loadingScreen) {
+  loadingScreen.updateAndRender();
   _interface.setEngineTexture(_engine.getColorBuffer());
   _interface.init();
+
+  loadingScreen.updateAndRender();
 
   setLockedView(false);
 

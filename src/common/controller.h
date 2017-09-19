@@ -7,6 +7,7 @@
 #include "eventHandlerGlobalView.h"
 #include "engine.h"
 #include "game.h"
+#include "loadingScreen.h"
 
 #ifndef NDEBUG
 	class TestHandler;
@@ -30,6 +31,8 @@ private:
 
 	bool _running;
 	int _msElapsed;
+
+	LoadingScreen _loadingScreen;
 
 	Engine _engine;
 	Game _game;

@@ -25,9 +25,6 @@ Interface::Interface():
   _rectSelect(glm::vec4(1), false) {}
 
 void Interface::init() {
-  ColoredRectangles::loadShader();
-  Text::loadShader();
-  TexturedRectangle::loadShader();
 
 #ifdef __ANDROID__
   // Get the screen DPI from the android application
@@ -114,15 +111,15 @@ void Interface::renderMinimap(const Engine& engine) const {
 }
 
 void Interface::renderText() const {
-  _textTopLeft.render();
-  _textTopRight.render();
-  _textTopCenter.render();
+  _textTopLeft.draw();
+  _textTopRight.draw();
+  _textTopCenter.draw();
 
   if (_textCenterChrono.isStillRunning())
-    _textCenter.render();
+    _textCenter.draw();
 
   if (_textBottomCenterChrono.isStillRunning())
-    _textBottomCenter.render();
+    _textBottomCenter.draw();
 }
 
 void Interface::setTextTopLeft(const std::string& string) {

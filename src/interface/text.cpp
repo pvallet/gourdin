@@ -120,7 +120,7 @@ void Text::setPosition(size_t X, size_t Y) {
   _origin.y -= 1;
 }
 
-void Text::render() const {
+void Text::draw() const {
   _textShader.bind();
   _vao.bind();
   _texture.bind();

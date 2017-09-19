@@ -10,6 +10,7 @@
 
 Controller::Controller(SDL2pp::Window& window) :
   _running(true),
+  _loadingScreen(window),
   _engine(),
   _game(_engine),
   _eventHandlerLockedView(_game, window),
@@ -30,9 +31,13 @@ Controller::Controller(SDL2pp::Window& window) :
 }
 
 void Controller::init() {
-  _engine.init();
-  _game.init();
+  ColoredRectangles::loadShader();
+  Text::loadShader();
+  TexturedRectangle::loadShader();
+  _engine.init(_loadingScreen);
+  _game.init(_loadingScreen);
 }
+
 
 void Controller::run() {
   Clock frameClock;

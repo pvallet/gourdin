@@ -11,6 +11,7 @@
 #include "tree.h"
 #include "igElementDisplay.h"
 
+#include "loadingScreen.h"
 #include "texturedRectangle.h"
 
 #include "chunk.h"
@@ -44,7 +45,7 @@ public:
 	Engine        (Engine const&) = delete;
 	void operator=(Engine const&) = delete;
 
-  void init();
+  void init(LoadingScreen& loadingScreen);
 
 	void update(int msElapsed);
 	void renderToFBO() const;
