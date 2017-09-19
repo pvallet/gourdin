@@ -1,44 +1,11 @@
-#include "interface.h"
+#include "igLayout.h"
 
-#ifdef __ANDROID__
-  #include <jni.h>
-
-  #define NORMALIZATION_DPI_VALUE 537.882019
-
-  #define STAMINA_BAR_WIDTH (60.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
-  #define STAMINA_BAR_HEIGHT (8.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
-
-  #define SIZE_SMALL_TEXT (30.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
-  #define SIZE_MEDIUM_TEXT (38.f * _screenHorizontalDPI / NORMALIZATION_DPI_VALUE)
-
-#else
-  #define STAMINA_BAR_WIDTH 20.f
-  #define STAMINA_BAR_HEIGHT 4.f
-
-  #define SIZE_SMALL_TEXT 12
-  #define SIZE_MEDIUM_TEXT 17
-#endif
-
-Interface::Interface():
+igLayout::igLayout():
   cam(Camera::getInstance()),
-  _screenHorizontalDPI(0),
+  interfaceParams(InterfaceParameters::getInstance()),
   _rectSelect(glm::vec4(1), false) {}
 
-void Interface::init() {
-
-#ifdef __ANDROID__
-  // Get the screen DPI from the android application
-  JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
-  jobject activity = (jobject)SDL_AndroidGetActivity();
-  jclass clazz(env->GetObjectClass(activity));
-  jmethodID method_id = env->GetMethodID(clazz, "getXDPI", "()F");
-
-  _screenHorizontalDPI = env->CallFloatMethod(activity, method_id);
-
-  env->DeleteLocalRef(activity);
-  env->DeleteLocalRef(clazz);
-#endif
-
+void igLayout::init() {
   // Minimap
   _minimapTexture.loadFromFile("res/map/map.png");
 
@@ -57,11 +24,11 @@ void Interface::init() {
 #endif
 }
 
-void Interface::renderEngine() const {
+void igLayout::renderEngine() const {
   _texRectEngine->draw();
 }
 
-void Interface::renderMinimap(const Engine& engine) const {
+void igLayout::renderMinimap(const Engine& engine) const {
   glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
 
   // Background texture
@@ -106,11 +73,11 @@ void Interface::renderMinimap(const Engine& engine) const {
   opaqueGrey.draw();
 
   // Texture frame
-  ColoredRectangles frame(glm::vec4(0.52, 0.34, 0.138, 1), minimapTextureRect, false);
+  ColoredRectangles frame(interfaceParams.colorFrame(), minimapTextureRect, false);
   frame.draw();
 }
 
-void Interface::renderText() const {
+void igLayout::renderText() const {
   _textTopLeft.draw();
   _textTopRight.draw();
   _textTopCenter.draw();
@@ -122,41 +89,41 @@ void Interface::renderText() const {
     _textBottomCenter.draw();
 }
 
-void Interface::setTextTopLeft(const std::string& string) {
-  _textTopLeft.setText(string, SIZE_SMALL_TEXT);
+void igLayout::setTextTopLeft(const std::string& string) {
+  _textTopLeft.setText(string, interfaceParams.sizeTextSmall());
 }
 
-void Interface::setTextTopRight(const std::string& string) {
-  _textTopRight.setText(string, SIZE_SMALL_TEXT);
+void igLayout::setTextTopRight(const std::string& string) {
+  _textTopRight.setText(string, interfaceParams.sizeTextSmall());
   _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
 }
 
-void Interface::setTextTopCenter(const std::string& string) {
-    _textTopCenter.setText(string, SIZE_SMALL_TEXT);
+void igLayout::setTextTopCenter(const std::string& string) {
+    _textTopCenter.setText(string, interfaceParams.sizeTextSmall());
     _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
 }
 
-void Interface::setTextCenter(const std::string& string, int msDuration) {
-  _textCenter.setText(string);
+void igLayout::setTextCenter(const std::string& string, int msDuration) {
+  _textCenter.setText(string, interfaceParams.sizeTextBig());
   _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
                           cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
 
   _textCenterChrono.reset(msDuration);
 }
 
-void Interface::setTextBottomCenter(const std::string& string, int msDuration) {
-  _textBottomCenter.setText(string, SIZE_MEDIUM_TEXT);
+void igLayout::setTextBottomCenter(const std::string& string, int msDuration) {
+  _textBottomCenter.setText(string, interfaceParams.sizeTextMedium());
   _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
                                 cam.getWindowH() - _textBottomCenter.getSize().y);
 
   _textBottomCenterChrono.reset(msDuration);
 }
 
-void Interface::renderRectSelect() const {
+void igLayout::renderRectSelect() const {
   _rectSelect.draw();
 }
 
-void Interface::renderStaminaBars(std::set<Lion*> selection) const {
+void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
   std::vector<glm::vec4> staminaBarsRects;
   std::vector<glm::vec4> outlinesRects;
 
@@ -168,17 +135,17 @@ void Interface::renderStaminaBars(std::set<Lion*> selection) const {
       float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
       staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-        corners.x + corners.z/2 - STAMINA_BAR_WIDTH / 2.f,
-        corners.y - corners.w*maxHeightFactor + corners.w - STAMINA_BAR_WIDTH / 4.f,
-        STAMINA_BAR_WIDTH * (*it)->getStamina() / 100.f,
-        STAMINA_BAR_HEIGHT
+        corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
+        corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
+        interfaceParams.staminaBarWidth() * (*it)->getStamina() / 100.f,
+        interfaceParams.staminaBarHeight()
       )));
 
       outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-        corners.x + corners.z/2 - STAMINA_BAR_WIDTH / 2.f,
-        corners.y - corners.w*maxHeightFactor + corners.w - STAMINA_BAR_WIDTH / 4.f,
-        STAMINA_BAR_WIDTH,
-        STAMINA_BAR_HEIGHT
+        corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
+        corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
+        interfaceParams.staminaBarWidth(),
+        interfaceParams.staminaBarHeight()
       )));
     }
   }
@@ -189,7 +156,7 @@ void Interface::renderStaminaBars(std::set<Lion*> selection) const {
   outlines.draw();
 }
 
-glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
+glm::vec2 igLayout::getMinimapClickCoords(size_t x, size_t y) const {
   glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::uvec2(x,y));
   glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
 
@@ -199,7 +166,7 @@ glm::vec2 Interface::getMinimapClickCoords(size_t x, size_t y) const {
   return coords;
 }
 
-void Interface::setRectSelect(glm::ivec4 rect) {
+void igLayout::setRectSelect(glm::ivec4 rect) {
   glm::uvec4 absoluteRect;
   if (rect.z > 0) {
     absoluteRect.x = rect.x;

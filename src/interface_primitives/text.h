@@ -13,7 +13,7 @@ class Text {
 public:
   Text ();
 
-  void setText(const std::string &str, float fontSize = _fontHandler.getFontSize());
+  void setText(const std::string &str, float fontSize);
   void setPosition(size_t X, size_t Y);
   void draw() const;
 

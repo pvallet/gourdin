@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine.h"
-#include "interface.h"
+#include "igLayout.h"
 #include "loadingScreen.h"
 
 class Game {
@@ -17,8 +17,8 @@ public:
   void render() const;
 
   inline void switchLog() {_displayLog = !_displayLog;}
-  inline       Interface& getInterface()       {return _interface;}
-  inline const Interface& getInterface() const {return _interface;}
+  inline       igLayout& getInterface()       {return _interface;}
+  inline const igLayout& getInterface() const {return _interface;}
   inline const Engine& getEngine() const {return _engine;}
 
   inline bool isViewLocked() const {return _lockedView;}
@@ -85,7 +85,7 @@ protected:
   bool _displayLog;
 
   Engine& _engine;
-  Interface _interface;
+  igLayout _interface;
 
   // Locked view
 

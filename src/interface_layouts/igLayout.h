@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL2pp/SDL2pp.hh>
-
 #include <set>
 
 #include "camera.h"
@@ -9,14 +7,16 @@
 #include "engine.h"
 #include "opengl.h"
 
+#include "interfaceParameters.h"
+
 #include "coloredRectangles.h"
 #include "text.h"
 #include "texture.h"
 #include "texturedRectangle.h"
 
-class Interface {
+class igLayout {
 public:
-  Interface();
+  igLayout();
   void init();
 
   void renderEngine() const;
@@ -38,8 +38,7 @@ public:
 
 private:
   const Camera& cam;
-
-  float _screenHorizontalDPI;
+  const InterfaceParameters& interfaceParams;
 
   ColoredRectangles _rectSelect;
   Text _textTopLeft;
