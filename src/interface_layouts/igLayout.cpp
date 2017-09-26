@@ -16,10 +16,10 @@ void igLayout::init() {
   ))));
 #else
   _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::uvec4(
-    cam.getWindowW() - _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
-    cam.getWindowH() - _minimapTexture.getSize().y * cam.getWindowH()/cam.getH(),
-    _minimapTexture.getSize().x * cam.getWindowW()/cam.getW(),
-    _minimapTexture.getSize().y * cam.getWindowH()/cam.getH()
+    cam.getWindowW() - _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
+    cam.getWindowH() - _minimapTexture.getSize().y * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
+    _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
+    _minimapTexture.getSize().y * 2 * interfaceParams.getAndroidInterfaceZoomFactor()
   ))));
 #endif
 }

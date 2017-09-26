@@ -3,7 +3,7 @@
 #include "camera.h"
 
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
-#define ROTATION_ANGLE_MOUSE 0.1f
+#define ROTATION_ANGLE_MOUSE (0.1f / interfaceParams.getAndroidInterfaceZoomFactor())
 #define CHARACTER_TIME_TRANSFER_MS 100
 #define CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS 200
 
@@ -150,6 +150,7 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_DRAG_MOTION) {
+    const InterfaceParameters& interfaceParams = InterfaceParameters::getInstance();
     if (_game.getPovCamera()) {
       cam.setTheta(_initialDragTheta + ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
       cam.setPhi  (_initialDragPhi   + ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
@@ -164,12 +165,12 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       // Dragging the camera must be coherent when the mouse goes around the central character
       // The sense of rotation depends on which quarter of the screen the cursor is
       // If the quarter changes, we reset the origin of the dragging
-      if (_beginDrag.x > cam.getW() / 2.f)
+      if (_beginDrag.x > cam.getWindowW() / 2.f)
           cam.rotate( ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
       else
           cam.rotate(-((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE, 0);
 
-      if (_beginDrag.y < cam.getH() / 2.f)
+      if (_beginDrag.y < cam.getWindowH() / 2.f)
           cam.rotate( ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);
       else
           cam.rotate(-((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE, 0);

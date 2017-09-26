@@ -22,7 +22,7 @@ Controller::Controller(SDL2pp::Window& window) :
 
 #ifdef __ANDROID__
   // We lower the game resolution to increase performance. Interface is left untouched
-  cam.resize(1280, 720);
+  cam.resize(std::min(window.GetWidth(), 1280), std::min(window.GetHeight(), 720));
 #else
   cam.resize(window.GetWidth(),window.GetHeight());
 #endif
