@@ -89,7 +89,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   Camera& cam = Camera::getInstance();
   _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-  _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_R32F, GL_RED, GL_FLOAT);
+  _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
 
   loadingScreen.updateAndRender("Initializing content generator", 38);
@@ -521,10 +521,13 @@ glm::vec2 Engine::get2DCoord(glm::ivec2 screenTarget) {
   _depthTexturedRectangle->draw();
   Shader::unbind();
 
-  GLfloat depth;
-  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_RED, GL_FLOAT, &depth);
+  GLubyte depthBytes[4];
+  glReadPixels(screenTarget.x, screenTarget.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &depthBytes[0]);
 
   FrameBufferObject::unbind();
+
+  const glm::vec4 bit_shift = glm::vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);
+  float depth = glm::dot(glm::vec4(depthBytes[0], depthBytes[1], depthBytes[2], depthBytes[3]) / 255.f, bit_shift);
 
   glm::vec3 modelCoord = glm::unProject(glm::vec3(screenTarget.x, screenTarget.y,depth),
     glm::mat4(1.f), cam.getViewProjectionMatrix(),
