@@ -15,7 +15,7 @@ public:
 
   void setText(const std::string &str, float fontSize);
   void setPosition(size_t X, size_t Y);
-  void draw() const;
+  void bindShaderAndDraw() const;
 
   void displayAtlas(glm::uvec2 windowCoords) const;
 

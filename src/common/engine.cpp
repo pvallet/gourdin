@@ -104,7 +104,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
   _chunkSubdivider.waitForTasksToFinish();
 
   loadingScreen.updateAndRender("Generating forests", 60);
-  
+
   #pragma omp parallel for
   for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
     size_t x = i / NB_CHUNKS;

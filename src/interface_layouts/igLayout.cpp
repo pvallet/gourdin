@@ -25,14 +25,18 @@ void igLayout::init() {
 }
 
 void igLayout::renderEngine() const {
+  TexturedRectangle::bindDefaultShader();
   _texRectEngine->draw();
+  Shader::unbind();
 }
 
 void igLayout::renderMinimap(const Engine& engine) const {
   glm::vec4 minimapTextureRect = _minimapRect->getTextureRect();
 
   // Background texture
+  TexturedRectangle::bindDefaultShader();
   _minimapRect->draw();
+  Shader::unbind();
 
   // Highlight visible chunks
   std::vector<glm::vec4> greyRects;
@@ -55,7 +59,7 @@ void igLayout::renderMinimap(const Engine& engine) const {
   }
 
   ColoredRectangles grey(glm::vec4(0,0,0,0.4), greyRects);
-  grey.draw();
+  grey.bindShaderAndDraw();
 
   // Position of the viewer
 
@@ -70,23 +74,23 @@ void igLayout::renderMinimap(const Engine& engine) const {
               viewer)
   ));
 
-  opaqueGrey.draw();
+  opaqueGrey.bindShaderAndDraw();
 
   // Texture frame
   ColoredRectangles frame(interfaceParams.colorFrame(), minimapTextureRect, false);
-  frame.draw();
+  frame.bindShaderAndDraw();
 }
 
 void igLayout::renderText() const {
-  _textTopLeft.draw();
-  _textTopRight.draw();
-  _textTopCenter.draw();
+  _textTopLeft.bindShaderAndDraw();
+  _textTopRight.bindShaderAndDraw();
+  _textTopCenter.bindShaderAndDraw();
 
   if (_textCenterChrono.isStillRunning())
-    _textCenter.draw();
+    _textCenter.bindShaderAndDraw();
 
   if (_textBottomCenterChrono.isStillRunning())
-    _textBottomCenter.draw();
+    _textBottomCenter.bindShaderAndDraw();
 }
 
 void igLayout::setTextTopLeft(const std::string& string) {
@@ -120,7 +124,7 @@ void igLayout::setTextBottomCenter(const std::string& string, int msDuration) {
 }
 
 void igLayout::renderRectSelect() const {
-  _rectSelect.draw();
+  _rectSelect.bindShaderAndDraw();
 }
 
 void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
@@ -152,8 +156,8 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
 
   ColoredRectangles staminaBars(glm::vec4(0,1,0,1), staminaBarsRects);
   ColoredRectangles outlines(glm::vec4(0,0,0,1), outlinesRects, false);
-  staminaBars.draw();
-  outlines.draw();
+  staminaBars.bindShaderAndDraw();
+  outlines.bindShaderAndDraw();
 }
 
 glm::vec2 igLayout::getMinimapClickCoords(size_t x, size_t y) const {

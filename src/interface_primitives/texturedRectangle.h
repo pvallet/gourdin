@@ -19,6 +19,8 @@ public:
   // Loaded in Interface init function to ensure it is only loaded once
   static void loadShader();
 
+  static void bindDefaultShader() {_2DShader.bind();}
+
 private:
   static Shader _2DShader;
   static bool _shaderLoaded;

@@ -50,10 +50,10 @@ void LoadingScreen::updateAndRender(std::string task, float progress) {
   glViewport(0, 0, (GLint) cam.getWindowW(), (GLint) cam.getWindowH());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  textCenter.draw();
-  progressBar.draw();
-  textProgressBar.draw();
-  progressBarFrame.draw();
+  textCenter.bindShaderAndDraw();
+  progressBar.bindShaderAndDraw();
+  textProgressBar.bindShaderAndDraw();
+  progressBarFrame.bindShaderAndDraw();
 
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 

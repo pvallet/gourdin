@@ -81,7 +81,7 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
   VertexBufferObject::unbind();
 }
 
-void ColoredRectangles::draw() const {
+void ColoredRectangles::bindShaderAndDraw() const {
 	_vao.bind();
 
   glEnable (GL_BLEND);

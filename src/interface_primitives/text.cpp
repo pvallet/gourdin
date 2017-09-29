@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include <SDL_log.h>
+
 FontHandler Text::_fontHandler;
 Shader Text::_textShader;
 bool Text::_shaderLoaded = false;
@@ -120,7 +122,7 @@ void Text::setPosition(size_t X, size_t Y) {
   _origin.y -= 1;
 }
 
-void Text::draw() const {
+void Text::bindShaderAndDraw() const {
   _textShader.bind();
   _vao.bind();
   _texture.bind();
@@ -144,7 +146,11 @@ void Text::displayAtlas(glm::uvec2 windowCoords) const {
 
   TexturedRectangle atlas(&_texture, glCoords.x, glCoords.y, glCoords.z, glCoords.w);
 
+  float defaultOffset[2] = {0,0};
+
   _textShader.bind();
+  glUniform2fv(_textShader.getUniformLocation("offset"), 1, &defaultOffset[0]);
+
   glEnable (GL_BLEND);
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

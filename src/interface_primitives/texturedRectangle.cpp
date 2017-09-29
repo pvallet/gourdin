@@ -38,7 +38,6 @@ void TexturedRectangle::loadShader() {
 }
 
 void TexturedRectangle::draw() const {
-	_2DShader.bind();
 	_vao.bind();
 	_texture->bind();
 
@@ -46,7 +45,6 @@ void TexturedRectangle::draw() const {
 
   Texture::unbind();
 	VertexArrayObject::unbind();
-	Shader::unbind();
 }
 
 glm::vec4 TexturedRectangle::getTextureRect() const {
