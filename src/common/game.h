@@ -61,6 +61,7 @@ public:
   void startNewHunt();
 
   void genTribe();
+  void genTribe(glm::ivec2 screenTarget);
   void deleteTribe();
 
   inline void switchWireframe() {_engine.switchWireframe();}

@@ -453,7 +453,8 @@ void Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
   appendNewElements(newLion);
 }
 
-std::vector<Controllable*> Engine::genTribe(glm::vec2 pos) {
+std::vector<Controllable*> Engine::genTribe(glm::ivec2 screenTarget) {
+  glm::vec2 pos = get2DCoord(screenTarget);
   std::vector<igMovingElement*> tribe = _contentGenerator.genTribe(pos);
   appendNewElements(tribe);
 

@@ -51,7 +51,7 @@ public:
 	void renderToFBO() const;
 	void moveSelection(glm::ivec2 screenTarget);
 	void addLion(glm::ivec2 screenTarget, float minDistToAntilopes = 0);
-	std::vector<Controllable*> genTribe(glm::vec2 pos);
+	std::vector<Controllable*> genTribe(glm::ivec2 screenTarget);
 	void deleteElements(const std::vector<igMovingElement*>& elementsToDelete);
 
 	inline void switchWireframe() {_wireframe = !_wireframe;}

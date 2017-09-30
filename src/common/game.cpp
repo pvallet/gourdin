@@ -486,8 +486,12 @@ void Game::startNewHunt() {
 
 void Game::genTribe() {
   Camera& cam = Camera::getInstance();
+  genTribe(glm::ivec2(cam.getWindowW(), cam.getWindowH()) / 2);
+}
+
+void Game::genTribe(glm::ivec2 screenTarget) {
   if (_tribe.size() == 0) {
-    _tribe = _engine.genTribe(cam.getPointedPos());
+    _tribe = _engine.genTribe(screenTarget);
 
     if (_tribe.size() == 0)
       displayInfo("Can't spawn a tribe here");
