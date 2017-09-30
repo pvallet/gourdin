@@ -12,6 +12,7 @@ Game::Game (Engine& engine):
   _displayLog(true),
   _engine(engine),
   _interface(),
+  _popupMenu(this),
   _povCamera(false),
   _huntHasStarted(false),
   _maxSimultaneousLions(5),
@@ -32,6 +33,10 @@ void Game::init(LoadingScreen& loadingScreen) {
 #ifndef __ANDROID__
   _interface.setTextTopCenter("Best score: 0");
 #endif
+
+  _popupMenu.setTitle("Spawning");
+  _popupMenu.addEntry("Predator", &Game::createLion);
+  _popupMenu.addEntry("Tribe", &Game::genTribe);
 
   update(0);
   _engine.waitForTasksToFinish();
@@ -326,7 +331,7 @@ void Game::selectAllLions() {
   }
 }
 
-bool Game::createLion(glm::ivec2 screenTarget) {
+void Game::createLion(glm::ivec2 screenTarget) {
   try {
     if (!_huntHasStarted)
       _engine.addLion(screenTarget);
@@ -338,11 +343,10 @@ bool Game::createLion(glm::ivec2 screenTarget) {
       _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
       _nbLions++;
     }
+    displayInfo("Created predator");
 
-    return true;
   } catch (const std::runtime_error& e) {
     displayInfo(e.what());
-    return false;
   }
 }
 

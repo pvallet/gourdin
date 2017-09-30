@@ -18,4 +18,6 @@ private:
   float _scrollSpeed;
 
   glm::ivec4 _rectSelect;
+
+  PopupMenu& _popupMenu;
 };

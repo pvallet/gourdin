@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "igLayout.h"
+#include "popupMenu.h"
 #include "loadingScreen.h"
 
 class Game {
@@ -52,7 +53,7 @@ public:
   void select(glm::ivec4 rect, bool add);
   void selectAllLions();
   inline void unselect() {select(glm::ivec4(-1,-1,0,0), false);}
-  bool createLion(glm::ivec2 screenTarget);
+  void createLion(glm::ivec2 screenTarget);
   void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
   void killLion();
@@ -71,6 +72,8 @@ public:
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
   inline void displayInfo(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
+  inline PopupMenu& getPopupMenu() {return _popupMenu;}
+
 protected:
   virtual void updateCamera() const;
   std::string getInfoTextCommon() const;
@@ -87,6 +90,7 @@ protected:
 
   Engine& _engine;
   igLayout _interface;
+  PopupMenu _popupMenu;
 
   // Locked view
 

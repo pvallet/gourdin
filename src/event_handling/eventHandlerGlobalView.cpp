@@ -14,7 +14,8 @@
 EventHandlerGlobalView::EventHandlerGlobalView(Game& game, SDL2pp::Window& window) :
   EventHandler::EventHandler(game, window),
   _addSelect(false),
-  _scrollSpeed(SCROLL_SPEED_SLOW) {
+  _scrollSpeed(SCROLL_SPEED_SLOW),
+  _popupMenu(_game.getPopupMenu()) {
   _game.setScrollSpeedToSlow(true);
 }
 
@@ -136,8 +137,17 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
-    if (_game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
-      _game.displayInfo("Created predator");
+    _game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
+
+    _popupMenu.create(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
+  }
+
+  else if (event.type == SDL_USER_LONG_CLICK_MOTION) {
+    _popupMenu.updateHighlight(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
+  }
+
+  else if (event.type == SDL_USER_LONG_CLICK_END) {
+    _popupMenu.triggerAndDestroy(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
   }
 
   else if (event.type == SDL_USER_DRAG_BEGIN) {
