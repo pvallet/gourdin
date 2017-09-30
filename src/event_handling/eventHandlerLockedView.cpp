@@ -2,8 +2,13 @@
 
 #include "camera.h"
 
+#ifdef __ANDROID__
+  #define ROTATION_ANGLE_MOUSE (0.1f / interfaceParams.getAndroidInterfaceZoomFactor())
+#else
+  #define ROTATION_ANGLE_MOUSE 0.1f
+#endif
+
 #define ROTATION_ANGLE_PMS 0.06f // PMS = per millisecond
-#define ROTATION_ANGLE_MOUSE (0.1f / interfaceParams.getAndroidInterfaceZoomFactor())
 #define CHARACTER_TIME_TRANSFER_MS 100
 #define CAMERA_TIME_TRANSFER_CHANGE_VIEWTYPE_MS 200
 
