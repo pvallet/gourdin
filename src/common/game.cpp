@@ -496,12 +496,11 @@ void Game::genTribe() {
 }
 
 void Game::genTribe(glm::ivec2 screenTarget) {
-  if (_tribe.size() == 0) {
-    _tribe = _engine.genTribe(screenTarget);
+  deleteTribe();
+  _tribe = _engine.genTribe(screenTarget);
 
-    if (_tribe.size() == 0)
-      displayInfo("Can't spawn a tribe here");
-  }
+  if (_tribe.size() == 0)
+    displayInfo("Can't spawn a tribe here");
 }
 
 void Game::deleteTribe() {

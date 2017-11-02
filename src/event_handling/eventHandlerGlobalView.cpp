@@ -63,7 +63,6 @@ void EventHandlerGlobalView::handleKeyPressed(const SDL_Event& event) {
       break;
 
     case SDL_SCANCODE_T:
-      _game.deleteTribe();
       _game.genTribe();
       break;
 
@@ -140,8 +139,6 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
-    _game.createLion(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
-
     _popupMenu.create(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
   }
 

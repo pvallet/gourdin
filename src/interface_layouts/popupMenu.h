@@ -21,12 +21,19 @@ class PopupMenu {
     inline void setHighlighted(bool highlighted) {_highlighted = highlighted;}
     void setAllocatedRect(const glm::ivec4& allocatedRect);
 
-    glm::ivec2 getTextSize();
+    inline glm::ivec2 getTextSize() const {return _text.getSize();}
+    inline glm::ivec4 getAllocatedRect() const {return _allocatedRect;}
+
+    static glm::ivec2 _clickPos;
 
   private:
     Text _text;
     TCallbackFunc _callback;
+    ColoredRectangles _highlight;
+
     bool _highlighted;
+
+    glm::ivec4 _allocatedRect;
   };
 
 public:
@@ -37,15 +44,17 @@ public:
 
   void bindShadersAndDraw() const;
 
-  void create(glm::ivec2 clickPos);
+  void create(const glm::ivec2& clickPos);
   void updateHighlight(const glm::ivec2& mousePos);
   void triggerAndDestroy(const glm::ivec2& clickPos);
 
 private:
+  void highlightIndex(size_t index);
   glm::ivec2 getMenuSize();
 
   Game* _game;
 
+  size_t _highlightedIndex;
   bool _isDisplaying;
 
   ColoredRectangles _frame;
