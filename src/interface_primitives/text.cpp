@@ -1,6 +1,7 @@
 #include "text.h"
 
 #include "camera.h"
+#include "coordConversion.h"
 #include "texturedRectangle.h"
 
 #include <vector>
@@ -113,8 +114,7 @@ void Text::setText(const std::string &str, float fontSize) {
 }
 
 void Text::setPosition(const glm::ivec2& windowCoords) {
-  Camera& cam = Camera::getInstance();
-  _origin = cam.windowCoordsToGLCoords(windowCoords);
+  _origin = ut::windowCoordsToGLCoords(windowCoords);
 
   // Substract default origin of the text
   _origin.x += 1;
@@ -139,11 +139,9 @@ void Text::bindShaderAndDraw() const {
 }
 
 void Text::displayAtlas(const glm::ivec2& windowCoords) const {
-  Camera& cam = Camera::getInstance();
-  glm::vec4 glCoords = cam.windowRectCoordsToGLRectCoords(glm::vec4(windowCoords,
-    _fontHandler.getWidth(), _fontHandler.getHeight()));
+  glm::ivec4 atlasRect(windowCoords, _fontHandler.getWidth(), _fontHandler.getHeight());
 
-  TexturedRectangle atlas(&_texture, glCoords.x, glCoords.y, glCoords.z, glCoords.w);
+  TexturedRectangle atlas(&_texture, atlasRect);
 
   float defaultOffset[2] = {0,0};
 
@@ -160,6 +158,5 @@ void Text::displayAtlas(const glm::ivec2& windowCoords) const {
 }
 
 glm::uvec2 Text::getSize() const {
-  Camera& cam = Camera::getInstance();
-  return cam.glCoordsToWindowCoords(_bounds);
+  return ut::glCoordsToWindowCoords(_bounds);
 }

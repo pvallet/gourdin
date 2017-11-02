@@ -118,7 +118,10 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
 
   if (event.type == SDL_USER_CLICK) {
     Camera& cam = Camera::getInstance();
-    glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords((intptr_t) event.user.data1, (intptr_t) event.user.data2);
+    glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(glm::ivec2(
+      (intptr_t) event.user.data1,
+      (intptr_t) event.user.data2
+    ));
 
     if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
       cam.setPointedPos(MAX_COORD * minimapCoord);

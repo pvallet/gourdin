@@ -25,7 +25,7 @@ public:
   void renderRectSelect() const;
   void renderStaminaBars(std::set<Lion*> selection) const;
 
-  glm::vec2 getMinimapClickCoords(size_t x, size_t y) const;
+  glm::vec2 getMinimapClickCoords(const glm::ivec2& clickPos) const;
   void setTextTopLeft(const std::string& string);
   void setTextTopRight(const std::string& string);
   void setTextTopCenter(const std::string& string);
@@ -33,7 +33,7 @@ public:
   void setTextBottomCenter(const std::string& string, int msDuration = -1);
   void clearText();
 
-  inline void setEngineTexture(const Texture* tex) {_texRectEngine.reset(new TexturedRectangle(tex, -1, -1, 2, 2));}
+  inline void setEngineTexture(const Texture* tex) {_texRectEngine.reset(new TexturedRectangle(tex, Camera::getInstance().getScreenRect()));}
   void setRectSelect(glm::ivec4 rect);
 
 private:

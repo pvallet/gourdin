@@ -69,15 +69,12 @@ glm::ivec2 PopupMenu::getMenuSize() {
 void PopupMenu::create(glm::ivec2 clickPos) {
   if (!_menuEntries.empty()) {
     clickPos -= _menuEntries.front().getTextSize() / 2;
-    glm::ivec4 menuRectangleWindowCoord(clickPos, getMenuSize());
-
-    Camera& cam = Camera::getInstance();
-    glm::vec4 menuRectangle = cam.windowRectCoordsToGLRectCoords(menuRectangleWindowCoord);
+    glm::ivec4 menuRectangle(clickPos, getMenuSize());
 
     _frame.setRectangles(menuRectangle);
     _background.setRectangles(menuRectangle);
 
-    glm::ivec4 currentAllocatedRect = menuRectangleWindowCoord;
+    glm::ivec4 currentAllocatedRect = menuRectangle;
     currentAllocatedRect.w /= _menuEntries.size();
 
     for (size_t i = 0; i < _menuEntries.size(); i++) {

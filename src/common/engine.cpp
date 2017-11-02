@@ -90,7 +90,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
   Camera& cam = Camera::getInstance();
   _globalFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
-  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), -1, -1, 2, 2));
+  _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), cam.getScreenRect()));
 
   loadingScreen.updateAndRender("Initializing content generator", 38);
 

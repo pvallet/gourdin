@@ -9,12 +9,11 @@
 
 class TexturedRectangle {
 public:
-  TexturedRectangle (const Texture* texture, float x, float y, float w, float h);
-  TexturedRectangle (const Texture* texture, glm::vec4 rect);
+  TexturedRectangle (const Texture* texture, glm::ivec4 rect);
 
   void draw() const;
 
-  glm::vec4 getTextureRect() const;
+  inline glm::ivec4 getTextureRect() const {return _textureRect;}
 
   // Loaded in Interface init function to ensure it is only loaded once
   static void loadShader();
@@ -26,6 +25,7 @@ private:
   static bool _shaderLoaded;
 
   std::array<float,16> _verticesAndCoord;
+  glm::ivec4 _textureRect;
 
   const Texture* _texture;
   VertexArrayObject _vao;

@@ -30,19 +30,19 @@ void LoadingScreen::updateAndRender(std::string task, float progress) {
   textProgressBar.setPosition(glm::ivec2(cam.getWindowW() / 2 - (textProgressBar.getSize().x / 2),
                                          cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2));
 
-  glm::vec4 progressBarRect(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+  glm::ivec4 progressBarRect(
    cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
    cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2,
    interfaceParams.loadingBarSize() * progress / 100.f,
    interfaceParams.sizeTextMedium() * 1.3
-  )));
+  );
 
-  glm::vec4 progressBarFrameRect(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+  glm::ivec4 progressBarFrameRect(
     cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
     cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2,
     interfaceParams.loadingBarSize(),
     interfaceParams.sizeTextMedium() * 1.3
-  )));
+  );
 
   ColoredRectangles progressBar(interfaceParams.colorBackground(), progressBarRect, true);
   ColoredRectangles progressBarFrame(interfaceParams.colorFrame(), progressBarFrameRect, false);

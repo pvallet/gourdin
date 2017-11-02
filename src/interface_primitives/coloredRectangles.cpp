@@ -1,4 +1,5 @@
 #include "coloredRectangles.h"
+#include "coordConversion.h"
 
 Shader ColoredRectangles::_plainColorShader;
 bool ColoredRectangles::_shaderLoaded = false;
@@ -20,10 +21,10 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
 	VertexArrayObject::unbind();
 }
 
-ColoredRectangles::ColoredRectangles (glm::vec4 color, const glm::vec4& rectangle, bool filled):
- ColoredRectangles(color, std::vector<glm::vec4>(1,rectangle), filled) {}
+ColoredRectangles::ColoredRectangles (glm::vec4 color, const glm::ivec4& rectangle, bool filled):
+ ColoredRectangles(color, std::vector<glm::ivec4>(1,rectangle), filled) {}
 
-ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::vec4>& rectangles, bool filled):
+ColoredRectangles::ColoredRectangles (glm::vec4 color, const std::vector<glm::ivec4>& rectangles, bool filled):
   ColoredRectangles(color, filled) {
   setRectangles(rectangles);
 }
@@ -35,11 +36,11 @@ void ColoredRectangles::loadShader() {
   }
 }
 
-void ColoredRectangles::setRectangles(const glm::vec4& rectangle) {
-	setRectangles(std::vector<glm::vec4>(1,rectangle));
+void ColoredRectangles::setRectangles(const glm::ivec4& rectangle) {
+	setRectangles(std::vector<glm::ivec4>(1,rectangle));
 }
 
-void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) {
+void ColoredRectangles::setRectangles(const std::vector<glm::ivec4>& rectangles) {
   _vbo.bind();
   _nbRect = rectangles.size();
   size_t rectGLDataSize;
@@ -52,10 +53,11 @@ void ColoredRectangles::setRectangles(const std::vector<glm::vec4>& rectangles) 
 	std::vector<float> bufferData(rectGLDataSize * _nbRect);
 
   for (size_t i = 0; i < _nbRect; i++) {
-    float x0 = rectangles[i].x;
-    float y0 = rectangles[i].y;
-    float x1 = rectangles[i].x + rectangles[i].z;
-    float y1 = rectangles[i].y + rectangles[i].w;
+		glm::vec4 glRectangle = ut::windowRectCoordsToGLRectCoords(rectangles[i]);
+    float x0 = glRectangle.x;
+    float y0 = glRectangle.y;
+    float x1 = glRectangle.x + glRectangle.z;
+    float y1 = glRectangle.y + glRectangle.w;
 
 		if (_filled) {
 		 	struct {float x, y;} data[6] = {

@@ -10,17 +10,17 @@ void igLayout::init() {
   _minimapTexture.loadFromFile("res/map/map.png");
 
 #ifndef __ANDROID__
-  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, glm::ivec4(
     0, cam.getWindowH() - _minimapTexture.getSize().y,
     _minimapTexture.getSize()
-  ))));
+  )));
 #else
-  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, glm::ivec4(
     cam.getWindowW() - _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
     cam.getWindowH() - _minimapTexture.getSize().y * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
     _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
     _minimapTexture.getSize().y * 2 * interfaceParams.getAndroidInterfaceZoomFactor()
-  ))));
+  )));
 #endif
 }
 
@@ -39,7 +39,7 @@ void igLayout::renderMinimap(const Engine& engine) const {
   Shader::unbind();
 
   // Highlight visible chunks
-  std::vector<glm::vec4> greyRects;
+  std::vector<glm::ivec4> greyRects;
 
   glm::vec2 miniChunkSize = glm::vec2(minimapTextureRect.z / (float) NB_CHUNKS,
                                       minimapTextureRect.w / (float) NB_CHUNKS);
@@ -50,7 +50,7 @@ void igLayout::renderMinimap(const Engine& engine) const {
     miniChunk.y = minimapTextureRect.y;
     for (size_t j = 0; j < NB_CHUNKS; j++) {
 
-      if (!engine.isChunkVisible(i,j))
+      if (!engine.isChunkVisible(i, NB_CHUNKS - 1 - j))
         greyRects.push_back(miniChunk);
 
       miniChunk.y += miniChunkSize.y;
@@ -64,14 +64,14 @@ void igLayout::renderMinimap(const Engine& engine) const {
   // Position of the viewer
 
   glm::vec2 viewerPos( minimapTextureRect.x + (float) minimapTextureRect.z * cam.getPointedPos().x / MAX_COORD,
-                       minimapTextureRect.y + (float) minimapTextureRect.w * cam.getPointedPos().y / MAX_COORD);
+                       minimapTextureRect.y + (float) minimapTextureRect.w * (1 - cam.getPointedPos().y / MAX_COORD));
 
   glm::vec2 viewer = glm::vec2(minimapTextureRect.z, minimapTextureRect.w) / 10.f;
 
-  ColoredRectangles opaqueGrey(glm::vec4(0.2,0.2,0.2,1), std::vector<glm::vec4>(1,
-    glm::vec4(viewerPos.x - viewer.x/2.f,
-              viewerPos.y - viewer.y/2.f,
-              viewer)
+  ColoredRectangles opaqueGrey(glm::vec4(0.2,0.2,0.2,1), std::vector<glm::ivec4>(1,
+    glm::ivec4(viewerPos.x - viewer.x/2.f,
+               viewerPos.y - viewer.y/2.f,
+               viewer)
   ));
 
   opaqueGrey.bindShaderAndDraw();
@@ -128,8 +128,8 @@ void igLayout::renderRectSelect() const {
 }
 
 void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
-  std::vector<glm::vec4> staminaBarsRects;
-  std::vector<glm::vec4> outlinesRects;
+  std::vector<glm::ivec4> staminaBarsRects;
+  std::vector<glm::ivec4> outlinesRects;
 
   for(auto it = selection.begin(); it != selection.end(); ++it) {
     glm::ivec4 corners = (*it)->getScreenRect();
@@ -138,19 +138,19 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
     if (corners.z != 0) {
       float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-      staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+      staminaBarsRects.push_back(glm::ivec4(
         corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
         corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
         interfaceParams.staminaBarWidth() * (*it)->getStamina() / 100.f,
         interfaceParams.staminaBarHeight()
-      )));
+      ));
 
-      outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
+      outlinesRects.push_back(glm::ivec4(
         corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
         corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
         interfaceParams.staminaBarWidth(),
         interfaceParams.staminaBarHeight()
-      )));
+      ));
     }
   }
 
@@ -160,12 +160,11 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
   outlines.bindShaderAndDraw();
 }
 
-glm::vec2 igLayout::getMinimapClickCoords(size_t x, size_t y) const {
-  glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::ivec2(x,y));
-  glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
+glm::vec2 igLayout::getMinimapClickCoords(const glm::ivec2& clickPos) const {
+  glm::ivec4 minimapTexRect = _minimapRect->getTextureRect();
 
-  glm::vec2 coords = glm::vec2( (clickGLCoords.x - minimapTexRect.x) / minimapTexRect.z,
-                                (clickGLCoords.y - minimapTexRect.y) / minimapTexRect.w);
+  glm::vec2 coords = glm::vec2( (clickPos.x - minimapTexRect.x) / (float) minimapTexRect.z,
+                                (clickPos.y - minimapTexRect.y) / (float) minimapTexRect.w);
 
   return coords;
 }
@@ -190,5 +189,5 @@ void igLayout::setRectSelect(glm::ivec4 rect) {
     absoluteRect.w = - rect.w;
   }
 
-  _rectSelect.setRectangles(cam.windowRectCoordsToGLRectCoords(absoluteRect));
+  _rectSelect.setRectangles(absoluteRect);
 }

@@ -83,20 +83,3 @@ void Camera::rotate (float dtheta, float dphi) {
   else if (_phi > 180.f)
     _phi = 180.f;
 }
-
-glm::vec2 Camera::windowCoordsToGLCoords(glm::ivec2 windowCoords) const {
-  return glm::vec2(2 *  windowCoords.x / (float) _windowW - 1,
-                   1 - 2 * windowCoords.y / (float) _windowH);
-}
-
-glm::ivec2 Camera::glCoordsToWindowCoords(glm::vec2 glCoords) const {
-  return glm::ivec2(_windowW * (1 + glCoords.x) / 2,
-                    _windowH * (1 - glCoords.y) / 2);
-}
-
-glm::vec4 Camera::windowRectCoordsToGLRectCoords(glm::ivec4 windowRect) const {
-  return glm::vec4(2 *  windowRect.x / (float) _windowW - 1,
-                   1 - 2 * (windowRect.y + windowRect.w) / (float) _windowH,
-                   2 *  windowRect.z / (float) _windowW,
-                   2 *  windowRect.w / (float) _windowH);
-}

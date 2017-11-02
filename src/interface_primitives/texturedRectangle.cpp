@@ -1,18 +1,23 @@
 #include "texturedRectangle.h"
 
+#include "coordConversion.h"
 #include "utils.h"
 
 Shader TexturedRectangle::_2DShader;
 bool TexturedRectangle::_shaderLoaded = false;
 
-TexturedRectangle::TexturedRectangle (const Texture* texture, float x, float y, float w, float h):
-	_verticesAndCoord {
-     x,   y,   0, 0,
-		 x+w, y,   1, 0,
-     x,   y+h, 0, 1,
-     x+w, y+h, 1, 1
-	},
-	_texture(texture) {
+TexturedRectangle::TexturedRectangle (const Texture* texture, glm::ivec4 rect)
+	: _textureRect(rect)
+	, _texture(texture)
+{
+	glm::vec4 floatRect = ut::windowRectCoordsToGLRectCoords(rect);
+
+	_verticesAndCoord  = {
+     floatRect.x,               floatRect.y,   0, 0,
+		 floatRect.x + floatRect.z, floatRect.y,   1, 0,
+     floatRect.x,               floatRect.y + floatRect.w, 0, 1,
+     floatRect.x + floatRect.z, floatRect.y + floatRect.w, 1, 1
+	};
 
 	_vao.bind();
   _vbo.bind();
@@ -26,9 +31,6 @@ TexturedRectangle::TexturedRectangle (const Texture* texture, float x, float y, 
 	VertexBufferObject::unbind();
 	VertexArrayObject::unbind();
 }
-
-TexturedRectangle::TexturedRectangle (const Texture* texture, glm::vec4 rect):
-	TexturedRectangle(texture, rect.x, rect.y, rect.z, rect.w) {}
 
 void TexturedRectangle::loadShader() {
   if (!TexturedRectangle::_shaderLoaded) {
@@ -45,13 +47,4 @@ void TexturedRectangle::draw() const {
 
   Texture::unbind();
 	VertexArrayObject::unbind();
-}
-
-glm::vec4 TexturedRectangle::getTextureRect() const {
-	return glm::vec4(
-		_verticesAndCoord[0],
-		_verticesAndCoord[1],
-		_verticesAndCoord[12] - _verticesAndCoord[0],
-		_verticesAndCoord[13] - _verticesAndCoord[1]
-	);
 }
