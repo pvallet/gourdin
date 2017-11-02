@@ -22,24 +22,24 @@ void LoadingScreen::updateAndRender(std::string task, float progress) {
   Text textCenter;
   textCenter.setText("Loading", interfaceParams.sizeTextBig());
 
-  textCenter.setPosition(cam.getWindowW() / 2 - (textCenter.getSize().x / 2),
-                         cam.getWindowH() / 2 - (textCenter.getSize().y / 2));
+  textCenter.setPosition(glm::ivec2(cam.getWindowW() / 2 - (textCenter.getSize().x / 2),
+                                    cam.getWindowH() / 2 - (textCenter.getSize().y / 2)));
 
   Text textProgressBar;
   textProgressBar.setText(task, interfaceParams.sizeTextMedium());
-  textProgressBar.setPosition(cam.getWindowW() / 2 - (textProgressBar.getSize().x / 2),
-                              cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2);
+  textProgressBar.setPosition(glm::ivec2(cam.getWindowW() / 2 - (textProgressBar.getSize().x / 2),
+                                         cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2));
 
-  glm::vec4 progressBarRect(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  glm::vec4 progressBarRect(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
    cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
-   cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2,
+   cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2,
    interfaceParams.loadingBarSize() * progress / 100.f,
    interfaceParams.sizeTextMedium() * 1.3
   )));
 
-  glm::vec4 progressBarFrameRect(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  glm::vec4 progressBarFrameRect(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
     cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
-    cam.getWindowH() / 2 + 1.2 * textCenter.getSize().y / 2,
+    cam.getWindowH() / 2 + 2.5 * textCenter.getSize().y / 2,
     interfaceParams.loadingBarSize(),
     interfaceParams.sizeTextMedium() * 1.3
   )));

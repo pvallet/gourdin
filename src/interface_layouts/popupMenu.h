@@ -19,7 +19,7 @@ class PopupMenu {
     void bindShaderAndDraw() const;
     void triggerAndDestroy(Game* game);
     inline void setHighlighted(bool highlighted) {_highlighted = highlighted;}
-    void setAllocatedRect(const glm::vec4& allocatedRect);
+    void setAllocatedRect(const glm::ivec4& allocatedRect);
 
     glm::ivec2 getTextSize();
 

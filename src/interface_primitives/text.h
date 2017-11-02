@@ -14,11 +14,10 @@ public:
   Text ();
 
   void setText(const std::string &str, float fontSize);
-  void setPosition(size_t X, size_t Y);
-  void setPosition(const glm::vec2& glCoords);
+  void setPosition(const glm::ivec2& windowCoords);
   void bindShaderAndDraw() const;
 
-  void displayAtlas(const glm::uvec2& windowCoords) const;
+  void displayAtlas(const glm::ivec2& windowCoords) const;
 
   glm::uvec2 getSize() const;
 

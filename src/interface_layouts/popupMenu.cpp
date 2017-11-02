@@ -3,9 +3,6 @@
 #include "camera.h"
 #include "interfaceParameters.h"
 
-#include <iostream>
-#include "glm/ext.hpp"
-
 PopupMenu::MenuEntry::MenuEntry(std::string name, TCallbackFunc callback):
   _callback(callback),
   _highlighted(false) {
@@ -22,8 +19,8 @@ void PopupMenu::MenuEntry::triggerAndDestroy(Game* game) {
 
 }
 
-void PopupMenu::MenuEntry::setAllocatedRect(const glm::vec4& allocatedRect) {
-  _text.setPosition(glm::vec2(allocatedRect.x, allocatedRect.y + allocatedRect.w));
+void PopupMenu::MenuEntry::setAllocatedRect(const glm::ivec4& allocatedRect) {
+  _text.setPosition(glm::ivec2(allocatedRect.x, allocatedRect.y));
 }
 
 glm::ivec2 PopupMenu::MenuEntry::getTextSize() {
@@ -80,7 +77,7 @@ void PopupMenu::create(glm::ivec2 clickPos) {
     _frame.setRectangles(menuRectangle);
     _background.setRectangles(menuRectangle);
 
-    glm::vec4 currentAllocatedRect = menuRectangle;
+    glm::ivec4 currentAllocatedRect = menuRectangleWindowCoord;
     currentAllocatedRect.w /= _menuEntries.size();
 
     for (size_t i = 0; i < _menuEntries.size(); i++) {

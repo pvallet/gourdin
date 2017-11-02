@@ -42,9 +42,9 @@ public:
 
 	void reset();
 
-	glm::vec2 windowCoordsToGLCoords(glm::uvec2 windowCoords) const;
-	glm::uvec2 glCoordsToWindowCoords(glm::vec2 glCoords) const;
-	glm::vec4 windowRectCoordsToGLRectCoords(glm::uvec4 windowRect) const;
+	glm::vec2 windowCoordsToGLCoords(glm::ivec2 windowCoords) const;
+	glm::ivec2 glCoordsToWindowCoords(glm::vec2 glCoords) const;
+	glm::vec4 windowRectCoordsToGLRectCoords(glm::ivec4 windowRect) const;
 
 	inline unsigned int getW() const {return _W;}
 	inline unsigned int getH() const {return _H;}

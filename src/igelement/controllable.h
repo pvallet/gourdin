@@ -14,7 +14,7 @@ public:
 
 	inline void setProjectedVertices(std::array<float,12> nVertices) {_projectedVertices = nVertices;}
 
-	glm::uvec4 getScreenRect() const;
+	glm::ivec4 getScreenRect() const;
 
 protected:
 	glm::vec2 _target;

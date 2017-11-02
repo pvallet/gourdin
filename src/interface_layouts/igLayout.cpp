@@ -10,12 +10,12 @@ void igLayout::init() {
   _minimapTexture.loadFromFile("res/map/map.png");
 
 #ifndef __ANDROID__
-  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::ivec4(
     0, cam.getWindowH() - _minimapTexture.getSize().y,
     _minimapTexture.getSize()
   ))));
 #else
-  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+  _minimapRect.reset(new TexturedRectangle(&_minimapTexture, cam.windowRectCoordsToGLRectCoords(glm::ivec4(
     cam.getWindowW() - _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
     cam.getWindowH() - _minimapTexture.getSize().y * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
     _minimapTexture.getSize().x * 2 * interfaceParams.getAndroidInterfaceZoomFactor(),
@@ -99,26 +99,26 @@ void igLayout::setTextTopLeft(const std::string& string) {
 
 void igLayout::setTextTopRight(const std::string& string) {
   _textTopRight.setText(string, interfaceParams.sizeTextSmall());
-  _textTopRight.setPosition(cam.getWindowW() - _textTopRight.getSize().x, 0);
+  _textTopRight.setPosition(glm::ivec2(cam.getWindowW() - _textTopRight.getSize().x, 0));
 }
 
 void igLayout::setTextTopCenter(const std::string& string) {
     _textTopCenter.setText(string, interfaceParams.sizeTextSmall());
-    _textTopCenter.setPosition(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0);
+    _textTopCenter.setPosition(glm::ivec2(cam.getWindowW() / 2 - _textTopCenter.getSize().x / 2, 0));
 }
 
 void igLayout::setTextCenter(const std::string& string, int msDuration) {
   _textCenter.setText(string, interfaceParams.sizeTextBig());
-  _textCenter.setPosition(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
-                          cam.getWindowH() / 2 - _textCenter.getSize().y / 2);
+  _textCenter.setPosition(glm::ivec2(cam.getWindowW() / 2 - _textCenter.getSize().x / 2,
+                                     cam.getWindowH() / 2 - _textCenter.getSize().y / 2));
 
   _textCenterChrono.reset(msDuration);
 }
 
 void igLayout::setTextBottomCenter(const std::string& string, int msDuration) {
   _textBottomCenter.setText(string, interfaceParams.sizeTextMedium());
-  _textBottomCenter.setPosition(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
-                                cam.getWindowH() - _textBottomCenter.getSize().y);
+  _textBottomCenter.setPosition(glm::ivec2(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
+                                           cam.getWindowH() - _textBottomCenter.getSize().y));
 
   _textBottomCenterChrono.reset(msDuration);
 }
@@ -132,20 +132,20 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
   std::vector<glm::vec4> outlinesRects;
 
   for(auto it = selection.begin(); it != selection.end(); ++it) {
-    glm::uvec4 corners = (*it)->getScreenRect();
+    glm::ivec4 corners = (*it)->getScreenRect();
 
     // Otherwise the selected element is outside the screen
     if (corners.z != 0) {
       float maxHeightFactor = (*it)->getMaxHeightFactor(); // The lifeBar must not change when switching animations
 
-      staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+      staminaBarsRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
         corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
         corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
         interfaceParams.staminaBarWidth() * (*it)->getStamina() / 100.f,
         interfaceParams.staminaBarHeight()
       )));
 
-      outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::uvec4(
+      outlinesRects.push_back(cam.windowRectCoordsToGLRectCoords(glm::ivec4(
         corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
         corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
         interfaceParams.staminaBarWidth(),
@@ -161,7 +161,7 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
 }
 
 glm::vec2 igLayout::getMinimapClickCoords(size_t x, size_t y) const {
-  glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::uvec2(x,y));
+  glm::vec2 clickGLCoords = cam.windowCoordsToGLCoords(glm::ivec2(x,y));
   glm::vec4 minimapTexRect = _minimapRect->getTextureRect();
 
   glm::vec2 coords = glm::vec2( (clickGLCoords.x - minimapTexRect.x) / minimapTexRect.z,
@@ -171,7 +171,7 @@ glm::vec2 igLayout::getMinimapClickCoords(size_t x, size_t y) const {
 }
 
 void igLayout::setRectSelect(glm::ivec4 rect) {
-  glm::uvec4 absoluteRect;
+  glm::ivec4 absoluteRect;
   if (rect.z > 0) {
     absoluteRect.x = rect.x;
     absoluteRect.z = rect.z;
