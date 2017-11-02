@@ -15,12 +15,11 @@ public:
 
   inline glm::ivec4 getTextureRect() const {return _textureRect;}
 
-  // Loaded in Interface init function to ensure it is only loaded once
-  static void loadShader();
-
   static void bindDefaultShader() {_2DShader.bind();}
 
 private:
+  static void loadShader();
+  
   static Shader _2DShader;
   static bool _shaderLoaded;
 

@@ -15,6 +15,8 @@ bool Text::_shaderLoaded = false;
 Text::Text() :
   _stringLength(0) {
 
+  loadShader();
+
   _texture.bind();
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

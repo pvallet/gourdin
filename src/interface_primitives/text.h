@@ -21,10 +21,9 @@ public:
 
   glm::uvec2 getSize() const;
 
-  // Loaded in Interface init function to ensure it is only loaded once
-  static void loadShader();
-
 private:
+  static void loadShader();
+  
   static FontHandler _fontHandler;
   static Shader _textShader;
   static bool _shaderLoaded;

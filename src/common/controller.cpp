@@ -31,9 +31,6 @@ Controller::Controller(SDL2pp::Window& window) :
 }
 
 void Controller::init() {
-  ColoredRectangles::loadShader();
-  Text::loadShader();
-  TexturedRectangle::loadShader();
   _engine.init(_loadingScreen);
   _game.init(_loadingScreen);
 }

@@ -10,6 +10,8 @@ ColoredRectangles::ColoredRectangles (glm::vec4 color, bool filled):
 	_filled(filled),
   _nbRect(0) {
 
+	loadShader();
+
 	_vao.bind();
 	_vbo.bind();
 

@@ -17,10 +17,9 @@ public:
   void setRectangles(const glm::ivec4& rectangle);
   void setRectangles(const std::vector<glm::ivec4>& rectangles);
 
-  // Loaded in Interface init function to ensure it is only loaded once
-  static void loadShader();
-
 private:
+  static void loadShader();
+  
   static Shader _plainColorShader;
   static bool _shaderLoaded;
 

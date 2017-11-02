@@ -10,6 +10,8 @@ TexturedRectangle::TexturedRectangle (const Texture* texture, glm::ivec4 rect)
 	: _textureRect(rect)
 	, _texture(texture)
 {
+	loadShader();
+	
 	glm::vec4 floatRect = ut::windowRectCoordsToGLRectCoords(rect);
 
 	_verticesAndCoord  = {
