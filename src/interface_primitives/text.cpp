@@ -115,7 +115,11 @@ void Text::setText(const std::string &str, float fontSize) {
 void Text::setPosition(size_t X, size_t Y) {
   glm::uvec2 windowCoords(X,Y);
   Camera& cam = Camera::getInstance();
-  _origin = cam.windowCoordsToGLCoords(windowCoords);
+  setPosition(cam.windowCoordsToGLCoords(windowCoords));
+}
+
+void Text::setPosition(const glm::vec2& glCoords) {
+  _origin = glCoords;
 
   // Substract default origin of the text
   _origin.x += 1;
@@ -139,7 +143,7 @@ void Text::bindShaderAndDraw() const {
   Shader::unbind();
 }
 
-void Text::displayAtlas(glm::uvec2 windowCoords) const {
+void Text::displayAtlas(const glm::uvec2& windowCoords) const {
   Camera& cam = Camera::getInstance();
   glm::vec4 glCoords = cam.windowRectCoordsToGLRectCoords(glm::vec4(windowCoords,
     _fontHandler.getWidth(), _fontHandler.getHeight()));

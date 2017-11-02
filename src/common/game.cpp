@@ -119,6 +119,8 @@ void Game::render() const {
   _interface.renderMinimap(_engine);
   _interface.renderText();
 
+  _popupMenu.bindShadersAndDraw();
+
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }
 
