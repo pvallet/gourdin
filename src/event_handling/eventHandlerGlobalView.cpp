@@ -103,7 +103,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
 
 #ifdef __ANDROID__
     case SDL_FINGERMOTION:
-      if (getNbFingers() == 1)
+      if (getNbFingers() == 1 && !isDuringLongClick())
         cam.translate(- event.tfinger.dx * TRANSLATION_FACTOR * cam.getZoom(),
                       - event.tfinger.dy * TRANSLATION_FACTOR * cam.getZoom());
       break;
