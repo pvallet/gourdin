@@ -40,6 +40,7 @@ public:
     return _focusedCharacter->getPos();}
   inline float getCharacterHeight() const {if (!_focusedCharacter) return 0;
     return _focusedCharacter->getSize().y;}
+  inline const igMovingElement* getFocusedCharacter() const { return _focusedCharacter; }
 
   inline void setTarget(glm::vec2 target) {if (_focusedCharacter) _focusedCharacter->setTarget(target);}
   inline void stopMoving() {if (_focusedCharacter) _focusedCharacter->stop();}

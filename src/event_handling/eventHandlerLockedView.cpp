@@ -140,8 +140,12 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
         }
       }
 
-      else
-        _game.moveFocused(windowCoords, true);
+      else {
+        if (dynamic_cast<const Lion*>(_game.getFocusedCharacter()))
+          _game.moveFocused(windowCoords, true);
+        else
+          _game.moveFocused(windowCoords, false);
+      }
     }
   }
 
