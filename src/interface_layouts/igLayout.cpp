@@ -118,7 +118,7 @@ void igLayout::setTextCenter(const std::string& string, int msDuration) {
 void igLayout::setTextBottomCenter(const std::string& string, int msDuration) {
   _textBottomCenter.setText(string, interfaceParams.sizeTextMedium());
   _textBottomCenter.setPosition(glm::ivec2(cam.getWindowW() / 2 - _textBottomCenter.getSize().x / 2,
-                                           cam.getWindowH() - _textBottomCenter.getSize().y));
+                                           cam.getWindowH() - _textBottomCenter.getSize().y * 2));
 
   _textBottomCenterChrono.reset(msDuration);
 }

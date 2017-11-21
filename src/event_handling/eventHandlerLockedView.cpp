@@ -158,6 +158,9 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
   }
 
   else if (event.type == SDL_USER_DRAG_MOTION) {
+#ifdef __ANDROID__
+    const InterfaceParameters& interfaceParams = InterfaceParameters::getInstance();
+#endif
     if (_game.getPovCamera()) {
       cam.setTheta(_initialDragTheta + ((intptr_t) event.user.data1 - _beginDrag.x) * ROTATION_ANGLE_MOUSE);
       cam.setPhi  (_initialDragPhi   + ((intptr_t) event.user.data2 - _beginDrag.y) * ROTATION_ANGLE_MOUSE);
