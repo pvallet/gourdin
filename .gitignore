@@ -20,3 +20,4 @@ android/app/app.iml
 android/android.iml
 android/local.properties
 .idea/
+.clang_complete
