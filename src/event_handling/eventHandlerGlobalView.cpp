@@ -123,6 +123,7 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
     ));
 
     if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
+      minimapCoord.y = 1 - minimapCoord.y;
       cam.setPointedPos(MAX_COORD * minimapCoord);
     }
 
