@@ -63,13 +63,13 @@ int Antilope::generateTimePhase(int msAverage) const {
 	return 	msAverage + RANDOMF * msAverage * 0.8f - msAverage * 0.4f;
 }
 
-BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neighbors) const {
+BoidsInfo Antilope::getInfoFromNeighbors(const TVecList& neighbors) const {
 	BoidsInfo res;
 	float distance;
 	res.minRepDst = _repulsionRadius;
 	res.minFleeDst = _panicFleeRadius;
 
-	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+	FOR_TVECLIST(it, neighbors) {
 		if ((*it) != this) {
 			distance = glm::length(_pos - (*it)->getPos());
 
@@ -202,7 +202,7 @@ void Antilope::reactWhenRecovering(const BoidsInfo& info) {
 	}
 }
 
-void Antilope::updateState(const std::list<igMovingElement*>& neighbors) {
+void Antilope::updateState(const TVecList& neighbors) {
 	BoidsInfo info = getInfoFromNeighbors(neighbors);
 
 	switch (_antilopeStatus) {

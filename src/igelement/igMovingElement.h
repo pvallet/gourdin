@@ -3,6 +3,7 @@
 #include <string>
 
 #include "animationManager.h"
+#include "customTypes.h"
 #include "igElement.h"
 #include "terrainGeometry.h"
 
@@ -14,7 +15,7 @@ public:
 	virtual void updateDisplay(int msElapsed, float theta); // Update sprite
 	virtual void update(int msElapsed); // Update pos and inner statuses
 	// React to the environment
-	virtual void updateState(const std::list<igMovingElement*>& neighbors) {(void) neighbors;}
+	virtual void updateState(const TVecList& neighbors) {(void) neighbors;}
 	virtual void die();
 	virtual void stop();
 

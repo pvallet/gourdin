@@ -106,12 +106,12 @@ void Lion::setTarget(glm::vec2 t, ANM_TYPE anim) {
 		Controllable::setTarget(t,WALK);
 }
 
-void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
+void Lion::updateState(const TVecList& neighbors) {
 	float distance;
 	igMovingElement* closest = nullptr;
 	float nearestDist = _rangeChase;
 
-	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
+	FOR_TVECLIST(it, neighbors) {
 		if (*it != this) {
 			Antilope *atlp = dynamic_cast<Antilope*>(*it);
 			if (atlp) {

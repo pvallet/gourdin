@@ -22,7 +22,7 @@ public:
 	Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry);
 
 	// React to the environment
-	virtual void updateState(const std::list<igMovingElement*>& neighbors);
+	virtual void updateState(const TVecList& neighbors);
 
 	void beginIdle();
 	void beginFleeing();
@@ -36,7 +36,7 @@ protected:
 private:
 	int generateTimePhase(int msAverage) const;
 
-	BoidsInfo getInfoFromNeighbors(const std::list<igMovingElement*>& neighbors) const;
+	BoidsInfo getInfoFromNeighbors(const TVecList& neighbors) const;
 	void reactWhenIdle      (const BoidsInfo& info);
 	void reactWhenFleeing   (const BoidsInfo& info);
 	void reactWhenRecovering(const BoidsInfo& info);

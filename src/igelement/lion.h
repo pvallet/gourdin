@@ -13,7 +13,7 @@ public:
 
 	virtual void update(int msElapsed);
 	// React to the environment
-	virtual void updateState(const std::list<igMovingElement*>& neighbors);
+	virtual void updateState(const TVecList& neighbors);
 
 	virtual void stop();
 	void beginRunning();

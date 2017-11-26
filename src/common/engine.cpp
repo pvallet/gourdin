@@ -6,6 +6,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 
 #include "camera.h"
+#include "customTypes.h"
 #include "log.h"
 #include "reliefGenerator.h"
 
@@ -127,18 +128,10 @@ void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
 }
 
 void Engine::updateMovingElementsStates() {
-  struct squareHashFunc {
-    size_t operator()(const glm::ivec2 &k) const {
-    size_t h1 = std::hash<int>()(k.x);
-    size_t h2 = std::hash<int>()(k.y);
-    return (h1 << 1) + h1 + h2;
-    }
-  };
-
   float squareSize = Antilope::getStandardLineOfSight();
   int nbSquares = MAX_COORD / squareSize;
 
-  std::unordered_map<glm::ivec2, std::list<igMovingElement*>, squareHashFunc> sortedElements;
+  TGridList sortedElements;
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     if (!(*it)->isDead()) {
@@ -149,15 +142,14 @@ void Engine::updateMovingElementsStates() {
   }
 
   for (auto square = sortedElements.begin(); square != sortedElements.end(); square++) {
-    std::list<igMovingElement*> elmtsInSurroundingSquares;
+    TVecList elmtsInSurroundingSquares;
 
     for (int k = std::max(0, square->first.x-1); k <= std::min(nbSquares-1, square->first.x+1); k++) {
     for (int l = std::max(0, square->first.y-1); l <= std::min(nbSquares-1, square->first.y+1); l++) {
       glm::ivec2 squareCoord(k,l);
 
       if (sortedElements.find(squareCoord) != sortedElements.end())
-        elmtsInSurroundingSquares.insert(elmtsInSurroundingSquares.end(),
-          sortedElements.at(squareCoord).begin(), sortedElements.at(squareCoord).end());
+        elmtsInSurroundingSquares.push_back(&sortedElements.at(squareCoord));
     }
     }
 
