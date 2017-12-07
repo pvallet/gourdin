@@ -20,6 +20,7 @@ public:
   float loadingBarSize() const;
   glm::vec4 colorFrame() const;
   glm::vec4 colorBackground() const;
+	glm::vec4 colorHighlight() const;
 
   inline float getAndroidInterfaceZoomFactor() const {return _androidInterfaceZoomFactor;}
 

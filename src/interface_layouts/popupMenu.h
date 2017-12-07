@@ -5,6 +5,7 @@
 #include <string>
 
 #include "coloredRectangles.h"
+#include "interfaceParameters.h"
 #include "text.h"
 
 class Game;
@@ -39,7 +40,6 @@ class PopupMenu {
 public:
   PopupMenu (Game* game);
 
-  void setTitle(const std::string& title);
   void addEntry(const std::string& name, TCallbackFunc callback);
 
   void bindShadersAndDraw() const;
@@ -49,12 +49,12 @@ public:
   void triggerAndDestroy(const glm::ivec2& clickPos);
 
 private:
-  void highlightIndex(size_t index);
+  void highlightIndex(int index);
   glm::ivec2 getMenuSize();
 
   Game* _game;
 
-  size_t _highlightedIndex;
+  int _highlightedIndex;
   bool _isDisplaying;
 
   ColoredRectangles _frame;

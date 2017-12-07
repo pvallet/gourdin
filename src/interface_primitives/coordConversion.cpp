@@ -10,8 +10,8 @@ glm::vec2 ut::windowCoordsToGLCoords(const glm::ivec2& windowCoords) {
 
 glm::ivec2 ut::glCoordsToWindowCoords(const glm::vec2& glCoords) {
   Camera& cam = Camera::getInstance();
-  return glm::ivec2(cam.getWindowW() * (1 + glCoords.x) / 2,
-                    cam.getWindowH() * (1 - glCoords.y) / 2);
+  return glm::ivec2(round(cam.getWindowW() * (1 + glCoords.x) / 2),
+                    round(cam.getWindowH() * (1 - glCoords.y) / 2));
 }
 
 glm::vec4 ut::windowRectCoordsToGLRectCoords(const glm::ivec4& windowRect) {

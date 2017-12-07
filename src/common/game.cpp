@@ -34,7 +34,6 @@ void Game::init(LoadingScreen& loadingScreen) {
   _interface.setTextTopCenter("Best score: 0");
 #endif
 
-  _popupMenu.setTitle("Spawning");
   _popupMenu.addEntry("Predator", &Game::createLion);
   _popupMenu.addEntry("Tribe", &Game::genTribe);
 

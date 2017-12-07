@@ -2,9 +2,10 @@
 
 #include "camera.h"
 #include "game.h"
-#include "interfaceParameters.h"
 
-#define SPACE_BETWEEN_ENTRIES 3
+#define MARGINS_SIZE (4 * InterfaceParameters::getInstance().getAndroidInterfaceZoomFactor())
+#define INDEX_NONE_SELECTED -1
+#define MENU_ENTRY_HEIGHT InterfaceParameters::getInstance().sizeTextMedium()
 
 glm::ivec2 PopupMenu::MenuEntry::_clickPos;
 
@@ -13,8 +14,7 @@ PopupMenu::MenuEntry::MenuEntry(std::string name, TCallbackFunc callback):
   _highlight(InterfaceParameters::getInstance().colorBackground()),
   _highlighted(false) {
 
-  const InterfaceParameters& iParams = InterfaceParameters::getInstance();
-  _text.setText(name, iParams.sizeTextSmall());
+  _text.setText(name, MENU_ENTRY_HEIGHT);
 }
 
 void PopupMenu::MenuEntry::bindShaderAndDraw() const {
@@ -30,7 +30,7 @@ void PopupMenu::MenuEntry::triggerAndDestroy(Game* game) {
 void PopupMenu::MenuEntry::setAllocatedRect(const glm::ivec4& allocatedRect) {
   _allocatedRect = allocatedRect;
   _highlight.setRectangles(allocatedRect);
-  _text.setPosition(glm::ivec2(allocatedRect.x, allocatedRect.y));
+  _text.setPosition(glm::ivec2(allocatedRect.x + MARGINS_SIZE, allocatedRect.y + MARGINS_SIZE));
 }
 
 PopupMenu::PopupMenu(Game* game):
@@ -39,10 +39,6 @@ PopupMenu::PopupMenu(Game* game):
   _isDisplaying(false),
   _frame(InterfaceParameters::getInstance().colorFrame(), false),
   _background(InterfaceParameters::getInstance().colorBackground(), true) {}
-
-void PopupMenu::setTitle(const std::string& title) {
-
-}
 
 void PopupMenu::addEntry(const std::string& name, TCallbackFunc callback) {
   _menuEntries.push_back(PopupMenu::MenuEntry(name, callback));
@@ -70,7 +66,8 @@ glm::ivec2 PopupMenu::getMenuSize() {
     totalSize.y += currentSize.y;
   }
 
-  totalSize.y += _menuEntries.size() * SPACE_BETWEEN_ENTRIES;
+  totalSize.x += 2 * MARGINS_SIZE;
+  totalSize.y += 2 * _menuEntries.size() * MARGINS_SIZE;
 
   return totalSize;
 }
@@ -79,13 +76,13 @@ void PopupMenu::create(const glm::ivec2& clickPos) {
   if (!_menuEntries.empty()) {
     MenuEntry::_clickPos = clickPos;
 
-    glm::ivec4 menuRectangle(clickPos - _menuEntries.front().getTextSize() / 2, getMenuSize());
+    glm::ivec4 menuRectangle(clickPos - (glm::ivec2(2 * MARGINS_SIZE) + _menuEntries.front().getTextSize()) / 2, getMenuSize());
 
     _frame.setRectangles(menuRectangle);
     _background.setRectangles(menuRectangle);
 
     glm::ivec4 currentAllocatedRect = menuRectangle;
-    currentAllocatedRect.w /= _menuEntries.size();
+    currentAllocatedRect.w = MENU_ENTRY_HEIGHT + 2 * MARGINS_SIZE;
 
     for (size_t i = 0; i < _menuEntries.size(); i++) {
       _menuEntries[i].setAllocatedRect(currentAllocatedRect);
@@ -100,12 +97,9 @@ void PopupMenu::create(const glm::ivec2& clickPos) {
 
 void PopupMenu::updateHighlight(const glm::ivec2& mousePos) {
   if (!_menuEntries.empty()) {
-    if (mousePos.y < _menuEntries.front().getAllocatedRect().y) {
-      highlightIndex(0);
-      return;
-    }
-    else if (mousePos.y > _menuEntries.back().getAllocatedRect().y) {
-      highlightIndex(_menuEntries.size() - 1);
+    if (mousePos.y < _menuEntries.front().getAllocatedRect().y ||
+        mousePos.y > _menuEntries.back().getAllocatedRect().y + _menuEntries.back().getAllocatedRect().w) {
+      highlightIndex(INDEX_NONE_SELECTED);
       return;
     }
 
@@ -119,11 +113,11 @@ void PopupMenu::updateHighlight(const glm::ivec2& mousePos) {
   }
 }
 
-void PopupMenu::highlightIndex(size_t index) {
+void PopupMenu::highlightIndex(int index) {
   _highlightedIndex = index;
 
   for (size_t i = 0; i < _menuEntries.size(); i++) {
-    if (i == index)
+    if ((int) i == index)
       _menuEntries[i].setHighlighted(true);
     else
       _menuEntries[i].setHighlighted(false);
@@ -132,6 +126,7 @@ void PopupMenu::highlightIndex(size_t index) {
 
 void PopupMenu::triggerAndDestroy(const glm::ivec2& clickPos) {
   updateHighlight(clickPos);
-  _menuEntries[_highlightedIndex].triggerAndDestroy(_game);
+  if (_highlightedIndex != INDEX_NONE_SELECTED)
+    _menuEntries[_highlightedIndex].triggerAndDestroy(_game);
   _isDisplaying = false;
 }

@@ -29,10 +29,11 @@
 
 #define COLOR_FRAME glm::vec4(0.52, 0.34, 0.138, 1)
 #define COLOR_BACKGROUND glm::vec4(205 / 256.f, 157 / 256.f, 102 / 256.f, 0.70)
+#define COLOR_HIGHLIGHT  glm::vec4(205 / 256.f, 157 / 256.f, 102 / 256.f, 0.90)
 
 InterfaceParameters::InterfaceParameters():
   _screenHorizontalDPI(0),
-  _androidInterfaceZoomFactor(0) {
+  _androidInterfaceZoomFactor(1) {
 #ifdef __ANDROID__
   // Get the screen DPI from the android application
   JNIEnv* env = (JNIEnv*)SDL_AndroidGetJNIEnv();
@@ -56,3 +57,4 @@ float InterfaceParameters::sizeTextBig() const {return SIZE_TEXT_BIG;}
 float InterfaceParameters::loadingBarSize() const {return LOADING_BAR_SIZE;}
 glm::vec4 InterfaceParameters::colorFrame() const {return COLOR_FRAME;}
 glm::vec4 InterfaceParameters::colorBackground() const {return COLOR_BACKGROUND;}
+glm::vec4 InterfaceParameters::colorHighlight() const {return COLOR_HIGHLIGHT;}
