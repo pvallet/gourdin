@@ -103,7 +103,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 std::vector<igMovingElement*> ContentGenerator::genHerds() const {
   std::vector<igMovingElement*> res;
 
-  for (size_t i = 0; i < 400; i++) {
+  for (size_t i = 0; i < 800; i++) {
     glm::vec2 pos(RANDOMF * MAX_COORD, RANDOMF * MAX_COORD);
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
