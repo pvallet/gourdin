@@ -407,7 +407,7 @@ void EventHandlerLockedView::resetCamera(bool pov, int msTransferDuration) {
 void EventHandlerLockedView::gainFocus() {
   Camera& cam = Camera::getInstance();
 
-  float distanceCamHasToTravel = glm::length(cam.getPointedPos() - _game.getFocusedPos());
+  float distanceCamHasToTravel = glm::length(glm::vec3(cam.getPointedPos() - _game.getFocusedPos(), cam.getZoom() - MIN_R));
 
   _thetaInPreviousView = cam.getTheta();
 
