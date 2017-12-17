@@ -7,6 +7,10 @@
 #define MENU_ENTRY_HEIGHT InterfaceParameters::getInstance().sizeTextMedium()
 #define MARGINS_SIZE InterfaceParameters::getInstance().marginsSize(MENU_ENTRY_HEIGHT)
 
+#ifdef __ANDROID__
+  #define FINGER_POPUP_OFFSET (300 * InterfaceParameters::getInstance().getAndroidInterfaceZoomFactor())
+#endif
+
 glm::ivec2 PopupMenu::MenuEntry::_clickPos;
 
 PopupMenu::MenuEntry::MenuEntry(std::string name, TCallbackFunc callback):
@@ -72,9 +76,16 @@ glm::ivec2 PopupMenu::getMenuSize() {
   return totalSize;
 }
 
-void PopupMenu::create(const glm::ivec2& clickPos) {
+void PopupMenu::create(glm::ivec2 clickPos) {
   if (!_menuEntries.empty()) {
     MenuEntry::_clickPos = clickPos;
+
+#ifdef __ANDROID__
+    if (clickPos.x > Camera::getInstance().getWindowW() / 2)
+      clickPos.x -= FINGER_POPUP_OFFSET;
+    else
+      clickPos.x += FINGER_POPUP_OFFSET;
+#endif
 
     glm::ivec4 menuRectangle(clickPos - (glm::ivec2(2 * MARGINS_SIZE) + _menuEntries.front().getTextSize()) / 2, getMenuSize());
 

@@ -44,7 +44,7 @@ public:
 
   void bindShadersAndDraw() const;
 
-  void create(const glm::ivec2& clickPos);
+  void create(glm::ivec2 clickPos);
   void updateHighlight(const glm::ivec2& mousePos);
   void triggerAndDestroy(const glm::ivec2& clickPos);
 
