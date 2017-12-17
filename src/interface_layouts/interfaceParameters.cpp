@@ -14,7 +14,7 @@
   #define SIZE_TEXT_MEDIUM (38.f * _androidInterfaceZoomFactor)
   #define SIZE_TEXT_BIG (90.f * _androidInterfaceZoomFactor)
 
-  #define LOADING_BAR_SIZE (1000.f * _androidInterfaceZoomFactor)
+  #define LOADING_BAR_SIZE (1300.f * _androidInterfaceZoomFactor)
 
 #else
   #define STAMINA_BAR_WIDTH 20.f
