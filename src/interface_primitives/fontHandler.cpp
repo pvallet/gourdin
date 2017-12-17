@@ -4,14 +4,15 @@
 
 #ifdef __ANDROID__
   #include "vera_38.h"
-  #define FONT_SIZE 38.
+  #define FONT_SIZE_PT 38.
 #else
   #include "vera_mono_39.h"
-  #define FONT_SIZE 39.
+  #define FONT_SIZE_PT 39.
 #endif
 
-FontHandler::FontHandler():
-  _fontSize(FONT_SIZE) {
+FontHandler::FontHandler()
+  : _fontSize(round(FONT_SIZE_PT / (4.f / 3.f)))
+  {
 
   Texture::flipPixelsUpsideDown(font.tex_width, font.tex_height, 1, font.tex_data);
 

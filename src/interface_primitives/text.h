@@ -13,7 +13,7 @@ class Text {
 public:
   Text ();
 
-  void setText(const std::string &str, float fontSize);
+  void setText(const std::string &str, float fontSize, float leading = 1.47);
   void setPosition(const glm::ivec2& windowCoords);
   void bindShaderAndDraw() const;
 
@@ -23,7 +23,7 @@ public:
 
 private:
   static void loadShader();
-  
+
   static FontHandler _fontHandler;
   static Shader _textShader;
   static bool _shaderLoaded;

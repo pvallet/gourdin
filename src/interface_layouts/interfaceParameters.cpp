@@ -20,12 +20,14 @@
   #define STAMINA_BAR_WIDTH 20.f
   #define STAMINA_BAR_HEIGHT 4.f
 
-  #define SIZE_TEXT_SMALL 12
-  #define SIZE_TEXT_MEDIUM 17
-  #define SIZE_TEXT_BIG 36
+  #define SIZE_TEXT_SMALL 10
+  #define SIZE_TEXT_MEDIUM 14
+  #define SIZE_TEXT_BIG 33
 
   #define LOADING_BAR_SIZE 500.f
 #endif
+
+#define MARGINS_FACTOR (_androidInterfaceZoomFactor * 1.f/3.f)
 
 #define COLOR_FRAME glm::vec4(0.52, 0.34, 0.138, 1)
 #define COLOR_BACKGROUND glm::vec4(205 / 256.f, 157 / 256.f, 102 / 256.f, 0.70)
@@ -55,6 +57,7 @@ float InterfaceParameters::sizeTextSmall() const {return SIZE_TEXT_SMALL;}
 float InterfaceParameters::sizeTextMedium() const {return SIZE_TEXT_MEDIUM;}
 float InterfaceParameters::sizeTextBig() const {return SIZE_TEXT_BIG;}
 float InterfaceParameters::loadingBarSize() const {return LOADING_BAR_SIZE;}
+float InterfaceParameters::marginsSize(float textSize) const {return textSize * MARGINS_FACTOR;}
 glm::vec4 InterfaceParameters::colorFrame() const {return COLOR_FRAME;}
 glm::vec4 InterfaceParameters::colorBackground() const {return COLOR_BACKGROUND;}
 glm::vec4 InterfaceParameters::colorHighlight() const {return COLOR_HIGHLIGHT;}

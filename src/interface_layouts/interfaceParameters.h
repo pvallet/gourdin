@@ -18,6 +18,7 @@ public:
   float sizeTextMedium() const;
   float sizeTextBig() const;
   float loadingBarSize() const;
+	float marginsSize(float textSize) const;
   glm::vec4 colorFrame() const;
   glm::vec4 colorBackground() const;
 	glm::vec4 colorHighlight() const;

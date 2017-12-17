@@ -3,9 +3,9 @@
 #include "camera.h"
 #include "game.h"
 
-#define MARGINS_SIZE (4 * InterfaceParameters::getInstance().getAndroidInterfaceZoomFactor())
 #define INDEX_NONE_SELECTED -1
 #define MENU_ENTRY_HEIGHT InterfaceParameters::getInstance().sizeTextMedium()
+#define MARGINS_SIZE InterfaceParameters::getInstance().marginsSize(MENU_ENTRY_HEIGHT)
 
 glm::ivec2 PopupMenu::MenuEntry::_clickPos;
 

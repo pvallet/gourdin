@@ -47,12 +47,13 @@ void Text::loadShader() {
   }
 }
 
-void Text::setText(const std::string &str, float fontSize) {
+void Text::setText(const std::string &str, float fontSize, float leading) {
   _vbo.bind();
 
   Camera& cam = Camera::getInstance();
   float sx = 2 / (float) cam.getWindowW() * fontSize / _fontHandler.getFontSize();
   float sy = 2 / (float) cam.getWindowH() * fontSize / _fontHandler.getFontSize();
+  float glyphInterpolationCorrection = 1e-3;
 
   // Default text location on top left corner of the screen
   float x = -1;
@@ -67,7 +68,7 @@ void Text::setText(const std::string &str, float fontSize) {
 
   for (size_t i = 0; i < str.size(); i++) {
     if (str[i] == '\n') {
-      y -= _fontHandler.getFontSize() * sy;
+      y -= _fontHandler.getFontSize() * sy * leading;
       x = -1;
       std::vector<float> clearChar(glyphGLDataSize,0);
       VertexBufferObject::cpuBufferSubData(bufferData, i * glyphGLDataSize, glyphGLDataSize, &clearChar[0]);
@@ -88,10 +89,10 @@ void Text::setText(const std::string &str, float fontSize) {
       float x1 = (float) (x0 + glyph->width * sx);
       float y1 = (float) (y0 - glyph->height * sy);
 
-      float s0 = glyph->s0;
-      float t0 = glyph->t0;
-      float s1 = glyph->s1;
-      float t1 = glyph->t1;
+      float s0 = glyph->s0 + glyphInterpolationCorrection;
+      float t0 = glyph->t0 - glyphInterpolationCorrection;
+      float s1 = glyph->s1 - glyphInterpolationCorrection;
+      float t1 = glyph->t1 + glyphInterpolationCorrection;
 
       struct {float x, y, s, t;} data[6] = {
         { x0, y0, s0, t0 }, { x0, y1, s0, t1 }, { x1, y1, s1, t1 },

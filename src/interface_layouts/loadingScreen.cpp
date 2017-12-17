@@ -5,7 +5,7 @@
 #include "interfaceParameters.h"
 #include "text.h"
 
-#define PROGRESS_BAR_TEXT_SIZE (interfaceParams.sizeTextMedium() * 1.3)
+#define PROGRESS_BAR_TEXT_SIZE interfaceParams.sizeTextMedium()
 #define PROGRESS_BAR_VERTICAL_OFFSET (2.5 * textCenter.getSize().y / 2)
 
 LoadingScreen::LoadingScreen(SDL2pp::Window& window):
@@ -31,20 +31,21 @@ void LoadingScreen::updateAndRender(std::string task, float progress) {
   Text textProgressBar;
   textProgressBar.setText(task, interfaceParams.sizeTextMedium());
   textProgressBar.setPosition(glm::ivec2(cam.getWindowW() / 2 - (textProgressBar.getSize().x / 2),
-                                         cam.getWindowH() / 2 + PROGRESS_BAR_VERTICAL_OFFSET));
+                                         cam.getWindowH() / 2 + PROGRESS_BAR_VERTICAL_OFFSET
+                                         + interfaceParams.marginsSize(PROGRESS_BAR_TEXT_SIZE)));
 
   glm::ivec4 progressBarRect(
    cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
    cam.getWindowH() / 2 + PROGRESS_BAR_VERTICAL_OFFSET,
    interfaceParams.loadingBarSize() * progress / 100.f,
-   PROGRESS_BAR_TEXT_SIZE
+   PROGRESS_BAR_TEXT_SIZE + 2 * interfaceParams.marginsSize(PROGRESS_BAR_TEXT_SIZE)
   );
 
   glm::ivec4 progressBarFrameRect(
     cam.getWindowW() / 2 - interfaceParams.loadingBarSize() / 2,
     cam.getWindowH() / 2 + PROGRESS_BAR_VERTICAL_OFFSET,
     interfaceParams.loadingBarSize(),
-    PROGRESS_BAR_TEXT_SIZE
+    PROGRESS_BAR_TEXT_SIZE + 2 * interfaceParams.marginsSize(PROGRESS_BAR_TEXT_SIZE)
   );
 
   ColoredRectangles progressBar(interfaceParams.colorBackground(), progressBarRect, true);
