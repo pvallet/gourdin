@@ -208,6 +208,11 @@ void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) {
     std::pair<float,float> thetasLim = ut::solveAcosXplusBsinXequalC(
       normal.x, normal.y, actualMinScalarProduct);
 
+    if (thetasLim.first == 0 && thetasLim.second == 0) {
+      theta = ut::spherical(normal).y;
+      return;
+    }
+
     glm::vec3 normalSpherical = ut::spherical(normal);
 
     if (ut::angleIsPositive(normalSpherical.y, thetasLim.first))
