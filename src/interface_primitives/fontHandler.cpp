@@ -2,13 +2,8 @@
 
 #include "texture.h"
 
-#ifdef __ANDROID__
-  #include "vera_38.h"
-  #define FONT_SIZE_PT 38.
-#else
-  #include "vera_mono_39.h"
-  #define FONT_SIZE_PT 39.
-#endif
+#include "vera_38.h"
+#define FONT_SIZE_PT 38.f
 
 FontHandler::FontHandler()
   : _fontSize(round(FONT_SIZE_PT / (4.f / 3.f)))
