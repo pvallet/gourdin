@@ -142,9 +142,12 @@ void Engine::updateMovingElementsStates() {
 
   for (auto it = _igMovingElements.begin(); it != _igMovingElements.end(); it++) {
     if (!(*it)->isDead()) {
-      glm::ivec2 square = glm::ivec2((*it)->getPos().x / squareSize, (*it)->getPos().y / squareSize);
+      glm::uvec2 chunkPos = ut::convertToChunkCoords((*it)->getPos());
+      if (_terrain[chunkPos.x * NB_CHUNKS + chunkPos.y]->getDisplayMovingElements()) {
+        glm::ivec2 square = glm::ivec2((*it)->getPos().x / squareSize, (*it)->getPos().y / squareSize);
 
-      sortedElements[square].push_back(it->get());
+        sortedElements[square].push_back(it->get());
+      }
     }
   }
 
