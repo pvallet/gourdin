@@ -167,6 +167,10 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(glm::vec2 pos, size_t co
 
   std::vector<glm::vec2> positions = scatteredPositions(pos, count, 10, 5);
 
+  if (count == 1) {
+    positions[0] = pos;
+  }
+
   for (size_t i = 0; i < positions.size(); i++) {
     res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
   }

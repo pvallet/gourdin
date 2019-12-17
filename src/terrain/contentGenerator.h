@@ -26,6 +26,7 @@ public:
   std::vector<igMovingElement*> genHerd(glm::vec2 pos, size_t count, Animals animal) const;
   std::vector<igMovingElement*> genTribe(glm::vec2 pos) const;
   std::vector<igMovingElement*> genLion(glm::vec2 pos) const;
+  std::vector<igMovingElement*> genAntilope(glm::vec2 pos) const;
 
   const std::vector<std::vector<bool> >& getForestsMask() const {return _forestsMask;}
 

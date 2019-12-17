@@ -43,8 +43,8 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   TerrainGeometry::SubdivisionLevel* initTerrainGeometry = _terrainGeometry.getFirstSubdivLevel();
   initTerrainGeometry->goingToAddNPoints(6);
-  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,0,0), glm::vec3(MAX_COORD,0,0), glm::vec3(0,MAX_COORD,0)}), GRASSLAND);
-  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,MAX_COORD,0), glm::vec3(MAX_COORD,0,0), glm::vec3(MAX_COORD,MAX_COORD,0)}), GRASSLAND);
+  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,0,0), glm::vec3(MAX_COORD,0,0), glm::vec3(0,MAX_COORD,0)}), TROPICAL_SEASONAL_FOREST);
+  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,MAX_COORD,0), glm::vec3(MAX_COORD,0,0), glm::vec3(MAX_COORD,MAX_COORD,0)}), TROPICAL_SEASONAL_FOREST);
   initTerrainGeometry->computeNormals();
 
   std::vector<Chunk*> newChunks;
@@ -62,11 +62,11 @@ void Engine::init(LoadingScreen& loadingScreen) {
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), cam.getScreenRect()));
 
-  /*loadingScreen.updateAndRender("Initializing content generator", 38);
+  loadingScreen.updateAndRender("Initializing content generator", 38);
 
   _contentGenerator.init();
 
-  loadingScreen.updateAndRender("Generating herds", 60);
+  /*loadingScreen.updateAndRender("Generating herds", 60);
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
   appendNewElements(_contentGenerator.genHerds()); */
@@ -275,7 +275,7 @@ void Engine::update(int msElapsed) {
 
   Log& logText = Log::getInstance();
   std::ostringstream renderStats;
-  renderStats << "Moving elements: " << visibleElmts.size() << std::endl;
+  renderStats << "Animals: " << visibleElmts.size() << std::endl;
   logText.addLine(renderStats.str());
 }
 
@@ -388,15 +388,6 @@ void Engine::renderToFBO() const {
 
   Shader::unbind();
   FrameBufferObject::unbind();
-
-  Log& logText = Log::getInstance();
-
-  std::ostringstream renderStats;
-  renderStats << "Triangles: " << nbTriangles << std::endl
-              << "Trees:  " << nbElements << std::endl
-              << "Chunks waiting for subdivision: " << _chunkSubdivider.getNbTasksInQueue() << std::endl;
-
-  logText.addLine(renderStats.str());
 }
 
 void Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
@@ -412,6 +403,12 @@ void Engine::addLion(glm::ivec2 screenTarget, float minDistToAntilopes) {
     throw std::runtime_error("Can't spawn a predator on this biome");
 
   appendNewElements(newLion);
+}
+
+void Engine::addAntilope(glm::ivec2 screenTarget) {
+  glm::vec2 antilopePos = get2DCoord(screenTarget);
+  std::vector<igMovingElement*> newAntilope = _contentGenerator.genHerd(antilopePos, 1, ANTILOPE);
+  appendNewElements(newAntilope);
 }
 
 std::vector<Controllable*> Engine::genTribe(glm::ivec2 screenTarget) {

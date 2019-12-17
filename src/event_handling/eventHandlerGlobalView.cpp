@@ -25,30 +25,9 @@ void EventHandlerGlobalView::handleKeyPressed(const SDL_Event& event) {
       _game.goBackToSelection();
       break;
 
-    case SDL_SCANCODE_LSHIFT:
-    case SDL_SCANCODE_RSHIFT:
-      _game.switchLionsRun();
-      break;
-
     // Delete first selected lion
     case SDL_SCANCODE_DELETE:
       _game.killLion();
-      break;
-
-    case SDL_SCANCODE_Q:
-    case SDL_SCANCODE_RETURN:
-      _game.selectAllLions();
-      break;
-
-    case SDL_SCANCODE_B:
-      _game.benchmark();
-      break;
-
-    case SDL_SCANCODE_H:
-      if (_game.huntHasStarted())
-        _game.interruptHunt();
-      else
-        _game.startNewHunt();
       break;
 
     case SDL_SCANCODE_E:
@@ -60,10 +39,6 @@ void EventHandlerGlobalView::handleKeyPressed(const SDL_Event& event) {
         _scrollSpeed = SCROLL_SPEED_SLOW;
         _game.setScrollSpeedToSlow(true);
       }
-      break;
-
-    case SDL_SCANCODE_T:
-      _game.genTribe();
       break;
 
     case SDL_SCANCODE_Z:
@@ -122,33 +97,19 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
       (intptr_t) event.user.data2
     ));
 
-    if (minimapCoord.x >= 0 && minimapCoord.x <= 1 && minimapCoord.y >= 0 && minimapCoord.y <= 1) {
-      minimapCoord.y = 1 - minimapCoord.y;
-      cam.setPointedPos(MAX_COORD * minimapCoord);
-    }
-
-    else if (_game.pickCharacter(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
+    if (_game.pickCharacter(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2)))
       _game.setLockedView(true);
 
-    else
+    else if (!_game.isSelectionEmpty())
       _game.unselect();
+
+    else
+    _game.createAntilope(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
   }
 
   else if (event.type == SDL_USER_DOUBLE_CLICK) {
     if (_game.hasFocusedCharacter())
       _game.setLockedView(true);
-  }
-
-  else if (event.type == SDL_USER_LONG_CLICK_BEGIN) {
-    _popupMenu.create(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
-  }
-
-  else if (event.type == SDL_USER_LONG_CLICK_MOTION) {
-    _popupMenu.updateHighlight(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
-  }
-
-  else if (event.type == SDL_USER_LONG_CLICK_END) {
-    _popupMenu.triggerAndDestroy(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));
   }
 
   else if (event.type == SDL_USER_DRAG_BEGIN) {

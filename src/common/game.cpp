@@ -30,13 +30,6 @@ void Game::init(LoadingScreen& loadingScreen) {
 
   setLockedView(false);
 
-#ifndef __ANDROID__
-  _interface.setTextTopCenter("Best score: 0");
-#endif
-
-  _popupMenu.addEntry("Predator", &Game::createLion);
-  _popupMenu.addEntry("Tribe", &Game::genTribe);
-
   update(0);
   _engine.waitForTasksToFinish();
   loadingScreen.updateAndRender("Finished initialization", 100);
@@ -111,14 +104,14 @@ void Game::render() const {
 
   _interface.renderEngine();
   _interface.renderStaminaBars(_selection);
-
-  if (!_lockedView)
-    _interface.renderRectSelect();
-
-  _interface.renderMinimap(_engine);
+  _interface.renderRectSelect();
   _interface.renderText();
 
-  _popupMenu.bindShadersAndDraw();
+  /*if (!_lockedView)
+
+  _interface.renderMinimap(_engine);
+
+  _popupMenu.bindShadersAndDraw();*/
 
   glViewport(0, 0, (GLint) cam.getW(), (GLint) cam.getH());
 }
@@ -150,8 +143,9 @@ std::string Game::getInfoTextCommon() const {
 
 std::string Game::getInfoTextLockedView() const {
   std::ostringstream text;
+  return text.str();
 
-#ifndef __ANDROID__
+/*#ifndef __ANDROID__
   text << "1: " << "God camera" << std::endl
        << "2: " << "POV camera" << std::endl;
   if (_povCamera)
@@ -175,15 +169,16 @@ std::string Game::getInfoTextLockedView() const {
   else
     text << "Click on the focused character to stop moving" << std::endl
          << "Click on the minimap to switch to POV camera" << std::endl;
-#endif
+#endif*/
 
   return getInfoTextCommon() + text.str();
 }
 
 std::string Game::getInfoTextGlobalView() const {
   std::ostringstream text;
+  return text.str();
 
-#ifndef __ANDROID__
+/*#ifndef __ANDROID__
   text << "Left-Right / A-D: " << "Rotate camera" << std::endl
        << "Up-Down    / W-S: " << "Go forwards/backwards" << std::endl
        << "A/Return: " << "Select all lions" << std::endl
@@ -207,7 +202,7 @@ std::string Game::getInfoTextGlobalView() const {
   text << "Long click to make a predator appear" << std::endl
        << "Click on it to select it" << std::endl
        << "Double click to go back to last selected predator" << std::endl;
-#endif
+#endif*/
 
   return getInfoTextCommon() + text.str();
 }
@@ -333,22 +328,13 @@ void Game::selectAllLions() {
 }
 
 void Game::createLion(glm::ivec2 screenTarget) {
-  try {
-    if (!_huntHasStarted)
-      _engine.addLion(screenTarget);
+  _engine.addLion(screenTarget);
+  displayInfo("Created predator");
+}
 
-    else {
-      if (_nbLions >= _maxSimultaneousLions)
-        throw std::runtime_error("Maximum number of predators reached");
-
-      _engine.addLion(screenTarget, LION_MIN_SPAWN_DIST);
-      _nbLions++;
-    }
-    displayInfo("Created predator");
-
-  } catch (const std::runtime_error& e) {
-    displayInfo(e.what());
-  }
+void Game::createAntilope(glm::ivec2 screenTarget) {
+  _engine.addAntilope(screenTarget);
+  displayInfo("Created prey");
 }
 
 void Game::moveSelection(glm::ivec2 screenTarget) {

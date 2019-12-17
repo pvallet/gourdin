@@ -55,6 +55,7 @@ public:
   void selectAllLions();
   inline void unselect() {select(glm::ivec4(-1,-1,0,0), false);}
   void createLion(glm::ivec2 screenTarget);
+  void createAntilope(glm::ivec2 screenTarget);
   void moveSelection(glm::ivec2 screenTarget);
   void goBackToSelection();
   void killLion();
