@@ -52,6 +52,8 @@ public:
 	inline void setTrees(std::vector<igElement*> trees) {_trees = trees; setTreesHeight(_currentSubdivLvl);}
 	inline size_t drawTrees() const {_subdivisionLevels[_currentSubdivLvl]->treeDrawer.drawElements(); return _trees.size();}
 
+	void generateSubdivisionLevel(size_t level);
+
 	friend ChunkSubdivider;
 
 private:
@@ -61,7 +63,6 @@ private:
 	void computeChunkBoundingBox(size_t subdivLvl);
 	bool theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const;
 	void setTreesHeight(size_t subdivLvl);
-	void generateSubdivisionLevel(size_t level);
 	void setSubdivisionLevel(size_t newSubdLvl);
 
 	float getHeight(glm::vec2 pos, size_t subdivLvl) const;

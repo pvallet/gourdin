@@ -7,7 +7,7 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
 																		 	 ChunkSubdivider&   chunkSubdivider) :
 	_chunkPos(x,y),
 	_visible(false),
-	_currentSubdivLvl(1),
+	_currentSubdivLvl(0),
 	_maxSubdivLvlAvailable(1),
 	_maxSubdivLvlAsked(1),
   _terrainTexManager(terrainTexManager),
@@ -244,6 +244,9 @@ void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
 }
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
+	if (newSubdLvl > MAX_SUBDIV_LVL)
+		newSubdLvl = MAX_SUBDIV_LVL;
+
 	if (newSubdLvl > _maxSubdivLvlAsked) {
 		for (size_t i = _maxSubdivLvlAsked + 1; i <= newSubdLvl; i++) {
 			_chunkSubdivider.addTask(this, i);

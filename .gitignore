@@ -21,3 +21,4 @@ android/android.iml
 android/local.properties
 .idea/
 .clang_complete
+.tags_swap

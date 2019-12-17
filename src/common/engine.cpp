@@ -40,49 +40,19 @@ void Engine::init(LoadingScreen& loadingScreen) {
   loadingScreen.updateAndRender("Loading terrain data", 1);
 
   _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
-  _map.load("res/map/");
-  _map.feedGeometryData(_terrainGeometry);
 
-  GeneratedImage relief;
-
-  if (relief.loadFromFile("res/map/relief.png")) {
-    loadingScreen.updateAndRender("Loading relief", 25);
-    _terrainGeometry.setReliefGenerator(relief);
-  }
-
-  else {
-    loadingScreen.updateAndRender("Generating relief", 25);
-
-    _mapInfoExtractor.convertMapData(512);
-    _mapInfoExtractor.generateBiomesTransitions(7);
-
-    _reliefGenerator.generateRelief();
-    _reliefGenerator.saveToFile("res/map/relief.png");
-    _terrainGeometry.setReliefGenerator(_reliefGenerator.getRelief());
-  }
-
-  loadingScreen.updateAndRender("Generate terrain geometry", 30);
-
-  // The base subdivision level is 1, it will take into account the generated relief contrary to level 0
-  _terrainGeometry.generateNewSubdivisionLevel();
-
-  loadingScreen.updateAndRender("Launching chunks subdivisions", 33);
+  TerrainGeometry::SubdivisionLevel* initTerrainGeometry = _terrainGeometry.getFirstSubdivLevel();
+  initTerrainGeometry->goingToAddNPoints(6);
+  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,0,0), glm::vec3(MAX_COORD,0,0), glm::vec3(0,MAX_COORD,0)}), GRASSLAND);
+  initTerrainGeometry->addTriangle(std::array<glm::vec3, 3>({glm::vec3(0,MAX_COORD,0), glm::vec3(MAX_COORD,0,0), glm::vec3(MAX_COORD,MAX_COORD,0)}), GRASSLAND);
+  initTerrainGeometry->computeNormals();
 
   std::vector<Chunk*> newChunks;
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
-    }
-  }
+  newChunks.push_back(new Chunk(0, 0, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
+  newChunks[0]->generateSubdivisionLevel(0);
+  _terrain[0] = std::unique_ptr<Chunk>(newChunks[0]);
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
-      _chunkSubdivider.addTask(newChunks[i*NB_CHUNKS + j], 1);
-      _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
-    }
-  }
-
-  loadingScreen.updateAndRender("Loading ocean and skybox", 34);
+  loadingScreen.updateAndRender("Loading ocean and skybox", 70);
 
   _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
   _skybox.load("res/skybox/");
@@ -92,26 +62,14 @@ void Engine::init(LoadingScreen& loadingScreen) {
   _depthInColorBufferFBO.init(cam.getW(), cam.getH(), GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE);
   _depthTexturedRectangle.reset(new TexturedRectangle(_globalFBO.getDepthTexture(), cam.getScreenRect()));
 
-  loadingScreen.updateAndRender("Initializing content generator", 38);
+  /*loadingScreen.updateAndRender("Initializing content generator", 38);
 
   _contentGenerator.init();
 
   loadingScreen.updateAndRender("Generating herds", 60);
 
   appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
-  appendNewElements(_contentGenerator.genHerds());
-
-  _chunkSubdivider.waitForTasksToFinish();
-
-  loadingScreen.updateAndRender("Generating forests", 60);
-
-  #pragma omp parallel for
-  for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
-    size_t x = i / NB_CHUNKS;
-    size_t y = i - x * NB_CHUNKS;
-    std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
-    newChunks[x*NB_CHUNKS + y]->setTrees(newTrees);
-  }
+  appendNewElements(_contentGenerator.genHerds()); */
 }
 
 void Engine::appendNewElements(std::vector<igMovingElement*> elems) {

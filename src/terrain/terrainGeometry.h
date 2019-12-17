@@ -10,7 +10,7 @@
 #include "generatedImage.h"
 #include "utils.h"
 
-#define MAX_SUBDIV_LVL 4
+#define MAX_SUBDIV_LVL 0
 
 struct Vertex;
 
