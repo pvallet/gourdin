@@ -53,11 +53,6 @@ void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
     case SDL_SCANCODE_A:
       moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
       break;
-
-    case SDL_SCANCODE_LSHIFT:
-      _game.makeLionsRun();
-      break;
-
   }
 
   // Switch selection to closest character in the direction given by moveFocused
@@ -85,10 +80,6 @@ void EventHandlerLockedView::handleKeyReleased(const SDL_Event& event) {
           !keyboardState[SDL_SCANCODE_D] &&
           !keyboardState[SDL_SCANCODE_SPACE])
         _game.stopMoving();
-      break;
-
-    case SDL_SCANCODE_LSHIFT:
-      _game.stopLionsRun();
       break;
   }
 }
@@ -148,9 +139,6 @@ bool EventHandlerLockedView::handleEvent(const SDL_Event& event) {
       }
     }
   }
-
-  else if (event.type == SDL_USER_DOUBLE_CLICK)
-    _game.switchLionsRun();
 
   else if (event.type == SDL_USER_LONG_CLICK_END)
     _game.moveFocused(glm::ivec2((intptr_t) event.user.data1, (intptr_t) event.user.data2));

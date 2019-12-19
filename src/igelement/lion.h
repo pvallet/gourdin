@@ -22,18 +22,11 @@ public:
 	void beginChasing();
 
 	virtual void setTarget(glm::vec2 t, ANM_TYPE anim);
-	inline float getStamina() const {return _stamina;}
-	inline bool isRunning() const {return _status == RUNNING;}
-
-	inline static size_t getNbKilled() {return _nbKilled;}
-	inline static void resetNbKilled() {_nbKilled = 0;}
+	inline float getHunger() const {return _hunger;}
 
 private:
-	static size_t _nbKilled;
 
-	float _stamina; // Percentage
-	float _catchBreathSpeed; // Percents per second
-	float _loseBreathSpeed;
+	float _hunger; // Percentage
 	float _speedWalking;
 	float _speedRunning;
 	float _rangeAttack;

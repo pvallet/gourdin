@@ -141,7 +141,7 @@ void igLayout::renderStaminaBars(std::set<Lion*> selection) const {
       staminaBarsRects.push_back(glm::ivec4(
         corners.x + corners.z/2 - interfaceParams.staminaBarWidth() / 2.f,
         corners.y - corners.w*maxHeightFactor + corners.w - interfaceParams.staminaBarWidth() / 4.f,
-        interfaceParams.staminaBarWidth() * (*it)->getStamina() / 100.f,
+        interfaceParams.staminaBarWidth() * (*it)->getHunger() / 100.f,
         interfaceParams.staminaBarHeight()
       ));
 

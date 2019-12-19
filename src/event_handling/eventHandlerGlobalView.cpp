@@ -63,9 +63,6 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
           _game.createLion(glm::ivec2(event.button.x, event.button.y));
         else {
           _game.moveSelection(glm::ivec2(event.button.x, event.button.y));
-          if (keyboardState[SDL_SCANCODE_LSHIFT] ||
-              keyboardState[SDL_SCANCODE_RSHIFT])
-            _game.makeLionsRun();
         }
       }
     }

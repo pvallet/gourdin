@@ -27,9 +27,6 @@ public:
 
   // Returns true if there is a controllable element containing screenTarget
   bool pickCharacter(glm::ivec2 screenTarget);
-  void makeLionsRun();
-  void stopLionsRun();
-  void switchLionsRun();
 
   // -------------------------- Locked view ------------------------------------
 
@@ -60,8 +57,6 @@ public:
   void goBackToSelection();
   void killLion();
   void benchmark();
-  void interruptHunt();
-  void startNewHunt();
 
   void genTribe();
   void genTribe(glm::ivec2 screenTarget);
@@ -70,7 +65,6 @@ public:
   inline void switchWireframe() {_engine.switchWireframe();}
   inline void setScrollSpeedToSlow(bool scrollSpeedSlow) {_scrollSpeedSlow = scrollSpeedSlow;}
   inline bool getScrollSpeedSlow() const {return _scrollSpeedSlow;}
-  inline bool huntHasStarted() const {return _huntHasStarted;}
   inline bool isSelectionEmpty() const {return _selection.size() == 0;}
   inline void displayInfo(const std::string& error) {_interface.setTextBottomCenter(error, _msCenterTextDisplayDuration);}
 
@@ -81,7 +75,6 @@ protected:
   std::string getInfoTextCommon() const;
   std::string getInfoTextLockedView() const;
   std::string getInfoTextGlobalView() const;
-  std::string getHuntText() const;
   void setFocusedCharacter(Controllable* focusedCharacter);
 
   Controllable* _focusedCharacter;
@@ -102,14 +95,10 @@ protected:
 
   bool _scrollSpeedSlow;
 
-  bool _huntHasStarted;
   const size_t _maxSimultaneousLions;
   size_t _nbLions;
   size_t _bestScore;
-  int _msHuntDuration;
   int _msCenterTextDisplayDuration;
-
-  Clock _huntStart;
 
   std::set<Lion*> _selection;
 };

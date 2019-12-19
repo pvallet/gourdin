@@ -14,11 +14,9 @@ Game::Game (Engine& engine):
   _interface(),
   _popupMenu(this),
   _povCamera(false),
-  _huntHasStarted(false),
   _maxSimultaneousLions(5),
   _nbLions(0),
   _bestScore(0),
-  _msHuntDuration(120000),
   _msCenterTextDisplayDuration(1000) {}
 
 void Game::init(LoadingScreen& loadingScreen) {
@@ -69,13 +67,6 @@ void Game::update(int msElapsed) {
   if (Clock::isGlobalTimerPaused())
     _interface.setTextCenter("PAUSED", 1);
 #endif
-
-  // Check if the hunt has ended
-  if (_huntHasStarted && _huntStart.getElapsedTime() > _msHuntDuration)
-    interruptHunt();
-
-  if (_huntHasStarted)
-    _interface.setTextTopRight(getHuntText());
 
   // Remove the dead elements from the selected elements
   std::vector<Lion*> toDelete;
@@ -184,10 +175,6 @@ std::string Game::getInfoTextGlobalView() const {
        << "A/Return: " << "Select all lions" << std::endl
        << "E: " << "Change scroll speed" << std::endl
        << "T: " << "Create tribe" << std::endl;
-  if (!_huntHasStarted)
-    text << "H: " << "Start new hunt!" << std::endl;
-  else
-    text << "H: " << "Interrupt current hunt" << std::endl;
   text << "Z: " << "Switch to wireframe display" << std::endl
        << std::endl
        << "Click on the minimap to change position" << std::endl
@@ -205,16 +192,6 @@ std::string Game::getInfoTextGlobalView() const {
 #endif*/
 
   return getInfoTextCommon() + text.str();
-}
-
-std::string Game::getHuntText() const {
-  std::ostringstream text;
-
-  text << "Predators: " << _nbLions << "/" << _maxSimultaneousLions << std::endl
-       << "Kills: " << Lion::getNbKilled() << std::endl
-       << "Time left: " << (_msHuntDuration - _huntStart.getElapsedTime()) / 1000 << std::endl;
-
-  return text.str();
 }
 
 void Game::changeFocusInDirection(glm::vec2 direction) {
@@ -362,35 +339,6 @@ void Game::goBackToSelection() {
   }
 }
 
-void Game::makeLionsRun() {
-  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
-    (*it)->beginRunning();
-  }
-}
-
-void Game::stopLionsRun() {
-  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
-    (*it)->beginWalking();
-  }
-}
-
-void Game::switchLionsRun() {
-  bool makeThemAllRun = false;
-  bool generalStrategyChosen = false;
-  for (auto it = _selection.begin(); it != _selection.end(); ++it) {
-    if (!generalStrategyChosen) {
-      generalStrategyChosen = true;
-      makeThemAllRun = !(*it)->isRunning();
-    }
-    if (generalStrategyChosen) {
-      if (makeThemAllRun)
-        (*it)->beginRunning();
-      else
-        (*it)->beginWalking();
-    }
-  }
-}
-
 void Game::killLion() {
   if (!_selection.empty()) {
     (*_selection.begin())->die();
@@ -419,60 +367,6 @@ void Game::benchmark() {
   SDL_Log("Average FPS: %f", 1.f / msTotalElapsed * 100 * 1000);
 
   cam.reset();
-}
-
-void Game::interruptHunt() {
-  if (_huntHasStarted) {
-    _huntHasStarted = false;
-    if (Lion::getNbKilled() > _bestScore)
-      _bestScore = Lion::getNbKilled();
-
-    Log& logText = Log::getInstance();
-    logText.clear();
-
-    std::ostringstream bestScoreText;
-    bestScoreText << "Best score: " << _bestScore;
-    _interface.setTextTopCenter(bestScoreText.str());
-
-    _interface.setTextTopRight("");
-
-    if (_lockedView)
-      _interface.setTextTopLeft(getInfoTextLockedView());
-    else
-      _interface.setTextTopLeft(getInfoTextGlobalView());
-
-    std::ostringstream scoreText;
-    scoreText << "Kills: " << Lion::getNbKilled();
-    _interface.setTextCenter(scoreText.str(), _msCenterTextDisplayDuration);
-  }
-}
-
-void Game::startNewHunt() {
-  if (!_huntHasStarted) {
-    std::vector<igMovingElement*> toDelete;
-
-    const std::set<Controllable*>& lions = _engine.getControllableElements();
-    for (auto it = lions.begin(); it != lions.end(); it++) {
-      if (dynamic_cast<Lion*>(*it))
-        toDelete.push_back(*it);
-    }
-
-    const std::set<Controllable*>& deadLions = _engine.getDeadControllableElements();
-    for (auto it = deadLions.begin(); it != deadLions.end(); it++) {
-      if (dynamic_cast<Lion*>(*it))
-        toDelete.push_back(*it);
-    }
-
-    _engine.deleteElements(toDelete);
-    _selection.clear();
-    _nbLions = 0;
-    Lion::resetNbKilled();
-    _huntHasStarted = true;
-    _huntStart.restart();
-
-    _interface.setTextTopLeft(getInfoTextGlobalView());
-    _interface.setTextCenter("Hunt Starts!", _msCenterTextDisplayDuration);
-  }
 }
 
 void Game::genTribe() {
