@@ -2,57 +2,72 @@
 
 #include "antilope.h"
 
+#define BASE_HUNGER_RATE 0.03f
+
 Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
-	Controllable(position, graphics, terrainGeometry),
-	_hunger(100),
+	Super(position, graphics, terrainGeometry),
+	_hunger(100.f),
 	_speedWalking(10.f),
 	_speedRunning(18.f),
 	_rangeAttack(8.f),
-	_rangeChase(13.f),
-	_status(WAITING),
+	_status(RESTING),
 	_msAnimAttack(2.0f * graphics.getAnimationTime(ATTACK)-150) {
 
 	_speed = _speedWalking;
+
+	_hungerRates[RESTING]   = BASE_HUNGER_RATE * 0.8f;
+	_hungerRates[ROAMING]   = BASE_HUNGER_RATE * 1.0f;
+	_hungerRates[ATTACKING] = BASE_HUNGER_RATE * 1.0f;
+	_hungerRates[CHASING]   = BASE_HUNGER_RATE * 1.0f;
 }
 
 void Lion::update(int msElapsed) {
-	if (_status == CHASING) {
+	_hunger -= _hungerRates[_status];
+
+	if (_hunger < 0.f) {
+		_hunger = 0.f;
+		die();
+	}
+
+	if (_hunger < 80.f && _status == RESTING) {
+		glm::vec2 toTarget;
+		float r = 50.f + sqrt(RANDOMF) * 50.f;
+		float theta = RANDOMF * 2*M_PI;
+
+		toTarget.x = r*cos(theta);
+		toTarget.y = r*sin(theta);
+
+		setTarget(getPos() + toTarget, WALK);
+		beginRoaming();
+	}
+
+	if (_prey != nullptr && _status != RESTING) {
 		_target = _prey->getPos();
 		setDirection(_prey->getPos() - _pos);
 	}
 
-	else if (_status == ATTACKING) {
-		_target = _prey->getPos();
-		setDirection(_prey->getPos() - _pos);
-
-		_speed = _prey->getSpeed() * 0.8f;
+	if (_status == ATTACKING) {
+			_speed = _prey->getSpeed() * 0.8f;
 
 		if (_beginAttack.getElapsedTime() >= _msAnimAttack) {
 			_prey->die();
+			_hunger = std::min(100.f, _hunger + 60.f);
 			stop();
 		}
 	}
 
-	Controllable::update(msElapsed);
+	Super::update(msElapsed);
 }
 
 void Lion::stop() {
 	_speed = _speedWalking;
-	_status = WAITING;
-	Controllable::stop();
+	_status = RESTING;
+	Super::stop();
 }
 
-void Lion::beginRunning() {
+void Lion::beginRoaming() {
 	if (_target != _pos) {
-		_status = RUNNING;
-		_speed = _speedRunning;
-		launchAnimation(RUN);
-	}
-}
-
-void Lion::beginWalking() {
-	if (_target != _pos) {
-		_status = WALKING;
+		_status = ROAMING;
 		_speed = _speedWalking;
 		launchAnimation(WALK);
 	}
@@ -68,29 +83,17 @@ void Lion::beginAttacking() {
 }
 
 void Lion::beginChasing() {
-	if (_status != CHASING && _status != ATTACKING && _status != WALKING) {
+	if (_status != CHASING && _status != ATTACKING) {
 		_status = CHASING;
 		_speed = _speedRunning;
 		launchAnimation(RUN);
 	}
 }
 
-void Lion::setTarget(glm::vec2 t, ANM_TYPE anim) {
-	(void) anim;
-	if (_status == RUNNING || _status == CHASING)
-		Controllable::setTarget(t, RUN);
-	else if (_status == WAITING) {
-		Controllable::setTarget(t, WALK);
-		beginWalking();
-	}
-	else if (_status == WALKING)
-		Controllable::setTarget(t,WALK);
-}
-
 void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 	float distance;
 	igMovingElement* closest = nullptr;
-	float nearestDist = _rangeChase;
+	float nearestDist = 50.f;
 
 	for (auto it = neighbors.begin(); it != neighbors.end(); it++) {
 		if (*it != this) {
@@ -98,21 +101,20 @@ void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
 			if (atlp) {
 				distance = glm::length(_pos - atlp->getPos());
 
-				if (distance < _rangeChase) {
-					if (distance < nearestDist) {
-						nearestDist = distance;
-						closest = atlp;
-					}
+				if (distance < nearestDist) {
+					nearestDist = distance;
+					closest = atlp;
 				}
 			}
 		}
 	}
 
-	if (closest) {
-		_prey = closest;
+	_prey = closest;
+
+	if (_prey && (_status == ROAMING || _status == CHASING)) {
 		if (nearestDist < _rangeAttack)
 			beginAttacking();
-		else
+		else if (nearestDist < 30.f)
 			beginChasing();
 	}
 }

@@ -5,7 +5,7 @@
 #include "controllable.h"
 #include "clock.h"
 
-enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
+enum LionStatus {RESTING, ROAMING, ATTACKING, CHASING, NB_LION_STATUSES};
 
 class Lion : public Controllable {
 public:
@@ -16,15 +16,16 @@ public:
 	virtual void updateState(const std::list<igMovingElement*>& neighbors);
 
 	virtual void stop();
-	void beginRunning();
-	void beginWalking();
+	void beginRoaming();
 	void beginAttacking();
 	void beginChasing();
 
-	virtual void setTarget(glm::vec2 t, ANM_TYPE anim);
 	inline float getHunger() const {return _hunger;}
 
 private:
+	typedef Controllable Super;
+
+	std::array<float, NB_LION_STATUSES> _hungerRates;
 
 	float _hunger; // Percentage
 	float _speedWalking;

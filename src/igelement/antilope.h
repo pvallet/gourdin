@@ -45,6 +45,7 @@ private:
 
 	float _lineOfSight; // Changes the standard line of sight to add hysteresis
 	float _panicFleeRadius;
+	float _baseFleeRadius;
 
 	float _repulsionRadius; // r < o < a
 	float _orientationRadius;

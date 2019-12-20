@@ -10,6 +10,7 @@ const float Antilope::_standardLineOfSight = 60.f;
 Antilope::Antilope(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
 	igMovingElement(position, graphics, terrainGeometry),
 	_panicFleeRadius(20.f),
+	_baseFleeRadius(30.f),
 	_repulsionRadius(8.f),
 	_orientationRadius(15.f),
 	_attractionRadius(50.f),
@@ -95,7 +96,7 @@ BoidsInfo Antilope::getInfoFromNeighbors(const std::list<igMovingElement*>& neig
 
 			else if (dynamic_cast<Lion*>((*it))) {
 
-				if (distance < _lineOfSight) {
+				if (distance < _baseFleeRadius) {
 					if (distance < res.minFleeDst) {
 						res.closestFlee = (*it)->getPos();
 						res.minFleeDst = distance;
