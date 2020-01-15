@@ -40,11 +40,6 @@ if (NOT ANDROID)
   find_package(SDL2)
   find_package(SDL2_image)
 
-  if (WIN32)
-    set(GLEW_LOCATION  ${CMAKE_SOURCE_DIR}/external/glew)
-    find_package(GLEW)
-  endif()
-
 # Include SDL2 libraries for android
 else()
   string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
@@ -93,6 +88,7 @@ find_package(GLM)
 
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
+add_subdirectory(external/glew/build/cmake)
 
 # If they are still not found, abort
 if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
@@ -105,7 +101,7 @@ endif()
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
-  ${GLEW_INCLUDE_DIRS}
+  external/glew/include
   ${SDL2_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
   ${SDL2PP_INCLUDE_DIRS}
@@ -169,7 +165,7 @@ else()
   if (WIN32)
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
-      ${GLEW_LIBRARIES}
+      glew_s
       ${SDL2_LIBRARY}
       ${SDL2_IMAGE_LIBRARIES}
       ${SDL2PP_LIBRARIES}
@@ -186,7 +182,7 @@ endif()
 
 # Generate file for clang-autocomplete and clang-linter in atom
 
-message(STATUS "Generarating ${CMAKE_SOURCE_DIR}/.clang_complete")
+message(STATUS "Generating ${CMAKE_SOURCE_DIR}/.clang_complete")
 file(WRITE ${CMAKE_SOURCE_DIR}/.clang_complete "")
 foreach(dir ${INCLUDE_DIRS})
   file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "-I${dir}\n")
@@ -202,7 +198,6 @@ endforeach()
 if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    "${GLEW_LOCATION}/bin/glew32.dll"
     "${SDL2_PATH}/bin/SDL2.dll"
     "${SDL2_IMAGE_PATH}/bin/SDL2_image.dll"
     "${SDL2_IMAGE_PATH}/bin/libjpeg-9.dll"
