@@ -85,17 +85,11 @@ if (OPENMP_FOUND)
 endif()
 
 
-# Include static and header-only libraries
-
-set(GLM_ROOT_DIR   ${CMAKE_SOURCE_DIR}/external/glm)
-
-find_package(GLM)
-
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
 
 # If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND GLM_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
+if ( NOT(OPENGL_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
 
   message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
 
@@ -104,7 +98,7 @@ endif()
 
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
-  ${GLM_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/external/glm
   ${GLEW_INCLUDE_DIRS}
   ${SDL2_INCLUDE_DIR}
   ${SDL2_IMAGE_INCLUDE_DIRS}
