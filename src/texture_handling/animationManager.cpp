@@ -3,7 +3,7 @@
 #include <cmath>
 
 AnimationManager::AnimationManager(const AnimationManagerInitializer& init) :
-	_currentAnim(WAIT),
+	_currentAnim(ANM_TYPE::WAIT),
   _currentSprite(0),
   _msAlreadyElapsed(0),
 	_texManager(init) {

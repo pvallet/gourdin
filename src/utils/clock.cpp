@@ -37,7 +37,7 @@ int Clock::getRelativeTicks() {
 }
 
 int Clock::getTicks() const {
-  if (_clockType == INDEPENDENT)
+  if (_clockType == ClockType::INDEPENDENT)
     return SDL_GetTicks();
   else
     return getRelativeTicks();

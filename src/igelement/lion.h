@@ -5,7 +5,7 @@
 #include "controllable.h"
 #include "clock.h"
 
-enum LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
+enum class LionStatus {WAITING, WALKING, RUNNING, ATTACKING, CHASING};
 
 class Lion : public Controllable {
 public:
@@ -23,7 +23,7 @@ public:
 
 	virtual void setTarget(glm::vec2 t, ANM_TYPE anim);
 	inline float getStamina() const {return _stamina;}
-	inline bool isRunning() const {return _status == RUNNING;}
+	inline bool isRunning() const {return _status == LionStatus::RUNNING;}
 
 	inline static size_t getNbKilled() {return _nbKilled;}
 	inline static void resetNbKilled() {_nbKilled = 0;}

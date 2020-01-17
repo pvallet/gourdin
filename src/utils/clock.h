@@ -2,11 +2,11 @@
 
 #include <SDL.h>
 
-enum ClockType {ATTACHED_TO_GLOBAL_TIMER, INDEPENDENT};
+enum class ClockType {ATTACHED_TO_GLOBAL_TIMER, INDEPENDENT};
 
 class Clock {
 public:
-  Clock (ClockType clockType = ATTACHED_TO_GLOBAL_TIMER);
+  Clock (ClockType clockType = ClockType::ATTACHED_TO_GLOBAL_TIMER);
 
   int getElapsedTime() const;
   int restart();

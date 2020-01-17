@@ -79,7 +79,7 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
   }
 }
 
-enum CurrentType {NO_TYPE, ANIMAL, TREE};
+enum class CurrentType {NO_TYPE, ANIMAL, TREE};
 
 void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts, bool onlyOnce) {
   _textures.clear();
@@ -91,7 +91,7 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts,
   size_t currentSpreeLength = 0;
   size_t firstIndexSpree = 0;
 
-  CurrentType currentType = NO_TYPE;
+  CurrentType currentType = CurrentType::NO_TYPE;
   const TextureArray* currentTexture;
   Biome       currentBiome;
 
@@ -100,17 +100,17 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts,
     igMovingElement* animal = dynamic_cast<igMovingElement*>(visibleElmts[i]);
 
     if (tree) {
-      if (currentType != TREE || currentBiome != tree->getBiome()) {
+      if (currentType != CurrentType::TREE || currentBiome != tree->getBiome()) {
         processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
-        currentType  = TREE;
+        currentType  = CurrentType::TREE;
         currentBiome = tree->getBiome();
       }
     }
 
     else if (animal) {
-      if (currentType != ANIMAL || currentTexture != animal->getTexArray()) {
+      if (currentType != CurrentType::ANIMAL || currentTexture != animal->getTexArray()) {
         processSpree(visibleElmts, currentSpreeLength, firstIndexSpree);
-        currentType   = ANIMAL;
+        currentType   = CurrentType::ANIMAL;
         currentTexture = animal->getTexArray();
       }
     }

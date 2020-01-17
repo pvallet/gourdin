@@ -5,8 +5,8 @@
 #include "chronometer.h"
 #include "igMovingElement.h"
 
-enum AntilopeStatus {IDLE, FLEEING, RECOVERING};
-enum BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
+enum class AntilopeStatus {IDLE, FLEEING, RECOVERING};
+enum class BoidStatus {REPULSION, ORIENTATION, ATTRACTION};
 
 struct BoidsInfo {
 	glm::vec2 closestRep, closestFlee;

@@ -5,7 +5,7 @@
 
 #include "texArray.h"
 
-enum ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
+enum class ANM_TYPE {WAIT, WALK, DIE, RUN, ATTACK};
 
 struct AnimInfo {
 	int steps;

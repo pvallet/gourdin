@@ -418,7 +418,7 @@ void Game::benchmark() {
   cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2, CHUNK_SIZE / 2));
   cam.setValues(5000, 225.f, INIT_PHI);
 
-  Clock frameClock(INDEPENDENT);
+  Clock frameClock(ClockType::INDEPENDENT);
 
   for (size_t i = 0; i < 100; i++) {
     cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
