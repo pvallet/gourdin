@@ -39,7 +39,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   loadingScreen.updateAndRender("Loading terrain data", 1);
 
-  _terrainTexManager.loadFolder(BIOME_NB_ITEMS, "res/terrain/");
+  _terrainTexManager.loadFolder((size_t) Biome::BIOME_NB_ITEMS, "res/terrain/");
   _map.load("res/map/");
   _map.feedGeometryData(_terrainGeometry);
 
@@ -84,7 +84,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   loadingScreen.updateAndRender("Loading ocean and skybox", 34);
 
-  _ocean.setTexture(_terrainTexManager.getTexture(OCEAN));
+  _ocean.setTexture(_terrainTexManager.getTexture((size_t) Biome::OCEAN));
   _skybox.load("res/skybox/");
 
   Camera& cam = Camera::getInstance();
@@ -98,7 +98,7 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   loadingScreen.updateAndRender("Generating herds", 60);
 
-  appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, DEER));
+  appendNewElements(_contentGenerator.genHerd(cam.getPointedPos(), 20, Animals::DEER));
   appendNewElements(_contentGenerator.genHerds());
 
   _chunkSubdivider.waitForTasksToFinish();

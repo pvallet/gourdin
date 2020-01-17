@@ -458,7 +458,11 @@ bool TerrainGeometry::SubdivisionLevel::isWater(glm::vec2 pos) const {
   if (t == nullptr)
     return true;
 
-  return t->biome == OCEAN || t->biome == WATER || t->biome == LAKE || t->biome == MARSH || t->biome == RIVER;
+  return t->biome == Biome::OCEAN ||
+         t->biome == Biome::WATER ||
+         t->biome == Biome::LAKE  ||
+         t->biome == Biome::MARSH ||
+         t->biome == Biome::RIVER;
 }
 
 float TerrainGeometry::SubdivisionLevel::getHeight(glm::vec2 pos) const {
@@ -476,7 +480,7 @@ float TerrainGeometry::SubdivisionLevel::getHeight(glm::vec2 pos) const {
 Biome TerrainGeometry::SubdivisionLevel::getBiome(glm::vec2 pos) const {
   const Triangle* triContaining = Triangle::getTriangleContaining(pos, getTrianglesNearPos(pos));
 
-  return triContaining == nullptr ? OCEAN : triContaining->biome;
+  return triContaining == nullptr ? Biome::OCEAN : triContaining->biome;
 }
 
 glm::vec3 TerrainGeometry::SubdivisionLevel::getNorm(glm::vec2 pos) const {

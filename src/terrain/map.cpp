@@ -16,47 +16,47 @@ bool Map::boolAttrib(std::string str) const {
 
 Biome Map::biomeAttrib(std::string str) const {
 	if (str == std::string("OCEAN"))
-		return OCEAN;
+		return Biome::OCEAN;
 	else if (str == std::string("WATER"))
-		return WATER;
+		return Biome::WATER;
 	else if (str == std::string("LAKE"))
-		return LAKE;
+		return Biome::LAKE;
 	else if (str == std::string("ICE"))
-		return ICE;
+		return Biome::ICE;
 	else if (str == std::string("MARSH"))
-		return MARSH;
+		return Biome::MARSH;
 	else if (str == std::string("BEACH"))
-		return BEACH;
+		return Biome::BEACH;
 	else if (str == std::string("RIVER"))
-		return RIVER;
+		return Biome::RIVER;
 	else if (str == std::string("SNOW"))
-		return SNOW;
+		return Biome::SNOW;
 	else if (str == std::string("TUNDRA"))
-		return TUNDRA;
+		return Biome::TUNDRA;
 	else if (str == std::string("BARE"))
-		return BARE;
+		return Biome::BARE;
 	else if (str == std::string("SCORCHED"))
-		return SCORCHED;
+		return Biome::SCORCHED;
 	else if (str == std::string("TAIGA"))
-		return TAIGA;
+		return Biome::TAIGA;
 	else if (str == std::string("SHRUBLAND"))
-		return SHRUBLAND;
+		return Biome::SHRUBLAND;
 	else if (str == std::string("TEMPERATE_DESERT"))
-		return TEMPERATE_DESERT;
+		return Biome::TEMPERATE_DESERT;
 	else if (str == std::string("TEMPERATE_RAIN_FOREST"))
-		return TEMPERATE_RAIN_FOREST;
+		return Biome::TEMPERATE_RAIN_FOREST;
 	else if (str == std::string("TEMPERATE_DECIDUOUS_FOREST"))
-		return TEMPERATE_DECIDUOUS_FOREST;
+		return Biome::TEMPERATE_DECIDUOUS_FOREST;
 	else if (str == std::string("GRASSLAND"))
-		return GRASSLAND;
+		return Biome::GRASSLAND;
 	else if (str == std::string("TROPICAL_RAIN_FOREST"))
-		return TROPICAL_RAIN_FOREST;
+		return Biome::TROPICAL_RAIN_FOREST;
 	else if (str == std::string("TROPICAL_SEASONAL_FOREST"))
-		return TROPICAL_SEASONAL_FOREST;
+		return Biome::TROPICAL_SEASONAL_FOREST;
 	else if (str == std::string("SUBTROPICAL_DESERT"))
-		return SUBTROPICAL_DESERT;
+		return Biome::SUBTROPICAL_DESERT;
 	else
-		return GRASSLAND;
+		return Biome::GRASSLAND;
 }
 
 void Map::loadCenters(const TiXmlHandle& hRoot) {
@@ -310,7 +310,7 @@ void Map::feedGeometryData(TerrainGeometry& terrainGeometry) const {
 	for (auto ctr = _centers.begin(); ctr != _centers.end(); ctr++) {
 		bool toDraw = true;
 
-		if ((*ctr)->biome == OCEAN) {
+		if ((*ctr)->biome == Biome::OCEAN) {
 			toDraw = false;
 			// We still draw an OCEAN biome if one of its neigbours is not an OCEAN
 			for (auto edge = (*ctr)->edges.begin(); edge != (*ctr)->edges.end(); edge++) {

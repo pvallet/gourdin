@@ -30,6 +30,8 @@ public:
   const std::vector<std::vector<bool> >& getForestsMask() const {return _forestsMask;}
 
 private:
+  inline const AnimationManagerInitializer& getAnimManagerInit(Animals animal) const {return _animManagerInits[(int) animal];}
+
   bool isInForestMask(glm::vec2 pos) const;
   bool notTooCloseToOtherTrees(glm::vec2 pos, float distance) const;
   // Generates randomly count positions around center within a radius radius.

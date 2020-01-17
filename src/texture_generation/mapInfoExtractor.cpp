@@ -9,10 +9,10 @@ MapInfoExtractor::MapInfoExtractor(const TerrainGeometry& terrainGeometry) :
 
 void MapInfoExtractor::convertMapData(size_t size) {
   _elevationMask = GeneratedImage(size,0);
-  _biomes.resize(size*size, OCEAN);
+  _biomes.resize(size*size, Biome::OCEAN);
   _size = size;
 
-  for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+  for (int i = 0; i < (int) Biome::BIOME_NB_ITEMS; i++) {
     _biomesMasks[i] = GeneratedImage(512, 0);
   }
 
@@ -32,7 +32,7 @@ void MapInfoExtractor::convertMapData(size_t size) {
       glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       size_t index = i*size + j;
       _biomes[index] = smoother.getBiome(pos);
-      _biomesMasks[_biomes[index]][index] = 1;
+      _biomesMasks[(int) _biomes[index]][index] = 1;
 
       float height = smoother.getHeight(pos);
 
@@ -90,7 +90,7 @@ void MapInfoExtractor::computeLakesElevations(
       glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       Biome biome = smoother.getBiome(pos);
 
-      if (biome == WATER || biome == LAKE || biome == MARSH || biome == RIVER) {
+      if (biome == Biome::WATER || biome == Biome::LAKE || biome == Biome::MARSH || biome == Biome::RIVER) {
         float pixelHeight = smoother.getHeight(pos);
         pixelHeight = HEIGHT_FUNCTION(pixelHeight);
 
@@ -199,7 +199,7 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
   }
 }
 
-GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedImage*, BIOME_NB_ITEMS>& imgs) const {
+GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedImage*, (int) Biome::BIOME_NB_ITEMS>& imgs) const {
   std::vector<float> result(_size*_size, 0);
 
   #pragma omp parallel for collapse (2)
@@ -209,7 +209,7 @@ GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedIma
     float normalizationFactor = 0;
 
     for (auto biome = _biomesCombinations[currentIndex].begin(); biome != _biomesCombinations[currentIndex].end(); biome++) {
-      result[currentIndex] += biome->second * (*imgs[biome->first])[currentIndex];
+      result[currentIndex] += biome->second * (*imgs[(int) biome->first])[currentIndex];
       normalizationFactor += biome->second;
     }
 

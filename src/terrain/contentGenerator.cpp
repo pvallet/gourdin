@@ -20,9 +20,9 @@ ContentGenerator::ContentGenerator(const TerrainGeometry& terrainGeometry) :
 }
 
 void ContentGenerator::init() {
-  _animManagerInits.resize(ANIMALS_NB_ITEMS);
+  _animManagerInits.resize((size_t) Animals::ANIMALS_NB_ITEMS);
 
-  for (size_t i = 0; i < ANIMALS_NB_ITEMS; i++) {
+  for (int i = 0; i < (int) Animals::ANIMALS_NB_ITEMS; i++) {
     std::ostringstream path;
     path << "res/animals/" << i << '/';
     _animManagerInits[i].load(path.str());
@@ -80,8 +80,8 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
-    if (biomeInPos != BIOME_NB_ITEMS) {
-      if (biomeInPos >= 11) { // No forests in other biomes
+    if (biomeInPos != Biome::BIOME_NB_ITEMS) {
+      if ((int) biomeInPos >= 11) { // No forests in other biomes
         if (isInForestMask(pos)) {
           if (notTooCloseToOtherTrees(pos, _treeTexManager.getDensity(biomeInPos))) {
             _treesInChunk[x*NB_CHUNKS + y].push_back(pos);
@@ -108,15 +108,15 @@ std::vector<igMovingElement*> ContentGenerator::genHerds() const {
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
-    if (biomeInPos == TEMPERATE_RAIN_FOREST ||
-        biomeInPos == TEMPERATE_DECIDUOUS_FOREST ||
-        biomeInPos == GRASSLAND) {
-      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 15 + 5, DEER);
+    if (biomeInPos == Biome::TEMPERATE_RAIN_FOREST ||
+        biomeInPos == Biome::TEMPERATE_DECIDUOUS_FOREST ||
+        biomeInPos == Biome::GRASSLAND) {
+      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 15 + 5, Animals::DEER);
       res.insert(res.end(), newItems.begin(), newItems.end());
     }
 
-    else if (biomeInPos == TROPICAL_SEASONAL_FOREST) {
-      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 25 + 10, ANTILOPE);
+    else if (biomeInPos == Biome::TROPICAL_SEASONAL_FOREST) {
+      std::vector<igMovingElement*> newItems = genHerd(pos, RANDOMF * 25 + 10, Animals::ANTILOPE);
       res.insert(res.end(), newItems.begin(), newItems.end());
     }
   }
@@ -168,7 +168,7 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(glm::vec2 pos, size_t co
   std::vector<glm::vec2> positions = scatteredPositions(pos, count, 10, 5);
 
   for (size_t i = 0; i < positions.size(); i++) {
-    res.push_back(new Antilope(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
+    res.push_back(new Antilope(positions[i], AnimationManager(getAnimManagerInit(animal)), _terrainGeometry));
   }
 
   return res;
@@ -183,12 +183,12 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(glm::vec2 pos) const {
     float randNumber = RANDOMF;
     Animals animal;
     if (randNumber < 0.3)
-      animal = AOE1_MAN;
+      animal = Animals::AOE1_MAN;
     else if (randNumber < 0.5)
-      animal = AOE2_MAN;
+      animal = Animals::AOE2_MAN;
     else
-      animal = WOMAN;
-    res.push_back(new Controllable(positions[i], AnimationManager(_animManagerInits[animal]), _terrainGeometry));
+      animal = Animals::WOMAN;
+    res.push_back(new Controllable(positions[i], AnimationManager(getAnimManagerInit(animal)), _terrainGeometry));
   }
 
   return res;
@@ -198,18 +198,18 @@ std::vector<igMovingElement*> ContentGenerator::genLion(glm::vec2 pos) const {
   std::vector<igMovingElement*> res;
   Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
 
-  if (biomeInPos == TROPICAL_RAIN_FOREST)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LEOPARD]), _terrainGeometry));
-  else if (biomeInPos == TROPICAL_SEASONAL_FOREST)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[LION]), _terrainGeometry));
+  if (biomeInPos == Biome::TROPICAL_RAIN_FOREST)
+    res.push_back(new Lion(pos, AnimationManager(getAnimManagerInit(Animals::LEOPARD)), _terrainGeometry));
+  else if (biomeInPos == Biome::TROPICAL_SEASONAL_FOREST)
+    res.push_back(new Lion(pos, AnimationManager(getAnimManagerInit(Animals::LION)), _terrainGeometry));
 
-  else if (biomeInPos == TEMPERATE_RAIN_FOREST ||
-           biomeInPos == TEMPERATE_DECIDUOUS_FOREST ||
-           biomeInPos == GRASSLAND ||
-           biomeInPos == TAIGA ||
-           biomeInPos == SHRUBLAND ||
-           biomeInPos == TUNDRA)
-    res.push_back(new Lion(pos, AnimationManager(_animManagerInits[WOLF]), _terrainGeometry));
+  else if (biomeInPos == Biome::TEMPERATE_RAIN_FOREST ||
+           biomeInPos == Biome::TEMPERATE_DECIDUOUS_FOREST ||
+           biomeInPos == Biome::GRASSLAND ||
+           biomeInPos == Biome::TAIGA ||
+           biomeInPos == Biome::SHRUBLAND ||
+           biomeInPos == Biome::TUNDRA)
+    res.push_back(new Lion(pos, AnimationManager(getAnimManagerInit(Animals::WOLF)), _terrainGeometry));
 
   return res;
 }

@@ -154,7 +154,7 @@ size_t Chunk::draw() const {
 	size_t nbTriangles = 0;
 
 	for (auto it = currentBuffers->indicesInfo.begin(); it != currentBuffers->indicesInfo.end(); it++) {
-		_terrainTexManager.bindTexture(it->first);
+		_terrainTexManager.bindTexture((size_t) it->first);
 
 		it->second.ibo->bind();
 
