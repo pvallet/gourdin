@@ -14,8 +14,6 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
-
 if (NOT ANDROID)
   # handling warnings
   if(MSVC)
@@ -33,12 +31,7 @@ if (NOT ANDROID)
   set (CMAKE_CXX_STANDARD 11)
   set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
-  set(SDL2_PATH ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
-  set(SDL2_IMAGE_PATH ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
-
   find_package(OpenGL)
-  find_package(SDL2)
-  find_package(SDL2_image)
 
   if (WIN32)
     set(GLEW_LOCATION  ${CMAKE_SOURCE_DIR}/external/glew)
@@ -84,24 +77,25 @@ if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+# Compiling SDL2 and SDL2_image from source
+set(SDL_STATIC OFF)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
+add_subdirectory(external/SDL2/SDL2_image)
+
+# SDL2pp needs defining where the SDL2 libraries are
+set(SDL2_LIBRARY SDL2)
+set(SDL2MAIN_LIBRARY SDL2main)
+set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2/include)
+
+set(SDL2_IMAGE_LIBRARY SDL2_image)
+set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
 
-# If they are still not found, abort
-if ( NOT(OPENGL_FOUND AND SDL2_FOUND AND SDL2_IMAGE_FOUND))
-
-  message( FATAL_ERROR "Some of the dependencies are not found, CMake will exit." )
-
-endif()
-
-
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
-  ${CMAKE_SOURCE_DIR}/external/glm
-  ${GLEW_INCLUDE_DIRS}
-  ${SDL2_INCLUDE_DIR}
-  ${SDL2_IMAGE_INCLUDE_DIRS}
+  external/glm
   ${SDL2PP_INCLUDE_DIRS}
 )
 
@@ -171,8 +165,8 @@ else()
   else()
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
-      ${SDL2_LIBRARY}
-      ${SDL2_IMAGE_LIBRARIES}
+      SDL2
+      SDL2_image
       ${SDL2PP_LIBRARIES}
     )
   endif()
