@@ -31,6 +31,9 @@ if (NOT ANDROID)
   set (CMAKE_CXX_STANDARD 11)
   set(EXECUTABLE_OUTPUT_PATH bin/${CMAKE_BUILD_TYPE})
 
+  # Move the built shared libraries to the executable location
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH})
+
   find_package(OpenGL)
 
 # Include SDL2 libraries for android
@@ -87,7 +90,11 @@ set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
-add_subdirectory(external/glew/build/cmake)
+
+if (WIN32)
+  SET(BUILD_UTILS OFF)
+  add_subdirectory(external/glew/build/cmake)
+ENDIF()
 
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
@@ -155,8 +162,8 @@ else()
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
       glew_s
-      ${SDL2_LIBRARY}
-      ${SDL2_IMAGE_LIBRARIES}
+      SDL2
+      SDL2_image
       ${SDL2PP_LIBRARIES}
     )
   else()
@@ -181,19 +188,3 @@ string(REPLACE " " ";" CMAKE_CXX_FLAGS_SPLIT ${CMAKE_CXX_FLAGS_SPLIT})
 foreach(flag ${CMAKE_CXX_FLAGS_SPLIT})
   file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
 endforeach()
-
-# At the end we need to copy the dlls to the output directory
-
-if (WIN32)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    "${SDL2_PATH}/bin/SDL2.dll"
-    "${SDL2_IMAGE_PATH}/bin/SDL2_image.dll"
-    "${SDL2_IMAGE_PATH}/bin/libjpeg-9.dll"
-    "${SDL2_IMAGE_PATH}/bin/libpng16-16.dll"
-    "${SDL2_IMAGE_PATH}/bin/libtiff-5.dll"
-    "${SDL2_IMAGE_PATH}/bin/libwebp-4.dll"
-    "${SDL2_IMAGE_PATH}/bin/zlib1.dll"
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-  )
-endif()
