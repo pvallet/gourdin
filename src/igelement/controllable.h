@@ -8,7 +8,7 @@ public:
 	Controllable(glm::vec2 position, AnimationManager _graphics, const TerrainGeometry& terrainGeometry);
 
 	virtual void update(int msElapsed);
-	virtual void setTarget(glm::vec2 t, ANM_TYPE anim = WALK);
+	virtual void setTarget(glm::vec2 t, ANM_TYPE anim = ANM_TYPE::WALK);
 	void setMovingDirection(glm::vec2 direction);
 	virtual void stop();
 

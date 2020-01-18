@@ -14,7 +14,7 @@ igMovingElement::igMovingElement(glm::vec2 position, AnimationManager graphics, 
 	_size *= _graphics.getParameters().size;
 	_speed = _graphics.getParameters().speed;
 
-	launchAnimation(WAIT);
+	launchAnimation(ANM_TYPE::WAIT);
 }
 
 void igMovingElement::launchAnimation(ANM_TYPE type) {
@@ -56,7 +56,7 @@ void igMovingElement::update(int msElapsed) {
 }
 
 void igMovingElement::die() {
-	launchAnimation(DIE);
+	launchAnimation(ANM_TYPE::DIE);
 	_speed = 0.f;
 	_dead = true;
 }
@@ -64,7 +64,7 @@ void igMovingElement::die() {
 void igMovingElement::stop() {
 	if (!_dead) {
     setDirection(glm::vec2(0,0));
-    launchAnimation(WAIT);
+    launchAnimation(ANM_TYPE::WAIT);
   }
 }
 

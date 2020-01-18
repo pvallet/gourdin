@@ -9,9 +9,9 @@ void ReliefGenerator::fillAdditionalReliefs() {
   size_t size = _mapInfoExtractor.getSize();
 
   // No relief
-  _biomesAdditionalRelief[SNOW] = GeneratedImage(size,0);
-  _biomesAdditionalRelief[ICE] = GeneratedImage(size,0);
-  _biomesAdditionalRelief[TROPICAL_RAIN_FOREST] = GeneratedImage(size,0);
+  _biomesAdditionalRelief[Biome::SNOW] = GeneratedImage(size,0);
+  _biomesAdditionalRelief[Biome::ICE] = GeneratedImage(size,0);
+  _biomesAdditionalRelief[Biome::TROPICAL_RAIN_FOREST] = GeneratedImage(size,0);
 
   // Hills
   Perlin perlinHills(3, 0.04, 0.4, size);
@@ -23,16 +23,16 @@ void ReliefGenerator::fillAdditionalReliefs() {
   }
   hills -= 0.35;
   hills *= 0.3;
-  GeneratedImage hillsMask = _mapInfoExtractor.getBiomeMask(BARE) +
-                             _mapInfoExtractor.getBiomeMask(SNOW) +
-                             _mapInfoExtractor.getBiomeMask(TAIGA) +
-                             _mapInfoExtractor.getBiomeMask(TUNDRA) +
-                             _mapInfoExtractor.getBiomeMask(SHRUBLAND) +
-                             _mapInfoExtractor.getBiomeMask(TEMPERATE_DESERT) +
-                             _mapInfoExtractor.getBiomeMask(TEMPERATE_RAIN_FOREST) +
-                             _mapInfoExtractor.getBiomeMask(TEMPERATE_DECIDUOUS_FOREST) +
-                             _mapInfoExtractor.getBiomeMask(GRASSLAND) +
-                             _mapInfoExtractor.getBiomeMask(TROPICAL_SEASONAL_FOREST);
+  GeneratedImage hillsMask = _mapInfoExtractor.getBiomeMask(Biome::BARE) +
+                             _mapInfoExtractor.getBiomeMask(Biome::SNOW) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TAIGA) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TUNDRA) +
+                             _mapInfoExtractor.getBiomeMask(Biome::SHRUBLAND) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TEMPERATE_DESERT) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TEMPERATE_RAIN_FOREST) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TEMPERATE_DECIDUOUS_FOREST) +
+                             _mapInfoExtractor.getBiomeMask(Biome::GRASSLAND) +
+                             _mapInfoExtractor.getBiomeMask(Biome::TROPICAL_SEASONAL_FOREST);
 
   hillsMask.smoothBlackDilatation(_mapInfoExtractor.getTransitionSize());
   _defaultRelief = hills * hillsMask;
@@ -43,11 +43,11 @@ void ReliefGenerator::fillAdditionalReliefs() {
   summits *= 1.1;
   summits -= 0.2;
   summits += hills;
-  GeneratedImage summitsMask = _mapInfoExtractor.getBiomeMask(BARE) + _mapInfoExtractor.getBiomeMask(SCORCHED);
+  GeneratedImage summitsMask = _mapInfoExtractor.getBiomeMask(Biome::BARE) + _mapInfoExtractor.getBiomeMask(Biome::SCORCHED);
   summitsMask.smoothBlackDilatation(_mapInfoExtractor.getTransitionSize());
   summits *= summitsMask;
-  _biomesAdditionalRelief[BARE] = summits;
-  _biomesAdditionalRelief[SCORCHED] = summits;
+  _biomesAdditionalRelief[Biome::BARE] = summits;
+  _biomesAdditionalRelief[Biome::SCORCHED] = summits;
 
   // Dunes
   Perlin perlinDunes(1, 0.5, 0, size);
@@ -55,11 +55,11 @@ void ReliefGenerator::fillAdditionalReliefs() {
   dunes -= 0.5;
   dunes *= 0.08;
   dunes += 0.05;
-  _biomesAdditionalRelief[SUBTROPICAL_DESERT] = dunes;
+  _biomesAdditionalRelief[Biome::SUBTROPICAL_DESERT] = dunes;
 
   // Mix the different additional reliefs
-  std::array<const GeneratedImage*, BIOME_NB_ITEMS> biomeFusion;
-  for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+  std::array<const GeneratedImage*, (int) Biome::BIOME_NB_ITEMS> biomeFusion;
+  for (int i = 0; i < (int) Biome::BIOME_NB_ITEMS; i++) {
     Biome biome = (Biome) i;
     if (_biomesAdditionalRelief.find(biome) == _biomesAdditionalRelief.end())
       biomeFusion[i] = &_defaultRelief;
@@ -73,11 +73,11 @@ void ReliefGenerator::fillAdditionalReliefs() {
 }
 
 void ReliefGenerator::generateRelief() {
-  GeneratedImage islandMask = _mapInfoExtractor.getBiomeMask(OCEAN);
-  GeneratedImage lakesMask = _mapInfoExtractor.getBiomeMask(WATER) +
-                             _mapInfoExtractor.getBiomeMask(LAKE) +
-                             _mapInfoExtractor.getBiomeMask(MARSH) +
-                             _mapInfoExtractor.getBiomeMask(RIVER);
+  GeneratedImage islandMask = _mapInfoExtractor.getBiomeMask(Biome::OCEAN);
+  GeneratedImage lakesMask = _mapInfoExtractor.getBiomeMask(Biome::WATER) +
+                             _mapInfoExtractor.getBiomeMask(Biome::LAKE) +
+                             _mapInfoExtractor.getBiomeMask(Biome::MARSH) +
+                             _mapInfoExtractor.getBiomeMask(Biome::RIVER);
 
   GeneratedImage lakesElevations = _mapInfoExtractor.getLakesElevations();
   GeneratedImage elevationMask = _mapInfoExtractor.getElevationMask();

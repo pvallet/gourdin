@@ -4,7 +4,7 @@
 
 // When not on POV, the camera can be locked in two positions, with an angle either
 // positive or negative to the angle of steepest slope of the current pointed position
-enum PreviousCameraLock {NO_LOCK, TRIGO_POS, TRIGO_NEG};
+enum class PreviousCameraLock {NO_LOCK, TRIGO_POS, TRIGO_NEG};
 
 class EventHandlerLockedView : public EventHandler {
 public:

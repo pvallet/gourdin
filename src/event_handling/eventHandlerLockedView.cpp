@@ -19,7 +19,7 @@ EventHandlerLockedView::EventHandlerLockedView(Game& game, SDL2pp::Window& windo
   EventHandler::EventHandler(game, window),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
-  _previousCameraLock(NO_LOCK) {}
+  _previousCameraLock(PreviousCameraLock::NO_LOCK) {}
 
 void EventHandlerLockedView::handleKeyPressed(const SDL_Event& event) {
   Camera& cam = Camera::getInstance();
@@ -218,9 +218,9 @@ void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) {
     if (ut::angleIsPositive(normalSpherical.y, thetasLim.first))
       std::swap(thetasLim.first, thetasLim.second);
 
-    if (_previousCameraLock == TRIGO_NEG)
+    if (_previousCameraLock == PreviousCameraLock::TRIGO_NEG)
       theta = thetasLim.first;
-    else if (_previousCameraLock == TRIGO_POS)
+    else if (_previousCameraLock == PreviousCameraLock::TRIGO_POS)
       theta = thetasLim.second;
     else {
       std::pair<float,float> distsToThetasLim;
@@ -228,18 +228,18 @@ void EventHandlerLockedView::handleCamBoundsGodMode(float& theta) {
       distsToThetasLim.second = ut::absDistBetweenAngles(theta, thetasLim.second);
 
       if (distsToThetasLim.first < distsToThetasLim.second) {
-        _previousCameraLock = TRIGO_NEG;
+        _previousCameraLock = PreviousCameraLock::TRIGO_NEG;
         theta = thetasLim.first;
       }
       else {
-        _previousCameraLock = TRIGO_POS;
+        _previousCameraLock = PreviousCameraLock::TRIGO_POS;
         theta = thetasLim.second;
       }
     }
   }
 
   else if (theta != _previousTheta)
-    _previousCameraLock = NO_LOCK;
+    _previousCameraLock = PreviousCameraLock::NO_LOCK;
 }
 
 void EventHandlerLockedView::handleCamBoundsPOVMode(float& theta, float& phi, bool slideCameraWhenGoingDownwards) const {

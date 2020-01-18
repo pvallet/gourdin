@@ -13,27 +13,27 @@ Lion::Lion(glm::vec2 position, AnimationManager graphics, const TerrainGeometry&
 	_speedRunning(18.f),
 	_rangeAttack(8.f),
 	_rangeChase(13.f),
-	_status(WAITING),
-	_msAnimAttack(2.0f * graphics.getAnimationTime(ATTACK)-150) {
+	_status(LionStatus::WAITING),
+	_msAnimAttack(2.0f * graphics.getAnimationTime(ANM_TYPE::ATTACK)-150) {
 
 	_speed = _speedWalking;
 }
 
 void Lion::update(int msElapsed) {
-	if (_status == RUNNING || _status == CHASING) {
+	if (_status == LionStatus::RUNNING || _status == LionStatus::CHASING) {
 		_stamina -= msElapsed * _loseBreathSpeed / 1000.f;
 		if (_stamina <= 0.f) {
 			_stamina = 0.f;
 			beginWalking();
 		}
 
-		if (_status == CHASING) {
+		if (_status == LionStatus::CHASING) {
 			_target = _prey->getPos();
 			setDirection(_prey->getPos() - _pos);
 		}
 	}
 
-	else if (_status == ATTACKING) {
+	else if (_status == LionStatus::ATTACKING) {
 		_target = _prey->getPos();
 		setDirection(_prey->getPos() - _pos);
 
@@ -57,53 +57,53 @@ void Lion::update(int msElapsed) {
 
 void Lion::stop() {
 	_speed = _speedWalking;
-	_status = WAITING;
+	_status = LionStatus::WAITING;
 	Controllable::stop();
 }
 
 void Lion::beginRunning() {
 	if (_target != _pos && _stamina > 0.f) {
-		_status = RUNNING;
+		_status = LionStatus::RUNNING;
 		_speed = _speedRunning;
-		launchAnimation(RUN);
+		launchAnimation(ANM_TYPE::RUN);
 	}
 }
 
 void Lion::beginWalking() {
 	if (_target != _pos) {
-		_status = WALKING;
+		_status = LionStatus::WALKING;
 		_speed = _speedWalking;
-		launchAnimation(WALK);
+		launchAnimation(ANM_TYPE::WALK);
 	}
 }
 
 void Lion::beginAttacking() {
-	if (_status != ATTACKING) {
-		_status = ATTACKING;
+	if (_status != LionStatus::ATTACKING) {
+		_status = LionStatus::ATTACKING;
 		_speed = 0.f;
-		launchAnimation(ATTACK);
+		launchAnimation(ANM_TYPE::ATTACK);
 		_beginAttack.restart();
 	}
 }
 
 void Lion::beginChasing() {
-	if (_status != CHASING && _status != ATTACKING && _status != WALKING) {
-		_status = CHASING;
+	if (_status != LionStatus::CHASING && _status != LionStatus::ATTACKING && _status != LionStatus::WALKING) {
+		_status = LionStatus::CHASING;
 		_speed = _speedRunning;
-		launchAnimation(RUN);
+		launchAnimation(ANM_TYPE::RUN);
 	}
 }
 
 void Lion::setTarget(glm::vec2 t, ANM_TYPE anim) {
 	(void) anim;
-	if (_status == RUNNING || _status == CHASING)
-		Controllable::setTarget(t, RUN);
-	else if (_status == WAITING) {
-		Controllable::setTarget(t, WALK);
+	if (_status == LionStatus::RUNNING || _status == LionStatus::CHASING)
+		Controllable::setTarget(t, ANM_TYPE::RUN);
+	else if (_status == LionStatus::WAITING) {
+		Controllable::setTarget(t, ANM_TYPE::WALK);
 		beginWalking();
 	}
-	else if (_status == WALKING)
-		Controllable::setTarget(t,WALK);
+	else if (_status == LionStatus::WALKING)
+		Controllable::setTarget(t,ANM_TYPE::WALK);
 }
 
 void Lion::updateState(const std::list<igMovingElement*>& neighbors) {
