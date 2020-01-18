@@ -107,12 +107,12 @@ void TestHandler::displayEngineGeneratedComponents(const Engine& engine) const {
     saveToImage(engine._mapInfoExtractor.getElevationMask().getPixels(), "relief_elevationMask.png");
 
     // Test image fusion
-    std::array<GeneratedImage, BIOME_NB_ITEMS> plainImages;
-    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
-      plainImages[i] = GeneratedImage(512, i / (float) BIOME_NB_ITEMS);
+    std::array<GeneratedImage, (int) Biome::BIOME_NB_ITEMS> plainImages;
+    for (int i = 0; i < (int) Biome::BIOME_NB_ITEMS; i++) {
+      plainImages[i] = GeneratedImage(512, i / (float) (int) Biome::BIOME_NB_ITEMS);
     }
-    std::array<const GeneratedImage*, BIOME_NB_ITEMS> toSend;
-    for (size_t i = 0; i < BIOME_NB_ITEMS; i++) {
+    std::array<const GeneratedImage*, (int) Biome::BIOME_NB_ITEMS> toSend;
+    for (int i = 0; i < (int) Biome::BIOME_NB_ITEMS; i++) {
       toSend[i] = &plainImages[i];
     }
 
@@ -123,7 +123,7 @@ void TestHandler::displayEngineGeneratedComponents(const Engine& engine) const {
              it != engine._reliefGenerator._biomesAdditionalRelief.end(); it++) {
 
       std::stringstream convert;
-      convert << "biome_" << it->first << ".png";
+      convert << "biome_" << (int) it->first << ".png";
       saveToImage(it->second.getPixels(), convert.str());
     }
 

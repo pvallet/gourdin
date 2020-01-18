@@ -36,53 +36,22 @@ if (NOT ANDROID)
 
   find_package(OpenGL)
 
+  # Compiling SDL2 and SDL2_image from source
+  set(SDL_STATIC OFF)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
+  add_subdirectory(external/SDL2/SDL2_image)
+
+  if (WIN32)
+    SET(BUILD_UTILS OFF)
+    add_subdirectory(external/glew/build/cmake)
+  ENDIF()
+
 # Include SDL2 libraries for android
-else()
-  string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
-  set(DISTRIBUTION_DIR ${CMAKE_SOURCE_DIR}/android/distribution/android/SDL2/intermediates/ndkBuild)
-  set(SDL_LOCATION ${CMAKE_SOURCE_DIR}/external/SDL2)
-
-  set(SDL2_INCLUDE_DIR ${SDL_LOCATION}/SDL2/include)
-  set(SDL2_IMAGE_INCLUDE_DIRS ${SDL_LOCATION}/SDL2_image)
-
-  set(SDL2_LIBRARY SDL2)
-  set(SDL2_IMAGE_LIBRARIES SDL2_image)
-
-  # For SDL2pp
-  set(SDL2_IMAGE_INCLUDE_DIR ${SDL2_IMAGE_INCLUDE_DIRS})
-  set(SDL2_IMAGE_LIBRARY ${SDL2_IMAGE_LIBRARIES})
-
-  # set(SDL2MAIN_LIBRARY ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
-
-  add_library( ${SDL2_LIBRARY} SHARED IMPORTED )
-  add_library( ${SDL2_IMAGE_LIBRARIES} SHARED IMPORTED )
-  set_target_properties(${SDL2_LIBRARY} PROPERTIES IMPORTED_LOCATION
-  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
-  set_target_properties(${SDL2_IMAGE_LIBRARIES} PROPERTIES IMPORTED_LOCATION
-  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2_image.so)
-
-
-  # If SDL2 or SDL2_image was not found, the build would have crashed before
-  set(SDL2_FOUND TRUE)
-  set(SDL2_IMAGE_FOUND TRUE)
-  set(OPENGL_FOUND TRUE) # TODO Check for GLESv3
-
 endif()
-
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
-
-# Compiling SDL2 and SDL2_image from source
-set(SDL_STATIC OFF)
-add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
-add_subdirectory(external/SDL2/SDL2_image)
 
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
-set(SDL2MAIN_LIBRARY SDL2main)
+set(SDL2MAIN_LIBRARY SDL2) # Hack to bypass SDL2Main, which is not needed
 set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2/include)
 
 set(SDL2_IMAGE_LIBRARY SDL2_image)
@@ -91,10 +60,26 @@ set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
 set(SDL2PP_WITH_IMAGE ON)
 add_subdirectory(external/libSDL2pp)
 
-if (WIN32)
-  SET(BUILD_UTILS OFF)
-  add_subdirectory(external/glew/build/cmake)
-ENDIF()
+if (ANDROID)
+  string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
+  set(DISTRIBUTION_DIR ${CMAKE_SOURCE_DIR}/android/distribution/android/SDL2/intermediates/ndkBuild)
+  set(SDL_LOCATION ${CMAKE_SOURCE_DIR}/external/SDL2)
+
+  include_directories( ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} )
+
+  add_library( ${SDL2_LIBRARY} SHARED IMPORTED )
+  add_library( ${SDL2_IMAGE_LIBRARY} SHARED IMPORTED )
+  set_target_properties(${SDL2_LIBRARY} PROPERTIES IMPORTED_LOCATION
+  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
+  set_target_properties(${SDL2_IMAGE_LIBRARY} PROPERTIES IMPORTED_LOCATION
+  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2_image.so)
+endif()
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 set(INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
@@ -151,7 +136,7 @@ if (ANDROID)
     GLESv3
     log
     ${SDL2_LIBRARY}
-    ${SDL2_IMAGE_LIBRARIES}
+    ${SDL2_IMAGE_LIBRARY}
     ${SDL2PP_LIBRARIES}
   )
 
