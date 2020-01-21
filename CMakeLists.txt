@@ -49,34 +49,39 @@ include(FetchContent)
 
 if (WIN32)
   SET(BUILD_UTILS OFF)
-  add_subdirectory(external/glew/build/cmake)
+  FetchContent_Declare(
+    GLEW
+    URL            https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glew
+  )
+  FetchContent_GetProperties(glew)
+  if(NOT glew_POPULATED)
+    FetchContent_Populate(glew)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/external/glew/build/cmake)
+  endif()
 ENDIF()
 
 FetchContent_Declare(
   SDL
-  GIT_REPOSITORY https://github.com/SDL-mirror/SDL.git
-  GIT_TAG        release-2.0.10
+  URL            https://www.libsdl.org/release/SDL2-2.0.10.zip
   SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2
 )
 
 FetchContent_Declare(
   SDL_IMAGE
-  GIT_REPOSITORY https://github.com/pvallet/SDL_image.git
-  GIT_TAG        release-2.0.5-mod
+  URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod.zip
   SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image
 )
 
 FetchContent_Declare(
   LIB_SDL2_PP
-  GIT_REPOSITORY https://github.com/libSDL2pp/libSDL2pp.git
-  GIT_TAG        0.16.0
+  URL            https://github.com/libSDL2pp/libSDL2pp/archive/0.16.0.zip
   SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
 )
 
 FetchContent_Declare(
   GLM
-  GIT_REPOSITORY https://github.com/g-truc/glm.git
-  GIT_TAG        0.9.9.7
+  URL            https://github.com/g-truc/glm/releases/download/0.9.9.7/glm-0.9.9.7.zip
   SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
 )
 
