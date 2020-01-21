@@ -78,7 +78,8 @@ FetchContent_Declare(
   SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
 )
 
-set(SDL_STATIC OFF)
+# Do not build the static version of SDL
+set(BUILD_SHARED_LIBS ON)
 
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
