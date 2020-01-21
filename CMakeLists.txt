@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14.7 FATAL_ERROR)
 
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
@@ -36,18 +36,49 @@ if (NOT ANDROID)
 
   find_package(OpenGL)
 
-  # Compiling SDL2 and SDL2_image from source
-  set(SDL_STATIC OFF)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2/SDL2)
-  add_subdirectory(external/SDL2/SDL2_image)
-
-  if (WIN32)
-    SET(BUILD_UTILS OFF)
-    add_subdirectory(external/glew/build/cmake)
-  ENDIF()
-
 # Include SDL2 libraries for android
 endif()
+
+################################################################################
+### Fetching external content
+################################################################################
+
+include(FetchContent)
+
+if (WIN32)
+  SET(BUILD_UTILS OFF)
+  add_subdirectory(external/glew/build/cmake)
+ENDIF()
+
+FetchContent_Declare(
+  SDL
+  GIT_REPOSITORY https://github.com/SDL-mirror/SDL.git
+  GIT_TAG        release-2.0.10
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2
+)
+
+FetchContent_Declare(
+  SDL_IMAGE
+  GIT_REPOSITORY https://github.com/pvallet/SDL_image.git
+  GIT_TAG        release-2.0.5-mod
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image
+)
+
+FetchContent_Declare(
+  LIB_SDL2_PP
+  GIT_REPOSITORY https://github.com/libSDL2pp/libSDL2pp.git
+  GIT_TAG        0.16.0
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
+)
+
+FetchContent_Declare(
+  GLM
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG        0.9.9.7
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
+)
+
+set(SDL_STATIC OFF)
 
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
@@ -58,7 +89,12 @@ set(SDL2_IMAGE_LIBRARY SDL2_image)
 set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
-add_subdirectory(external/libSDL2pp)
+
+FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP GLM)
+
+################################################################################
+### End fetching external content
+################################################################################
 
 if (ANDROID)
   string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
