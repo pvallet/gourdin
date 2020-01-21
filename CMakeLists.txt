@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.14.7 FATAL_ERROR)
 
+cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
+
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
 
@@ -81,9 +83,16 @@ FetchContent_Declare(
 # Do not build the static version of SDL
 set(BUILD_SHARED_LIBS ON)
 
+# To make libpng build correctly
+set(ZLIB_INCLUDE_DIR external/zlib-1.2.11)
+set(ZLIB_LIBRARY z)
+
+set(PNG_STATIC OFF)
+set(PNG_TESTS  OFF)
+
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
-set(SDL2MAIN_LIBRARY SDL2) # Hack to bypass SDL2Main, which is not needed
+set(SDL2MAIN_LIBRARY SDL2main)
 set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2/include)
 
 set(SDL2_IMAGE_LIBRARY SDL2_image)
@@ -91,7 +100,13 @@ set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 
-FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP GLM)
+FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
+
+# Don't add GLM as a subdirectory, since we just want to include it
+FetchContent_GetProperties(glm)
+if(NOT glm_POPULATED)
+  FetchContent_Populate(glm)
+endif()
 
 ################################################################################
 ### End fetching external content
