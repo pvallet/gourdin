@@ -1,3 +1,5 @@
+#ifndef NDEBUG
+
 #include "testHandler.hpp"
 
 #include <SDL_image.h>
@@ -34,8 +36,8 @@ void TestHandler::addToDeleteList(std::string filename) const {
 void TestHandler::saveToImage(const std::vector<float>& pixels, std::string filename) const {
   std::vector<uint8_t> rgbPixels(4*pixels.size());
 
-  for (size_t i = 0; i < pixels.size(); i++) {
-    for (size_t j = 0; j < 3; j++) {
+  for (int i = 0; i < pixels.size(); i++) {
+    for (int j = 0; j < 3; j++) {
       rgbPixels[4*i + j] = pixels[i] * 255;
     }
     rgbPixels[4*i + 3] = 255;
@@ -47,8 +49,8 @@ void TestHandler::saveToImage(const std::vector<float>& pixels, std::string file
 std::vector<float> TestHandler::generateTestSquare(size_t size) {
   std::vector<float> res(size*size, 0);
 
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       if (i > size/3 && i < 2*size/3 && j > size/3 && j < 2*size/3)
         res[i*size + j] = 0;
       else
@@ -62,8 +64,8 @@ std::vector<float> TestHandler::generateTestSquare(size_t size) {
 std::vector<float> TestHandler::generateTestCircle(size_t size) {
   std::vector<float> res(size*size, 0);
 
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       float centeredI = i - size / 2.f;
       float centeredJ = j - size / 2.f;
 
@@ -84,8 +86,8 @@ void TestHandler::ContentGeneratorDisplayForestsMask(
 
   std::vector<uint8_t> pixels(forestsMask.size() * forestsMask.size() * 4, 255);
 
-	for (size_t i = 0 ; i < forestsMask.size() ; i++) { // Convert mask to array of pixels
-		for (size_t j = 0 ; j < forestsMask.size() ; j++) {
+	for (int i = 0 ; i < forestsMask.size() ; i++) { // Convert mask to array of pixels
+		for (int j = 0 ; j < forestsMask.size() ; j++) {
       if (forestsMask[i][j]) {
         pixels[i*4*forestsMask.size() + j*4] = 0;
         pixels[i*4*forestsMask.size() + j*4 + 2] = 0;
@@ -151,7 +153,7 @@ void TestHandler::testVecUtils() const {
 void TestHandler::testPerlin() const {
   Perlin perlin(3, 0.06, 0.1, 512);
 
-  for (size_t i = 0; i < 1; i++) {
+  for (int i = 0; i < 1; i++) {
     std::ostringstream convert;
     convert << "perlin_" << i << ".png";
     perlin.shuffle();
@@ -300,3 +302,5 @@ void TestHandler::clean() const {
 
   remove(DELETE_LIST_NAME);
 }
+
+#endif

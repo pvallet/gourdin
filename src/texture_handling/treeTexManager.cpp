@@ -8,7 +8,7 @@ TreeTexManager::TreeTexManager() :
 void TreeTexManager::load(std::string path) {
   _flora.resize((size_t) Biome::BIOME_NB_ITEMS);
 
-  for (size_t i = 0; i < _flora.size(); i++) {
+  for (int i = 0; i < _flora.size(); i++) {
     _flora[i].biome = Biome::BIOME_NB_ITEMS;
   }
 

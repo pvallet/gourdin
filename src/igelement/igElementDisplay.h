@@ -21,8 +21,8 @@ protected:
 
   void reset();
 
-  size_t _capacity;
-  bool _fixedCapacity;
+  size_t _capacity = 0;
+  bool _fixedCapacity = false;
 
   std::vector<float> _data;
 

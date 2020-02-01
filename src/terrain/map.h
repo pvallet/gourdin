@@ -39,26 +39,26 @@ class Edge {
 public:
 	Edge() {}
 
-	int id;
-	bool mapEdge;
-	float x; // Midpoint coordinates
-	float y;
-	int river;
+	int id = 0;
+	bool mapEdge = false;
+	float x = 0.f; // Midpoint coordinates
+	float y = 0.f;
+	int river = 0;
 
-	float beginX;
-	float beginY;
-	float endX;
-	float endY;
+	float beginX = 0.f;
+	float beginY = 0.f;
+	float endX = 0.f;
+	float endY = 0.f;
 
-	int center0ID; // Only for initialisation
-	int center1ID;
-	int corner0ID;
-	int corner1ID;
+	int center0ID = 0; // Only for initialisation
+	int center1ID = 0;
+	int corner0ID = 0;
+	int corner1ID = 0;
 
-	Center* center0;
-	Center* center1;
-	Corner* corner0;
-	Corner* corner1;
+	Center* center0 = nullptr;
+	Center* center1 = nullptr;
+	Corner* corner0 = nullptr;
+	Corner* corner1 = nullptr;
 
 	glm::vec2 normalToCenter0; // set in computeEdgeBoundingBoxes
 

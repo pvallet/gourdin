@@ -47,6 +47,9 @@ void ColoredRectangles::setRectangles(const std::vector<glm::ivec4>& rectangles)
   _nbRect = rectangles.size();
   size_t rectGLDataSize;
 
+	if (_nbRect == 0)
+		return;
+
 	if (_filled)
 		rectGLDataSize = 12;
 	else
@@ -54,7 +57,7 @@ void ColoredRectangles::setRectangles(const std::vector<glm::ivec4>& rectangles)
 
 	std::vector<float> bufferData(rectGLDataSize * _nbRect);
 
-  for (size_t i = 0; i < _nbRect; i++) {
+  for (int i = 0; i < _nbRect; i++) {
 		glm::vec4 glRectangle = ut::windowRectCoordsToGLRectCoords(rectangles[i]);
     float x0 = glRectangle.x;
     float y0 = glRectangle.y;

@@ -33,7 +33,7 @@ public:
 
 class Vertex {
 public:
-  Vertex(): _sorted(false) {}
+  Vertex(): pos(0.f), normal(0.f), _sorted(false) {}
 
   glm::vec3 pos;
   glm::vec3 normal;

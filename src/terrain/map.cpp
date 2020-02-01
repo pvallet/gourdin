@@ -212,22 +212,22 @@ void Map::loadCorners(const TiXmlHandle& hRoot) {
 
 void Map::setPointersInDataStructures() {
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
-		for (unsigned int j = 0 ; j < _centers[i]->centerIDs.size() ; j++) {
+	for (int i = 0 ; i < _centers.size() ; i++) {
+		for (int j = 0 ; j < _centers[i]->centerIDs.size() ; j++) {
 			_centers[i]->centers[j] = _centers[_centers[i]->centerIDs[j]].get();
 		}
 
-		for (unsigned int j = 0 ; j < _centers[i]->edgeIDs.size() ; j++) {
+		for (int j = 0 ; j < _centers[i]->edgeIDs.size() ; j++) {
 			_centers[i]->edges[j] = _edges[_centers[i]->edgeIDs[j]].get();
 		}
 
-		for (unsigned int j = 0 ; j < _centers[i]->cornerIDs.size() ; j++) {
+		for (int j = 0 ; j < _centers[i]->cornerIDs.size() ; j++) {
 			_centers[i]->corners[j] = _corners[_centers[i]->cornerIDs[j]].get();
 		}
 	}
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+	for (int i = 0 ; i < _edges.size() ; i++) {
 		if (!_edges[i]->mapEdge) {
 			_edges[i]->center0 = _centers[_edges[i]->center0ID].get();
 			_edges[i]->center1 = _centers[_edges[i]->center1ID].get();
@@ -237,16 +237,16 @@ void Map::setPointersInDataStructures() {
 	}
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
-		for (unsigned int j = 0 ; j < _corners[i]->centerIDs.size() ; j++) {
+	for (int i = 0 ; i < _corners.size() ; i++) {
+		for (int j = 0 ; j < _corners[i]->centerIDs.size() ; j++) {
 			_corners[i]->centers[j] = _centers[_corners[i]->centerIDs[j]].get();
 		}
 
-		for (unsigned int j = 0 ; j < _corners[i]->edgeIDs.size() ; j++) {
+		for (int j = 0 ; j < _corners[i]->edgeIDs.size() ; j++) {
 			_corners[i]->edges[j] = _edges[_corners[i]->edgeIDs[j]].get();
 		}
 
-		for (unsigned int j = 0 ; j < _corners[i]->cornerIDs.size() ; j++) {
+		for (int j = 0 ; j < _corners[i]->cornerIDs.size() ; j++) {
 			_corners[i]->corners[j] = _corners[_corners[i]->cornerIDs[j]].get();
 		}
 	}
@@ -280,13 +280,13 @@ void Map::load(std::string path) {
 	// Convert to engine coordinates
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _centers.size() ; i++) {
+	for (int i = 0 ; i < _centers.size() ; i++) {
 		_centers[i]->x *= MAX_COORD / MAP_MAX_COORD;
 		_centers[i]->y *= MAX_COORD / MAP_MAX_COORD;
 	}
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _edges.size() ; i++) {
+	for (int i = 0 ; i < _edges.size() ; i++) {
 		if (!_edges[i]->mapEdge) {
 			_edges[i]->x *= MAX_COORD / MAP_MAX_COORD;
 			_edges[i]->y *= MAX_COORD / MAP_MAX_COORD;
@@ -294,7 +294,7 @@ void Map::load(std::string path) {
 	}
 
 	#pragma omp parallel for
-	for (unsigned int i = 0 ; i < _corners.size() ; i++) {
+	for (int i = 0 ; i < _corners.size() ; i++) {
 		_corners[i]->x *= MAX_COORD / MAP_MAX_COORD;
 		_corners[i]->y *= MAX_COORD / MAP_MAX_COORD;
 	}

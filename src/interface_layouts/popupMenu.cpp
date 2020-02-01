@@ -52,7 +52,7 @@ void PopupMenu::bindShadersAndDraw() const {
   if (_isDisplaying) {
     _background.bindShaderAndDraw();
 
-    for (size_t i = 0; i < _menuEntries.size(); i++) {
+    for (int i = 0; i < _menuEntries.size(); i++) {
       _menuEntries[i].bindShaderAndDraw();
     }
 
@@ -61,9 +61,9 @@ void PopupMenu::bindShadersAndDraw() const {
 }
 
 glm::ivec2 PopupMenu::getMenuSize() {
-  glm::ivec2 totalSize;
+  glm::ivec2 totalSize(0.f);
 
-  for (size_t i = 0; i < _menuEntries.size(); i++) {
+  for (int i = 0; i < _menuEntries.size(); i++) {
     glm::ivec2 currentSize = _menuEntries[i].getTextSize();
 
     totalSize.x = std::max(totalSize.x, currentSize.x);
@@ -95,7 +95,7 @@ void PopupMenu::create(glm::ivec2 clickPos) {
     glm::ivec4 currentAllocatedRect = menuRectangle;
     currentAllocatedRect.w = MENU_ENTRY_HEIGHT + 2 * MARGINS_SIZE;
 
-    for (size_t i = 0; i < _menuEntries.size(); i++) {
+    for (int i = 0; i < _menuEntries.size(); i++) {
       _menuEntries[i].setAllocatedRect(currentAllocatedRect);
       currentAllocatedRect.y += currentAllocatedRect.w;
     }
@@ -114,7 +114,7 @@ void PopupMenu::updateHighlight(const glm::ivec2& mousePos) {
       return;
     }
 
-    for (size_t i = 0; i < _menuEntries.size(); i++) {
+    for (int i = 0; i < _menuEntries.size(); i++) {
       glm::ivec4 allocatedRect = _menuEntries[i].getAllocatedRect();
       if (allocatedRect.y + allocatedRect.w > mousePos.y) {
         highlightIndex(i);
@@ -127,7 +127,7 @@ void PopupMenu::updateHighlight(const glm::ivec2& mousePos) {
 void PopupMenu::highlightIndex(int index) {
   _highlightedIndex = index;
 
-  for (size_t i = 0; i < _menuEntries.size(); i++) {
+  for (int i = 0; i < _menuEntries.size(); i++) {
     if ((int) i == index)
       _menuEntries[i].setHighlighted(true);
     else

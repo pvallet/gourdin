@@ -44,7 +44,7 @@ struct compTriClockwiseOrder {
 };
 
 std::array<size_t,3> Triangle::sortIndices(glm::vec3 refPoint) const {
-  std::array<size_t,3> res;
+  std::array<size_t, 3> res{};
 
   if (refPoint == vertices[0]->pos) {
     res[0] = 0;
@@ -76,7 +76,7 @@ const Triangle* Triangle::getTriangleContaining(
   for (auto tri = triangles.begin(); tri != triangles.end(); tri++) {
     float x[3]; float y[3];
 
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       x[i] = (*tri)->vertices[i]->pos.x;
       y[i] = (*tri)->vertices[i]->pos.y;
     }
@@ -181,7 +181,7 @@ TerrainGeometry::SubdivisionLevel::SubdivisionLevel(const GeneratedImage* relief
 
 void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, Biome biome) {
   if (_relief != nullptr) {
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       p[i].z = PERLIN_HEIGHT_FACTOR * _relief->getValueNormalizedCoord(p[i].x / MAX_COORD, p[i].y / MAX_COORD);
     }
   }
@@ -199,7 +199,7 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
   }
 
   // Add the vertices to the list of all vertices
-  for (size_t i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     if (_vertices.find(p[i]) == _vertices.end()) {
       Vertex vertex;
       vertex.pos = p[i];
@@ -215,7 +215,7 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
 
   if (addedNewTri.second) {
 
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       _vertices.at(p[i]).addAdjacentTriangle(&(*addedNewTri.first));
     }
 
@@ -230,11 +230,11 @@ void TerrainGeometry::SubdivisionLevel::addTriangle(std::array<glm::vec3,3> p, B
     std::array<glm::uvec2, 2> minChunkCoords = getSubChunkInfo(minAbsCoord);
     std::array<glm::uvec2, 2> maxChunkCoords = getSubChunkInfo(maxAbsCoord);
 
-    for (size_t i = minChunkCoords[0].x; i < maxChunkCoords[0].x+1; i++) {
-    for (size_t j = minChunkCoords[0].y; j < maxChunkCoords[0].y+1; j++) {
-      for (size_t k = (i == minChunkCoords[0].x ? minChunkCoords[1].x : 0);
+    for (int i = minChunkCoords[0].x; i < maxChunkCoords[0].x+1; i++) {
+    for (int j = minChunkCoords[0].y; j < maxChunkCoords[0].y+1; j++) {
+      for (int k = (i == minChunkCoords[0].x ? minChunkCoords[1].x : 0);
                   k < (i == maxChunkCoords[0].x ? maxChunkCoords[1].x + 1 : GRID_SUBDIV); k++) {
-      for (size_t l = (j == minChunkCoords[0].y ? minChunkCoords[1].y : 0);
+      for (int l = (j == minChunkCoords[0].y ? minChunkCoords[1].y : 0);
                   l < (j == maxChunkCoords[0].y ? maxChunkCoords[1].y + 1 : GRID_SUBDIV); l++) {
 
 
@@ -254,7 +254,7 @@ void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Trian
   for (std::list<const Triangle*>::iterator t = triangles.begin(); t != triangles.end(); t++) {
 
     // For every vertex that has not been processed, we process it and then save it
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       if (tmpProcessedVertices.find((*t)->vertices[i]->pos) == tmpProcessedVertices.end()) {
         (*t)->vertices[i]->sortTriangles();
         glm::vec3 newPos = (*t)->vertices[i]->pos;
@@ -292,7 +292,7 @@ void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Trian
     }
 
     std::array<glm::vec3,3> newMidPoints; // To construct the central triangle at the end
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
 
       const Triangle* nextTri = (*t)->vertices[i]->getNextTri(*t);
 
@@ -315,7 +315,7 @@ void TerrainGeometry::SubdivisionLevel::subdivideTriangles(std::list<const Trian
         newMidPoints[i] = 1.f/2.f * ((*t)->vertices[i]->pos + (*t)->vertices[(i+2)%3]->pos);
     }
 
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       std::array<glm::vec3,3> newTrianglePositions = {
         tmpProcessedVertices[(*t)->vertices[i]->pos], newMidPoints[(i+1)%3], newMidPoints[i]};
 
@@ -361,7 +361,7 @@ void TerrainGeometry::SubdivisionLevel::computeNormals() {
 }
 
 bool TerrainGeometry::SubdivisionLevel::isOcean(size_t x, size_t y) const {
-  for (size_t i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
+  for (int i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
     if (_trianglesInSubChunk[x*NB_CHUNKS + y][i].size() == 0)
       return true;
   }
@@ -391,7 +391,7 @@ std::array<glm::uvec2, 2> TerrainGeometry::SubdivisionLevel::getSubChunkInfo(glm
 
 struct compTri {
   bool operator()(const Triangle* lhs, const Triangle* rhs) const {
-  for (size_t i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     if (lhs->vertices[i] < rhs->vertices[i])
       return true;
     else if (lhs->vertices[i] > rhs->vertices[i])
@@ -412,7 +412,7 @@ std::list<Vertex*> TerrainGeometry::SubdivisionLevel::getVertices(const std::lis
   std::list<Vertex*> res;
 
   for (auto t = triangles.begin(); t != triangles.end(); t++) {
-    for (size_t i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
       res.push_back((*t)->vertices[i]);
     }
   }
@@ -426,7 +426,7 @@ std::list<Vertex*> TerrainGeometry::SubdivisionLevel::getVertices(const std::lis
 std::list<const Triangle*> TerrainGeometry::SubdivisionLevel::getTrianglesInChunk(size_t x, size_t y) const {
   std::list<const Triangle*> res;
 
-  for (size_t i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
+  for (int i = 0; i < _trianglesInSubChunk[x*NB_CHUNKS + y].size(); i++) {
     res.insert(res.end(), _trianglesInSubChunk[x*NB_CHUNKS + y][i].begin(),
                           _trianglesInSubChunk[x*NB_CHUNKS + y][i].end());
   }
@@ -503,7 +503,7 @@ TerrainGeometry::TerrainGeometry() :
   // The first subdivision level should accept the geometry given as is
   _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(nullptr)));
 
-  for (size_t i = 1; i < MAX_SUBDIV_LVL+1; i++) {
+  for (int i = 1; i < MAX_SUBDIV_LVL+1; i++) {
     _subdivisionLevels.push_back(std::unique_ptr<SubdivisionLevel>(new SubdivisionLevel(&_relief)));
   }
 }
@@ -521,7 +521,7 @@ void TerrainGeometry::generateNewSubdivisionLevel() {
 
     _currentGlobalSubdivLvl++;
 
-    for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
+    for (int i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
       if (_chunkSubdivLvl[i] < _currentGlobalSubdivLvl)
         _chunkSubdivLvl[i] = _currentGlobalSubdivLvl;
     }

@@ -74,7 +74,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
   glm::vec2 chunkPos(x*CHUNK_SIZE, y*CHUNK_SIZE);
   std::vector<igElement*> res;
 
-  for (size_t i = 0; i < 2400; i++) {
+  for (int i = 0; i < 2400; i++) {
     glm::vec2 pos(RANDOMF * CHUNK_SIZE, RANDOMF * CHUNK_SIZE);
     pos += chunkPos;
 
@@ -103,7 +103,7 @@ std::vector<igElement*> ContentGenerator::genForestsInChunk(size_t x, size_t y) 
 std::vector<igMovingElement*> ContentGenerator::genHerds() const {
   std::vector<igMovingElement*> res;
 
-  for (size_t i = 0; i < 800; i++) {
+  for (int i = 0; i < 800; i++) {
     glm::vec2 pos(RANDOMF * MAX_COORD, RANDOMF * MAX_COORD);
 
     Biome biomeInPos = _terrainGeometry.getBiome(pos,1);
@@ -133,7 +133,7 @@ std::vector<glm::vec2> ContentGenerator::scatteredPositions(glm::vec2 center,
 
   std::vector<glm::vec2> res;
 
-  for (size_t i = 0 ; i < 2*count ; i++) {
+  for (int i = 0 ; i < 2*count ; i++) {
     add = true;
     r = sqrt(RANDOMF) * radius * sqrt(count);
     theta = RANDOMF * 2*M_PI;
@@ -141,7 +141,7 @@ std::vector<glm::vec2> ContentGenerator::scatteredPositions(glm::vec2 center,
     p.x = center.x + r*cos(theta);
     p.y = center.y + r*sin(theta);
 
-    for (unsigned int j = 0 ; j < res.size() ; j++) {
+    for (int j = 0 ; j < res.size() ; j++) {
       diff = res[j] - p;
 
       if (diff.x * diff.x + diff.y * diff.y < minProximity)
@@ -167,7 +167,7 @@ std::vector<igMovingElement*> ContentGenerator::genHerd(glm::vec2 pos, size_t co
 
   std::vector<glm::vec2> positions = scatteredPositions(pos, count, 10, 5);
 
-  for (size_t i = 0; i < positions.size(); i++) {
+  for (int i = 0; i < positions.size(); i++) {
     res.push_back(new Antilope(positions[i], AnimationManager(getAnimManagerInit(animal)), _terrainGeometry));
   }
 
@@ -179,7 +179,7 @@ std::vector<igMovingElement*> ContentGenerator::genTribe(glm::vec2 pos) const {
 
   std::vector<glm::vec2> positions = scatteredPositions(pos, RANDOMF * 5 + 5, 10, 5);
 
-  for (size_t i = 0; i < positions.size(); i++) {
+  for (int i = 0; i < positions.size(); i++) {
     float randNumber = RANDOMF;
     Animals animal;
     if (randNumber < 0.3)

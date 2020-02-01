@@ -69,14 +69,14 @@ void Engine::init(LoadingScreen& loadingScreen) {
   loadingScreen.updateAndRender("Launching chunks subdivisions", 33);
 
   std::vector<Chunk*> newChunks;
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       newChunks.push_back(new Chunk(i, j, _terrainTexManager, _terrainGeometry, _chunkSubdivider));
     }
   }
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       _chunkSubdivider.addTask(newChunks[i*NB_CHUNKS + j], 1);
       _terrain[i*NB_CHUNKS + j] = std::unique_ptr<Chunk>(newChunks[i*NB_CHUNKS + j]);
     }
@@ -105,8 +105,8 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
   loadingScreen.updateAndRender("Generating forests", 60);
 
-  #pragma omp parallel for
-  for (size_t i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
+  //#pragma omp parallel for
+  for (int i = 0; i < NB_CHUNKS*NB_CHUNKS; i++) {
     size_t x = i / NB_CHUNKS;
     size_t y = i - x * NB_CHUNKS;
     std::vector<igElement*> newTrees = _contentGenerator.genForestsInChunk(x,y);
@@ -116,10 +116,10 @@ void Engine::init(LoadingScreen& loadingScreen) {
 
 void Engine::appendNewElements(std::vector<igMovingElement*> elems) {
 
-  for (size_t i = 0; i < elems.size(); i++)
+  for (int i = 0; i < elems.size(); i++)
     _igMovingElements.push_back(std::unique_ptr<igMovingElement>(elems[i]));
 
-  for (size_t i = 0; i < elems.size(); i++) {
+  for (int i = 0; i < elems.size(); i++) {
     Controllable* ctrl = dynamic_cast<Controllable*>(elems[i]);
     if (ctrl)
       _controllableElements.insert(ctrl);
@@ -211,14 +211,14 @@ void Engine::compute2DCorners() {
       glm::mat4 model = glm::translate(glm::mat4(1.f), translatePos) * rotateElements;
 
       // Compute their projections
-      for (size_t i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) {
         glm::vec4 tmp(corners3[i], 1.f);
         tmp = model * tmp;
         tmp = cam.getViewProjectionMatrix() * tmp;
         corners3[i] = glm::vec3(tmp) / tmp.w;
       }
 
-      for (size_t i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++) {
         vertices[3*i]     = corners3[i].x;
         vertices[3*i + 1] = corners3[i].y;
         vertices[3*i + 2] = corners3[i].z;
@@ -226,7 +226,7 @@ void Engine::compute2DCorners() {
     }
 
     else {
-      for (size_t i = 0; i < 12; i++) {
+      for (int i = 0; i < 12; i++) {
         vertices[i] = 0;
       }
     }
@@ -259,8 +259,8 @@ void Engine::updateCulling() {
     (float) (alpha*RAD), ut::carthesian(1.f, theta + 180.f, 90.f - phi)));
 
   // Update terrains
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       _terrain[i*NB_CHUNKS + j]->computeCulling(camFrustumPlaneNormals);
 
       if (_terrain[i*NB_CHUNKS + j]->isVisible())
@@ -308,7 +308,7 @@ void Engine::update(int msElapsed) {
    if ((*it)->isDead())
      toDelete.push_back(*it);
   }
-  for (size_t i = 0; i < toDelete.size(); i++) {
+  for (int i = 0; i < toDelete.size(); i++) {
     _controllableElements.erase(toDelete[i]);
     _deadControllableElements.insert(toDelete[i]);
   }
@@ -367,8 +367,8 @@ void Engine::renderToFBO() const {
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 #endif
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible())
         nbTriangles += _terrain[i*NB_CHUNKS + j]->draw();
     }
@@ -404,8 +404,8 @@ void Engine::renderToFBO() const {
   glUniform1i(_igEShader.getUniformLocation("onlyOpaqueParts"), true);
   _igElementDisplay.drawElements();
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible() &&
           _terrain[i*NB_CHUNKS + j]->getTreesNeedTwoPasses())
         _terrain[i*NB_CHUNKS + j]->drawTrees();
@@ -419,8 +419,8 @@ void Engine::renderToFBO() const {
 
   _igElementDisplay.drawElements();
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
       if (_terrain[i*NB_CHUNKS + j]->isVisible())
         nbElements += _terrain[i*NB_CHUNKS + j]->drawTrees();
     }
@@ -462,7 +462,7 @@ std::vector<Controllable*> Engine::genTribe(glm::ivec2 screenTarget) {
   appendNewElements(tribe);
 
   std::vector<Controllable*> res;
-  for (size_t i = 0; i < tribe.size(); i++) {
+  for (int i = 0; i < tribe.size(); i++) {
     res.push_back(dynamic_cast<Controllable*>(tribe[i]));
   }
 

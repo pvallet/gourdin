@@ -8,7 +8,8 @@ igMovingElement::igMovingElement(glm::vec2 position, AnimationManager graphics, 
 	igElement(position),
 	_dead(false),
 	_graphics(graphics),
-	_terrainGeometry(terrainGeometry) {
+	_terrainGeometry(terrainGeometry),
+	_direction(0.f) {
 	_size = _graphics.getRawSize();
 	_size /= _size.y;
 	_size *= _graphics.getParameters().size;

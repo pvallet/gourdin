@@ -45,9 +45,9 @@ bool GeneratedImage::loadFromFile(std::string filename) {
     _pixels.resize(_size*_size, 0);
 
     #pragma omp parallel for
-    for (size_t i = 0; i < _size*_size; i++) {
+    for (int i = 0; i < _size*_size; i++) {
       ConvertFloat convert;
-      for (size_t j = 0; j < 4; j++) {
+      for (int j = 0; j < 4; j++) {
         convert.uc[j] = imgPixels[4*i + j];
       }
       _pixels[i] = convert.f;
@@ -65,11 +65,11 @@ void GeneratedImage::saveToFile(std::string filename) const {
   std::vector<uint8_t> rgbPixels(4*_pixels.size());
 
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     ConvertFloat convert;
     convert.f = _pixels[i];
 
-    for (size_t j = 0; j < 4; j++) {
+    for (int j = 0; j < 4; j++) {
       rgbPixels[4*i + j] = convert.uc[j];
     }
   }
@@ -81,7 +81,7 @@ void GeneratedImage::saveToFile(std::string filename) const {
 
 void GeneratedImage::invert() {
   #pragma omp parallel for
-  for (size_t i = 0; i < _size*_size; i++) {
+  for (int i = 0; i < _size*_size; i++) {
     _pixels[i] = 1 - _pixels[i];
   }
 }
@@ -96,7 +96,7 @@ void GeneratedImage::combine(const std::vector<float>& img, const std::vector<fl
   assert(mask.size() == _pixels.size());
 
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] = img[i] * mask[i] + _pixels[i] * (1-mask[i]);
   }
 }
@@ -110,10 +110,10 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
   std::vector<float> nPixels(_size*_size, 0);
 
   #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < _size; i++) {
-  for (size_t j = 0; j < _size; j++) {
-    for (size_t k = 0; k < filterSize; k++) {
-    for (size_t l = 0; l < filterSize; l++) {
+  for (int i = 0; i < _size; i++) {
+  for (int j = 0; j < _size; j++) {
+    for (int k = 0; k < filterSize; k++) {
+    for (int l = 0; l < filterSize; l++) {
       int curI = i - filterSize/2 + k;
       int curJ = j - filterSize/2 + l;
 
@@ -143,8 +143,8 @@ void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongs
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
   #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < (size_t) dilSize; i++) {
-    for (size_t j = 0; j < (size_t) dilSize; j++) {
+  for (int i = 0; i < (size_t) dilSize; i++) {
+    for (int j = 0; j < (size_t) dilSize; j++) {
       if (sqrt(i*i + j*j) <= radius)
         dilMask[i*dilSize + j] = 1;
     }
@@ -177,8 +177,8 @@ void GeneratedImage::smoothBlackDilatation(float radius) {
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
   #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < (size_t) dilSize; i++) {
-    for (size_t j = 0; j < (size_t) dilSize; j++) {
+  for (int i = 0; i < (size_t) dilSize; i++) {
+    for (int j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = sqrt(i*i + j*j) / radius;
     }
   }
@@ -208,7 +208,7 @@ std::vector<float> GeneratedImage::generateBoxFilter(size_t size) {
   std::vector<float> filter(size*size, 0);
 
   #pragma omp parallel for
-  for (size_t i = 0; i < size*size; i++) {
+  for (int i = 0; i < size*size; i++) {
     filter[i] = 1.f / (float) (size*size);
   }
 
@@ -240,7 +240,7 @@ std::vector<float> GeneratedImage::generateGaussianFilter(size_t size, float sig
 
   // normalize the filter
   #pragma omp parallel for
-  for (size_t i = 0; i < size*size; i++) {
+  for (int i = 0; i < size*size; i++) {
     filter[i] /= sum;
   }
 
@@ -304,7 +304,7 @@ float GeneratedImage::getValueNormalizedCoord(float x, float y) const {
 GeneratedImage& GeneratedImage::operator+=(const GeneratedImage& rhs) {
   assert(rhs._size == _size);
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] += rhs._pixels[i];
   }
   return *this;
@@ -313,7 +313,7 @@ GeneratedImage& GeneratedImage::operator+=(const GeneratedImage& rhs) {
 GeneratedImage& GeneratedImage::operator-=(const GeneratedImage& rhs) {
   assert(rhs._size == _size);
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] -= rhs._pixels[i];
   }
   return *this;
@@ -322,7 +322,7 @@ GeneratedImage& GeneratedImage::operator-=(const GeneratedImage& rhs) {
 GeneratedImage& GeneratedImage::operator*=(const GeneratedImage& rhs) {
   assert(rhs._size == _size);
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] *= rhs._pixels[i];
   }
   return *this;
@@ -331,7 +331,7 @@ GeneratedImage& GeneratedImage::operator*=(const GeneratedImage& rhs) {
 GeneratedImage& GeneratedImage::operator/=(const GeneratedImage& rhs) {
   assert(rhs._size == _size);
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] /= rhs._pixels[i];
   }
   return *this;
@@ -339,7 +339,7 @@ GeneratedImage& GeneratedImage::operator/=(const GeneratedImage& rhs) {
 
 GeneratedImage& GeneratedImage::operator+=(float rhs) {
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] += rhs;
   }
   return *this;
@@ -347,7 +347,7 @@ GeneratedImage& GeneratedImage::operator+=(float rhs) {
 
 GeneratedImage& GeneratedImage::operator-=(float rhs) {
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] -= rhs;
   }
   return *this;
@@ -355,7 +355,7 @@ GeneratedImage& GeneratedImage::operator-=(float rhs) {
 
 GeneratedImage& GeneratedImage::operator*=(float rhs) {
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] *= rhs;
   }
   return *this;
@@ -363,7 +363,7 @@ GeneratedImage& GeneratedImage::operator*=(float rhs) {
 
 GeneratedImage& GeneratedImage::operator/=(float rhs) {
   #pragma omp parallel for
-  for (size_t i = 0; i < _pixels.size(); i++) {
+  for (int i = 0; i < _pixels.size(); i++) {
     _pixels[i] /= rhs;
   }
   return *this;

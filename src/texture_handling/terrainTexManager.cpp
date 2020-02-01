@@ -23,7 +23,7 @@ void TerrainTexManager::loadTexture(std::string path) {
 }
 
 void TerrainTexManager::loadFolder(size_t nbTextures, std::string folderPath) {
-  for (size_t i = 0 ; i < nbTextures ; i++) {
+  for (int i = 0 ; i < nbTextures ; i++) {
     std::ostringstream convert;
     convert << folderPath << i << ".png";
     loadTexture(convert.str());

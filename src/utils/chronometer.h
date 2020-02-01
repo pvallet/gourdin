@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include "clock.h"
 
 class Chronometer {
