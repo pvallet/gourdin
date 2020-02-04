@@ -26,7 +26,7 @@ void MapInfoExtractor::convertMapData(size_t size) {
 
   float maxHeight = 0;
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
       glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
@@ -155,7 +155,7 @@ void MapInfoExtractor::computeLakesElevations(
   }
 
   _lakesElevations = GeneratedImage(size,baseColor);
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
       if (lakes[i][j] != (size_t) -1)
@@ -172,14 +172,14 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
   std::vector<float> dilMask(dilSize*dilSize);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < (size_t) dilSize; i++) {
     for (int j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = std::max(0., 1 - sqrt(i*i + j*j) / transitionSize);
     }
   }
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < (int) _size; i++) {
   for (int j = 0; j < (int) _size; j++) {
     Biome biome = _biomes[i*_size + j];
@@ -202,7 +202,7 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
 GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedImage*, (int) Biome::BIOME_NB_ITEMS>& imgs) const {
   std::vector<float> result(_size*_size, 0);
 
-  #pragma omp parallel for collapse (2)
+  #pragma omp parallel for
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
     size_t currentIndex = i*_size + j;

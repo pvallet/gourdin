@@ -109,7 +109,7 @@ void GeneratedImage::applyConvolutionFilter(const std::vector<float>& filter) {
 
   std::vector<float> nPixels(_size*_size, 0);
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < _size; i++) {
   for (int j = 0; j < _size; j++) {
     for (int k = 0; k < filterSize; k++) {
@@ -142,7 +142,7 @@ void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongs
   std::vector<float> dilMask(dilSize*dilSize, 0);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
-  #pragma omp parallel for collapse (2)
+  #pragma omp parallel for
   for (int i = 0; i < (size_t) dilSize; i++) {
     for (int j = 0; j < (size_t) dilSize; j++) {
       if (sqrt(i*i + j*j) <= radius)
@@ -151,7 +151,7 @@ void GeneratedImage::dilatation(float radius, std::function<bool(float)> belongs
   }
 
   std::vector<float> result = _pixels;
-  #pragma omp parallel for collapse (2)
+  #pragma omp parallel for
   for (int i = 0; i < (int) _size; i++) {
   for (int j = 0; j < (int) _size; j++) {
 
@@ -176,14 +176,14 @@ void GeneratedImage::smoothBlackDilatation(float radius) {
   std::vector<float> dilMask(dilSize*dilSize);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
-  #pragma omp parallel for collapse (2)
+  #pragma omp parallel for
   for (int i = 0; i < (size_t) dilSize; i++) {
     for (int j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = sqrt(i*i + j*j) / radius;
     }
   }
 
-  #pragma omp parallel for collapse (2)
+  #pragma omp parallel for
   for (int i = 0; i < (int) _size; i++) {
   for (int j = 0; j < (int) _size; j++) {
     // Mask is only applied to expand black regions

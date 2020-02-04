@@ -51,7 +51,7 @@ float Perlin::getValue(float x, float y) const {
 std::vector<float> Perlin::getPixels() const {
   std::vector<float> img(_size*_size);
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < _size; i++) {
     for (int j = 0; j < _size; j++) {
       img[i*_size + j] = getValue(i,j);

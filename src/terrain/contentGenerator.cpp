@@ -30,7 +30,7 @@ void ContentGenerator::init() {
 
   _treeTexManager.load("res/trees/");
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0 ; i < CONTENT_RES ; i++) {
 		for (int j = 0 ; j < CONTENT_RES ; j++) {
       if (_perlinGenerator.getValue(i,j) > 0.4)
