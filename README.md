@@ -72,7 +72,7 @@ cd android
 ## Windows
 
 Download and install CMake from its website: https://cmake.org/download/
-You can now create a new directory named `build` at the root of `gourdin`. Running CMake will generate the project files for the EDI you use. You can then open the solution files and start the build.
+You can now create a new directory named `build` at the root of `gourdin`. Running CMake will generate the project files for the IDE you use. You can then open the solution files and start the build.
 The VS solution should be configured automatically, while a Code::Blocks project needs a bit more attention (see next section).
 
 In VS, you choose the build type within the solution, while it would be done with CMake for Code::Blocks
