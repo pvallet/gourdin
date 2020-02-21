@@ -18,6 +18,7 @@ public class GourdinSDL2Activity extends SDLActivity
     @Override
     protected String[] getLibraries() {
         return new String[]{
+                "hidapi",
                 "SDL2",
                 "SDL2_image",
                 "main"
@@ -42,5 +43,11 @@ public class GourdinSDL2Activity extends SDLActivity
       DisplayMetrics metrics = getResources().getDisplayMetrics();
 
       return metrics.xdpi;
+    }
+
+    @Override
+    public void setOrientationBis(int w, int h, boolean resizable, String hint) {
+      // Forcing gourdin to be landscape
+      super.setOrientationBis(w,h,resizable, "LandscapeRight LandscapeLeft");
     }
 }

@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.14.7 FATAL_ERROR)
-
-cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
+cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
 
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
@@ -45,45 +43,52 @@ endif()
 ### Fetching external content
 ################################################################################
 
-include(FetchContent)
+if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
+  cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
 
-if (WIN32)
-  SET(BUILD_UTILS OFF)
-  FetchContent_Declare(
-    GLEW
-    URL            https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glew
-  )
-  FetchContent_GetProperties(glew)
-  if(NOT glew_POPULATED)
-    FetchContent_Populate(glew)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/external/glew/build/cmake)
+  include(FetchContent)
+
+  if (WIN32)
+    SET(BUILD_UTILS OFF)
+    FetchContent_Declare(
+      GLEW
+      URL            https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip
+      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glew
+    )
+    FetchContent_GetProperties(glew)
+    if(NOT glew_POPULATED)
+      FetchContent_Populate(glew)
+      add_subdirectory(${CMAKE_SOURCE_DIR}/external/glew/build/cmake)
+    endif()
   endif()
-ENDIF()
 
-FetchContent_Declare(
-  SDL
-  URL            https://www.libsdl.org/release/SDL2-2.0.10.zip
-  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2
-)
+  FetchContent_Declare(
+    SDL
+    URL            https://hg.libsdl.org/SDL/archive/39a7b759a38a.zip # Update with 2.0.11 when available
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
+  )
 
-FetchContent_Declare(
-  SDL_IMAGE
-  URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod.zip
-  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image
-)
+  FetchContent_Declare(
+    SDL_IMAGE
+    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod.zip # Update with 2.0.6 if build issues get fixed
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
+  )
 
-FetchContent_Declare(
-  LIB_SDL2_PP
-  URL            https://github.com/libSDL2pp/libSDL2pp/archive/0.16.0.zip
-  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
-)
+  FetchContent_Declare(
+    LIB_SDL2_PP
+    URL            https://github.com/libSDL2pp/libSDL2pp/archive/0.16.0.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
+  )
 
-FetchContent_Declare(
-  GLM
-  URL            https://github.com/g-truc/glm/releases/download/0.9.9.7/glm-0.9.9.7.zip
-  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
-)
+  FetchContent_Declare(
+    GLM
+    URL            https://github.com/g-truc/glm/releases/download/0.9.9.7/glm-0.9.9.7.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
+  )
+else()
+  message( WARNING "The CMake version is below 3.14.7, unable to fetch dependencies.
+  Please update your CMake version or read CMakeLists.txt to know where to download and unpack them.")
+endif()
 
 # Do not build the static version of SDL
 set(BUILD_SHARED_LIBS ON)
@@ -98,39 +103,32 @@ set(PNG_TESTS  OFF)
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
 set(SDL2MAIN_LIBRARY SDL2main)
-set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2/include)
+set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/include)
 
 set(SDL2_IMAGE_LIBRARY SDL2_image)
-set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image)
+set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 
-FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
+if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
+  FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
 
-# Don't add GLM as a subdirectory, since we just want to include it
-FetchContent_GetProperties(glm)
-if(NOT glm_POPULATED)
-  FetchContent_Populate(glm)
+  # Don't add GLM as a subdirectory, since we just want to include it
+  FetchContent_GetProperties(glm)
+  if(NOT glm_POPULATED)
+    FetchContent_Populate(glm)
+  endif()
+else()
+  # if (NOT ANDROID) # Already taken care of by the app itself
+    add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2_image)
+  # endif()
+  add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
 endif()
 
 ################################################################################
 ### End fetching external content
 ################################################################################
-
-if (ANDROID)
-  string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
-  set(DISTRIBUTION_DIR ${CMAKE_SOURCE_DIR}/android/distribution/android/SDL2/intermediates/ndkBuild)
-  set(SDL_LOCATION ${CMAKE_SOURCE_DIR}/external/SDL2)
-
-  include_directories( ${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} )
-
-  add_library( ${SDL2_LIBRARY} SHARED IMPORTED )
-  add_library( ${SDL2_IMAGE_LIBRARY} SHARED IMPORTED )
-  set_target_properties(${SDL2_LIBRARY} PROPERTIES IMPORTED_LOCATION
-  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2.so)
-  set_target_properties(${SDL2_IMAGE_LIBRARY} PROPERTIES IMPORTED_LOCATION
-  ${DISTRIBUTION_DIR}/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI}/libSDL2_image.so)
-endif()
 
 find_package(OpenMP)
 if (OPENMP_FOUND)
@@ -187,7 +185,7 @@ list (APPEND INCLUDE_DIRS "external_manual/fonts/")
 include_directories(${INCLUDE_DIRS})
 
 if (ANDROID)
-  add_library( main SHARED ${SDL_LOCATION}/SDL2/src/main/android/SDL_android_main.c ${SOURCE_FILES} )
+  add_library( main SHARED ${CMAKE_SOURCE_DIR}/external/SDL2/src/main/android/SDL_android_main.c ${SOURCE_FILES} )
 
   target_link_libraries(main
     GLESv3

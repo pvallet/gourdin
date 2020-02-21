@@ -24,7 +24,7 @@ public:
   inline float getFontSize() const {return _fontSize;}
 
 private:
-  std::array<std::unique_ptr<Glyph>,128> _glyphs;
+  std::array<Glyph,128> _glyphs;
 
   const float _fontSize;
 };

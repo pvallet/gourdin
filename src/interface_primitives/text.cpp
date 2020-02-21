@@ -6,8 +6,6 @@
 
 #include <vector>
 
-#include <SDL_log.h>
-
 FontHandler Text::_fontHandler;
 Shader Text::_textShader;
 bool Text::_shaderLoaded = false;
