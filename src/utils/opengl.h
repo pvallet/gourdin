@@ -22,13 +22,14 @@
 
 #elif __APPLE__
   #include "TargetConditionals.h"
-  
+
   #if TARGET_OS_IPHONE
 
     #include <OpenGLES/ES3/gl3.h>
 
   #elif TARGET_OS_MAC
 
+    #include <OpenGL/OpenGLAvailability.h>
     #include <OpenGL/gl3ext.h>
     #include <OpenGL/gl3.h>
 

@@ -71,8 +71,8 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
 
   FetchContent_Declare(
     SDL_IMAGE
-    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod2.zip
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image
+    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod3.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
   )
 
   FetchContent_Declare(
