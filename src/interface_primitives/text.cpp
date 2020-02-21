@@ -64,7 +64,7 @@ void Text::setText(const std::string &str, float fontSize, float leading) {
 
   std::vector<float> bufferData(_stringLength * glyphGLDataSize);
 
-  for (size_t i = 0; i < str.size(); i++) {
+  for (int i = 0; i < str.size(); i++) {
     if (str[i] == '\n') {
       y -= _fontHandler.getFontSize() * sy * leading;
       x = -1;

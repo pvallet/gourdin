@@ -17,6 +17,7 @@ endif()
 if (NOT ANDROID)
   # handling warnings
   if(MSVC)
+    add_definitions( -DNOMINMAX )
     # Force to always compile with W4
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
       string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -70,8 +71,8 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
 
   FetchContent_Declare(
     SDL_IMAGE
-    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod.zip # Update with 2.0.6 if build issues get fixed
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
+    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod2.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image
   )
 
   FetchContent_Declare(
@@ -94,11 +95,14 @@ endif()
 set(BUILD_SHARED_LIBS ON)
 
 # To make libpng build correctly
-set(ZLIB_INCLUDE_DIR external/zlib-1.2.11)
+set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image/external/zlib-1.2.11)
 set(ZLIB_LIBRARY z)
 
 set(PNG_STATIC OFF)
 set(PNG_TESTS  OFF)
+set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
+
+set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
 
 # SDL2pp needs defining where the SDL2 libraries are
 set(SDL2_LIBRARY SDL2)
@@ -157,7 +161,7 @@ foreach (_headerFile ${HEADER_FILES})
 endforeach()
 
 # Only add debug classes if we are in debug mode
-if ( CMAKE_BUILD_TYPE MATCHES Debug )
+if ( CMAKE_BUILD_TYPE MATCHES Debug OR MSVC)
   foreach (_headerFile ${DEBUG_HEADER_FILES})
       get_filename_component(_dir ${_headerFile} PATH)
       list (APPEND INCLUDE_DIRS ${_dir})
@@ -170,8 +174,9 @@ list(REMOVE_DUPLICATES INCLUDE_DIRS)
 file(GLOB_RECURSE EXTERNAL_SOURCE_FILES "external_manual/*.cpp")
 list(APPEND SOURCE_FILES ${EXTERNAL_SOURCE_FILES})
 
-if ( CMAKE_BUILD_TYPE MATCHES Debug )
+if ( CMAKE_BUILD_TYPE MATCHES Debug OR MSVC)
   list(APPEND SOURCE_FILES ${DEBUG_SOURCE_FILES})
+  list(APPEND HEADER_FILES ${DEBUG_HEADER_FILES})
 endif()
 
 foreach (_sourceFile ${EXTERNAL_SOURCE_FILES})
@@ -196,7 +201,7 @@ if (ANDROID)
   )
 
 else()
-  add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+  add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
   if (WIN32)
     target_link_libraries(${PROJECT_NAME}
@@ -206,6 +211,11 @@ else()
       SDL2_image
       ${SDL2PP_LIBRARIES}
     )
+
+    if (MSVC) # Setup the VS solution file correctly
+      set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+      set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
+    endif()
   else()
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
@@ -223,8 +233,11 @@ file(WRITE ${CMAKE_SOURCE_DIR}/.clang_complete "")
 foreach(dir ${INCLUDE_DIRS})
   file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "-I${dir}\n")
 endforeach()
-string(REPLACE "'" "" CMAKE_CXX_FLAGS_SPLIT ${CMAKE_CXX_FLAGS})
-string(REPLACE " " ";" CMAKE_CXX_FLAGS_SPLIT ${CMAKE_CXX_FLAGS_SPLIT})
-foreach(flag ${CMAKE_CXX_FLAGS_SPLIT})
-  file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
-endforeach()
+
+if (${CMAKE_CXX_FLAGS})
+  string(REPLACE "'" "" CMAKE_CXX_FLAGS_SPLIT ${CMAKE_CXX_FLAGS})
+  string(REPLACE " " ";" CMAKE_CXX_FLAGS_SPLIT ${CMAKE_CXX_FLAGS_SPLIT})
+  foreach(flag ${CMAKE_CXX_FLAGS_SPLIT})
+    file(APPEND ${CMAKE_SOURCE_DIR}/.clang_complete "${flag}\n")
+  endforeach()
+endif()

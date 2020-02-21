@@ -56,9 +56,9 @@ void Texture::loadFromFile(std::string filePath) {
 void Texture::flipPixelsUpsideDown(size_t width, size_t height, size_t bytesPerPixel,
   unsigned char* data) {
 
-  for (size_t i = 0; i < width / 2; i++) {
-    for (size_t j = 0; j < height; j++) {
-      for (size_t k = 0; k < bytesPerPixel; k++) {
+  for (int i = 0; i < width / 2; i++) {
+    for (int j = 0; j < height; j++) {
+      for (int k = 0; k < bytesPerPixel; k++) {
         std::swap(data[bytesPerPixel * (i * width + j) + k],
                   data[bytesPerPixel * (width * (height - i - 1) + j) + k]);
       }

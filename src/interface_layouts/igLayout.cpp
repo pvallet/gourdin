@@ -46,9 +46,9 @@ void igLayout::renderMinimap(const Engine& engine) const {
 
   glm::vec4 miniChunk(minimapTextureRect.x, minimapTextureRect.y, miniChunkSize);
 
-  for (size_t i = 0; i < NB_CHUNKS; i++) {
+  for (int i = 0; i < NB_CHUNKS; i++) {
     miniChunk.y = minimapTextureRect.y;
-    for (size_t j = 0; j < NB_CHUNKS; j++) {
+    for (int j = 0; j < NB_CHUNKS; j++) {
 
       if (!engine.isChunkVisible(i, NB_CHUNKS - 1 - j))
         greyRects.push_back(miniChunk);

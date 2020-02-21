@@ -8,6 +8,8 @@
 
 igElement::igElement(glm::vec2 position) :
 	_pos(position),
+	_size(0.f),
+	_offset(0.f),
 	_camOrientation(0.f) {
 
 	_orientation = RANDOMF * 360.f;
@@ -29,7 +31,7 @@ void igElement::setVertices() {
 }
 
 void igElement::setPosArray() {
-	for (size_t i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		_posArray[3*i]     = _pos.x;
 		_posArray[3*i + 1] = _pos.y;
 		_posArray[3*i + 2] = _height;
@@ -48,7 +50,7 @@ void igElement::setTexCoord(glm::vec4 rect) {
 }
 
 void igElement::setLayer(size_t layer) {
-	for (size_t i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
 		_layer[i] = layer;
 	}
 }

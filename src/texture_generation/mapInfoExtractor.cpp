@@ -26,9 +26,9 @@ void MapInfoExtractor::convertMapData(size_t size) {
 
   float maxHeight = 0;
 
-  #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  #pragma omp parallel for
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       size_t index = i*size + j;
       _biomes[index] = smoother.getBiome(pos);
@@ -46,7 +46,7 @@ void MapInfoExtractor::convertMapData(size_t size) {
 
   // Normalizations
   #pragma omp parallel for
-  for (size_t i = 0; i < size*size; i++) {
+  for (int i = 0; i < size*size; i++) {
     _elevationMask[i] /= maxHeight;
     _lakesElevations[i] /= maxHeight;
   }
@@ -85,8 +85,8 @@ void MapInfoExtractor::computeLakesElevations(
   std::vector<std::set<size_t> > adjacentLakes;
 
   // Fill lake info
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       glm::vec2 pos(i * MAX_COORD / size, j * MAX_COORD / size);
       Biome biome = smoother.getBiome(pos);
 
@@ -139,8 +139,8 @@ void MapInfoExtractor::computeLakesElevations(
   }
 
   // Fix lakes stats according to adjacency
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       if (lakes[i][j] != (size_t) -1 && baseLakes[lakes[i][j]] != lakes[i][j]) {
         lakesTotalElevation[baseLakes[lakes[i][j]]] += lakesTotalElevation[lakes[i][j]];
         lakesNumberOfPixels[baseLakes[lakes[i][j]]] += lakesNumberOfPixels[lakes[i][j]];
@@ -150,14 +150,14 @@ void MapInfoExtractor::computeLakesElevations(
   }
 
   // Normalize heights
-  for (size_t i = 0; i < lakesTotalElevation.size(); i++) {
+  for (int i = 0; i < lakesTotalElevation.size(); i++) {
     lakesTotalElevation[i] /= (float) lakesNumberOfPixels[i];
   }
 
   _lakesElevations = GeneratedImage(size,baseColor);
-  #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < size; i++) {
-    for (size_t j = 0; j < size; j++) {
+  #pragma omp parallel for
+  for (int i = 0; i < size; i++) {
+    for (int j = 0; j < size; j++) {
       if (lakes[i][j] != (size_t) -1)
         _lakesElevations[i*size + j] = lakesTotalElevation[lakes[i][j]];
     }
@@ -172,14 +172,14 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
   std::vector<float> dilMask(dilSize*dilSize);
 
   // Generate dilatation mask according to the distances. Only one quarter of it as it is symmetrical
-  #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < (size_t) dilSize; i++) {
-    for (size_t j = 0; j < (size_t) dilSize; j++) {
+  #pragma omp parallel for
+  for (int i = 0; i < (size_t) dilSize; i++) {
+    for (int j = 0; j < (size_t) dilSize; j++) {
       dilMask[i*dilSize + j] = std::max(0., 1 - sqrt(i*i + j*j) / transitionSize);
     }
   }
 
-  #pragma omp parallel for collapse(2)
+  #pragma omp parallel for
   for (int i = 0; i < (int) _size; i++) {
   for (int j = 0; j < (int) _size; j++) {
     Biome biome = _biomes[i*_size + j];
@@ -202,9 +202,9 @@ void MapInfoExtractor::generateBiomesTransitions(float transitionSize) {
 GeneratedImage MapInfoExtractor::imageFusion(const std::array<const GeneratedImage*, (int) Biome::BIOME_NB_ITEMS>& imgs) const {
   std::vector<float> result(_size*_size, 0);
 
-  #pragma omp parallel for collapse (2)
-  for (size_t i = 0; i < _size; i++) {
-  for (size_t j = 0; j < _size; j++) {
+  #pragma omp parallel for
+  for (int i = 0; i < _size; i++) {
+  for (int j = 0; j < _size; j++) {
     size_t currentIndex = i*_size + j;
     float normalizationFactor = 0;
 

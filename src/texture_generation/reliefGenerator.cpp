@@ -17,7 +17,7 @@ void ReliefGenerator::fillAdditionalReliefs() {
   Perlin perlinHills(3, 0.04, 0.4, size);
   GeneratedImage hills(perlinHills.getPixels());
   #pragma omp parallel for
-  for (size_t i = 0; i < size*size; i++) {
+  for (int i = 0; i < size*size; i++) {
     if (hills[i] < 0.3)
       hills[i] = 0.3;
   }

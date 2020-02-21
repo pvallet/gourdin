@@ -12,7 +12,7 @@ FontHandler::FontHandler()
   Texture::flipPixelsUpsideDown(font.tex_width, font.tex_height, 1, font.tex_data);
 
   // Fill the glyph data with the glyphs from the font
-  for (size_t i = 0; i < font.glyphs_count; i++) {
+  for (int i = 0; i < font.glyphs_count; i++) {
     char codepoint = font.glyphs[i].codepoint;
     if (codepoint > 0) {
       _glyphs[codepoint].width = font.glyphs[i].width;
@@ -25,11 +25,11 @@ FontHandler::FontHandler()
       _glyphs[codepoint].s1 = font.glyphs[i].s1;
       _glyphs[codepoint].t1 = 1-font.glyphs[i].t1;
 
-      for (size_t i = 0; i < 128; i++) {
+      for (int i = 0; i < 128; i++) {
         _glyphs[codepoint].kerning[i] = 0;
       }
 
-      for (size_t j = 0; j < font.glyphs[i].kerning_count; j++) {
+      for (int j = 0; j < font.glyphs[i].kerning_count; j++) {
         _glyphs[codepoint].kerning[font.glyphs[i].kerning[j].codepoint] = font.glyphs[i].kerning[j].kerning;
       }
     }

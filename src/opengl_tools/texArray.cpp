@@ -31,7 +31,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 		_maxTexSize.y = 0;
 		_texSizes.resize(count);
 
-		for (size_t i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			std::ostringstream convert;
 			convert << folderPath << i << ".png";
 
@@ -54,7 +54,7 @@ void TextureArray::loadTextures(size_t count, std::string folderPath) {
 
 		glTexStorage3D(GL_TEXTURE_2D_ARRAY, MIPMAP_LVLS, GL_RGBA8, _maxTexSize.x, _maxTexSize.y, count);
 
-		for (size_t i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			glTexSubImage3D( GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
 											 _texSizes[i].x, _texSizes[i].y, 1,
 											 GL_RGBA, GL_UNSIGNED_BYTE, img[i].Get()->pixels

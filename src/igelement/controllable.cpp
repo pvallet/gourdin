@@ -5,7 +5,8 @@
 Controllable::Controllable(glm::vec2 position, AnimationManager graphics, const TerrainGeometry& terrainGeometry) :
  	igMovingElement(position, graphics, terrainGeometry),
   _target(position),
-  _alwaysInSameDirection(false) {}
+  _alwaysInSameDirection(false),
+  _projectedVertices({}) {}
 
 void Controllable::update(int msElapsed) {
   if (!_dead) {

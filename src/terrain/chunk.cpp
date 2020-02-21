@@ -3,10 +3,13 @@
 #include "camera.h"
 
 Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
-	                                     TerrainGeometry&   terrainGeometry,
-																		 	 ChunkSubdivider&   chunkSubdivider) :
-	_chunkPos(x,y),
+	TerrainGeometry& terrainGeometry,
+	ChunkSubdivider& chunkSubdivider) :
+	_chunkPos(x, y),
+	_centerOfChunk(0.f),
 	_visible(false),
+	_treesNeedTwoPasses(false),
+	_displayMovingElements(false),
 	_currentSubdivLvl(1),
 	_maxSubdivLvlAvailable(1),
 	_maxSubdivLvlAsked(1),
@@ -14,7 +17,7 @@ Chunk::Chunk(size_t x, size_t y, const TerrainTexManager& terrainTexManager,
   _terrainGeometry(terrainGeometry),
 	_chunkSubdivider(chunkSubdivider) {
 
-	for (size_t i = 0; i < MAX_SUBDIV_LVL+1; i++) {
+	for (int i = 0; i < MAX_SUBDIV_LVL+1; i++) {
     _subdivisionLevels.push_back(std::unique_ptr<Buffers>(new Buffers()));
   }
 }
@@ -34,7 +37,7 @@ void Chunk::fillBufferData(size_t subdivLvl) {
 	size_t vertIndex = 0;
 
 	for (auto vert = vertices.begin(); vert != vertices.end(); vert++) {
-		for (size_t i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			currentBuffers->vertices[3*vertIndex + i] = (*vert)->pos[i];
 			currentBuffers->normals[3*vertIndex + i] = (*vert)->normal[i];
 		}
@@ -54,7 +57,7 @@ void Chunk::fillBufferData(size_t subdivLvl) {
 
 		currentIndices.resize(currentIndices.size() + 3);
 
-		for (size_t i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			currentIndices[currentIndices.size()-3+i] = verticesArrayIndices.at((*tri)->vertices[i]);
 		}
 	}
@@ -62,6 +65,9 @@ void Chunk::fillBufferData(size_t subdivLvl) {
 
 void Chunk::generateBuffers() {
 	Buffers* currentBuffers = _subdivisionLevels[_currentSubdivLvl].get();
+
+	if (currentBuffers->vertices.size() == 0)
+		return;
 
 	// geometry VBO
 
@@ -120,13 +126,13 @@ void Chunk::computeChunkBoundingBox(size_t subdivLvl) {
 	float minCoord[3];
 	float maxCoord[3];
 
-	for (size_t i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		minCoord[i] = std::numeric_limits<float>::max();
 		maxCoord[i] = - std::numeric_limits<float>::max();
 	}
 
-	for (size_t i = 0; i < currentBuffers->vertices.size(); i+=3) {
-		for (size_t j = 0; j < 3; j++) {
+	for (int i = 0; i < currentBuffers->vertices.size(); i+=3) {
+		for (int j = 0; j < 3; j++) {
 			if (currentBuffers->vertices[i+j] < minCoord[j])
 				minCoord[j] = currentBuffers->vertices[i+j];
 			if (currentBuffers->vertices[i+j] > maxCoord[j])
@@ -175,7 +181,7 @@ size_t Chunk::draw() const {
 bool Chunk::theCornersAreOutside(const glm::vec3& cam, const glm::vec3& vec) const {
   float dots[8];
 
-  for (size_t i = 0 ; i < 8 ; i++) {
+  for (int i = 0 ; i < 8 ; i++) {
     dots[i] = glm::dot(_subdivisionLevels[_currentSubdivLvl]->corners[i]-cam, vec);
 
 		if (dots[i] < 0.f)
@@ -189,7 +195,7 @@ void Chunk::computeCulling(const std::vector<glm::vec3>& planeNormals) {
 	Camera& cam = Camera::getInstance();
   glm::vec3 pos = cam.getPos();
 
-	for (size_t i = 0; i < planeNormals.size(); i++) {
+	for (int i = 0; i < planeNormals.size(); i++) {
 		if (theCornersAreOutside(pos, planeNormals[i])) {
 			_visible = false;
 			return;
@@ -229,7 +235,7 @@ void Chunk::computeDistanceOptimizations() {
 }
 
 void Chunk::setTreesHeight(size_t subdivLvl) {
-	for (size_t i = 0; i < _trees.size(); i++) {
+	for (int i = 0; i < _trees.size(); i++) {
 		_trees[i]->setHeight(getHeight(_trees[i]->getPos(), subdivLvl));
 	}
 }
@@ -245,7 +251,7 @@ void Chunk::generateSubdivisionLevel(size_t subdivLvl) {
 
 void Chunk::setSubdivisionLevel(size_t newSubdLvl) {
 	if (newSubdLvl > _maxSubdivLvlAsked) {
-		for (size_t i = _maxSubdivLvlAsked + 1; i <= newSubdLvl; i++) {
+		for (int i = _maxSubdivLvlAsked + 1; i <= newSubdLvl; i++) {
 			_chunkSubdivider.addTask(this, i);
 		}
 

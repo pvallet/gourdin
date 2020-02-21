@@ -7,6 +7,9 @@
 #include "utils.h"
 
 void igElementDisplay::fillBufferData(GLenum drawType) {
+  if (_data.size() == 0)
+    return;
+
   // vbo
 
   _vbo.bind();
@@ -20,7 +23,7 @@ void igElementDisplay::fillBufferData(GLenum drawType) {
 
   std::vector<GLuint> indices(6*_capacity);
 
-  for (size_t i = 0; i < _capacity; i++) {
+  for (int i = 0; i < _capacity; i++) {
     indices[6*i]     = 0 + 4*i;
     indices[6*i + 1] = 1 + 4*i;
     indices[6*i + 2] = 2 + 4*i;
@@ -60,7 +63,7 @@ void igElementDisplay::processSpree(const std::vector<igElement*>& elemsToDispla
     _textures.push_back(elemsToDisplay[firstIndexSpree]->getTexArray());
     _nbElemsInSpree.push_back(currentSpreeLength);
 
-    for (size_t i = firstIndexSpree; i < firstIndexSpree + currentSpreeLength; i++) {
+    for (int i = firstIndexSpree; i < firstIndexSpree + currentSpreeLength; i++) {
       const std::array<float, 12>& vertices = elemsToDisplay[i]->getVertices();
       const std::array<float, 12>& posArray = elemsToDisplay[i]->getPosArray();
       const std::array<float,  8>& coord2D = elemsToDisplay[i]->getCoord2D();
@@ -92,10 +95,10 @@ void igElementDisplay::loadElements(const std::vector<igElement*>& visibleElmts,
   size_t firstIndexSpree = 0;
 
   CurrentType currentType = CurrentType::NO_TYPE;
-  const TextureArray* currentTexture;
-  Biome       currentBiome;
+  const TextureArray* currentTexture = nullptr;
+  Biome       currentBiome = Biome::BIOME_NB_ITEMS;
 
-  for (size_t i = 0; i < visibleElmts.size(); i++) {
+  for (int i = 0; i < visibleElmts.size(); i++) {
     Tree* tree = dynamic_cast<Tree*>(visibleElmts[i]);
     igMovingElement* animal = dynamic_cast<igMovingElement*>(visibleElmts[i]);
 
@@ -132,7 +135,7 @@ size_t igElementDisplay::drawElements() const {
   _vao.bind();
   _ibo.bind();
 
-  for (size_t i = 0; i < _nbElemsInSpree.size(); i++) {
+  for (int i = 0; i < _nbElemsInSpree.size(); i++) {
     _textures[i]->bind();
 
     glDrawElements(GL_TRIANGLES, 6 * _nbElemsInSpree[i], GL_UNSIGNED_INT, BUFFER_OFFSET(cursor * sizeof(GLuint)));

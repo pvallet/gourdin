@@ -27,7 +27,7 @@ float Perlin::getValue(float x, float y) const {
   float f = _frequency;
   float amplitude = 1.f;
 
-  for (size_t i = 0; i < _octaves; i++) {
+  for (int i = 0; i < _octaves; i++) {
     // r += smooth_noise(x * f, y * f, i) * amplitude;
     r += GeneratedImage::bicubicInterpolate(x * f, y * f, _randValues[i]) * amplitude;
     amplitude *= _persistence;
@@ -51,9 +51,9 @@ float Perlin::getValue(float x, float y) const {
 std::vector<float> Perlin::getPixels() const {
   std::vector<float> img(_size*_size);
 
-  #pragma omp parallel for collapse(2)
-  for (size_t i = 0; i < _size; i++) {
-    for (size_t j = 0; j < _size; j++) {
+  #pragma omp parallel for
+  for (int i = 0; i < _size; i++) {
+    for (int j = 0; j < _size; j++) {
       img[i*_size + j] = getValue(i,j);
     }
   }
@@ -62,8 +62,8 @@ std::vector<float> Perlin::getPixels() const {
 }
 
 void Perlin::shuffle() {
-  for (size_t i = 0; i < _octaves; i++) {
-    for (size_t j = 0; j < _sizeRandArray*_sizeRandArray; j++) {
+  for (int i = 0; i < _octaves; i++) {
+    for (int j = 0; j < _sizeRandArray*_sizeRandArray; j++) {
       _randValues[i][j] = (float) rand() / (float) RAND_MAX;
     }
   }

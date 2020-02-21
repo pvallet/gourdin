@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef NDEBUG
+
 #include "controller.h"
 
 class TestHandler {
@@ -28,3 +30,5 @@ private:
 
   const Clock& _beginningOfProg;
 };
+
+#endif

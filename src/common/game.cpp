@@ -90,7 +90,7 @@ void Game::update(int msElapsed) {
    if ((*it)->isDead())
      toDelete.push_back(*it);
   }
-  for (size_t i = 0; i < toDelete.size(); i++) {
+  for (int i = 0; i < toDelete.size(); i++) {
    _selection.erase(toDelete[i]);
   }
 
@@ -420,7 +420,7 @@ void Game::benchmark() {
 
   Clock frameClock(ClockType::INDEPENDENT);
 
-  for (size_t i = 0; i < 100; i++) {
+  for (int i = 0; i < 100; i++) {
     cam.setPointedPos(glm::vec2(CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1),
                                 CHUNK_SIZE / 2 + i / 100.f * CHUNK_SIZE * (NB_CHUNKS-1)));
     update(0);
@@ -506,7 +506,7 @@ void Game::deleteTribe() {
   std::vector<igMovingElement*> tribe(_tribe.size());
 
   #pragma omp parallel for
-  for (size_t i = 0; i < _tribe.size(); i++) {
+  for (int i = 0; i < _tribe.size(); i++) {
     tribe[i] = (igMovingElement*) _tribe[i];
   }
 
