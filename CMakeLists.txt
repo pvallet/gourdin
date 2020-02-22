@@ -95,8 +95,13 @@ endif()
 set(BUILD_SHARED_LIBS ON)
 
 # To make libpng build correctly
-set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/SDL2_image/external/zlib-1.2.11)
-set(ZLIB_LIBRARY z)
+set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
+
+if (WIN32)
+  set(ZLIB_LIBRARY zlib)
+else()
+  set(ZLIB_LIBRARY z)
+endif()
 
 set(PNG_STATIC OFF)
 set(PNG_TESTS  OFF)
@@ -114,6 +119,9 @@ set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
 
 set(SDL2PP_WITH_IMAGE ON)
 
+# Fixing the build of SDL on VS2019
+list(APPEND EXTRA_LIBS vcruntime)
+
 if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
   FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
 
@@ -123,10 +131,8 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
     FetchContent_Populate(glm)
   endif()
 else()
-  # if (NOT ANDROID) # Already taken care of by the app itself
-    add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2_image)
-  # endif()
+  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2)
+  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2_image)
   add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
 endif()
 
