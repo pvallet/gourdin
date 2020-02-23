@@ -120,7 +120,9 @@ set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
 set(SDL2PP_WITH_IMAGE ON)
 
 # Fixing the build of SDL on VS2019
-list(APPEND EXTRA_LIBS vcruntime)
+if (MSVC)
+  list(APPEND EXTRA_LIBS vcruntime)
+endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
   FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
