@@ -96,12 +96,7 @@ set(BUILD_SHARED_LIBS ON)
 
 # To make libpng build correctly
 set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
-
-if (WIN32)
-  set(ZLIB_LIBRARY zlib)
-else()
-  set(ZLIB_LIBRARY z)
-endif()
+set(ZLIB_LIBRARY zlib)
 
 set(PNG_STATIC OFF)
 set(PNG_TESTS  OFF)
