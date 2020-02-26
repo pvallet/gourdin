@@ -35,10 +35,7 @@ struct Center {
 	std::vector<Corner*> corners;
 };
 
-class Edge {
-public:
-	Edge() {}
-
+struct Edge {
 	int id = 0;
 	bool mapEdge = false;
 	float x = 0.f; // Midpoint coordinates

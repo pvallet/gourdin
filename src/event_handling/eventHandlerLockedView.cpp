@@ -17,6 +17,10 @@
 
 EventHandlerLockedView::EventHandlerLockedView(Game& game, SDL2pp::Window& window) :
   EventHandler::EventHandler(game, window),
+  _beginDrag(0),
+  _previousFocusedPos(0),
+  _previousCameraParams(0.f),
+  _nextCameraParams(0.f),
   _maxScalarProductWithGroundPOV(-sin(RAD*MAX_GROUND_ANGLE_FOR_CAM_POV)),
   _minScalarProductWithGroundGod(-sin(RAD*GROUND_ANGLE_TOLERANCE_GOD)),
   _previousCameraLock(PreviousCameraLock::NO_LOCK) {}
@@ -345,16 +349,16 @@ void EventHandlerLockedView::onGoingEvents(int msElapsed) {
 
     if (!keyboardState[SDL_SCANCODE_SPACE]) {
       glm::vec2 moveFocused = _game.getFocusedPos();
-      float theta = cam.getTheta()*M_PI/180.f;
+      float thetaRad = cam.getTheta()*M_PI/180.f;
 
       if (keyboardState[SDL_SCANCODE_S])
-        moveFocused += glm::vec2(cos(theta), sin(theta));
+        moveFocused += glm::vec2(cos(thetaRad), sin(thetaRad));
       if (keyboardState[SDL_SCANCODE_D])
-        moveFocused += glm::vec2(cos(theta+M_PI/2.f), sin(theta+M_PI/2.f));
+        moveFocused += glm::vec2(cos(thetaRad+M_PI/2.f), sin(thetaRad+M_PI/2.f));
       if (keyboardState[SDL_SCANCODE_W])
-        moveFocused += glm::vec2(cos(theta+M_PI), sin(theta+M_PI));
+        moveFocused += glm::vec2(cos(thetaRad+M_PI), sin(thetaRad+M_PI));
       if (keyboardState[SDL_SCANCODE_A])
-        moveFocused += glm::vec2(cos(theta-M_PI/2.f), sin(theta-M_PI/2.f));
+        moveFocused += glm::vec2(cos(thetaRad-M_PI/2.f), sin(thetaRad-M_PI/2.f));
 
       if (moveFocused != _game.getFocusedPos())
         _game.setTarget(moveFocused);

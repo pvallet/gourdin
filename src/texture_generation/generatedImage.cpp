@@ -46,7 +46,7 @@ bool GeneratedImage::loadFromFile(std::string filename) {
 
     #pragma omp parallel for
     for (int i = 0; i < _size*_size; i++) {
-      ConvertFloat convert;
+      ConvertFloat convert = { 0.f };
       for (int j = 0; j < 4; j++) {
         convert.uc[j] = imgPixels[4*i + j];
       }
