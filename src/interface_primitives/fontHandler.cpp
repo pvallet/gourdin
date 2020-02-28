@@ -25,8 +25,8 @@ FontHandler::FontHandler()
       _glyphs[codepoint].s1 = font.glyphs[i].s1;
       _glyphs[codepoint].t1 = 1-font.glyphs[i].t1;
 
-      for (int i = 0; i < 128; i++) {
-        _glyphs[codepoint].kerning[i] = 0;
+      for (int j = 0; j < 128; j++) {
+        _glyphs[codepoint].kerning[j] = 0;
       }
 
       for (int j = 0; j < font.glyphs[i].kerning_count; j++) {

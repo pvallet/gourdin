@@ -28,10 +28,10 @@ private:
   const float _maxScalarProductWithGroundPOV;
   const float _minScalarProductWithGroundGod;
 
-  float _previousTheta;
-  float _previousPhi;
-  float _initialDragTheta;
-  float _initialDragPhi;
+  float _previousTheta = 0.f;
+  float _previousPhi = 0.f;
+  float _initialDragTheta = 0.f;
+  float _initialDragPhi = 0.f;
 
   PreviousCameraLock _previousCameraLock;
 
@@ -43,6 +43,6 @@ private:
   Chronometer _camTransferTimer;
   glm::vec4 _previousCameraParams;
   glm::vec4 _nextCameraParams;
-  float _thetaInPreviousView;
-  float _phiInPreviousView;
+  float _thetaInPreviousView = 0.f;
+  float _phiInPreviousView = 0.f;
 };

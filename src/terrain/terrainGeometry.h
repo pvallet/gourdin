@@ -14,8 +14,7 @@
 
 struct Vertex;
 
-class Triangle {
-public:
+struct Triangle {
   std::array<Vertex*,3> vertices;
   Biome biome;
   glm::vec3 normal;
@@ -31,8 +30,7 @@ public:
     const std::list<const Triangle*>& triangles, float* barCoord = nullptr);
 };
 
-class Vertex {
-public:
+struct Vertex {
   Vertex(): pos(0.f), normal(0.f), _sorted(false) {}
 
   glm::vec3 pos;

@@ -13,6 +13,7 @@
 
 EventHandlerGlobalView::EventHandlerGlobalView(Game& game, SDL2pp::Window& window) :
   EventHandler::EventHandler(game, window),
+  _rectSelect(0),
   _addSelect(false),
   _scrollSpeed(SCROLL_SPEED_SLOW),
   _popupMenu(_game.getPopupMenu()) {
@@ -116,7 +117,6 @@ bool EventHandlerGlobalView::handleEvent(const SDL_Event& event) {
   }
 
   if (event.type == SDL_USER_CLICK) {
-    Camera& cam = Camera::getInstance();
     glm::vec2 minimapCoord = _game.getInterface().getMinimapClickCoords(glm::ivec2(
       (intptr_t) event.user.data1,
       (intptr_t) event.user.data2
