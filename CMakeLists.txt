@@ -36,8 +36,6 @@ if (NOT ANDROID)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${EXECUTABLE_OUTPUT_PATH})
 
   find_package(OpenGL)
-
-# Include SDL2 libraries for android
 endif()
 
 ################################################################################
@@ -71,7 +69,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
 
   FetchContent_Declare(
     SDL_IMAGE
-    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod4.zip
+    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod3.zip
     SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
   )
 
