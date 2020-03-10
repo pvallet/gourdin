@@ -31,6 +31,11 @@ mkdir build && cd build
 cmake ..
 make -j4
 ```
+The project then needs to be run from the source directory:
+```
+cd ..
+./build/bin/Release/gourdin
+```
 
 ## OS X
 
@@ -50,6 +55,12 @@ make -j4
 ```
 
 Please note that cmake might throw some errors about testing OpenMP. You can ignore them, the CMake config file is not up to date with the compiler Clang, that features OpenMP natively.
+
+The project then needs to be run from the source directory:
+```
+cd ..
+./build/bin/Release/gourdin
+```
 
 ## Android (under linux)
 
