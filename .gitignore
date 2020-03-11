@@ -4,7 +4,7 @@
 *.o
 *.obj
 *.dll
-
+*.DS_Store
 *.layout
 
 .tags
