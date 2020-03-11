@@ -43,9 +43,9 @@ In order to easily install the dependencies, Homebrew is a good option. (Similar
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
-You then need CMake to generate your project and Clang (C++ compiler) to build it:
+You then need CMake to generate your project and Clang (C++ compiler) to build it. The SDL library is also retrieved from brew for OS X PNG compatibility
 ```
-brew install cmake llvm
+brew install cmake llvm sdl2 sdl2_image
 ```
 Building the project is the same as on linux:
 ```

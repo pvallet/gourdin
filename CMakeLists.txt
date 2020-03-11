@@ -61,17 +61,20 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
     endif()
   endif()
 
-  FetchContent_Declare(
-    SDL
-    URL            https://hg.libsdl.org/SDL/archive/39a7b759a38a.zip # Update with 2.0.11 when available
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
-  )
+  # We need to get the version directly from brew to load PNG files correctly
+  if (NOT APPLE)
+    FetchContent_Declare(
+      SDL
+      URL            https://hg.libsdl.org/SDL/archive/39a7b759a38a.zip # Update with 2.0.11 when available
+      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
+    )
 
-  FetchContent_Declare(
-    SDL_IMAGE
-    URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod3.zip
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
-  )
+    FetchContent_Declare(
+      SDL_IMAGE
+      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod3.zip
+      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
+    )
+  endif()
 
   FetchContent_Declare(
     LIB_SDL2_PP
@@ -89,26 +92,34 @@ else()
   Please update your CMake version or read CMakeLists.txt to know where to download and unpack them.")
 endif()
 
-# Do not build the static version of SDL
-set(BUILD_SHARED_LIBS ON)
+# Build SDL2 and SDL2_image with CMake
+if (NOT APPLE)
+  # Do not build the static version of SDL
+  set(BUILD_SHARED_LIBS ON)
 
-# To make libpng build correctly
-set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
-set(ZLIB_LIBRARY zlib)
+  # To make libpng build correctly
+  set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
+  set(ZLIB_LIBRARY zlib)
 
-set(PNG_STATIC OFF)
-set(PNG_TESTS  OFF)
-set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
+  set(PNG_STATIC OFF)
+  set(PNG_TESTS  OFF)
+  set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
 
-set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
+  set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
 
-# SDL2pp needs defining where the SDL2 libraries are
-set(SDL2_LIBRARY SDL2)
-set(SDL2MAIN_LIBRARY SDL2main)
-set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/include)
+  # SDL2pp needs defining where the SDL2 libraries are
+  set(SDL2_LIBRARY SDL2)
+  set(SDL2MAIN_LIBRARY SDL2main)
+  set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/include)
 
-set(SDL2_IMAGE_LIBRARY SDL2_image)
-set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
+  set(SDL2_IMAGE_LIBRARY SDL2_image)
+  set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
+else()
+  INCLUDE(FindPkgConfig)
+
+  PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+  PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
+endif()
 
 set(SDL2PP_WITH_IMAGE ON)
 
@@ -118,16 +129,20 @@ if (MSVC)
 endif()
 
 if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
-  FetchContent_MakeAvailable(SDL SDL_IMAGE LIB_SDL2_PP)
+  if (NOT APPLE)
+    FetchContent_MakeAvailable(SDL SDL_IMAGE)
+  endif()
+  FetchContent_MakeAvailable(LIB_SDL2_PP)
 
   # Don't add GLM as a subdirectory, since we just want to include it
   FetchContent_GetProperties(glm)
   if(NOT glm_POPULATED)
     FetchContent_Populate(glm)
   endif()
-else()
+elseif (NOT APPLE)
   add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2)
   add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2_image)
+else()
   add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
 endif()
 
@@ -208,8 +223,8 @@ else()
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
       glew_s
-      SDL2
-      SDL2_image
+      ${SDL2_LIBRARY}
+      ${SDL2_IMAGE_LIBRARY}
       ${SDL2PP_LIBRARIES}
     )
 
@@ -220,8 +235,8 @@ else()
   else()
     target_link_libraries(${PROJECT_NAME}
       ${OPENGL_LIBRARIES}
-      SDL2
-      SDL2_image
+      ${SDL2_LIBRARY}
+      ${SDL2_IMAGE_LIBRARY}
       ${SDL2PP_LIBRARIES}
     )
   endif()
