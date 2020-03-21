@@ -71,7 +71,7 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
 
     FetchContent_Declare(
       SDL_IMAGE
-      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod3.zip
+      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod6.zip
       SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
     )
   endif()
@@ -101,8 +101,8 @@ if (NOT APPLE)
   set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
   set(ZLIB_LIBRARY zlib)
 
-  set(PNG_STATIC OFF)
-  set(PNG_TESTS  OFF)
+  set(PNG_STATIC OFF CACHE BOOL "Build static lib")
+  set(PNG_TESTS  OFF CACHE BOOL "Build libpng tests")
   set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
 
   set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
