@@ -14,7 +14,8 @@ FontHandler::FontHandler()
   // Fill the glyph data with the glyphs from the font
   for (int i = 0; i < font.glyphs_count; i++) {
     char codepoint = font.glyphs[i].codepoint;
-    if (codepoint > 0) {
+    
+    if (codepoint > 0 && codepoint < 128) {
       _glyphs[codepoint].width = font.glyphs[i].width;
       _glyphs[codepoint].height = font.glyphs[i].height;
       _glyphs[codepoint].offset_x = font.glyphs[i].offset_x;
