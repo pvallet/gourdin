@@ -21,3 +21,6 @@ android/local.properties
 android/app/.cxx
 .idea/
 .clang_complete
+android/app/local.properties
+android/app/src/main/assets
+android/keystore.properties

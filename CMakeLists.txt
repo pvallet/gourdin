@@ -65,13 +65,13 @@ if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
   if (NOT APPLE)
     FetchContent_Declare(
       SDL
-      URL            https://hg.libsdl.org/SDL/archive/39a7b759a38a.zip # Update with 2.0.11 when available
+      URL            https://www.libsdl.org/release/SDL2-2.0.12.zip
       SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
     )
 
     FetchContent_Declare(
       SDL_IMAGE
-      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod6.zip
+      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod7.zip
       SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
     )
   endif()
@@ -97,14 +97,8 @@ if (NOT APPLE)
   # Do not build the static version of SDL
   set(BUILD_SHARED_LIBS ON)
 
-  # To make libpng build correctly
-  set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/external/zlib-1.2.11)
-  set(ZLIB_LIBRARY zlib)
-
-  set(PNG_STATIC OFF CACHE BOOL "Build static lib")
-  set(PNG_TESTS  OFF CACHE BOOL "Build libpng tests")
+  set(SDL_IMAGE_STATIC_DEPS ON CACHE BOOL "Building png and zlib statically to avoid linking problems on android")
   set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
-
   set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
 
   # SDL2pp needs defining where the SDL2 libraries are
