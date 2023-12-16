@@ -18,7 +18,6 @@ public class GourdinSDL2Activity extends SDLActivity
     @Override
     protected String[] getLibraries() {
         return new String[]{
-                "hidapi",
                 "SDL2",
                 "SDL2_image",
                 "main"

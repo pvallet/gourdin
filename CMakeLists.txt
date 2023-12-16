@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.14.7 FATAL_ERROR)
 
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
@@ -42,64 +42,61 @@ endif()
 ### Fetching external content
 ################################################################################
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
-  cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
+cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
 
-  include(FetchContent)
+include(FetchContent)
 
-  if (WIN32)
-    SET(BUILD_UTILS OFF)
-    FetchContent_Declare(
-      GLEW
-      URL            https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip
-      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glew
-    )
-    FetchContent_GetProperties(glew)
-    if(NOT glew_POPULATED)
-      FetchContent_Populate(glew)
-      add_subdirectory(${CMAKE_SOURCE_DIR}/external/glew/build/cmake)
-    endif()
-  endif()
-
-  # We need to get the version directly from brew to load PNG files correctly
-  if (NOT APPLE)
-    FetchContent_Declare(
-      SDL
-      URL            https://www.libsdl.org/release/SDL2-2.0.12.zip
-      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
-    )
-
-    FetchContent_Declare(
-      SDL_IMAGE
-      URL            https://github.com/pvallet/SDL_image/archive/release-2.0.5-mod7.zip
-      SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
-    )
-  endif()
-
+if (WIN32)
+  SET(BUILD_UTILS OFF)
   FetchContent_Declare(
-    LIB_SDL2_PP
-    URL            https://github.com/libSDL2pp/libSDL2pp/archive/0.16.0.zip
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
+    GLEW
+    URL            https://sourceforge.net/projects/glew/files/glew/2.1.0/glew-2.1.0.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glew
   )
-
-  FetchContent_Declare(
-    GLM
-    URL            https://github.com/g-truc/glm/releases/download/0.9.9.7/glm-0.9.9.7.zip
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
-  )
-else()
-  message( WARNING "The CMake version is below 3.14.7, unable to fetch dependencies.
-  Please update your CMake version or read CMakeLists.txt to know where to download and unpack them.")
+  FetchContent_GetProperties(glew)
+  if(NOT glew_POPULATED)
+    FetchContent_Populate(glew)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/external/glew/build/cmake)
+  endif()
 endif()
+
+# We need to get the version directly from brew to load PNG files correctly
+if (NOT APPLE)
+  FetchContent_Declare(
+    SDL
+    URL            https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.28.5.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2
+  )
+
+  FetchContent_Declare(
+    SDL_IMAGE
+    URL            https://github.com/libsdl-org/SDL_image/archive/release-2.8.1.zip
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/SDL2_image
+  )
+endif()
+
+FetchContent_Declare(
+  LIB_SDL2_PP
+  URL            https://github.com/libSDL2pp/libSDL2pp/archive/0.16.0.zip
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/libSDL2pp
+)
+
+FetchContent_Declare(
+  GLM
+  URL            https://github.com/g-truc/glm/releases/download/0.9.9.7/glm-0.9.9.7.zip
+  SOURCE_DIR     ${CMAKE_SOURCE_DIR}/external/glm
+)
 
 # Build SDL2 and SDL2_image with CMake
 if (NOT APPLE)
   # Do not build the static version of SDL
   set(BUILD_SHARED_LIBS ON)
 
-  set(SDL_IMAGE_STATIC_DEPS ON CACHE BOOL "Building png and zlib statically to avoid linking problems on android")
-  set(SKIP_INSTALL_ALL ON) # Prevent png from trying to install stuff and fail
-  set(SUPPORT_JPG OFF CACHE BOOL "The jpeg build is not correctly set up and we don't need it right now")
+  set(SDL2_DISABLE_UNINSTALL ON CACHE BOOL "" FORCE)
+  set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+  set(SDL2IMAGE_DEPS_SHARED OFF CACHE BOOL "Building png and zlib statically to avoid linking problems on android" FORCE)
+  set(SDL2IMAGE_INSTALL OFF CACHE BOOL "" FORCE)
+  set(SDL2IMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
 
   # SDL2pp needs defining where the SDL2 libraries are
   set(SDL2_LIBRARY SDL2)
@@ -107,12 +104,17 @@ if (NOT APPLE)
   set(SDL2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2/include)
 
   set(SDL2_IMAGE_LIBRARY SDL2_image)
-  set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image)
-else()
-  INCLUDE(FindPkgConfig)
+  set(SDL2_IMAGE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/SDL2_image/include)
 
-  PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
-  PKG_SEARCH_MODULE(SDL2IMAGE REQUIRED SDL2_image>=2.0.0)
+else()
+  find_package(PkgConfig REQUIRED)
+
+  # Hack needed for linux because the pkg-config module is lower case for some reason
+  if (UNIX AND NOT APPLE)
+    pkg_check_modules(sdl2 REQUIRED sdl2 SDL2_image)
+  else()
+    pkg_check_modules(SDL2 REQUIRED SDL2 SDL2_image)
+  endif()
 endif()
 
 set(SDL2PP_WITH_IMAGE ON)
@@ -140,6 +142,19 @@ elseif (NOT APPLE)
 else()
   add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
 endif()
+
+# Copying needed files for the android project
+# SDL activity
+set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
+file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+
+# Assets
+file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
+file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
+# Shaders
+file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src/shaders)
+file(COPY ${CMAKE_SOURCE_DIR}/src/shaders DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src)
 
 ################################################################################
 ### End fetching external content

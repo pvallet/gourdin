@@ -14,13 +14,15 @@ external/
 ignored/
 makebuild/
 
+.idea/
+.clang_complete
 res/map/relief.png
-android/app/app.iml
 android/android.iml
 android/local.properties
 android/app/.cxx
-.idea/
-.clang_complete
+android/app/app.iml
 android/app/local.properties
+android/app/release
 android/app/src/main/assets
+android/app/src/main/java/org/libsdl/app
 android/keystore.properties
