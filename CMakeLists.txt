@@ -124,23 +124,16 @@ if (MSVC)
   list(APPEND EXTRA_LIBS vcruntime)
 endif()
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.14.7")
-  if (NOT APPLE)
-    FetchContent_MakeAvailable(SDL SDL_IMAGE)
-  endif()
-  FetchContent_MakeAvailable(LIB_SDL2_PP)
 
-  # Don't add GLM as a subdirectory, since we just want to include it
-  FetchContent_GetProperties(glm)
-  if(NOT glm_POPULATED)
-    FetchContent_Populate(glm)
-  endif()
-elseif (NOT APPLE)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/external/SDL2_image)
-  add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
-else()
-  add_subdirectory(${CMAKE_SOURCE_DIR}/external/libSDL2pp)
+if (NOT APPLE)
+  FetchContent_MakeAvailable(SDL SDL_IMAGE)
+endif()
+FetchContent_MakeAvailable(LIB_SDL2_PP)
+
+# Don't add GLM as a subdirectory, since we just want to include it
+FetchContent_GetProperties(glm)
+if(NOT glm_POPULATED)
+  FetchContent_Populate(glm)
 endif()
 
 # Copying needed files for the android project
