@@ -8,6 +8,7 @@
 #include "opengl.h"
 #include "glObjectInterface.h"
 
+#include <stddef.h> // size_t
 #include <vector>
 
 class VertexArrayObject : public GLObjectInterface {

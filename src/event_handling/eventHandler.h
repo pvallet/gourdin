@@ -6,6 +6,7 @@
 #include "game.h"
 
 #include <map>
+#include <stddef.h> // size_t
 
 #define DEFAULT_OUTSIDE_WINDOW_COORD glm::ivec2(-1,-1)
 

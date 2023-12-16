@@ -5,6 +5,7 @@
 #include "glObjectInterface.h"
 #include "opengl.h"
 
+#include <stddef.h> // size_t
 #include <string>
 
 class Texture : public GLObjectInterface {

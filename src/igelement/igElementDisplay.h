@@ -3,6 +3,7 @@
 #include "basicGLObjects.h"
 #include "texArray.h"
 
+#include <stddef.h> // size_t
 #include <vector>
 
 #include "igElement.h"

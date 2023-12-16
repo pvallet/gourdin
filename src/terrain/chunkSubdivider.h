@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <queue>
+#include <stddef.h> // size_t
 #include <thread>
 
 class Chunk;

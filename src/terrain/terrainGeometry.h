@@ -3,6 +3,7 @@
 #include <array>
 #include <list>
 #include <memory>
+#include <stddef.h> // size_t
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>

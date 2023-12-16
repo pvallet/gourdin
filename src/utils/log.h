@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <stddef.h> // size_t
 
 #include "clock.h"
 

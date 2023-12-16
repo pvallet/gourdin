@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstddef>
 #include <functional>
+#include <stddef.h> // size_t
 #include <string>
 #include <vector>
 

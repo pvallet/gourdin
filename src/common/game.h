@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h> // size_t
+
 #include "engine.h"
 #include "igLayout.h"
 #include "popupMenu.h"

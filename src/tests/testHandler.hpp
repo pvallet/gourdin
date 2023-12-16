@@ -3,6 +3,7 @@
 #ifndef NDEBUG
 
 #include "controller.h"
+#include <stddef.h> // size_t
 
 class TestHandler {
 public:

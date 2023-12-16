@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h> // size_t
 #include <vector>
 #include <glm/glm.hpp>
 

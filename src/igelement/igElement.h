@@ -5,6 +5,7 @@
 #include "texArray.h"
 
 #include <array>
+#include <stddef.h> // size_t
 #include <string>
 
 // ig = ingame

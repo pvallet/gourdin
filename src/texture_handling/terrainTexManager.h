@@ -5,6 +5,7 @@
 #include "opengl.h"
 #include "texture.h"
 
+#include <stddef.h> // size_t
 #include <string>
 #include <vector>
 

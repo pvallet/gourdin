@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <stddef.h> // size_t
 
 #include "terrainGeometry.h"
 

@@ -2,6 +2,7 @@
 
 #include "opengl.h"
 
+#include <stddef.h> // size_t
 #include <set>
 #include <unordered_set>
 #include <vector>

@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "texture.h"
 
+#include <stddef.h> // size_t
 #include <string>
 
 class Text {

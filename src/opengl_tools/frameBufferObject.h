@@ -2,6 +2,8 @@
 
 #include "texture.h"
 
+#include <stddef.h> // size_t
+
 class FrameBufferObject : public GLObjectInterface {
 public:
   FrameBufferObject ();

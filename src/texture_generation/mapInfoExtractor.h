@@ -5,6 +5,7 @@
 
 #include <map>
 #include <set>
+#include <stddef.h> // size_t
 
 class MapInfoExtractor {
 public:
