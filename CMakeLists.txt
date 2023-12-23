@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14.7 FATAL_ERROR)
+cmake_policy(VERSION 3.14.7...3.28.1)
 
 # Debug command
 # cmake .. -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles"
@@ -41,8 +42,6 @@ endif()
 ################################################################################
 ### Fetching external content
 ################################################################################
-
-cmake_policy(SET CMP0077 NEW) # Make the following calls actually override what is defined in option()
 
 include(FetchContent)
 
@@ -137,17 +136,19 @@ if(NOT glm_POPULATED)
 endif()
 
 # Copying needed files for the android project
-# SDL activity
-set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
-file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
-file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+if (ANDROID)
+  # SDL activity
+  set(SDL_ACTIVITY_FOLDER app/src/main/java/org/libsdl/app/)
+  file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
+  file(COPY ${CMAKE_SOURCE_DIR}/external/SDL2/android-project/${SDL_ACTIVITY_FOLDER} DESTINATION ${CMAKE_SOURCE_DIR}/android/${SDL_ACTIVITY_FOLDER})
 
-# Assets
-file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
-file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
-# Shaders
-file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src/shaders)
-file(COPY ${CMAKE_SOURCE_DIR}/src/shaders DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src)
+  # Assets
+  file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/res)
+  file(COPY ${CMAKE_SOURCE_DIR}/res DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets)
+  # Shaders
+  file(REMOVE_RECURSE ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src/shaders)
+  file(COPY ${CMAKE_SOURCE_DIR}/src/shaders DESTINATION ${CMAKE_SOURCE_DIR}/android/app/src/main/assets/src)
+endif()
 
 ################################################################################
 ### End fetching external content
